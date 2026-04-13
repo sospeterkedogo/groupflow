@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 
-// We use the service role key to bypass RLS securely purely for automated background webhooks,
-// falling back to anon key if service role is missing in the MVP environment.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
 export async function POST(req: Request) {
+  // We initialize the client INSIDE the handler. Otherwise, Next.js tries to statically compile it 
+  // during `npm run build` without environment variables, causing a Vercel Pipeline crash.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
   try {
     const rawBody = await req.text()
     const signature = req.headers.get('x-hub-signature-256')
