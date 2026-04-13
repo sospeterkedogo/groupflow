@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus } from '@/types/database'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
+import EvidenceModal from './EvidenceModal'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -11,6 +12,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -156,10 +158,11 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   className="kanban-card"
                   draggable
                   onDragStart={(e) => handleDragStart(e, task.id)}
+                  onClick={() => setSelectedTask(task)}
                 >
                   <div className="kanban-card-title">{task.title}</div>
                   <div className="kanban-card-meta">
-                     <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItem: 'center', gap: '0.25rem' }}>
+                     <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                        {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
                        {task.is_coding_task ? 'Code' : 'Design / Doc'}
                      </span>
@@ -173,6 +176,10 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
           </div>
         ))}
       </div>
+      
+      {selectedTask && (
+        <EvidenceModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+      )}
     </div>
   )
 }
