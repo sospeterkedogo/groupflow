@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Github, Activity, ShieldCheck, Users } from 'lucide-react'
+import { ArrowRight, BookOpen, Activity, ShieldCheck, Users } from 'lucide-react'
 
 export default function Home() {
   const dummyProjects = [
@@ -36,7 +36,7 @@ export default function Home() {
               Launch Dashboard <ArrowRight size={20} />
             </Link>
             <a href="https://github.com/sospeterkedogo/groupflow" target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
-              <Github size={20} /> Read the Research
+              <BookOpen size={20} /> Read the Research
             </a>
           </div>
         </div>
