@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import Link from 'next/link'
 import KanbanBoard from '@/components/KanbanBoard'
 import { redirect } from 'next/navigation'
 
@@ -18,13 +19,11 @@ export default async function DashboardPage() {
     return (
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>
         <h2 style={{ marginBottom: '1rem' }}>Welcome to GroupFlow</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>You are not assigned to a group module yet.</p>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Ask your lecturer to assign you to a group module code to unlock the project dashboard.</p>
-        <div className="error-message" style={{ marginTop: '2rem', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-           <strong>Test Mode Instructions:</strong>
-           Since we are running this MVP, go to your Supabase Dashboard, manually add a row in `groups` table, and then update your user row in the `profiles` table to assign yourself to that `group_id`.
-           Refresh this page to access the board!
-        </div>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>You are not assigned to a group module yet.</p>
+        
+        <Link href="/dashboard/join" className="btn btn-primary" style={{ padding: '0.75rem 2rem', width: 'auto', fontSize: '1rem' }}>
+           Join a Module / Group
+        </Link>
       </main>
     )
   }
