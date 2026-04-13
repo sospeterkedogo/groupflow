@@ -246,6 +246,7 @@ h1, h2, h3, h4, h5, h6 {
   overflow-x: auto;
   padding-bottom: 1rem;
   min-height: 60vh;
+  scroll-snap-type: x mandatory;
 }
 
 .kanban-column {
@@ -257,6 +258,13 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 768px) {
+  .kanban-column {
+    min-width: 85vw;
+  }
 }
 
 .kanban-column-header {
