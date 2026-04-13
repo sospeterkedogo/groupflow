@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus } from '@/types/database'
-import { FileUp, GitCommit } from 'lucide-react'
+import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
 export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const [boardError, setBoardError] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -39,12 +40,17 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   }, [groupId])
 
   const fetchTasks = async () => {
-    const { data } = await supabase
+    setBoardError(null)
+    const { data, error } = await supabase
       .from('tasks')
       .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false })
       
+    if (error) {
+      setBoardError('Failed to synchronize tasks with the server.')
+    }
+    
     if (data) setTasks(data as Task[])
     setLoading(false)
   }
@@ -83,6 +89,8 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
     if (error) {
        console.error("Failed to move task", error)
        setTasks(originalTasks) // Revert on failure
+       setBoardError(`Could not move task: ${error.message}`)
+       setTimeout(() => setBoardError(null), 5000)
     }
   }
 
@@ -100,8 +108,11 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
       is_coding_task: isCoding
     }
 
-    await supabase.from('tasks').insert([newTask])
-    // Realtime channel will fetch the updated list
+    const { error } = await supabase.from('tasks').insert([newTask])
+    if (error) {
+       setBoardError(`Failed to create task: ${error.message}`)
+       setTimeout(() => setBoardError(null), 5000)
+    }
   }
 
   if (loading) {
@@ -110,6 +121,13 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+      {boardError && (
+        <div className="error-message" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+           <AlertCircle size={16} />
+           <span>{boardError}</span>
+        </div>
+      )}
+      
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
         <button className="btn btn-primary" onClick={addNewTask} style={{ width: 'auto' }}>
           + Add New Task
