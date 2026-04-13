@@ -52,10 +52,16 @@ export async function joinGroup(formData: FormData) {
   }
 
   // Update the user's profile to join this group
-  await supabase
+  const { data: updatedProfile, error: updateError } = await supabase
     .from('profiles')
     .update({ group_id: group.id })
     .eq('id', user.id)
+    .select('id')
+    .single()
+
+  if (updateError || !updatedProfile) {
+    redirect('/dashboard/join?error=' + encodeURIComponent('Security Blocked: Database requires an UPDATE policy on the profiles table to allow assigning groups.'))
+  }
 
   revalidatePath('/dashboard', 'layout')
   redirect('/dashboard')
