@@ -1,5 +1,6 @@
 import { createGroup, joinGroup } from './actions'
-import { AlertCircle, Plus, Key } from 'lucide-react'
+import { Plus, Key } from 'lucide-react'
+import TransientError from '@/components/TransientError'
 
 // Read standard Next.js 15 searchParams natively as a Promise on page load to securely extract validation errors
 export default async function JoinGroupPage(props: { searchParams?: Promise<{ error?: string }> }) {
@@ -9,12 +10,7 @@ export default async function JoinGroupPage(props: { searchParams?: Promise<{ er
   return (
     <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>
        {/* Error Handling Feedback Component */}
-       {error && (
-         <div className="error-message" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', width: '100%', maxWidth: '800px' }}>
-           <AlertCircle size={16} />
-           <span>{error}</span>
-         </div>
-       )}
+       {error && <TransientError message={error} />}
        
        <div style={{ display: 'flex', gap: '2rem', width: '100%', maxWidth: '800px', flexWrap: 'wrap' }}>
           

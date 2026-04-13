@@ -1,5 +1,5 @@
 import { login, signup } from './actions'
-import { AlertCircle } from 'lucide-react'
+import TransientError from '@/components/TransientError'
 
 export default async function LoginPage(props: { searchParams?: Promise<{ error?: string }> }) {
   const searchParams = await props.searchParams
@@ -11,12 +11,7 @@ export default async function LoginPage(props: { searchParams?: Promise<{ error?
         <h1 className="auth-title">Welcome to GroupFlow</h1>
         <p className="auth-subtitle">Sign in to your account</p>
         
-        {error && (
-          <div className="error-message" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <AlertCircle size={16} />
-            <span>{error}</span>
-          </div>
-        )}
+        {error && <TransientError message={error} />}
 
         <form>
           <div className="form-group">
