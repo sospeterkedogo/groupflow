@@ -182,6 +182,37 @@ export default function TaskModal({
     setUploading(false)
   }
 
+  const handlePhysicalUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+     try {
+       const file = e.target.files?.[0]
+       if (!file || !task || !currentUser) return
+       setUploading(true)
+       setError(null)
+       
+       const fileName = `evidence-${task.id}-${Date.now()}-${file.name}`
+       
+       const { error: uploadError } = await supabase.storage.from('groupflow_assets').upload(fileName, file)
+       if (uploadError) throw uploadError
+       
+       const { data: publicUrlData } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+       
+       const payload = {
+         task_id: task.id,
+         file_url: publicUrlData.publicUrl,
+         uploaded_by: currentUser.id
+       }
+       
+       const { error: dbError } = await supabase.from('artifacts').insert([payload])
+       if (dbError) throw dbError
+       
+       fetchArtifacts() // Re-sync network state explicitly
+     } catch (err: any) {
+       setError("File transmission logic failed dynamically: " + err.message)
+     } finally {
+       setUploading(false)
+     }
+  }
+
   const handleDeleteArtifact = async (artifactId: string) => {
     // Instant Optimistic Update
     const original = [...artifacts]
@@ -317,17 +348,30 @@ export default function TaskModal({
                </div>
                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Ensure technical accountability by linking Figma files, Docs, or external PRs. This list updates locally and instantly.</p>
 
-               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
                  <input 
                    type="url" 
                    className="form-input" 
                    placeholder="https://figma.com/file/... or Google Doc link"
                    value={newUrl}
                    onChange={(e) => setNewUrl(e.target.value)}
+                   style={{ flex: 1 }}
                  />
                  <button className="btn btn-primary" onClick={handleUploadEvidence} disabled={uploading || !newUrl} style={{ width: 'auto', whiteSpace: 'nowrap' }}>
-                   {uploading ? 'Linking...' : 'Attach Proof'}
+                   {uploading ? 'Linking...' : 'Attach URl Proof'}
                  </button>
+                 
+                 <div style={{ position: 'relative', width: 'auto', display: 'flex' }}>
+                   <button className="btn" disabled={uploading} style={{ backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--accent-color)', color: 'var(--accent-color)', width: 'auto', whiteSpace: 'nowrap' }}>
+                      <FileUp size={16} /> Device Upload
+                   </button>
+                   <input 
+                      type="file" 
+                      onChange={handlePhysicalUpload} 
+                      disabled={uploading} 
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
+                   />
+                 </div>
                </div>
 
                <div>

@@ -5,6 +5,8 @@ import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus } from '@/types/database'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
 import TaskModal from './TaskModal'
+import confetti from 'canvas-confetti'
+import { distributeTaskScore } from '@/app/dashboard/actions'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -50,7 +52,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const fetchGroupMembers = async () => {
      const { data } = await supabase
        .from('profiles')
-       .select('id, full_name, email')
+       .select('id, full_name, email, avatar_url')
        .eq('group_id', groupId)
        
      if (data) setGroupMembers(data)
@@ -108,6 +110,12 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
        setTasks(originalTasks) // Revert on failure
        setBoardError(`Could not move task: ${error.message}`)
        setTimeout(() => setBoardError(null), 5000)
+    } else if (newStatus === 'Done') {
+       // Fire secure anti-farming Score Node pipeline
+       const targetTask = originalTasks.find(t => t.id === taskId)
+       if (targetTask && targetTask.assignees) {
+          distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error("Score Distribution error", err))
+       }
     }
   }
 
@@ -132,6 +140,25 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
     : 0
 
   const overdueCount = tasks.filter(t => t.due_date && new Date(t.due_date).getTime() < Date.now() && t.status !== 'Done').length
+  const [hasCelebrated, setHasCelebrated] = useState(false)
+
+  // IMMERSIVE GAMIFICATION REWARD MATRIX
+  useEffect(() => {
+     if (tasks.length > 0 && globalProbability === 100 && !hasCelebrated) {
+        setHasCelebrated(true)
+        const duration = 3000
+        const end = Date.now() + duration
+
+        const frame = () => {
+          confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0ea5e9', '#38bdf8', '#7dd3fc', '#ffffff'] })
+          confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0ea5e9', '#38bdf8', '#7dd3fc', '#ffffff'] })
+          if (Date.now() < end) requestAnimationFrame(frame)
+        }
+        frame()
+     } else if (globalProbability < 100 && hasCelebrated) {
+        setHasCelebrated(false) // Reset sequence dynamically if pipeline decays
+     }
+  }, [globalProbability, tasks.length, hasCelebrated])
 
   if (loading) {
     return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Mounting Kanban Flow...</div>
@@ -230,23 +257,26 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                           task.assignees.map(userId => {
                             const user = groupMembers.find(m => m.id === userId)
                             const initial = user?.full_name ? user.full_name.substring(0, 1).toUpperCase() : '?'
-                            return (
+                            
+                            return user?.avatar_url ? (
+                              <img 
+                                key={userId} 
+                                src={user.avatar_url} 
+                                title={user.full_name || 'Unknown'} 
+                                style={{ 
+                                  width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', 
+                                  border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' 
+                                }} 
+                                onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.removeAttribute('style') }}
+                              />
+                            ) : (
                               <div 
                                 key={userId} 
                                 title={user?.full_name || 'Unknown User'} 
                                 style={{ 
-                                  width: '22px', 
-                                  height: '22px', 
-                                  borderRadius: '50%', 
-                                  backgroundColor: 'var(--primary-color)', 
-                                  color: 'white', 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  justifyContent: 'center', 
-                                  fontSize: '0.65rem', 
-                                  fontWeight: 'bold',
-                                  border: '1px solid var(--border-color)',
-                                  boxShadow: 'var(--shadow-sm)'
+                                  width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'white', 
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold',
+                                  border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)'
                                 }}
                               >
                                 {initial}

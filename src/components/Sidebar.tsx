@@ -37,7 +37,20 @@ export default function Sidebar({ user }: { user: any }) {
        .subscribe()
 
      return () => { supabase.removeChannel(channel) }
-  }, [user.id])
+  }, [user.id, pathname])
+
+  const switchActiveGroup = async (groupId: string) => {
+     if (profile?.group_id === groupId) return
+     
+     // 1. Optimistic Update ensuring fast UI snap.
+     setProfile((p: any) => ({...p, group_id: groupId}))
+     
+     // 2. Perform Backend Profile Update securely modifying absolute project binding.
+     await supabase.from('profiles').update({ group_id: groupId }).eq('id', user.id)
+     
+     // 3. Fire absolute browser refresh to physically snap the Kanban pipeline to new target.
+     window.location.href = '/dashboard'
+  }
 
   const fetchGroups = async () => {
     const { data } = await supabase.from('groups').select('*').order('created_at', { ascending: false })
@@ -118,15 +131,18 @@ export default function Sidebar({ user }: { user: any }) {
                  <div 
                    key={group.id}
                    title={group.name}
+                   onClick={() => switchActiveGroup(group.id)}
                    style={{
                      display: 'flex',
                      alignItems: 'center',
                      gap: '1rem',
                      padding: '0.5rem 1rem',
                      borderRadius: 'var(--radius)',
+                     cursor: 'pointer',
                      backgroundColor: isActiveProject ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
                      border: isActiveProject ? '1px solid rgba(14, 165, 233, 0.2)' : '1px solid transparent',
-                     justifyContent: isOpen ? 'flex-start' : 'center'
+                     justifyContent: isOpen ? 'flex-start' : 'center',
+                     transition: 'all 0.2s ease'
                    }}
                  >
                    <FolderDot size={18} color={isActiveProject ? 'var(--accent-color)' : 'var(--text-secondary)'} />

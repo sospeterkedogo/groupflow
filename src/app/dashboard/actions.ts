@@ -1,0 +1,52 @@
+'use server'
+
+import { createClient } from '@supabase/supabase-js'
+import { revalidatePath } from 'next/cache'
+
+export async function distributeTaskScore(taskId: string, assignees: string[]) {
+  // Validate Security Credentials
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Critical Error: Admin Node keys fundamentally missing. Score scaling aborted.')
+  }
+
+  // Construct absolute admin client bypassing RLS restrictions
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+
+  // 1. Verify mathematically if score_awarded is false
+  const { data: taskStr, error: taskErr } = await adminClient
+    .from('tasks')
+    .select('score_awarded')
+    .eq('id', taskId)
+    .single()
+
+  if (taskErr || !taskStr) throw new Error('Task node validation failed')
+  if (taskStr.score_awarded) {
+    console.log('Anti-Farming Lock Active: Score already extracted from this node.')
+    return { success: false, reason: 'Already awarded' }
+  }
+
+  // 2. Safely traverse all assignees and globally inject +15 Validity Score internally
+  if (assignees && assignees.length > 0) {
+    for (const userId of assignees) {
+      // Manual internal update because Supabase RPC might not exist
+      const { data: profile } = await adminClient.from('profiles').select('total_score').eq('id', userId).single()
+      if (profile) {
+         await adminClient.from('profiles').update({ total_score: (profile.total_score || 0) + 15 }).eq('id', userId)
+      }
+    }
+  }
+
+  // 3. Close the physical lock permanently
+  await adminClient.from('tasks').update({ score_awarded: true }).eq('id', taskId)
+
+  revalidatePath('/dashboard', 'layout')
+  return { success: true }
+}

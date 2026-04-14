@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Settings, Save, CheckCircle2, Shield, Download, Trash2, Key, AlertTriangle, X } from 'lucide-react'
+import { Settings, Save, CheckCircle2, Shield, Download, Trash2, Key, AlertTriangle, X, Camera } from 'lucide-react'
 import TransientError from '@/components/TransientError'
+import imageCompression from 'browser-image-compression'
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<any>(null)
@@ -12,6 +13,10 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Biometric Avatar Integration
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   
   // Danger Zone Modals
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -31,6 +36,7 @@ export default function SettingsPage() {
        if (data) {
          setProfile(data)
          setFullName(data.full_name || '')
+         setAvatarUrl(data.avatar_url || '')
        }
     }
     setLoading(false)
@@ -57,6 +63,38 @@ export default function SettingsPage() {
        setSuccess(true)
        setTimeout(() => setSuccess(false), 3000)
     }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+     try {
+       const file = e.target.files?.[0]
+       if (!file || !profile) return
+       setUploadingAvatar(true)
+       setError(null)
+       
+       // Squeeze the file bytes locally on device before wasting bandwidth limits
+       const compressedFile = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true })
+       
+       const fileName = `${profile.id}-${Date.now()}.jpg`
+       
+       // Force upload to specifically public bucket
+       const { error: uploadError } = await supabase.storage.from('groupflow_assets').upload(fileName, compressedFile, { upsert: true })
+       if (uploadError) throw uploadError
+       
+       // Retrieve public network node URI
+       const { data: publicUrlData } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+       
+       // Link biometric url directly to central ID registry
+       await supabase.from('profiles').update({ avatar_url: publicUrlData.publicUrl }).eq('id', profile.id)
+       
+       setAvatarUrl(publicUrlData.publicUrl)
+       setSuccess(true)
+       setTimeout(() => setSuccess(false), 3000)
+     } catch (err: any) {
+       setError("Biometric capture failed dynamically: " + err.message)
+     } finally {
+       setUploadingAvatar(false)
+     }
   }
 
   const handleDownloadData = () => {
@@ -106,6 +144,31 @@ export default function SettingsPage() {
           <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 600 }}>Personal Identity Boundaries</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Manage how your algorithmic signature represents itself to peers across GroupFlow.</p>
           
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '1.5rem' }}>
+             <div style={{ position: 'relative', width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', border: '2px dashed var(--accent-color)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Biometric Vector" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <Camera size={32} color="var(--text-secondary)" />
+                )}
+                {/* Native OS Sensor injection */}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  capture="user" 
+                  onChange={handleAvatarUpload} 
+                  disabled={uploadingAvatar} 
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
+                  title="Upload / Snap Representation"
+                />
+             </div>
+             <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>Network Object Binding Status</p>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Accepts native OS hardware sensors.<br/>Images uniquely computed out locally before transmission.</p>
+                {uploadingAvatar && <p style={{ fontSize: '0.75rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>Executing device-local compression...</p>}
+             </div>
+          </div>
+
           <form onSubmit={handleUpdateProfile}>
             <div className="form-group" style={{ maxWidth: '400px' }}>
                <label className="form-label">Active Full Name</label>
