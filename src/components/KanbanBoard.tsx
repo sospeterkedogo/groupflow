@@ -8,12 +8,14 @@ import TaskModal from './TaskModal'
 import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
 import { usePresence } from './PresenceProvider'
+import TeamChat from './TeamChat'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
 export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [groupMembers, setGroupMembers] = useState<any[]>([])
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null)
   
   const [loading, setLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
@@ -28,6 +30,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   useEffect(() => {
     fetchTasks()
     fetchGroupMembers()
+    fetchCurrentUser()
     
     // Subscribe to real-time task changes for this specific group
     const channel = supabase
@@ -60,11 +63,19 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
      if (data) setGroupMembers(data)
   }
 
+  const fetchCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      if (data) setCurrentUserProfile(data)
+    }
+  }
+
   const fetchTasks = async () => {
     setBoardError(null)
     const { data, error } = await supabase
       .from('tasks')
-      .select('*')
+      .select('*, artifacts(id)')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false })
       
@@ -121,20 +132,24 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
     }
   }
 
-  // ALGORITHMIC COMPLETION ENGINE
-  const calculateProbability = (task: Task) => {
+  // ALGORITHMIC COMPLETION ENGINE (Enhanced with Evidence Weight)
+  const calculateProbability = (task: any) => {
      if (task.status === 'Done') return 100
      let base = task.status === 'In Review' ? 85 : task.status === 'In Progress' ? 50 : 10
      
+     // 1. Evidence Boost (Max +15% for comprehensive documentation)
+     const artifactBoost = Math.min((task.artifacts?.length || 0) * 5, 15)
+     base += artifactBoost
+
      if (task.due_date) {
         const remainingHours = (new Date(task.due_date).getTime() - Date.now()) / (1000 * 60 * 60)
         if (remainingHours < 0) {
-            base = Math.max(0, base - 50) // Severe penalty for overdue
+            base = Math.max(0, base - 50) 
         } else if (remainingHours < 48) {
-            base = Math.max(0, base - 20) // Penalty for imminent risk
+            base = Math.max(0, base - 10) 
         }
      }
-     return base
+     return Math.min(base, 99) // Cannot reach 100 without being 'Done'
   }
 
   const globalProbability = tasks.length > 0 
@@ -163,7 +178,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   }, [globalProbability, tasks.length, hasCelebrated])
 
   if (loading) {
-    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Mounting Kanban Flow...</div>
+    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-sub)' }}>Mounting Kanban Flow...</div>
   }
 
   return (
@@ -176,28 +191,28 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
       )}
       
       {/* Master Milestone HUD */}
-      <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', padding: '1.5rem', marginBottom: '0.5rem' }}>
+      <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', marginBottom: '0.5rem' }}>
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Global Project Network Pipeline</h3>
              {overdueCount > 0 && (
-               <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                  <AlertCircle size={14} /> {overdueCount} Critical Overdue Nodes
                </span>
              )}
          </div>
-         <div style={{ width: '100%', backgroundColor: 'var(--card-bg)', height: '12px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-            <div style={{ width: `${globalProbability}%`, height: '100%', backgroundColor: globalProbability < 30 ? 'var(--danger-color)' : 'var(--accent-color)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+         <div style={{ width: '100%', backgroundColor: 'var(--surface)', height: '12px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <div style={{ width: `${globalProbability}%`, height: '100%', backgroundColor: globalProbability < 30 ? 'var(--error)' : 'var(--brand)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
          </div>
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Completion Profile: <span style={{ color: 'var(--text-color)' }}>{globalProbability}%</span></span>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{tasks.length} Active Nodes</span>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>Total Completion Profile: <span style={{ color: 'var(--text-main)' }}>{globalProbability}%</span></span>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>{tasks.length} Active Nodes</span>
          </div>
       </div>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Drag and drop computational modules. Progress dynamically recalculates against absolute deadlines.</p>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Drag and drop computational modules. Progress dynamically recalculates against absolute deadlines.</p>
         <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
-          + Add New Task
+           + New Task
         </button>
       </div>
 
@@ -206,7 +221,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
           <div key={col} className="kanban-column">
             <div className="kanban-column-header">
               {col}
-              <span className="badge" style={{ backgroundColor: 'var(--bg-color)' }}>
+              <span className="badge" style={{ backgroundColor: 'var(--bg-sub)', color: 'var(--text-sub)' }}>
                 {tasks.filter(t => t.status === col).length}
               </span>
             </div>
@@ -225,90 +240,97 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   onDragStart={(e) => handleDragStart(e, task.id)}
                   onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
                 >
-                   <div className="kanban-card-title">{task.title}</div>
-                   
-                   {/* DYNAMIC PROGRESS BAR */}
-                   <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                         <span>Confidence</span>
-                         <span style={{ color: calculateProbability(task) < 30 ? 'var(--danger-color)' : 'var(--text-secondary)' }}>{calculateProbability(task)}%</span>
-                      </div>
-                      <div style={{ width: '100%', backgroundColor: 'var(--bg-secondary)', height: '4px', borderRadius: '4px' }}>
-                         <div style={{ width: `${calculateProbability(task)}%`, height: '100%', backgroundColor: calculateProbability(task) < 30 ? 'var(--danger-color)' : calculateProbability(task) === 100 ? 'var(--success-color)' : 'var(--accent-color)', borderRadius: '4px', transition: 'width 0.4s ease' }}></div>
-                      </div>
-                   </div>
+                  <div className="kanban-card-title">{task.title}</div>
+                  
+                  {/* DYNAMIC PROGRESS BAR */}
+                  <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <span>Confidence</span>
+                      <span style={{ color: calculateProbability(task) < 30 ? 'var(--error)' : 'var(--text-sub)' }}>
+                        {calculateProbability(task)}% 
+                        {(task.artifacts?.length ?? 0) > 0 && <span style={{ color: 'var(--success)', marginLeft: '0.25rem', fontSize: '0.6rem' }}>(+{Math.min((task.artifacts?.length ?? 0) * 5, 15)}% Boost)</span>}
+                      </span>
+                    </div>
+                    <div style={{ width: '100%', backgroundColor: 'var(--bg-sub)', height: '4px', borderRadius: '4px' }}>
+                      <div style={{ width: `${calculateProbability(task)}%`, height: '100%', backgroundColor: calculateProbability(task) < 30 ? 'var(--error)' : calculateProbability(task) === 100 ? 'var(--success)' : 'var(--brand)', borderRadius: '4px', transition: 'width 0.4s ease' }}></div>
+                    </div>
+                  </div>
 
-                   <div className="kanban-card-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                         <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                           {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
-                           {task.is_coding_task ? 'Code' : 'Design'}
-                         </span>
-                         {task.due_date && (
-                           <span style={{ fontSize: '0.65rem', fontWeight: 600, color: new Date(task.due_date).getTime() < Date.now() && task.status !== 'Done' ? 'var(--danger-color)' : 'var(--text-secondary)' }}>
-                              Due: {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                           </span>
-                         )}
-                      </div>
-                      
-                      {/* AVATAR RENDER MATRIX */}
-                      <div style={{ display: 'flex', gap: '0.2rem', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '40%' }}>
-                        {(!task.assignees || task.assignees.length === 0) ? (
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Unassigned</span>
-                        ) : (
-                          task.assignees.map(userId => {
-                            const user = groupMembers.find(m => m.id === userId)
-                            const initial = user?.full_name ? user.full_name.substring(0, 1).toUpperCase() : '?'
-                            const isOnline = onlineUsers.has(userId)
-                            
-                            return (
-                              <div key={userId} style={{ position: 'relative' }}>
-                                {user?.avatar_url ? (
-                                  <img 
-                                    src={user.avatar_url} 
-                                    title={user.full_name || 'Unknown'} 
-                                    style={{ 
-                                      width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', 
-                                      border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' 
-                                    }} 
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.removeAttribute('style') }}
-                                  />
-                                ) : (
-                                  <div 
-                                    title={user?.full_name || 'Unknown User'} 
-                                    style={{ 
-                                      width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'white', 
-                                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold',
-                                      border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)'
-                                    }}
-                                  >
-                                    {initial}
-                                  </div>
-                                )}
-                                {isOnline && (
-                                  <div style={{
-                                    position: 'absolute',
-                                    bottom: '-2px',
-                                    right: '-2px',
-                                    width: '8px',
-                                    height: '8px',
-                                    borderRadius: '50%',
-                                    backgroundColor: 'var(--success-color)',
-                                    border: '1.5px solid var(--card-bg)',
-                                    boxShadow: '0 0 4px var(--success-color)'
-                                  }} />
-                                )}
-                              </div>
-                            )
-                          })
-                        )}
-                      </div>
-                   </div>
+                  <div className="kanban-card-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
+                        {task.is_coding_task ? 'Code' : 'Design'}
+                      </span>
+                      {task.due_date && (
+                        <span style={{ fontSize: '0.65rem', fontWeight: 600, color: new Date(task.due_date).getTime() < Date.now() && task.status !== 'Done' ? 'var(--error)' : 'var(--text-sub)' }}>
+                          Due: {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* AVATAR RENDER MATRIX */}
+                    <div style={{ display: 'flex', gap: '0.2rem', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '40%' }}>
+                      {(!task.assignees || task.assignees.length === 0) ? (
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>Unassigned</span>
+                      ) : (
+                        task.assignees.map(userId => {
+                          const user = groupMembers.find(m => m.id === userId)
+                          const initial = user?.full_name ? user.full_name.substring(0, 1).toUpperCase() : '?'
+                          const isOnline = onlineUsers.has(userId)
+                          
+                          return (
+                            <div key={userId} style={{ position: 'relative' }}>
+                              {user?.avatar_url ? (
+                                <img 
+                                  src={user.avatar_url} 
+                                  title={user.full_name || 'Unknown'} 
+                                  style={{ 
+                                    width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', 
+                                    border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' 
+                                  }} 
+                                />
+                              ) : (
+                                <div 
+                                  title={user?.full_name || 'Unknown User'} 
+                                  style={{ 
+                                    width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold',
+                                    border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)'
+                                  }}
+                                >
+                                  {initial}
+                                </div>
+                              )}
+                              {isOnline && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: '-2px',
+                                  right: '-2px',
+                                  width: '8px',
+                                  height: '8px',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'var(--success)',
+                                  border: '1.5px solid var(--surface)',
+                                  boxShadow: '0 0 4px var(--success)'
+                                }} />
+                              )}
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         ))}
+
+        {/* Real-time Team Communications */}
+        {groupId && currentUserProfile && (
+          <TeamChat groupId={groupId} user={currentUserProfile} />
+        )}
       </div>
       
       {isModalOpen && (

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus, Artifact } from '@/types/database'
-import { X, Trash2, ExternalLink, ThumbsUp, FileUp, GitCommit, Link as LinkIcon, UserPlus, UserMinus, UserCircle } from 'lucide-react'
+import { X, Trash2, ExternalLink, ThumbsUp, FileUp, GitCommit, Link as LinkIcon, UserPlus, UserMinus, UserCircle, Check } from 'lucide-react'
+import { usePresence } from './PresenceProvider'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -27,6 +28,8 @@ export default function TaskModal({
   const [assignees, setAssignees] = useState<string[]>(task?.assignees || [])
   const [dueDate, setDueDate] = useState<string>(task?.due_date ? task.due_date.substring(0, 10) : '')
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [members, setMembers] = useState<any[]>([])
+  const { onlineUsers } = usePresence()
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +44,16 @@ export default function TaskModal({
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
-  }, [])
+    fetchMembers()
+  }, [groupId])
+
+  const fetchMembers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, email')
+      .eq('group_id', groupId)
+    if (data) setMembers(data)
+  }
 
   useEffect(() => {
     if (!isEditMode) return
@@ -123,28 +135,22 @@ export default function TaskModal({
     }
   }
 
-  // COLLABORATION ASSIGNMENT TOGGLE
-  const isAssigned = currentUser && assignees.includes(currentUser.id)
-
-  const toggleAssignment = async () => {
-    if (!currentUser) return
-    
-    // Calculate mathematically
-    const newAssignees = isAssigned 
-      ? assignees.filter(id => id !== currentUser.id) 
-      : [...assignees, currentUser.id]
+  const toggleMemberAssignment = async (memberId: string) => {
+    const isCurrentlyAssigned = assignees.includes(memberId)
+    const newAssignees = isCurrentlyAssigned 
+      ? assignees.filter(id => id !== memberId) 
+      : [...assignees, memberId]
       
-    setAssignees(newAssignees) // Instant optimistic update
+    setAssignees(newAssignees)
 
     if (isEditMode) {
-       // Fire network sync
        setLoading(true)
        const { error } = await supabase.from('tasks').update({ assignees: newAssignees }).eq('id', task.id)
        if (error) {
-          setError(`Failed to update collaboration assignment: ${error.message}`)
-          setAssignees(task.assignees || []) // Revert optimism
+          setError(`Failed to update assignment: ${error.message}`)
+          setAssignees(task.assignees || [])
        } else {
-          onRefresh() // Ensure Kanban avatars update globally behind modal
+          onRefresh()
        }
        setLoading(false)
     }
@@ -245,16 +251,16 @@ export default function TaskModal({
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: '650px' }}>
         
         {/* Sleek Google-style Header */}
-        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-secondary)' }}>
-          <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {isEditMode ? 'Task Configuration Panel' : 'Draft New Sprint Issue'}
+        <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-sub)' }}>
+          <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {isEditMode ? 'Task Configuration' : 'New Sprint Task'}
             {isEditMode && assignees.length > 0 && (
-               <span className="badge" style={{ backgroundColor: 'var(--accent-color)', color: 'white', marginLeft: '0.5rem' }}>
-                 {assignees.length} Collaborator{assignees.length !== 1 && 's'}
+               <span className="badge" style={{ backgroundColor: 'var(--brand)', color: 'white', marginLeft: '0.5rem' }}>
+                 {assignees.length} Member{assignees.length !== 1 && 's'}
                </span>
             )}
           </h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
              <X size={24} />
           </button>
         </div>
@@ -296,57 +302,92 @@ export default function TaskModal({
                </div>
                
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                 <label className="form-label">Classification Tag</label>
+                 <label className="form-label">Classification</label>
                  <select className="form-input" value={isCodingTask ? 'true' : 'false'} onChange={e => setIsCodingTask(e.target.value === 'true')}>
-                   <option value="true">Engineering Vector (Code)</option>
-                   <option value="false">Design Vector (Doc)</option>
+                   <option value="true">Engineering (Code)</option>
+                   <option value="false">Production (Design)</option>
                  </select>
                </div>
                
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                 <label className="form-label" style={{ color: 'var(--danger-color)' }}>Execution Deadline</label>
+                 <label className="form-label" style={{ color: 'var(--error)' }}>Deadline</label>
                  <input 
                    type="date"
                    className="form-input"
                    value={dueDate}
                    onChange={e => setDueDate(e.target.value)}
-                   style={{ borderColor: dueDate ? 'var(--border-color)' : 'rgba(239,68,68,0.5)' }}
+                   style={{ borderColor: dueDate ? 'var(--border)' : 'var(--error)' }}
                  />
                </div>
              </div>
             
-            {/* COLLABORATOR TOGGLE STRIP */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px dashed var(--border-color)', marginTop: '0.5rem' }}>
-               <div>
-                  <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-color)', marginBottom: '0.25rem' }}>Peer Responsibility</h4>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
-                     {isAssigned ? 'You are actively committed to delivering this task.' : 'You are currently not bound to this execution pipeline.'}
-                  </p>
-               </div>
-               <button 
-                  className="btn" 
-                  onClick={toggleAssignment}
-                  disabled={loading || (!isEditMode && !title)} 
-                  style={{ 
-                     width: 'auto', 
-                     backgroundColor: isAssigned ? 'transparent' : 'var(--accent-color)', 
-                     color: isAssigned ? 'var(--text-color)' : 'white',
-                     border: isAssigned ? '1px solid var(--border-color)' : 'none'
-                  }}
-               >
-                 {isAssigned ? <><UserMinus size={16} /> Unassign Me</> : <><UserPlus size={16} /> Accept Responsibility</>}
-               </button>
+            {/* COLLABORATOR SELECTION GRID */}
+            <div style={{ marginTop: '0.5rem' }}>
+              <label className="form-label" style={{ marginBottom: '1rem', display: 'block' }}>Assignees & Collaboration</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
+                {members.map(member => {
+                  const isAssigned = assignees.includes(member.id)
+                  const isOnline = onlineUsers.has(member.id)
+                  const initials = member.full_name ? member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '?'
+
+                  return (
+                    <div 
+                      key={member.id}
+                      onClick={() => toggleMemberAssignment(member.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        padding: '0.75rem',
+                        borderRadius: '12px',
+                        backgroundColor: isAssigned ? 'var(--bg-sub)' : 'transparent',
+                        border: isAssigned ? '1px solid var(--brand)' : '1px solid var(--border)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        boxShadow: isAssigned ? 'var(--shadow-sm)' : 'none'
+                      }}
+                    >
+                      <div style={{ position: 'relative' }}>
+                        {member.avatar_url ? (
+                          <img 
+                            src={member.avatar_url} 
+                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }} 
+                            alt={member.full_name}
+                          />
+                        ) : (
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                            {initials}
+                          </div>
+                        )}
+                        {isOnline && (
+                          <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)', boxShadow: '0 0 4px var(--success)' }} />
+                        )}
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous'}</div>
+                        <div style={{ fontSize: '0.65rem', color: isOnline ? 'var(--success)' : 'var(--text-sub)', fontWeight: 500 }}>{isOnline ? 'Online Now' : 'Offline'}</div>
+                      </div>
+                      {isAssigned && (
+                        <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={12} />
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
           {/* Peer Verification Sub-Panel (Only in Edit Mode) */}
           {isEditMode && (
-            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                 <LinkIcon size={18} color="var(--accent-color)" />
-                 <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 600 }}>Peer Evidence Protocol</h3>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '1.5rem' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                 <LinkIcon size={18} color="var(--brand)" />
+                 <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Project Evidence</h3>
                </div>
-               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Ensure technical accountability by linking Figma files, Docs, or external PRs. This list updates locally and instantly.</p>
+               <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Attach Figma, Docs, or external PRs to verify completion status.</p>
 
                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
                  <input 
@@ -362,9 +403,9 @@ export default function TaskModal({
                  </button>
                  
                  <div style={{ position: 'relative', width: 'auto', display: 'flex' }}>
-                   <button className="btn" disabled={uploading} style={{ backgroundColor: 'var(--bg-secondary)', border: '1px dashed var(--accent-color)', color: 'var(--accent-color)', width: 'auto', whiteSpace: 'nowrap' }}>
-                      <FileUp size={16} /> Device Upload
-                   </button>
+                    <button className="btn" disabled={uploading} style={{ backgroundColor: 'var(--bg-sub)', border: '1px dashed var(--brand)', color: 'var(--brand)', width: 'auto', whiteSpace: 'nowrap' }}>
+                       <FileUp size={16} /> Upload File
+                    </button>
                    <input 
                       type="file" 
                       onChange={handlePhysicalUpload} 
@@ -375,47 +416,46 @@ export default function TaskModal({
                </div>
 
                <div>
-                 {evidenceLoading ? (
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Loading artifacts...</p>
-                 ) : artifacts.length === 0 ? (
-                    <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius)', border: '1px dashed var(--border-color)' }}>
-                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>No verification documents firmly attached yet.</p>
-                    </div>
+                  {evidenceLoading ? (
+                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>Synchronizing documentation...</p>
+                  ) : artifacts.length === 0 ? (
+                     <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
+                        <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>No verification documents attached.</p>
+                     </div>
                  ) : (
                    artifacts.map(artifact => {
                      const isOwner = currentUser?.id === artifact.uploaded_by;
-                     
-                     return (
-                       <div key={artifact.id} className="artifact-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', marginBottom: '0.5rem' }}>
-                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
-                            <a href={artifact.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>
-                              <ExternalLink size={14} />
-                              {artifact.file_url}
-                            </a>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                              Timestamp: {new Date(artifact.created_at).toLocaleString()}
-                            </div>
-                          </div>
+                                          return (
+                        <div key={artifact.id} className="artifact-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '0.5rem' }}>
+                           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
+                             <a href={artifact.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
+                               <ExternalLink size={14} />
+                               Link Artifact
+                             </a>
+                             <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginTop: '0.25rem' }}>
+                               Transmitted: {new Date(artifact.created_at).toLocaleString()}
+                             </div>
+                           </div>
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <button 
-                              title="Endorse Peer Quality"
-                              className="btn btn-secondary" 
-                              onClick={() => handleEndorse(artifact.id, artifact.endorsements_count)}
-                              style={{ width: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.75rem', border: '1px solid var(--accent-color)', color: 'var(--accent-color)' }}
-                            >
-                              <ThumbsUp size={14} />
-                              ({artifact.endorsements_count})
-                            </button>
+                             <button 
+                               title="Endorsement"
+                               className="btn btn-secondary" 
+                               onClick={() => handleEndorse(artifact.id, artifact.endorsements_count)}
+                               style={{ width: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.75rem', border: '1px solid var(--brand)', color: 'var(--brand)' }}
+                             >
+                               <ThumbsUp size={14} />
+                               {artifact.endorsements_count}
+                             </button>
                             
                             {isOwner && (
-                               <button 
-                                 title="Delete Artifact"
+                                <button 
+                                 title="Delete"
                                  onClick={() => handleDeleteArtifact(artifact.id)}
-                                 style={{ background: 'none', border: '1px solid var(--danger-color)', color: 'var(--danger-color)', padding: '0.35rem', borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                               >
-                                  <Trash2 size={14} />
-                               </button>
+                                 style={{ background: 'none', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.35rem', borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                   <Trash2 size={14} />
+                                </button>
                             )}
                           </div>
                        </div>
@@ -428,15 +468,15 @@ export default function TaskModal({
         </div>
 
         {/* Footer Actions */}
-        <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', backgroundColor: 'var(--bg-secondary)' }}>
+        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', backgroundColor: 'var(--bg-sub)' }}>
            {isEditMode && (
-             <button className="btn" onClick={handleDelete} disabled={loading} style={{ width: 'auto', color: 'var(--danger-color)', backgroundColor: 'transparent', border: '1px solid var(--danger-color)', marginRight: 'auto' }}>
-               <Trash2 size={16} /> Delete Pipeline
+             <button className="btn" onClick={handleDelete} disabled={loading} style={{ width: 'auto', color: 'var(--error)', backgroundColor: 'transparent', border: '1px solid var(--error)', marginRight: 'auto' }}>
+               <Trash2 size={16} /> Delete
              </button>
            )}
-           <button className="btn btn-secondary" onClick={onClose} style={{ width: 'auto' }}>Close Setup</button>
+           <button className="btn btn-secondary" onClick={onClose} style={{ width: 'auto' }}>Cancel</button>
            <button className="btn btn-primary" onClick={handleSave} disabled={loading} style={{ width: 'auto' }}>
-             {loading ? 'Committing...' : 'Commit Configuration'}
+             {loading ? 'Saving...' : 'Save Configuration'}
            </button>
         </div>
 

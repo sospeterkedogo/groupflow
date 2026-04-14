@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Settings, Save, CheckCircle2, Shield, Download, Trash2, Key, AlertTriangle, X, Camera } from 'lucide-react'
+import { 
+  Settings, Save, CheckCircle2, Shield, Download, Trash2, 
+  Key, AlertTriangle, X, Camera, Palette as PaletteIcon, 
+  Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users
+} from 'lucide-react'
 import TransientError from '@/components/TransientError'
 import imageCompression from 'browser-image-compression'
+import { useTheme, PALETTES } from '@/context/ThemeContext'
+
+type Tab = 'identity' | 'security' | 'appearance' | 'workspace' | 'data'
 
 export default function SettingsPage() {
+  const [activeTab, setActiveTab ] = useState<Tab>('identity')
   const [profile, setProfile] = useState<any>(null)
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(true)
@@ -14,25 +22,33 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Biometric Avatar Integration
+  const { currentPalette, setPalette, customBg, setCustomBg } = useTheme()
   const [avatarUrl, setAvatarUrl] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [uploadingBg, setUploadingBg] = useState(false)
   
-  // Danger Zone Modals
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [availableGroups, setAvailableGroups] = useState<any[]>([])
+  const [switching, setSwitching] = useState(false)
 
   const supabase = createClient()
 
   useEffect(() => {
     fetchUserData()
+    fetchGroups()
   }, [])
+
+  const fetchGroups = async () => {
+    const { data } = await supabase.from('groups').select('*').order('name')
+    if (data) setAvailableGroups(data)
+  }
 
   const fetchUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+       const { data } = await supabase.from('profiles').select('*, groups(name, module_code)').eq('id', user.id).single()
        if (data) {
          setProfile(data)
          setFullName(data.full_name || '')
@@ -46,7 +62,6 @@ export default function SettingsPage() {
     e.preventDefault()
     setSaving(true)
     setError(null)
-    setSuccess(false)
     
     if (!profile) return
     
@@ -56,66 +71,75 @@ export default function SettingsPage() {
       .eq('id', profile.id)
       
     setSaving(false)
-    
-    if (updateError) {
-       setError("Failed to update profile settings.")
-    } else {
+    if (updateError) setError("Failed to update profile settings.")
+    else {
        setSuccess(true)
        setTimeout(() => setSuccess(false), 3000)
     }
   }
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'bg') => {
      try {
        const file = e.target.files?.[0]
        if (!file || !profile) return
-       setUploadingAvatar(true)
+       
+       if (type === 'avatar') setUploadingAvatar(true)
+       else setUploadingBg(true)
+       
        setError(null)
+       const compressedFile = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1200, useWebWorker: true })
+       const fileName = `${profile.id}-${type}-${Date.now()}.jpg`
        
-       // Squeeze the file bytes locally on device before wasting bandwidth limits
-       const compressedFile = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true })
-       
-       const fileName = `${profile.id}-${Date.now()}.jpg`
-       
-       // Force upload to specifically public bucket
        const { error: uploadError } = await supabase.storage.from('groupflow_assets').upload(fileName, compressedFile, { upsert: true })
        if (uploadError) throw uploadError
        
-       // Retrieve public network node URI
-       const { data: publicUrlData } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+       const { data } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+       const publicUrl = data.publicUrl
        
-       // Link biometric url directly to central ID registry
-       await supabase.from('profiles').update({ avatar_url: publicUrlData.publicUrl }).eq('id', profile.id)
+       if (type === 'avatar') {
+         await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
+         setAvatarUrl(publicUrl)
+       } else {
+         await setCustomBg(publicUrl)
+       }
        
-       setAvatarUrl(publicUrlData.publicUrl)
        setSuccess(true)
        setTimeout(() => setSuccess(false), 3000)
      } catch (err: any) {
-       setError("Image upload failed: " + err.message)
+       setError("Upload failed: " + err.message)
      } finally {
        setUploadingAvatar(false)
+       setUploadingBg(false)
      }
   }
 
-  const handleDownloadData = () => {
-     // Route directly to GET endpoint downloading the compiler JSON blob
-     window.open('/api/account', '_blank')
+  const handleDownloadData = () => window.open('/api/account', '_blank')
+
+  const handleSwitchGroup = async (newGroupId: string | null) => {
+    if (!profile) return
+    setSwitching(true)
+    setError(null)
+    
+    const { error: switchError } = await supabase
+      .from('profiles')
+      .update({ group_id: newGroupId })
+      .eq('id', profile.id)
+      
+    if (switchError) setError("Failed to transition workspace node.")
+    else {
+      await fetchUserData() // Refresh profile state
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    }
+    setSwitching(false)
   }
 
   const handleAccountTermination = async () => {
      if (deleteConfirmation !== 'DELETE') return
      setIsDeleting(true)
-     setError(null)
-     
      try {
        const res = await fetch('/api/account', { method: 'DELETE' })
-         
-       if (!res.ok) {
-          const message = await res.text()
-          throw new Error(message)
-       }
-       
-       // Force Sign Out & Local Storage Wipe
+       if (!res.ok) throw new Error(await res.text())
        await supabase.auth.signOut()
        window.location.href = '/login'
      } catch (err: any) {
@@ -126,178 +150,280 @@ export default function SettingsPage() {
   }
 
   if (loading) {
-    return <div style={{ padding: '2rem', color: 'var(--text-secondary)' }}>Mounting security boundaries...</div>
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-sub)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner" style={{ border: '3px solid var(--border)', borderTop: '3px solid var(--brand)', borderRadius: '50%', width: '30px', height: '30px', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
+          <span>Configuring System...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '4rem' }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
        
-       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-         <Settings size={28} color="var(--primary-color)" />
-         <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: 800 }}>Settings</h1>
+       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+         <Settings size={32} color="var(--brand)" />
+         <h1 style={{ fontSize: '2.25rem', margin: 0, fontWeight: 800, letterSpacing: '-0.02em' }}>Settings</h1>
        </div>
        
        {error && <TransientError message={error} />}
        
-       {/* 1. PERSONAL INFO ZONE */}
-       <div className="auth-card" style={{ maxWidth: '100%', margin: 0, borderTop: '4px solid var(--primary-color)' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 600 }}>Personal Information</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Manage your profile details and how you appear to others on GroupFlow.</p>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '1.5rem' }}>
-             <div style={{ position: 'relative', width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', border: '2px dashed var(--accent-color)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Profile Picture" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <Camera size={32} color="var(--text-secondary)" />
-                )}
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  capture="user" 
-                  onChange={handleAvatarUpload} 
-                  disabled={uploadingAvatar} 
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
-                  title="Upload Profile Picture"
-                />
-             </div>
-             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>Profile Picture</p>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Click to upload an image or take a photo.<br/>Images are automatically compressed.</p>
-                {uploadingAvatar && <p style={{ fontSize: '0.75rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>Uploading image...</p>}
-             </div>
-          </div>
-
-          <form onSubmit={handleUpdateProfile}>
-            <div className="form-group" style={{ maxWidth: '400px' }}>
-               <label className="form-label">Full Name</label>
-               <input 
-                 type="text" 
-                 className="form-input" 
-                 value={fullName}
-                 onChange={e => setFullName(e.target.value)}
-                 placeholder="Enter your name"
-               />
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
-              <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto' }}>
-                 <Save size={18} />
-                 {saving ? 'Saving...' : 'Save Settings'}
-              </button>
-              
-              {success && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success-color)', fontSize: '0.875rem', fontWeight: 500 }}>
-                   <CheckCircle2 size={16} /> Successfully saved.
-                </div>
-              )}
-            </div>
-          </form>
+       {/* Tab Navigation */}
+       <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+          {[
+            { id: 'identity', label: 'Identity', icon: User },
+            { id: 'workspace', label: 'Workspace', icon: MapPin },
+            { id: 'appearance', label: 'Appearance', icon: PaletteIcon },
+            { id: 'security', label: 'Security', icon: Shield },
+            { id: 'data', label: 'Data & Privacy', icon: AlertTriangle },
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as Tab)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem',
+                background: activeTab === tab.id ? 'var(--brand)' : 'transparent',
+                color: activeTab === tab.id ? 'white' : 'var(--text-sub)',
+                border: 'none', borderRadius: 'var(--radius)', cursor: 'pointer', fontWeight: 600,
+                transition: 'all 0.2s ease', whiteSpace: 'nowrap'
+              }}
+            >
+              <tab.icon size={18} />
+              {tab.label}
+            </button>
+          ))}
        </div>
 
-       {/* 2. SECURITY PROTOCOLS */}
-       <div className="auth-card" style={{ maxWidth: '100%', margin: 0, borderLeft: '4px solid var(--accent-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <Shield size={20} color="var(--accent-color)" />
-            <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 600 }}>Security</h2>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Manage your sign-in methods.</p>
+       {/* Content Panels */}
+       <div style={{ minHeight: '400px' }}>
           
-          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-             <div style={{ backgroundColor: 'black', color: 'white', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Key size={20} />
-             </div>
-             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Linked to Github Identity</span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{profile?.email || 'Encrypted Payload Address'}</span>
-             </div>
-             <span className="badge" style={{ marginLeft: 'auto', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success-color)' }}>Active & Verified</span>
-          </div>
-       </div>
+          {activeTab === 'identity' && (
+            <div className="auth-card" style={{ maxWidth: '100%' }}>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Personal Profile</h2>
+               
+               <div style={{ display: 'flex', alignItems: 'center', gap: '3rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', width: '120px', height: '120px' }}>
+                     <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {avatarUrl ? (
+                          <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <User size={48} color="var(--text-sub)" />
+                        )}
+                     </div>
+                     <label style={{ position: 'absolute', bottom: '0', right: '0', width: '36px', height: '36px', borderRadius: '50%', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '3px solid var(--surface)' }}>
+                        <Camera size={18} />
+                        <input type="file" accept="image/*" capture="user" onChange={e => handleFileUpload(e, 'avatar')} style={{ display: 'none' }} />
+                     </label>
+                  </div>
+                  <div>
+                     <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Avatar Representation</h3>
+                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Upload a photo or capture a biometric verification profile.</p>
+                     {uploadingAvatar && <p style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }}>Uploading...</p>}
+                  </div>
+               </div>
 
-       {/* 3. DATA & PRIVACY ZONE */}
-       <div className="auth-card" style={{ maxWidth: '100%', margin: 0, border: '1px solid rgba(239, 68, 68, 0.2)', backgroundColor: 'transparent' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <AlertTriangle size={20} color="var(--danger-color)" />
-            <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 600, color: 'var(--danger-color)' }}>Data & Privacy</h2>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Download your data or request account deletion.</p>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-             
-             {/* Read / Export Array */}
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                   <span style={{ fontWeight: 600 }}>Export Data</span>
-                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Download a complete JSON record of your tasks.</span>
-                </div>
-                <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}>
-                   <Download size={16} /> Download
-                </button>
-             </div>
-
-             {/* Delete Matrix */}
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                   <span style={{ fontWeight: 600, color: 'var(--danger-color)' }}>Delete Account</span>
-                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Permanently remove your profile and data.</span>
-                </div>
-                <button 
-                  className="btn" 
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  style={{ width: 'auto', backgroundColor: 'var(--danger-color)', color: 'white' }}
-                >
-                   <Trash2 size={16} /> Delete Account
-                </button>
-             </div>
-
-          </div>
-       </div>
-
-       {/* Danger Zone Modal */}
-       {isDeleteModalOpen && (
-         <div className="modal-overlay" style={{ zIndex: 9999 }}>
-            <div className="modal-content" style={{ maxWidth: '400px', borderTop: '4px solid var(--danger-color)' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--danger-color)' }}>Delete Account</h3>
-                  <button onClick={() => setIsDeleteModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                     <X size={20} />
+               <form onSubmit={handleUpdateProfile} style={{ maxWidth: '500px' }}>
+                  <div className="form-group">
+                     <label className="form-label">Global Alias</label>
+                     <input type="text" className="form-input" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Display Name" />
+                  </div>
+                  <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto', marginTop: '1rem' }}>
+                     {saving ? 'Synchronizing...' : 'Update Context'}
                   </button>
+                  {success && <span style={{ marginLeft: '1rem', color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem' }}>Settings updated.</span>}
+               </form>
+            </div>
+          )}
+
+          {activeTab === 'workspace' && (
+            <div className="auth-card" style={{ maxWidth: '100%' }}>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Workspace Migration</h2>
+               <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Transition your identity to a different module or project team.</p>
+               
+               <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Alignment</div>
+                     <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{profile?.groups?.name || 'Unassigned Independent'}</div>
+                     <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{profile?.groups?.module_code || 'No parent module'}</div>
+                  </div>
+                  {profile?.group_id && (
+                    <button 
+                      onClick={() => handleSwitchGroup(null)}
+                      disabled={switching}
+                      className="btn" 
+                      style={{ width: 'auto', background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)' }}
+                    >
+                      Leave Current Team
+                    </button>
+                  )}
                </div>
+
+               <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Available Systems</h3>
+               {availableGroups.filter(g => g.id !== profile?.group_id).length === 0 ? (
+                 <p style={{ color: 'var(--text-sub)', fontStyle: 'italic' }}>No other active systems detected in the registry.</p>
+               ) : (
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                   {availableGroups.filter(g => g.id !== profile?.group_id).map(group => (
+                     <div 
+                       key={group.id} 
+                       style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                     >
+                         <div>
+                           <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
+                           <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
+                         </div>
+                         <button 
+                           onClick={() => {
+                             if (confirm(`Transition to ${group.name}? Your current task context will change.`)) {
+                               handleSwitchGroup(group.id)
+                             }
+                           }}
+                           disabled={switching}
+                           className="btn btn-primary" 
+                           style={{ width: 'auto', padding: '0.5rem 1rem' }}
+                         >
+                           Join Team
+                         </button>
+                     </div>
+                   ))}
+                 </div>
+               )}
+            </div>
+          )}
+
+          {activeTab === 'appearance' && (
+            <div className="auth-card" style={{ maxWidth: '100%' }}>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Interface Configuration</h2>
                
-               <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                 This action is irreversible. All your data, profile, and active modules will be permanently removed.
-               </p>
-               
-               <div className="form-group">
-                 <label className="form-label" style={{ color: 'var(--text-color)' }}>
-                   Type <strong>DELETE</strong> below to confirm
-                 </label>
-                 <input 
-                   type="text" 
-                   className="form-input" 
-                   style={{ border: '1px solid var(--danger-color)', backgroundColor: 'rgba(239, 68, 68, 0.05)', color: 'var(--danger-color)', fontWeight: 'bold' }}
-                   value={deleteConfirmation}
-                   onChange={e => setDeleteConfirmation(e.target.value)}
-                   placeholder="Type DELETE"
-                 />
+               <div style={{ marginBottom: '3rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                     <PaletteIcon size={20} color="var(--brand)" /> 13-Color Semantic Palettes
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                     {PALETTES.map(p => (
+                       <button 
+                         key={p.name}
+                         onClick={() => setPalette(p.name)}
+                         style={{
+                           padding: '1.25rem', background: 'var(--bg-sub)', border: currentPalette.name === p.name ? '2px solid var(--brand)' : '1px solid var(--border)',
+                           borderRadius: 'var(--radius)', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                         }}
+                       >
+                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{p.name}</span>
+                            {currentPalette.name === p.name && <CheckCircle2 size={16} color="var(--brand)" />}
+                         </div>
+                         <div style={{ display: 'flex', gap: '4px' }}>
+                            {Object.values(p.colors).slice(0, 5).map((c, i) => (
+                              <div key={i} style={{ width: '20px', height: '20px', borderRadius: '4px', background: c, border: '1px solid rgba(0,0,0,0.1)' }} />
+                            ))}
+                         </div>
+                       </button>
+                     ))}
+                  </div>
                </div>
-               
-               <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                 <button className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting}>Cancel</button>
-                 <button 
-                   className="btn" 
-                   onClick={handleAccountTermination} 
-                   disabled={isDeleting || deleteConfirmation !== 'DELETE'}
-                   style={{ backgroundColor: 'var(--danger-color)', color: 'white', opacity: deleteConfirmation === 'DELETE' ? 1 : 0.5 }}
-                 >
-                   {isDeleting ? 'Deleting...' : 'Delete Forever'}
-                 </button>
+
+               <div>
+                  <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                     <ImageIcon size={20} color="var(--brand)" /> Custom Environmental Backdrop
+                  </h3>
+                  <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', textAlign: 'center' }}>
+                     {customBg ? (
+                       <div style={{ position: 'relative', width: '200px', height: '100px', borderRadius: 'var(--radius)', overflow: 'hidden', margin: '0 auto 1.5rem', border: '2px solid var(--brand)' }}>
+                          <img src={customBg} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <button 
+                            onClick={() => setCustomBg(null)}
+                            style={{ position: 'absolute', top: '5px', right: '5px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                          >
+                            <X size={14} />
+                          </button>
+                       </div>
+                     ) : (
+                       <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', border: '1px dashed var(--border)' }}>
+                          <ImageIcon size={30} color="var(--text-sub)" />
+                       </div>
+                     )}
+                     <label className="btn btn-secondary" style={{ width: 'auto', cursor: 'pointer' }}>
+                        {uploadingBg ? 'Installing Image...' : customBg ? 'Swap Backdrop' : 'Upload Custom Image'}
+                        <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'bg')} style={{ display: 'none' }} />
+                     </label>
+                  </div>
                </div>
             </div>
-         </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="auth-card" style={{ maxWidth: '100%' }}>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Security Protocol</h2>
+               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                  <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                     <Key size={24} />
+                  </div>
+                  <div>
+                     <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Github Identity Authenticated</h3>
+                     <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.875rem' }}>{profile?.email}</p>
+                  </div>
+                  <span className="badge badge-code" style={{ marginLeft: 'auto', padding: '0.4rem 0.8rem' }}>Verified Node</span>
+               </div>
+            </div>
+          )}
+
+          {activeTab === 'data' && (
+            <div className="auth-card" style={{ maxWidth: '100%', border: '1px solid var(--error)' }}>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--error)' }}>Danger Matrix</h2>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+                     <div>
+                        <h4 style={{ margin: 0 }}>Binary Export</h4>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Extract all task data as absolute JSON.</p>
+                     </div>
+                     <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}><Download size={16} /> Export</button>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid var(--error)', borderRadius: 'var(--radius)' }}>
+                     <div>
+                        <h4 style={{ margin: 0, color: 'var(--error)' }}>Account Termination</h4>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Irreversibly wipe all data and identity.</p>
+                     </div>
+                     <button className="btn" onClick={() => setIsDeleteModalOpen(true)} style={{ width: 'auto', background: 'var(--error)', color: 'white' }}><Trash2 size={16} /> Terminate</button>
+                  </div>
+               </div>
+            </div>
+          )}
+       </div>
+
+       {/* Delete Modal Component */}
+       {isDeleteModalOpen && (
+          <div className="modal-overlay" style={{ zIndex: 9999 }}>
+             <div className="modal-content" style={{ maxWidth: '450px', textAlign: 'center' }}>
+                <div style={{ marginBottom: '1.5rem', color: 'var(--error)' }}><AlertTriangle size={60} /></div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Final Confirmation</h3>
+                <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+                   This will permanently purge your student configuration. All scores, tasks, and communications will be lost.
+                </p>
+                <input 
+                  type="text" className="form-input" placeholder="Type DELETE to execute" value={deleteConfirmation} 
+                  onChange={e => setDeleteConfirmation(e.target.value)} 
+                  style={{ border: '2px solid var(--error)', textAlign: 'center', fontWeight: 'bold' }}
+                />
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                   <button className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Abort</button>
+                   <button 
+                     className="btn" onClick={handleAccountTermination} disabled={isDeleting || deleteConfirmation !== 'DELETE'}
+                     style={{ background: 'var(--error)', color: 'white', opacity: deleteConfirmation === 'DELETE' ? 1 : 0.4 }}
+                   >
+                      {isDeleting ? 'Terminating...' : 'Wipe Account'}
+                   </button>
+                </div>
+             </div>
+          </div>
        )}
 
+       <style jsx>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+       `}</style>
     </div>
   )
 }

@@ -13,7 +13,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   FolderDot,
-  Plus
+  Plus,
+  BarChart3
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 
@@ -73,6 +74,7 @@ export default function Sidebar({ user }: { user: any }) {
   const navLinks = [
     { name: 'Sprint Board', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Student Network', path: '/dashboard/network', icon: Users },
+    { name: 'Project Analytics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/network', icon: BarChart3 },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]
@@ -80,20 +82,20 @@ export default function Sidebar({ user }: { user: any }) {
   return (
     <div className="sidebar-container" style={{ width: isOpen ? '280px' : '80px' }}>
       {/* Header / Toggle */}
-      <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border-color)' }}>
+      <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border)' }}>
          {isOpen && (
            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--primary-color)' }}>GroupFlow</Link>
-             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success-color)' : 'var(--text-secondary)', boxShadow: isOnline ? '0 0 4px var(--success-color)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
+             <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--brand)' }}>GroupFlow</Link>
+             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 4px var(--success)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
            </div>
          )}
-         <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+         <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
             {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
          </button>
       </div>
 
       {/* Main Navigation */}
-      <div style={{ padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
+      <div style={{ padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderBottom: '1px solid var(--border)' }}>
         {navLinks.map(link => {
           const isActive = pathname === link.path
           return (
@@ -105,17 +107,17 @@ export default function Sidebar({ user }: { user: any }) {
                 alignItems: 'center',
                 gap: '1rem',
                 padding: '0.75rem 1rem',
-                borderRadius: 'var(--radius)',
-                backgroundColor: isActive ? 'var(--bg-secondary)' : 'transparent',
-                color: isActive ? 'var(--primary-color)' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 500,
-                textDecoration: 'none',
-                transition: 'all 0.2s ease',
-                justifyContent: isOpen ? 'flex-start' : 'center'
+                background: isActive ? 'var(--surface)' : 'transparent',
+                color: isActive ? 'var(--brand)' : 'var(--text-sub)',
+                borderRadius: '12px',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                border: isActive ? '1px solid var(--border)' : '1px solid transparent',
+                boxShadow: isActive ? 'var(--shadow-sm)' : 'none'
               }}
             >
-              <link.icon size={20} color={isActive ? 'var(--primary-color)' : 'var(--text-secondary)'} />
+              <link.icon size={20} color={isActive ? 'var(--brand)' : 'var(--text-sub)'} />
               {isOpen && <span>{link.name}</span>}
+              {isOpen && isActive && <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)' }} />}
             </Link>
           )
         })}
@@ -125,9 +127,9 @@ export default function Sidebar({ user }: { user: any }) {
       <div style={{ padding: '1.5rem 1rem', flex: 1, overflowY: 'auto' }}>
          {isOpen && (
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingLeft: '1rem', paddingRight: '0.5rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Global Projects</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Global Projects</span>
               <Link href="/dashboard/join" title="Join / Create Project">
-                <Plus size={16} color="var(--text-secondary)" />
+                <Plus size={16} color="var(--text-sub)" />
               </Link>
            </div>
          )}
@@ -153,13 +155,13 @@ export default function Sidebar({ user }: { user: any }) {
                      transition: 'all 0.2s ease'
                    }}
                  >
-                   <FolderDot size={18} color={isActiveProject ? 'var(--accent-color)' : 'var(--text-secondary)'} />
+                   <FolderDot size={18} color={isActiveProject ? 'var(--brand)' : 'var(--text-sub)'} />
                    {isOpen && (
                      <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                       <span style={{ fontSize: '0.875rem', fontWeight: isActiveProject ? 600 : 500, color: isActiveProject ? 'var(--text-color)' : 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                       <span style={{ fontSize: '0.875rem', fontWeight: isActiveProject ? 600 : 500, color: isActiveProject ? 'var(--text-main)' : 'var(--text-sub)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                          {group.name}
                        </span>
-                       <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{group.module_code}</span>
+                       <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>{group.module_code}</span>
                      </div>
                    )}
                  </div>
@@ -169,7 +171,7 @@ export default function Sidebar({ user }: { user: any }) {
       </div>
 
       {/* Render Authentication Logout correctly */}
-      <div style={{ padding: '1.5rem 1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ padding: '1.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'center' }}>
          <form action="/auth/signout" method="post" style={{ width: '100%' }}>
             <button 
               type="submit" 
@@ -182,7 +184,7 @@ export default function Sidebar({ user }: { user: any }) {
                 alignItems: 'center', 
                 gap: '1rem', 
                 padding: '0.75rem 1rem', 
-                color: 'var(--danger-color)',
+                color: 'var(--error)',
                 fontWeight: 600,
                 justifyContent: isOpen ? 'flex-start' : 'center',
                 borderRadius: 'var(--radius)',

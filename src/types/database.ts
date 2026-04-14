@@ -26,6 +26,7 @@ export type Task = {
   is_coding_task: boolean;
   due_date: string | null;
   created_at: string;
+  artifacts?: any[]; // Joined artifacts for metrics
 };
 
 export type Commit = {
