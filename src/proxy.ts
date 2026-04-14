@@ -6,7 +6,7 @@ const rateLimitMap = new Map<string, { count: number, resetAt: number }>()
 const LIMIT = 60 // requests
 const WINDOW_MS = 60 * 1000 // 1 minute
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || 'anonymous'
   const now = Date.now()
   
