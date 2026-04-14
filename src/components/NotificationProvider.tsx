@@ -39,10 +39,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     fetchNotifications()
     
     let channel: any
+    let active = true
 
     const setupSubscription = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
+      if (user && active) {
         channel = supabase
           .channel(`notifications_${user.id}`)
           .on('postgres_changes', { 
@@ -62,6 +63,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setupSubscription()
 
     return () => {
+      active = false
       if (channel) supabase.removeChannel(channel)
     }
   }, [])
