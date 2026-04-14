@@ -16,6 +16,7 @@ type CalendarTask = {
 export default function CalendarView({ groupId }: { groupId: string }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [tasks, setTasks] = useState<CalendarTask[]>([])
+  const [selectedTask, setSelectedTask] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
