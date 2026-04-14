@@ -194,39 +194,31 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: 1rem;
 }
 
-/* Nav & Dashboard Layout */
+/* Dashboard Layout */
 .dashboard-layout {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
-.main-header {
-  height: 64px;
-  border-bottom: 1px solid var(--border-color);
+.sidebar-container {
+  height: 100vh;
   background-color: var(--header-bg);
+  border-right: 1px solid var(--border-color);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.header-logo {
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  z-index: 50;
 }
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  padding: 2.5rem;
   background-color: var(--bg-secondary);
+  overflow-y: auto;
+  height: 100vh;
 }
 
 .error-message {
