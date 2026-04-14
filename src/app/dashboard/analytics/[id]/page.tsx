@@ -65,10 +65,10 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const totalEvidence = artifacts.length
   const evidenceDensity = tasks.length > 0 ? (totalEvidence / tasks.length).toFixed(1) : '0'
 
-  // --- PROJECT EFFORT ENGINE ---
+  // --- PROJECT EFFORT ENGINE (Localized Contribution) ---
   const calculateMemberEffort = (memberId: string) => {
     const completedTasks = tasks.filter(t => t.status === 'Done' && t.assignees?.includes(memberId)).length
-    return completedTasks * 15 // Using the 15pts per task metric from actions.ts
+    return completedTasks * 15 // Aligning with Score Node pipeline (+15 pts per task)
   }
 
   const memberEfforts = members.map(m => ({ id: m.id, effort: calculateMemberEffort(m.id) }))

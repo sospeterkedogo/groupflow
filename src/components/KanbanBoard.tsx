@@ -273,7 +273,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   <div className="kanban-card-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        {task.is_coding_task ? <GitCommit size(10) /> : <FileUp size(10) />}
+                        {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
                         {task.is_coding_task ? 'Code' : 'Design'}
                       </span>
                       {task.due_date && (

@@ -23,7 +23,7 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
   // Calculate verified CURRENT PROJECT EFFORT contribution %
   const calculateMemberEffort = (memberId: string) => {
     const completedTasks = tasks.filter(t => t.status === 'Done' && t.assignees?.includes(memberId)).length
-    return completedTasks * 15 // Using the 15pts per task metric from actions.ts
+    return completedTasks * 15 // Standardized score increment
   }
 
   const memberEffort = calculateMemberEffort(member.id)
@@ -95,9 +95,9 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
               </div>
               <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                    <ShieldCheck size={14} /> Total Score
+                    <ShieldCheck size={14} /> Local Rank
                  </div>
-                 <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>{member.total_score}</div>
+                 <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>{memberEffort}</div>
               </div>
            </div>
 
@@ -111,7 +111,7 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
                  <div style={{ width: `${contributionPercent}%`, height: '100%', background: 'linear-gradient(90deg, var(--brand), #818cf8)', borderRadius: '10px' }} />
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-sub)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-                 This verified metric calculates this member&apos;s contribution effort relative to the CURRENT group performance, based on completed task nodes.
+                 This verified metric calculates this collaborator's contribution effort relative to the CURRENT project performance, based on completed task nodes.
               </p>
            </div>
         </div>
