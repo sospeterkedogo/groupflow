@@ -14,7 +14,7 @@ type VirtualEmail = {
   type: 'reminder' | 'report' | 'system'
 }
 
-export default function EmailCenter({ groupId, profile }: { groupId: string, profile: any }) {
+export default function EmailCenter({ groupId, profile, teamMembers }: { groupId: string, profile: any, teamMembers: any[] }) {
   const [emails, setEmails] = useState<VirtualEmail[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState<VirtualEmail | null>(null)
@@ -77,10 +77,14 @@ export default function EmailCenter({ groupId, profile }: { groupId: string, pro
       Member: ${profile?.full_name}
       Generated: ${new Date().toLocaleString()}
       
-      STATS:
-      - Validity Score: ${profile?.total_score || 0}
-      - Project Status: Active
       
+      TEAM PERFORMANCE BREAKDOWN:
+      ${teamMembers.map(m => {
+        const total = teamMembers.reduce((acc, curr) => acc + (curr.total_score || 0), 0)
+        const pct = total > 0 ? Math.round((m.total_score / total) * 100) : 0
+        return `- ${m.full_name}: ${m.total_score} pts (${pct}%)`
+      }).join('\n      ')}
+
       CONFIRMATION: This report is a verifiable snapshot of the project registry.
     `
     const blob = new Blob([reportContent], { type: 'text/plain' })

@@ -10,6 +10,7 @@ import { distributeTaskScore } from '@/app/dashboard/actions'
 import { usePresence } from './PresenceProvider'
 import TeamChat from './TeamChat'
 import { logActivity } from '@/utils/logging'
+import MemberProfileModal from './MemberProfileModal'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -24,6 +25,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   // Modal Orchestration State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [selectedMember, setSelectedMember] = useState<any>(null)
   
   const supabase = createClient()
   const { onlineUsers } = usePresence()
@@ -271,7 +273,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   <div className="kanban-card-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
+                        {task.is_coding_task ? <GitCommit size(10) /> : <FileUp size(10) />}
                         {task.is_coding_task ? 'Code' : 'Design'}
                       </span>
                       {task.due_date && (
@@ -292,23 +294,35 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                           const isOnline = onlineUsers.has(userId)
                           
                           return (
-                            <div key={userId} style={{ position: 'relative' }}>
+                            <button 
+                              key={userId} 
+                              onClick={(e) => { e.stopPropagation(); setSelectedMember(user); }}
+                              style={{ 
+                                position: 'relative', 
+                                padding: 0, 
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
+                              }}
+                              className="avatar-bubble"
+                            >
                               {user?.avatar_url ? (
                                 <img 
                                   src={user.avatar_url} 
-                                  title={user.full_name || 'Unknown'} 
+                                  title={user.full_name || 'View Profile'} 
                                   style={{ 
-                                    width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', 
-                                    border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' 
+                                    width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', 
+                                    border: '1.5px solid var(--surface)', boxShadow: 'var(--shadow-sm)' 
                                   }} 
                                 />
                               ) : (
                                 <div 
-                                  title={user?.full_name || 'Unknown User'} 
+                                  title={user?.full_name || 'View Profile'} 
                                   style={{ 
-                                    width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', 
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold',
-                                    border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)'
+                                    width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 'bold',
+                                    border: '1.5px solid var(--surface)', boxShadow: 'var(--shadow-sm)'
                                   }}
                                 >
                                   {initial}
@@ -317,8 +331,8 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                               {isOnline && (
                                 <div style={{
                                   position: 'absolute',
-                                  bottom: '-2px',
-                                  right: '-2px',
+                                  bottom: '-1px',
+                                  right: '-1px',
                                   width: '8px',
                                   height: '8px',
                                   borderRadius: '50%',
@@ -327,7 +341,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                                   boxShadow: '0 0 4px var(--success)'
                                 }} />
                               )}
-                            </div>
+                            </button>
                           )
                         })
                       )}
@@ -356,6 +370,74 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
           }} 
         />
       )}
+
+      {selectedMember && (
+        <MemberProfileModal 
+          member={selectedMember}
+          groupMembers={groupMembers}
+          tasks={tasks}
+          onClose={() => setSelectedMember(null)}
+        />
+      )}
+
+      <style jsx>{`
+        .avatar-bubble:hover { transform: scale(1.15) translateY(-2px); z-index: 10; filter: brightness(1.1); }
+        .kanban-board {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1.5rem;
+          min-height: 70vh;
+        }
+        .kanban-column {
+          background: var(--bg-main);
+          border-radius: var(--radius);
+          padding: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          border: 1px solid var(--border);
+        }
+        .kanban-column-header {
+          font-weight: 800;
+          font-size: 0.875rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--text-sub);
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem;
+          border-bottom: 2px solid var(--border);
+          margin-bottom: 0.5rem;
+        }
+        .kanban-task-list {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          min-height: 200px;
+        }
+        .kanban-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 1.25rem;
+          cursor: grab;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: var(--shadow-sm);
+        }
+        .kanban-card:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--brand);
+        }
+        .kanban-card-title {
+          font-weight: 700;
+          font-size: 1rem;
+          color: var(--text-main);
+          margin-bottom: 0.5rem;
+          line-height: 1.4;
+        }
+      `}</style>
     </div>
   )
 }

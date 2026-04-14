@@ -65,11 +65,31 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const totalEvidence = artifacts.length
   const evidenceDensity = tasks.length > 0 ? (totalEvidence / tasks.length).toFixed(1) : '0'
 
+  // --- PROJECT EFFORT ENGINE ---
+  const calculateMemberEffort = (memberId: string) => {
+    const completedTasks = tasks.filter(t => t.status === 'Done' && t.assignees?.includes(memberId)).length
+    return completedTasks * 15 // Using the 15pts per task metric from actions.ts
+  }
+
+  const memberEfforts = members.map(m => ({ id: m.id, effort: calculateMemberEffort(m.id) }))
+  const totalGroupEffort = memberEfforts.reduce((acc, curr) => acc + curr.effort, 0)
+
   // --- EXPORT LOGIC ---
   const exportToCSV = async () => {
     setLoading(true)
     const { data: logs } = await supabase.from('activity_log').select('*, profiles(full_name)').eq('group_id', groupId).order('created_at', { ascending: false })
     
+    // Performance Summary Section
+    const performanceHeaders = ['Member', 'Project Score (This Group)', 'Contribution %']
+    const performanceRows = members.map(m => {
+       const effort = calculateMemberEffort(m.id)
+       return [
+         m.full_name || 'Anonymous',
+         effort,
+         totalGroupEffort > 0 ? `${Math.round((effort / totalGroupEffort) * 100)}%` : '0%'
+       ]
+    })
+
     const headers = ['Type', 'User', 'Description', 'Timestamp', 'Metadata']
     const reportTimestamp = new Date().toLocaleString()
     const rows = (logs || []).map(l => [
@@ -85,6 +105,11 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       [`PROJECT: ${group?.name}`],
       [`GENERATED AT: ${reportTimestamp}`],
       [],
+      [`TEAM PERFORMANCE SUMMARY`],
+      performanceHeaders,
+      ...performanceRows,
+      [],
+      [`DETAILED ACTION LOG`],
       headers, 
       ...rows
     ].map(e => e.map(cell => `"${cell}"`).join(",")).join("\n")
@@ -204,6 +229,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
               <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-sub)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
                 <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 700 }}>Member</th>
                 <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Pulse (Last Active)</th>
+                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Verified Impact</th>
                 <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Score</th>
                 <th style={{ textAlign: 'right', padding: '1rem 0', fontWeight: 700 }}>Activity Level</th>
               </tr>
@@ -230,6 +256,16 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)', fontWeight: 600 }}>
                         {member.last_seen ? new Date(member.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never'}
                       </span>
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '1.25rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                        <span style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                          {totalGroupEffort > 0 ? Math.round((calculateMemberEffort(member.id) / totalGroupEffort) * 100) : 0}% 
+                        </span>
+                        <div style={{ width: '80px', height: '4px', background: 'var(--bg-main)', borderRadius: '4px', overflow: 'hidden' }}>
+                           <div style={{ width: `${totalGroupEffort > 0 ? (calculateMemberEffort(member.id) / totalGroupEffort) * 100 : 0}%`, height: '100%', background: 'var(--brand)' }} />
+                        </div>
+                      </div>
                     </td>
                     <td style={{ textAlign: 'center', padding: '1.25rem' }}>
                       <span style={{ fontWeight: 800, color: 'var(--brand)', fontSize: '1.1rem' }}>{member.total_score}</span>

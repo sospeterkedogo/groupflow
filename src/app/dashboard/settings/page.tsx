@@ -270,7 +270,7 @@ export default function SettingsPage() {
              <div className="auth-card" style={{ maxWidth: '100%' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Direct Intercom & Mail</h2>
                 <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Management hub for automated reminders and verifiable PDF reports.</p>
-                <EmailCenter groupId={profile.group_id} profile={profile} />
+                <EmailCenter groupId={profile.group_id} profile={profile} teamMembers={teamMembers} />
              </div>
            )}
            
