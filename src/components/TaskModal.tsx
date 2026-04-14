@@ -2,12 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Task, TaskStatus, Artifact } from '@/types/database'
+import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, GitCommit, Link as LinkIcon, UserPlus, UserMinus, UserCircle, Check } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
+const CATEGORIES: TaskCategory[] = [
+  'Implementation', 
+  'Architecture', 
+  'UX/UI Design', 
+  'Quality Assurance', 
+  'Research', 
+  'Management', 
+  'Documentation', 
+  'DevOps', 
+  'Ethics'
+]
 
 export default function TaskModal({ 
   task, 
@@ -27,7 +38,7 @@ export default function TaskModal({
   const [title, setTitle] = useState(task?.title || '')
   const [description, setDescription] = useState(task?.description || '')
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'To Do')
-  const [isCodingTask, setIsCodingTask] = useState(task ? task.is_coding_task : true)
+  const [category, setCategory] = useState<TaskCategory>(task?.category || 'Implementation')
   const [assignees, setAssignees] = useState<string[]>(task?.assignees || [])
   const [dueDate, setDueDate] = useState<string>(
     task?.due_date 
@@ -104,7 +115,8 @@ export default function TaskModal({
       title,
       description,
       status,
-      is_coding_task: isCodingTask,
+      category,
+      is_coding_task: category === 'Implementation', // Legacy sync
       group_id: groupId,
       assignees, // Pass array payload!
       due_date: dueDate ? new Date(dueDate).toISOString() : null
@@ -351,12 +363,11 @@ export default function TaskModal({
                </div>
                
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                 <label className="form-label">Category</label>
-                 <select className="form-input" value={isCodingTask ? 'true' : 'false'} onChange={e => setIsCodingTask(e.target.value === 'true')}>
-                   <option value="true">Coding</option>
-                   <option value="false">Design</option>
-                 </select>
-               </div>
+                  <label className="form-label">Track / Category</label>
+                  <select className="form-input" value={category} onChange={e => setCategory(e.target.value as TaskCategory)}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
                
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
                  <label className="form-label" style={{ color: 'var(--error)' }}>Due Date</label>

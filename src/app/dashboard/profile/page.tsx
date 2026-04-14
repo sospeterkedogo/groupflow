@@ -114,10 +114,79 @@ export default function ProfilePage() {
 
        </div>
 
+       {/* Technical Arsenal Gallery */}
+       <div className="auth-card" style={{ maxWidth: '100%', marginTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               <Activity size={20} color="var(--brand)" /> 
+               Technical Arsenal
+            </h3>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', padding: '0.25rem 0.75rem', borderRadius: '50px', border: '1px solid var(--brand)' }}>
+               {profile?.achievements?.length || 0} ACHIEVEMENTS
+            </div>
+          </div>
+          
+          {profile?.achievements && profile.achievements.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+               {profile.achievements.map((achievement: any) => (
+                 <div 
+                   key={achievement.name}
+                   style={{
+                     padding: '1rem',
+                     background: 'linear-gradient(135deg, var(--bg-sub), var(--surface))',
+                     border: '1px solid var(--border)',
+                     borderRadius: '16px',
+                     textAlign: 'center',
+                     position: 'relative',
+                     overflow: 'hidden',
+                     display: 'flex',
+                     flexDirection: 'column',
+                     alignItems: 'center',
+                     gap: '0.75rem',
+                     boxShadow: 'var(--shadow-sm)',
+                     animation: 'badgeGlow 3s infinite alternate'
+                   }}
+                 >
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '10px', 
+                      background: 'var(--brand)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      color: 'white',
+                      boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.3)'
+                    }}>
+                       <Award size={20} />
+                    </div>
+                    <div>
+                       <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-main)' }}>{achievement.name}</div>
+                       <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>Mastered {new Date(achievement.date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</div>
+                    </div>
+                    {/* Corner accent */}
+                    <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '30px', height: '30px', background: 'var(--brand)', opacity: 0.1, transform: 'rotate(45deg)' }} />
+                 </div>
+               ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
+               <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>Your technical arsenal is currently a blank canvas.</p>
+               <button 
+                 onClick={() => window.location.href = '/dashboard/settings'}
+                 className="btn btn-secondary" 
+                 style={{ width: 'auto' }}
+               >
+                 Connect Integrations
+               </button>
+            </div>
+          )}
+       </div>
+
        {/* Module Context */}
        <div className="auth-card" style={{ maxWidth: '100%', marginTop: '2rem' }}>
           <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             <Activity size={20} color="var(--brand)" /> 
+             <MapPin size={20} color="var(--brand)" /> 
              Active Deployment Focus
           </h3>
           {profile?.groups ? (

@@ -489,16 +489,83 @@ export default function SettingsPage() {
 
           {activeTab === 'security' && (
             <div className="auth-card" style={{ maxWidth: '100%' }}>
-               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Login Security</h2>
-               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Identity & Integrations</h2>
+               <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Configure your technical provenance and project toolkit connections.</p>
+               
+               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                  <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 0 15px rgba(0,0,0,0.2)' }}>
                      <Key size={24} />
                   </div>
                   <div>
-                     <h3 style={{ margin: 0, fontSize: '1.1rem' }}>GitHub Login</h3>
+                     <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Primary Identity: GitHub</h3>
                      <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.875rem' }}>{profile?.email}</p>
                   </div>
-                  <span className="badge badge-code" style={{ marginLeft: 'auto', padding: '0.4rem 0.8rem' }}>Verified Account</span>
+                  <span className="badge badge-code" style={{ marginLeft: 'auto', padding: '0.4rem 0.8rem', background: 'var(--success)', color: 'white', border: 'none' }}>Verified Connection</span>
+               </div>
+
+               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                 <CheckCircle2 color="var(--brand)" size={22} /> Technical Arsenal
+               </h3>
+               
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+                  {[
+                    'React', 'Next.js', 'Tailwind', 
+                    'Node.js', 'Python', 'Supabase', 'PostgreSQL', 
+                    'AWS', 'Docker', 'Vercel',
+                    'Figma', 'VS Code'
+                  ].map(tool => {
+                    const isConnected = profile?.achievements?.some((a: any) => a.name === tool)
+                    return (
+                      <div 
+                        key={tool}
+                        style={{
+                          padding: '1.25rem',
+                          background: isConnected ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)',
+                          border: isConnected ? '2px solid var(--brand)' : '1px solid var(--border)',
+                          borderRadius: '16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                        }}
+                      >
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isConnected ? 'var(--brand)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'white' : 'var(--text-sub)' }}>
+                               <Settings size={16} />
+                            </div>
+                            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isConnected ? 'var(--text-main)' : 'var(--text-sub)' }}>{tool}</span>
+                         </div>
+                         
+                         <button 
+                           onClick={async () => {
+                             const achievements = profile.achievements || []
+                             let newAchievements
+                             if (isConnected) {
+                               newAchievements = achievements.filter((a: any) => a.name !== tool)
+                             } else {
+                               newAchievements = [...achievements, { name: tool, date: new Date().toISOString() }]
+                             }
+                             
+                             setProfile({ ...profile, achievements: newAchievements })
+                             const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
+                             if (error) {
+                               setError("Synchonization failed.")
+                               setProfile(profile)
+                             } else {
+                               logActivity(profile.id, profile.group_id, isConnected ? 'setting_updated' : 'theme_changed', `${isConnected ? 'Disconnected' : 'Connected'} ${tool} to arsenal`)
+                               setSuccess(true)
+                               setTimeout(() => setSuccess(false), 3000)
+                             }
+                           }}
+                           style={{
+                             background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem', borderLeft: '1px solid var(--border)', marginLeft: '0.5rem', color: isConnected ? 'var(--error)' : 'var(--brand)'
+                           }}
+                         >
+                            {isConnected ? <Trash2 size={16} /> : <CheckCircle2 size={16} />}
+                         </button>
+                      </div>
+                    )
+                  })}
                </div>
             </div>
           )}

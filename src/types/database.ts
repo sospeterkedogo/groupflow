@@ -17,17 +17,29 @@ export type Profile = {
 
 export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';
 
+export type TaskCategory = 
+  | 'Implementation' 
+  | 'Architecture' 
+  | 'UX/UI Design' 
+  | 'Quality Assurance' 
+  | 'Research' 
+  | 'Management' 
+  | 'Documentation' 
+  | 'DevOps' 
+  | 'Ethics';
+
 export type Task = {
   id: string;
   title: string;
   description: string | null;
   status: TaskStatus;
-  assignees: string[]; // Replaces old assignee_id logic!
+  category: TaskCategory; // NEW Field
+  assignees: string[];
   group_id: string;
-  is_coding_task: boolean;
+  is_coding_task: boolean; // Legacy
   due_date: string | null;
   created_at: string;
-  artifacts?: any[]; // Joined artifacts for metrics
+  artifacts?: any[];
 };
 
 export type Commit = {

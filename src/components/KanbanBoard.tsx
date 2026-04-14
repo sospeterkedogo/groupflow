@@ -271,10 +271,37 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   </div>
 
                   <div className="kanban-card-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
-                        {task.is_coding_task ? 'Code' : 'Design'}
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span 
+                        className="badge" 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '0.25rem',
+                          background: task.category === 'Implementation' ? 'rgba(var(--brand-rgb), 0.1)' : 
+                                      task.category === 'Architecture' ? 'rgba(139, 92, 246, 0.1)' :
+                                      task.category === 'UX/UI Design' ? 'rgba(236, 72, 153, 0.1)' :
+                                      task.category === 'Quality Assurance' ? 'rgba(16, 185, 129, 0.1)' :
+                                      task.category === 'Research' ? 'rgba(245, 158, 11, 0.1)' :
+                                      task.category === 'Management' ? 'rgba(99, 102, 241, 0.1)' :
+                                      task.category === 'Documentation' ? 'rgba(100, 116, 139, 0.1)' :
+                                      task.category === 'DevOps' ? 'rgba(6, 182, 212, 0.1)' :
+                                      'rgba(239, 68, 68, 0.1)',
+                          color: task.category === 'Implementation' ? 'var(--brand)' : 
+                                 task.category === 'Architecture' ? '#8b5cf6' :
+                                 task.category === 'UX/UI Design' ? '#ec4899' :
+                                 task.category === 'Quality Assurance' ? '#10b981' :
+                                 task.category === 'Research' ? '#f59e0b' :
+                                 task.category === 'Management' ? '#6366f1' :
+                                 task.category === 'Documentation' ? '#64748b' :
+                                 task.category === 'DevOps' ? '#06b6d4' :
+                                 '#ef4444',
+                          border: 'none',
+                          fontSize: '0.65rem',
+                          fontWeight: 800
+                        }}
+                      >
+                        {task.category || 'Legacy'}
                       </span>
                       {task.due_date && (
                         <span style={{ fontSize: '0.65rem', fontWeight: 600, color: new Date(task.due_date).getTime() < Date.now() && task.status !== 'Done' ? 'var(--error)' : 'var(--text-sub)' }}>
