@@ -118,7 +118,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
      
      if (task.due_date) {
         const remainingHours = (new Date(task.due_date).getTime() - Date.now()) / (1000 * 60 * 60)
-        if (remainingHours < 0 && task.status !== 'Done') {
+        if (remainingHours < 0) {
             base = Math.max(0, base - 50) // Severe penalty for overdue
         } else if (remainingHours < 48) {
             base = Math.max(0, base - 20) // Penalty for imminent risk
