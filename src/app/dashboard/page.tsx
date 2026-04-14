@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import DashboardHome from '@/components/DashboardHome'
 
 export default async function DashboardPage() {
