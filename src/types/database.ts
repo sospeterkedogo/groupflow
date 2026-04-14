@@ -21,7 +21,7 @@ export type Task = {
   title: string;
   description: string | null;
   status: TaskStatus;
-  assignee_id: string | null;
+  assignees: string[]; // Replaces old assignee_id logic!
   group_id: string;
   is_coding_task: boolean;
   created_at: string;

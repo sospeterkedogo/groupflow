@@ -43,13 +43,12 @@ export async function POST(req: Request) {
         // 1. Fetch the Task to find who it's assigned to
         const { data: task, error: taskError } = await supabase
           .from('tasks')
-          .select('assignee_id, status, is_coding_task')
+          .select('assignees, status, is_coding_task')
           .eq('id', taskId)
           .single()
 
         if (!taskError && task?.is_coding_task) {
            // 2. Base Algorithmic Validity Engine (MVP scoring calculation)
-           // You can expand lines_added / deleted by grabbing detailed commit stats via Octokit later.
            const impactScore = 15; // standard base reward
            
            // 3. Record the Commit mathematically
@@ -66,11 +65,13 @@ export async function POST(req: Request) {
            // 4. Update Task Status dynamically to Done
            await supabase.from('tasks').update({ status: 'Done' }).eq('id', taskId)
 
-           // 5. Update Profile Score
-           if (task.assignee_id) {
-              const { data: profile } = await supabase.from('profiles').select('total_score').eq('id', task.assignee_id).single()
-              if (profile) {
-                 await supabase.from('profiles').update({ total_score: profile.total_score + impactScore }).eq('id', task.assignee_id)
+           // 5. Update Profile Score across ALL ACTIVE COLLABORATORS
+           if (task.assignees && task.assignees.length > 0) {
+              for (const userId of task.assignees) {
+                 const { data: profile } = await supabase.from('profiles').select('total_score').eq('id', userId).single()
+                 if (profile) {
+                    await supabase.from('profiles').update({ total_score: profile.total_score + impactScore }).eq('id', userId)
+                 }
               }
            }
         }
