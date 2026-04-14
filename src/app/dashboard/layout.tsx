@@ -25,9 +25,14 @@ export default async function DashboardLayout({
   return (
     <div className="dashboard-layout">
       <header className="main-header">
-        <div className="header-logo">
-          GroupFlow
+        <div className="header-logo" style={{ flex: 1 }}>
+          <Link href="/dashboard" style={{ color: 'inherit', textDecoration: 'none' }}>GroupFlow</Link>
         </div>
+
+        <nav style={{ display: 'flex', gap: '2rem', flex: 1, justifyContent: 'center' }}>
+           <Link href="/dashboard" className="nav-link" style={{ fontWeight: 600, color: 'var(--text-color)' }}>Sprint Board</Link>
+           <Link href="/dashboard/network" className="nav-link" style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>Student Network</Link>
+        </nav>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {profile?.groups ? (

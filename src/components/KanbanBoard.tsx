@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus } from '@/types/database'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
-import EvidenceModal from './EvidenceModal'
+import TaskModal from './TaskModal'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -12,7 +12,11 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
+  
+  // Modal Orchestration State
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  
   const supabase = createClient()
 
   useEffect(() => {
@@ -30,7 +34,6 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
           filter: `group_id=eq.${groupId}`
         },
         (payload) => {
-          // Re-fetch everything simply to ensure state matches DB closely
           fetchTasks()
         }
       )
@@ -63,7 +66,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   }
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault() // Necessary to allow dropping
+    e.preventDefault() 
     e.currentTarget.classList.add('drag-over')
   }
 
@@ -96,27 +99,6 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
     }
   }
 
-  const addNewTask = async () => {
-    const title = prompt("Enter new task title:")
-    if (!title) return
-
-    const isCoding = confirm("Is this a coding task? (OK = Yes, Cancel = No)")
-
-    const newTask = {
-      title,
-      description: '',
-      status: 'To Do' as TaskStatus,
-      group_id: groupId,
-      is_coding_task: isCoding
-    }
-
-    const { error } = await supabase.from('tasks').insert([newTask])
-    if (error) {
-       setBoardError(`Failed to create task: ${error.message}`)
-       setTimeout(() => setBoardError(null), 5000)
-    }
-  }
-
   if (loading) {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading tasks...</div>
   }
@@ -131,7 +113,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
       )}
       
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-        <button className="btn btn-primary" onClick={addNewTask} style={{ width: 'auto' }}>
+        <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
           + Add New Task
         </button>
       </div>
@@ -158,13 +140,13 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   className="kanban-card"
                   draggable
                   onDragStart={(e) => handleDragStart(e, task.id)}
-                  onClick={() => setSelectedTask(task)}
+                  onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
                 >
                   <div className="kanban-card-title">{task.title}</div>
                   <div className="kanban-card-meta">
                      <span className={`badge ${task.is_coding_task ? 'badge-code' : 'badge-design'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                        {task.is_coding_task ? <GitCommit size={10} /> : <FileUp size={10} />}
-                       {task.is_coding_task ? 'Code' : 'Design / Doc'}
+                       {task.is_coding_task ? 'Code' : 'Design'}
                      </span>
                      <span style={{ fontSize: '0.7rem' }}>
                        {task.assignee_id ? 'Assigned' : 'Unassigned'}
@@ -177,8 +159,16 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
         ))}
       </div>
       
-      {selectedTask && (
-        <EvidenceModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+      {isModalOpen && (
+        <TaskModal 
+          task={selectedTask} 
+          groupId={groupId} 
+          onRefresh={fetchTasks}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedTask(null)
+          }} 
+        />
       )}
     </div>
   )
