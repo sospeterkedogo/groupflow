@@ -33,7 +33,14 @@ export async function logActivity(
       metadata
     })
 
-  if (logError) console.error('Audit Logging Failed:', logError)
+  if (logError) {
+    console.error('Audit Logging Failed:', {
+      action: actionType,
+      error: logError.message || logError,
+      code: (logError as any).code,
+      details: (logError as any).details
+    })
+  }
 
   // 2. Real-time Notification Trigger (if applicable)
   if (notifyUserId) {
