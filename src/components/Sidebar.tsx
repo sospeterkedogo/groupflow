@@ -27,8 +27,13 @@ function DigitalClock() {
   }, [])
 
   return (
-    <div style={{ fontSize: '1.25rem', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)', letterSpacing: '1px' }}>
-      {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <div style={{ fontSize: '1.25rem', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)', letterSpacing: '1px', lineHeight: 1 }}>
+        {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+      </div>
+      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-sub)', textTransform: 'capitalize' }}>
+        {time.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+      </div>
     </div>
   )
 }
