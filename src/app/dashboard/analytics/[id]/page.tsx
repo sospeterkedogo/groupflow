@@ -67,6 +67,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   // --- EXPORT LOGIC ---
   const exportToCSV = () => {
     const headers = ['Task ID', 'Title', 'Status', 'Assignees', 'Due Date', 'Evidence Count', 'Created At']
+    const reportTimestamp = new Date().toLocaleString()
     const rows = tasks.map(t => {
       const assigneeNames = t.assignees?.map((id: string) => members.find(m => m.id === id)?.full_name || 'Anonymous').join('; ')
       return [
@@ -80,7 +81,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       ]
     })
 
-    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n")
+    const csvContent = [
+      [`REPORT GENERATED AT: ${reportTimestamp}`],
+      [],
+      headers, 
+      ...rows
+    ].map(e => e.map(cell => `"${cell}"`).join(",")).join("\n")
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")

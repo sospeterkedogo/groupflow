@@ -18,6 +18,21 @@ import {
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 
+function DigitalClock() {
+  const [time, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div style={{ fontSize: '1.25rem', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)', letterSpacing: '1px' }}>
+      {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
+    </div>
+  )
+}
+
 export default function Sidebar({ user }: { user: any }) {
   const [isOpen, setIsOpen] = useState(true)
   const [groups, setGroups] = useState<any[]>([])
@@ -168,6 +183,16 @@ export default function Sidebar({ user }: { user: any }) {
                )
             })}
          </div>
+      </div>
+
+      {/* Live Digital Clock */}
+      <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', opacity: isOpen ? 1 : 0 }}>
+         {isOpen && (
+           <>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '2px' }}>Temporal Status</span>
+              <DigitalClock />
+           </>
+         )}
       </div>
 
       {/* Render Authentication Logout correctly */}
