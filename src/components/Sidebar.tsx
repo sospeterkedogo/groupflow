@@ -30,15 +30,15 @@ function DigitalClock() {
     return () => clearInterval(timer)
   }, [])
 
-  if (!time) return <div style={{ height: '2.5rem' }} /> // Placeholder to prevent layout shift
+  if (!time) return <div style={{ height: '1.5rem' }} />
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-      <div style={{ fontSize: '1.25rem', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)', letterSpacing: '1px', lineHeight: 1 }}>
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+      <div style={{ fontSize: '1.1rem', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)', letterSpacing: '0.5px' }}>
         {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}
       </div>
-      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-sub)', textTransform: 'capitalize' }}>
-        {time.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+      <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-sub)', whiteSpace: 'nowrap' }}>
+        {time.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}
       </div>
     </div>
   )
@@ -125,7 +125,7 @@ export default function Sidebar({ user }: { user: any }) {
       </div>
 
       {/* Main Navigation */}
-      <div style={{ padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderBottom: '1px solid var(--border)' }}>
         {navLinks.map(link => {
           const isActive = pathname === link.path
           return (
@@ -138,8 +138,8 @@ export default function Sidebar({ user }: { user: any }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: isOpen ? 'flex-start' : 'center',
-                gap: isOpen ? '1rem' : '0',
-                padding: isOpen ? '0.75rem 1rem' : '0',
+                gap: isOpen ? '0.75rem' : '0',
+                padding: isOpen ? '0.65rem 1rem' : '0',
                 width: isOpen ? '100%' : '48px',
                 height: isOpen ? 'auto' : '48px',
                 margin: isOpen ? '0' : '0 auto',
@@ -166,7 +166,7 @@ export default function Sidebar({ user }: { user: any }) {
       </div>
 
       {/* Dynamic Projects Hub */}
-      <div style={{ padding: '1.5rem 1rem', flex: 1, overflowY: 'auto' }}>
+      <div style={{ padding: '1.25rem 1rem', flex: 1, minHeight: '180px', overflowY: 'auto' }}>
          {isOpen && (
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingLeft: '1rem', paddingRight: '0.5rem' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Global Projects</span>
@@ -218,17 +218,17 @@ export default function Sidebar({ user }: { user: any }) {
       </div>
 
       {/* Live Digital Clock */}
-      <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', opacity: isOpen ? 1 : 0, transition: 'opacity 0.3s' }}>
+      <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', opacity: isOpen ? 1 : 0, transition: 'opacity 0.3s' }}>
          {isOpen && (
            <>
-              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '2px' }}>Current Time</span>
+              <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '2px' }}>Clock</span>
               <DigitalClock />
            </>
          )}
       </div>
 
       {/* User Identity Pill - Personal Ownership Anchor */}
-      <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
+      <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)' }}>
          <Link 
            href="/dashboard/profile"
            title={profile?.full_name || 'My Profile'}
@@ -290,8 +290,8 @@ export default function Sidebar({ user }: { user: any }) {
          </Link>
       </div>
 
-      {/* Theme Switcher Bubble */}
-      <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
+      {/* Bottom Action Row (Theme & Logout) */}
+      <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
          <button 
            onClick={() => {
              const currentIndex = PALETTES.findIndex(p => p.name === currentPalette.name)
@@ -300,56 +300,51 @@ export default function Sidebar({ user }: { user: any }) {
            }}
            title={`Switch Theme: ${currentPalette.name}`}
            style={{ 
-             width: isOpen ? '100%' : '48px', 
-             height: isOpen ? 'auto' : '48px',
+             flex: 1,
+             height: '40px',
              background: 'rgba(var(--brand-rgb), 0.1)',
              border: 'none', 
              cursor: 'pointer', 
              display: 'flex', 
              alignItems: 'center', 
-             gap: isOpen ? '1rem' : '0', 
-             padding: isOpen ? '0.75rem 1rem' : '0', 
+             gap: isOpen ? '0.5rem' : '0', 
+             padding: isOpen ? '0.5rem' : '0', 
              color: 'var(--brand)',
              fontWeight: 600,
              justifyContent: 'center',
-             borderRadius: isOpen ? 'var(--radius)' : '50%',
-             margin: '0 auto',
-             transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+             borderRadius: '12px',
+             transition: 'all 0.3s'
            }}
            className="theme-bubble"
          >
-           <PaletteIcon size={20} />
-           {isOpen && <span>Rotate Theme</span>}
+           <PaletteIcon size={18} />
+           {isOpen && <span style={{ fontSize: '0.75rem' }}>Theme</span>}
          </button>
-      </div>
 
-      {/* Logout Action Bubble */}
-      <div style={{ padding: '1rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'center' }}>
-         <form action="/auth/signout" method="post" style={{ width: '100%' }}>
+         <form action="/auth/signout" method="post" style={{ flex: 1 }}>
             <button 
               type="submit" 
               title={!isOpen ? "Sign Out Session" : ""}
               style={{ 
-                width: isOpen ? '100%' : '48px', 
-                height: isOpen ? 'auto' : '48px',
-                background: isOpen ? 'none' : 'rgba(239, 68, 68, 0.1)', 
+                width: '100%', 
+                height: '40px',
+                background: 'rgba(239, 68, 68, 0.1)', 
                 border: 'none', 
                 cursor: 'pointer', 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: isOpen ? '1rem' : '0', 
-                padding: isOpen ? '0.75rem 1rem' : '0', 
+                gap: isOpen ? '0.5rem' : '0', 
+                padding: isOpen ? '0.5rem' : '0', 
                 color: 'var(--error)',
                 fontWeight: 600,
                 justifyContent: 'center',
-                borderRadius: isOpen ? 'var(--radius)' : '50%',
-                margin: '0 auto',
-                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                borderRadius: '12px',
+                transition: 'all 0.3s'
               }}
               className="logout-bubble"
             >
-              <LogOut size={20} />
-              {isOpen && <span>Sign Out Session</span>}
+              <LogOut size={18} />
+              {isOpen && <span style={{ fontSize: '0.75rem' }}>Exit</span>}
             </button>
          </form>
       </div>
