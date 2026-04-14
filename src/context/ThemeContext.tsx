@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { logActivity } from '@/utils/logging'
 
 export type Palette = {
   name: string
@@ -119,11 +120,15 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
     if (palette) {
       setCurrentPalette(palette)
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        await supabase.from('profiles').update({ 
-          theme_config: { palette: name } 
-        }).eq('id', user.id)
-      }
+        if (user) {
+          await supabase.from('profiles').update({ 
+            theme_config: { palette: name } 
+          }).eq('id', user.id)
+
+          // Verifiable Logging
+          const { data: profile } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
+          logActivity(user.id, profile?.group_id, 'theme_changed', `Changed palette to ${name}`)
+        }
     }
   }
 

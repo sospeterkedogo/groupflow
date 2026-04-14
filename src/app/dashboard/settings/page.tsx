@@ -6,14 +6,17 @@ import {
   Settings, Save, CheckCircle2, Shield, Download, Trash2, 
   Key, AlertTriangle, X, Camera, Palette as PaletteIcon, 
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
-  UserMinus, Eye, EyeOff, ShieldAlert
+  UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History
 } from 'lucide-react'
+import ActiveUsersList from '@/components/ActiveUsersList'
+import ActivityLogView from '@/components/ActivityLogView'
 import TransientError from '@/components/TransientError'
 import imageCompression from 'browser-image-compression'
 import { useTheme, PALETTES } from '@/context/ThemeContext'
 import { kickUser } from '../join/actions'
+import { logActivity } from '@/utils/logging'
 
-type Tab = 'identity' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
+type Tab = 'identity' | 'pulse' | 'activity' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab ] = useState<Tab>('identity')
@@ -89,6 +92,8 @@ export default function SettingsPage() {
     setSaving(false)
     if (updateError) setError("Failed to update profile settings.")
     else {
+       // Verifiable Logging
+       logActivity(profile.id, profile.group_id, 'setting_updated', 'Updated personal profile details')
        setSuccess(true)
        setTimeout(() => setSuccess(false), 3000)
     }
@@ -141,9 +146,16 @@ export default function SettingsPage() {
       
     if (updateError) setError("Failed to update group visibility.")
     else {
-      setIsEncrypted(nextValue)
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+       // Verifiable Logging
+       logActivity(
+         profile.id, 
+         profile.group_id, 
+         'privacy_toggled', 
+         `Changed group visibility to ${nextValue ? 'Encrypted' : 'Public'}`
+       )
+       setIsEncrypted(nextValue)
+       setSuccess(true)
+       setTimeout(() => setSuccess(false), 3000)
     }
     setUpdatingGroup(false)
   }
@@ -224,6 +236,8 @@ export default function SettingsPage() {
        <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
           {[
             { id: 'identity', label: 'Profile', icon: User },
+            { id: 'pulse', label: 'Live Pulse', icon: PulseIcon },
+            { id: 'activity', label: 'My Activity', icon: History },
             { id: 'team', label: 'Team Admin', icon: Shield, hidden: !isAdmin },
             { id: 'workspace', label: 'My Team', icon: MapPin },
             { id: 'appearance', label: 'Appearance', icon: PaletteIcon },
@@ -247,8 +261,24 @@ export default function SettingsPage() {
           ))}
        </div>
 
-       {/* Content Panels */}
-       <div style={{ minHeight: '400px' }}>
+        {/* Content Panels */}
+        <div style={{ minHeight: '400px' }}>
+           
+           {activeTab === 'activity' && profile && (
+             <div className="auth-card" style={{ maxWidth: '100%' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Personal Audit Log</h2>
+                <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>A verifiable history of your actions, contributions, and customizations.</p>
+                <ActivityLogView userId={profile.id} />
+             </div>
+           )}
+           
+           {activeTab === 'pulse' && profile?.group_id && (
+             <div className="auth-card" style={{ maxWidth: '100%' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Live Team Activity</h2>
+                <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Real-time awareness of your collaborators and recently seen members.</p>
+                <ActiveUsersList groupId={profile.group_id} currentUser={profile} />
+             </div>
+           )}
           
           {activeTab === 'identity' && (
             <div className="auth-card" style={{ maxWidth: '100%' }}>

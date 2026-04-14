@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
 import { usePresence } from './PresenceProvider'
 import TeamChat from './TeamChat'
+import { logActivity } from '@/utils/logging'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -129,6 +130,17 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
        if (targetTask && targetTask.assignees) {
           distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error("Score Distribution error", err))
        }
+    }
+
+    // Verifiable Logging
+    if (!error && currentUserProfile) {
+       logActivity(
+          currentUserProfile.id,
+          groupId,
+          'task_updated',
+          `Moved task to ${newStatus}`,
+          { task_id: taskId, new_status: newStatus }
+       )
     }
   }
 

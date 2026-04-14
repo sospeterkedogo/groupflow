@@ -14,17 +14,22 @@ import {
   ChevronRight,
   FolderDot,
   Plus,
-  BarChart3
+  BarChart3,
+  Palette as PaletteIcon
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
+import { useTheme, PALETTES } from '../context/ThemeContext'
 
 function DigitalClock() {
-  const [time, setTime] = useState(new Date())
+  const [time, setTime] = useState<Date | null>(null)
 
   useEffect(() => {
+    setTime(new Date())
     const timer = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
+
+  if (!time) return <div style={{ height: '2.5rem' }} /> // Placeholder to prevent layout shift
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -39,6 +44,7 @@ function DigitalClock() {
 }
 
 export default function Sidebar({ user }: { user: any }) {
+  const { currentPalette, setPalette } = useTheme()
   const [isOpen, setIsOpen] = useState(true)
   const [groups, setGroups] = useState<any[]>([])
   const [profile, setProfile] = useState<any>(null)
@@ -115,29 +121,41 @@ export default function Sidebar({ user }: { user: any }) {
       </div>
 
       {/* Main Navigation */}
-      <div style={{ padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', borderBottom: '1px solid var(--border)' }}>
         {navLinks.map(link => {
           const isActive = pathname === link.path
           return (
             <Link 
               key={link.name} 
               href={link.path}
+              title={!isOpen ? link.name : ''}
+              className={`nav-bubble ${isActive ? 'active' : ''}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem',
-                padding: '0.75rem 1rem',
-                background: isActive ? 'var(--surface)' : 'transparent',
-                color: isActive ? 'var(--brand)' : 'var(--text-sub)',
-                borderRadius: '12px',
-                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                border: isActive ? '1px solid var(--border)' : '1px solid transparent',
-                boxShadow: isActive ? 'var(--shadow-sm)' : 'none'
+                justifyContent: isOpen ? 'flex-start' : 'center',
+                gap: isOpen ? '1rem' : '0',
+                padding: isOpen ? '0.75rem 1rem' : '0',
+                width: isOpen ? '100%' : '48px',
+                height: isOpen ? 'auto' : '48px',
+                margin: isOpen ? '0' : '0 auto',
+                background: isActive ? 'var(--brand)' : 'transparent',
+                color: isActive ? 'white' : 'var(--text-sub)',
+                borderRadius: isOpen ? '12px' : '50%',
+                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                border: 'none',
+                boxShadow: isActive ? '0 8px 16px rgba(var(--brand-rgb), 0.3)' : 'none',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
-              <link.icon size={20} color={isActive ? 'var(--brand)' : 'var(--text-sub)'} />
-              {isOpen && <span>{link.name}</span>}
-              {isOpen && isActive && <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)' }} />}
+              <link.icon size={20} color={isActive ? 'white' : 'var(--text-sub)'} />
+              {isOpen && <span style={{ fontWeight: 600 }}>{link.name}</span>}
+              
+              {/* Glossy Overlay for Active State */}
+              {isActive && (
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(45deg, rgba(255,255,255,0.1), transparent)', pointerEvents: 'none' }} />
+              )}
             </Link>
           )
         })}
@@ -165,15 +183,20 @@ export default function Sidebar({ user }: { user: any }) {
                    style={{
                      display: 'flex',
                      alignItems: 'center',
-                     gap: '1rem',
-                     padding: '0.5rem 1rem',
-                     borderRadius: 'var(--radius)',
+                     gap: isOpen ? '1rem' : '0',
+                     padding: isOpen ? '0.5rem 1rem' : '0',
+                     margin: isOpen ? '0' : '4px auto',
+                     width: isOpen ? '100%' : '40px',
+                     height: isOpen ? 'auto' : '40px',
+                     borderRadius: isOpen ? 'var(--radius)' : '50%',
                      cursor: 'pointer',
                      backgroundColor: isActiveProject ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
                      border: isActiveProject ? '1px solid rgba(14, 165, 233, 0.2)' : '1px solid transparent',
                      justifyContent: isOpen ? 'flex-start' : 'center',
-                     transition: 'all 0.2s ease'
+                     transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                     boxShadow: isActiveProject && !isOpen ? '0 0 12px rgba(14, 165, 233, 0.3)' : 'none'
                    }}
+                   className="project-bubble"
                  >
                    <FolderDot size={18} color={isActiveProject ? 'var(--brand)' : 'var(--text-sub)'} />
                    {isOpen && (
@@ -187,11 +210,11 @@ export default function Sidebar({ user }: { user: any }) {
                  </div>
                )
             })}
-         </div>
+          </div>
       </div>
 
       {/* Live Digital Clock */}
-      <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', opacity: isOpen ? 1 : 0 }}>
+      <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', opacity: isOpen ? 1 : 0, transition: 'opacity 0.3s' }}>
          {isOpen && (
            <>
               <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '2px' }}>Current Time</span>
@@ -200,31 +223,77 @@ export default function Sidebar({ user }: { user: any }) {
          )}
       </div>
 
-      {/* Render Authentication Logout correctly */}
-      <div style={{ padding: '1.5rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'center' }}>
+      {/* Theme Switcher Bubble */}
+      <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
+         <button 
+           onClick={() => {
+             const currentIndex = PALETTES.findIndex(p => p.name === currentPalette.name)
+             const nextIndex = (currentIndex + 1) % PALETTES.length
+             setPalette(PALETTES[nextIndex].name)
+           }}
+           title={`Switch Theme: ${currentPalette.name}`}
+           style={{ 
+             width: isOpen ? '100%' : '48px', 
+             height: isOpen ? 'auto' : '48px',
+             background: 'rgba(var(--brand-rgb), 0.1)',
+             border: 'none', 
+             cursor: 'pointer', 
+             display: 'flex', 
+             alignItems: 'center', 
+             gap: isOpen ? '1rem' : '0', 
+             padding: isOpen ? '0.75rem 1rem' : '0', 
+             color: 'var(--brand)',
+             fontWeight: 600,
+             justifyContent: 'center',
+             borderRadius: isOpen ? 'var(--radius)' : '50%',
+             margin: '0 auto',
+             transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+           }}
+           className="theme-bubble"
+         >
+           <PaletteIcon size={20} />
+           {isOpen && <span>Rotate Theme</span>}
+         </button>
+      </div>
+
+      {/* Logout Action Bubble */}
+      <div style={{ padding: '1rem 1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'center' }}>
          <form action="/auth/signout" method="post" style={{ width: '100%' }}>
             <button 
               type="submit" 
+              title={!isOpen ? "Sign Out Session" : ""}
               style={{ 
-                width: '100%', 
-                background: 'none', 
+                width: isOpen ? '100%' : '48px', 
+                height: isOpen ? 'auto' : '48px',
+                background: isOpen ? 'none' : 'rgba(239, 68, 68, 0.1)', 
                 border: 'none', 
                 cursor: 'pointer', 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '1rem', 
-                padding: '0.75rem 1rem', 
+                gap: isOpen ? '1rem' : '0', 
+                padding: isOpen ? '0.75rem 1rem' : '0', 
                 color: 'var(--error)',
                 fontWeight: 600,
-                justifyContent: isOpen ? 'flex-start' : 'center',
-                borderRadius: 'var(--radius)',
+                justifyContent: 'center',
+                borderRadius: isOpen ? 'var(--radius)' : '50%',
+                margin: '0 auto',
+                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
               }}
+              className="logout-bubble"
             >
               <LogOut size={20} />
               {isOpen && <span>Sign Out Session</span>}
             </button>
          </form>
       </div>
+
+      <style jsx>{`
+        .nav-bubble:hover, .project-bubble:hover, .logout-bubble:hover, .theme-bubble:hover {
+          transform: scale(1.05);
+          filter: brightness(1.1);
+        }
+        .nav-bubble:active, .theme-bubble:active { transform: scale(0.95); }
+      `}</style>
 
     </div>
   )

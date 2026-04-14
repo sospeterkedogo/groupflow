@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus, Artifact } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, GitCommit, Link as LinkIcon, UserPlus, UserMinus, UserCircle, Check } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
+import { logActivity } from '@/utils/logging'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -114,6 +115,16 @@ export default function TaskModal({
     if (err) {
       setError(`Failed to save task: ${err.message}`)
     } else {
+      // Verifiable Logging
+      if (currentUser) {
+        logActivity(
+          currentUser.id,
+          groupId,
+          isEditMode ? 'task_updated' : 'task_created',
+          isEditMode ? `Updated task: ${title}` : `Created task: ${title}`,
+          { task_id: task?.id || 'new' }
+        )
+      }
       onRefresh()
       onClose()
     }
@@ -130,6 +141,15 @@ export default function TaskModal({
     if (error) {
       setError(`Failed to delete: ${error.message}`)
     } else {
+      // Verifiable Logging
+      if (currentUser) {
+        logActivity(
+          currentUser.id,
+          groupId,
+          'task_deleted',
+          `Deleted task: ${task.title}`
+        )
+      }
       onRefresh()
       onClose()
     }
@@ -184,6 +204,15 @@ export default function TaskModal({
     if (dbError) {
       setError(`Failed to attach evidence: ${dbError.message}`)
       fetchArtifacts() // Revert
+    } else {
+      // Verifiable Logging
+      logActivity(
+        currentUser.id,
+        groupId,
+        'artifact_uploaded',
+        `Attached a link to task`,
+        { task_id: task.id }
+      )
     }
     setUploading(false)
   }
@@ -228,6 +257,17 @@ export default function TaskModal({
     if (error) {
       setError(`Failed to delete: ${error.message}`)
       setArtifacts(original)
+    } else {
+      // Verifiable Logging
+      if (currentUser) {
+        logActivity(
+          currentUser.id,
+          groupId,
+          'artifact_uploaded',
+          `Removed an attachment from task`,
+          { task_id: task.id }
+        )
+      }
     }
   }
 

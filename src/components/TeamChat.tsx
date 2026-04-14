@@ -5,9 +5,10 @@ import { createClient } from '@/utils/supabase/client'
 import { 
   Send, User, MessageSquare, X, ChevronRight, Hash, 
   Paperclip, Image as ImageIcon, Smile, Check, CheckCheck, Clock,
-  Trash2
+  Trash2, Shield
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
+import { logActivity } from '@/utils/logging'
 
 interface ChatMessage {
   id: string
@@ -170,6 +171,15 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
        setMessages(prev => prev.filter(m => m.id !== tempId))
     } else if (data) {
        setMessages(prev => prev.map(m => m.id === tempId ? { ...data, profiles: optimisticMsg.profiles } : m))
+       
+       // Verifiable Logging
+       logActivity(
+         user.id, 
+         groupId, 
+         'message_sent', 
+         `Sent a ${payload?.type || 'text'} message`,
+         { message_id: data.id }
+       )
     }
   }
 
@@ -182,6 +192,16 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
        .eq('id', msgId)
      
      if (error) console.error("Deletion failed", error)
+     else {
+       // Verifiable Logging
+       logActivity(
+         user.id, 
+         groupId, 
+         'message_deleted', 
+         'Deleted a message',
+         { message_id: msgId }
+       )
+     }
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,8 +267,22 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
   return (
     <div 
       style={{
-        position: 'fixed', bottom: '2rem', right: '2rem', width: '400px', height: '650px', background: 'var(--surface)', borderRadius: '24px', boxShadow: '0 24px 48px rgba(0,0,0,0.2)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 1000, overflow: 'hidden', animation: 'whatsappIn 0.4s ease-out'
+        position: 'fixed', 
+        bottom: 'min(2rem, 1rem)', 
+        right: 'min(2rem, 0.5rem)', 
+        width: 'min(400px, calc(100vw - 1rem))', 
+        height: 'min(650px, calc(100vh - 4rem))', 
+        background: 'var(--surface)', 
+        borderRadius: '24px', 
+        boxShadow: '0 24px 48px rgba(0,0,0,0.2)', 
+        border: '1px solid var(--border)', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        zIndex: 1000, 
+        overflow: 'hidden', 
+        animation: 'whatsappIn 0.4s ease-out'
       }}
+      className="responsive-chat"
     >
        {/* WhatsApp Header */}
        <div style={{ padding: '0.75rem 1rem', background: '#075e54', color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>

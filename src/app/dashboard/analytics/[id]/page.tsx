@@ -18,6 +18,7 @@ import {
   UserCircle
 } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
+import ActivityLogView from '@/components/ActivityLogView'
 import Link from 'next/link'
 
 export default function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -65,33 +66,35 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const evidenceDensity = tasks.length > 0 ? (totalEvidence / tasks.length).toFixed(1) : '0'
 
   // --- EXPORT LOGIC ---
-  const exportToCSV = () => {
-    const headers = ['Task ID', 'Title', 'Status', 'Assignees', 'Due Date', 'Evidence Count', 'Created At']
+  const exportToCSV = async () => {
+    setLoading(true)
+    const { data: logs } = await supabase.from('activity_log').select('*, profiles(full_name)').eq('group_id', groupId).order('created_at', { ascending: false })
+    
+    const headers = ['Type', 'User', 'Description', 'Timestamp', 'Metadata']
     const reportTimestamp = new Date().toLocaleString()
-    const rows = tasks.map(t => {
-      const assigneeNames = t.assignees?.map((id: string) => members.find(m => m.id === id)?.full_name || 'Anonymous').join('; ')
-      return [
-        t.id,
-        t.title,
-        t.status,
-        assigneeNames || 'Unassigned',
-        t.due_date || 'N/A',
-        artifacts.filter(a => a.task_id === t.id).length,
-        t.created_at
-      ]
-    })
+    const rows = (logs || []).map(l => [
+      l.action_type,
+      (l.profiles as any)?.full_name || 'System',
+      l.description,
+      l.created_at,
+      JSON.stringify(l.metadata).replace(/"/g, '""')
+    ])
 
     const csvContent = [
-      [`REPORT GENERATED AT: ${reportTimestamp}`],
+      [`ACTIVITY AUDIT LOG REPORT`],
+      [`PROJECT: ${group?.name}`],
+      [`GENERATED AT: ${reportTimestamp}`],
       [],
       headers, 
       ...rows
     ].map(e => e.map(cell => `"${cell}"`).join(",")).join("\n")
+    
+    setLoading(false)
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.setAttribute("href", url)
-    link.setAttribute("download", `GroupFlow_Export_${group?.module_code || 'Project'}_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute("download", `GroupFlow_AuditLog_${group?.module_code || 'Project'}_${new Date().toISOString().split('T')[0]}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -200,9 +203,9 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-sub)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
                 <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 700 }}>Member</th>
-                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Total Score</th>
-                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Assignments</th>
-                <th style={{ textAlign: 'right', padding: '1rem 0', fontWeight: 700 }}>Status</th>
+                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Pulse (Last Active)</th>
+                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Score</th>
+                <th style={{ textAlign: 'right', padding: '1rem 0', fontWeight: 700 }}>Activity Level</th>
               </tr>
             </thead>
             <tbody>
@@ -224,15 +227,17 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                       </div>
                     </td>
                     <td style={{ textAlign: 'center', padding: '1.25rem' }}>
-                      <span style={{ fontWeight: 800, color: 'var(--brand)', fontSize: '1.1rem' }}>{member.total_score}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)', fontWeight: 600 }}>
+                        {member.last_seen ? new Date(member.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never'}
+                      </span>
                     </td>
                     <td style={{ textAlign: 'center', padding: '1.25rem' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{userTasks}</span>
+                      <span style={{ fontWeight: 800, color: 'var(--brand)', fontSize: '1.1rem' }}>{member.total_score}</span>
                     </td>
                     <td style={{ textAlign: 'right', padding: '1.25rem 0' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: isOnline ? 'var(--success)' : 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--border)' }} />
-                        {isOnline ? 'ACTIVE' : 'IDLE'}
+                        {isOnline ? 'HIGH FREQUENCY' : 'LOW FREQUENCY'}
                       </div>
                     </td>
                   </tr>
@@ -240,6 +245,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
               })}
             </tbody>
           </table>
+
+          {/* New Verifiable Log Section */}
+          <div style={{ marginTop: '3rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
+             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Verifiable Action Log</h2>
+             <ActivityLogView groupId={groupId} limit={20} />
+          </div>
         </section>
 
         {/* Project Health / Trends */}
