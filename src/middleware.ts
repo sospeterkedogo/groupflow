@@ -6,7 +6,7 @@ const rateLimitMap = new Map<string, { count: number, resetAt: number }>()
 const LIMIT = 60 // requests
 const WINDOW_MS = 60 * 1000 // 1 minute
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || 'anonymous'
   const now = Date.now()
   
@@ -28,6 +28,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Handle Supabase Session & Redirection Logic
   const response = await updateSession(request)
   
   // Inject Headers for transparency
@@ -39,6 +40,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Skip static assets and internals
+    '/((?!_next/static|_next/image|favicon.ico|assets|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
