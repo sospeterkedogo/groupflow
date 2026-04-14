@@ -100,7 +100,7 @@ export default function Sidebar({ user }: { user: any }) {
           const isActive = pathname === link.path
           return (
             <Link 
-              key={link.path} 
+              key={link.name} 
               href={link.path}
               style={{
                 display: 'flex',
