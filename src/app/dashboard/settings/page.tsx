@@ -5,13 +5,15 @@ import { createClient } from '@/utils/supabase/client'
 import { 
   Settings, Save, CheckCircle2, Shield, Download, Trash2, 
   Key, AlertTriangle, X, Camera, Palette as PaletteIcon, 
-  Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users
+  Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
+  UserMinus, Eye, EyeOff, ShieldAlert
 } from 'lucide-react'
 import TransientError from '@/components/TransientError'
 import imageCompression from 'browser-image-compression'
 import { useTheme, PALETTES } from '@/context/ThemeContext'
+import { kickUser } from '../join/actions'
 
-type Tab = 'identity' | 'security' | 'appearance' | 'workspace' | 'data'
+type Tab = 'identity' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab ] = useState<Tab>('identity')
@@ -32,6 +34,10 @@ export default function SettingsPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [availableGroups, setAvailableGroups] = useState<any[]>([])
   const [switching, setSwitching] = useState(false)
+  
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
+  const [isEncrypted, setIsEncrypted] = useState(false)
+  const [updatingGroup, setUpdatingGroup] = useState(false)
 
   const supabase = createClient()
 
@@ -48,14 +54,24 @@ export default function SettingsPage() {
   const fetchUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-       const { data } = await supabase.from('profiles').select('*, groups(name, module_code)').eq('id', user.id).single()
+       const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
        if (data) {
          setProfile(data)
          setFullName(data.full_name || '')
          setAvatarUrl(data.avatar_url || '')
+         setIsEncrypted(data.groups?.is_encrypted || false)
+         
+         if (data.role === 'admin' && data.group_id) {
+           fetchTeam(data.group_id)
+         }
        }
     }
     setLoading(false)
+  }
+
+  const fetchTeam = async (groupId: string) => {
+    const { data } = await supabase.from('profiles').select('*').eq('group_id', groupId)
+    if (data) setTeamMembers(data)
   }
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -113,6 +129,38 @@ export default function SettingsPage() {
      }
   }
 
+  const handleToggleEncryption = async () => {
+    if (!profile?.group_id) return
+    setUpdatingGroup(true)
+    const nextValue = !isEncrypted
+    
+    const { error: updateError } = await supabase
+      .from('groups')
+      .update({ is_encrypted: nextValue })
+      .eq('id', profile.group_id)
+      
+    if (updateError) setError("Failed to update group visibility.")
+    else {
+      setIsEncrypted(nextValue)
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    }
+    setUpdatingGroup(false)
+  }
+
+  const handleKickUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to remove this member from the team? They will lose access to all tasks and chat.')) return
+    
+    const res = await kickUser(userId)
+    if (res.error) {
+      setError(res.error)
+    } else {
+      setTeamMembers(prev => prev.filter(m => m.id !== userId))
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    }
+  }
+
   const handleDownloadData = () => window.open('/api/account', '_blank')
 
   const handleSwitchGroup = async (newGroupId: string | null) => {
@@ -122,12 +170,12 @@ export default function SettingsPage() {
     
     const { error: switchError } = await supabase
       .from('profiles')
-      .update({ group_id: newGroupId })
+      .update({ group_id: newGroupId, role: 'collaborator' })
       .eq('id', profile.id)
       
     if (switchError) setError("Failed to switch team.")
     else {
-      await fetchUserData() // Refresh profile state
+      await fetchUserData()
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     }
@@ -160,6 +208,8 @@ export default function SettingsPage() {
     )
   }
 
+  const isAdmin = profile?.role === 'admin'
+
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
        
@@ -171,14 +221,15 @@ export default function SettingsPage() {
        {error && <TransientError message={error} />}
        
        {/* Tab Navigation */}
-       <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+       <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
           {[
             { id: 'identity', label: 'Profile', icon: User },
+            { id: 'team', label: 'Team Admin', icon: Shield, hidden: !isAdmin },
             { id: 'workspace', label: 'My Team', icon: MapPin },
             { id: 'appearance', label: 'Appearance', icon: PaletteIcon },
             { id: 'security', label: 'Security', icon: Shield },
             { id: 'data', label: 'Data & Privacy', icon: AlertTriangle },
-          ].map(tab => (
+          ].filter(t => !t.hidden).map(tab => (
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as Tab)}
@@ -219,7 +270,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                      <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Profile Photo</h3>
-                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Upload or take a photo for your student profile.</p>
+                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Update your professional identity.</p>
                      {uploadingAvatar && <p style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }}>Uploading...</p>}
                   </div>
                </div>
@@ -234,6 +285,56 @@ export default function SettingsPage() {
                   </button>
                   {success && <span style={{ marginLeft: '1rem', color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem' }}>Changes saved.</span>}
                </form>
+            </div>
+          )}
+
+          {activeTab === 'team' && isAdmin && (
+            <div className="auth-card" style={{ maxWidth: '100%' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                 <div>
+                   <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Team Management</h2>
+                   <p style={{ color: 'var(--text-sub)' }}>Manage collaborators and group visibility settings.</p>
+                 </div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1.25rem', background: isEncrypted ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)', borderRadius: '12px', border: `1px solid ${isEncrypted ? 'var(--error)' : 'var(--success)'}` }}>
+                    {isEncrypted ? <Shield size={18} color="var(--error)" /> : <Eye size={18} color="var(--success)" />}
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: isEncrypted ? 'var(--error)' : 'var(--success)' }}>
+                      {isEncrypted ? 'VISIBILITY: ENCRYPTED' : 'VISIBILITY: PUBLIC'}
+                    </span>
+                    <button 
+                      onClick={handleToggleEncryption}
+                      disabled={updatingGroup}
+                      style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.25rem 0.5rem', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer', marginLeft: '0.5rem' }}
+                    >
+                      Toggle
+                    </button>
+                 </div>
+               </div>
+
+               <div style={{ display: 'grid', gap: '1rem' }}>
+                  {teamMembers.map(member => (
+                    <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', overflow: 'hidden' }}>
+                             {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={20} style={{ margin: '10px' }} />}
+                          </div>
+                          <div>
+                             <div style={{ fontWeight: 700 }}>{member.full_name || 'Anonymous'}</div>
+                             <div style={{ fontSize: '0.75rem', color: 'var(--brand)', fontWeight: 700, textTransform: 'uppercase' }}>{member.role}</div>
+                          </div>
+                       </div>
+                       
+                       {member.id !== profile.id && member.role !== 'admin' && (
+                         <button 
+                           onClick={() => handleKickUser(member.id)}
+                           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid var(--error)', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}
+                         >
+                            <UserMinus size={16} /> Kick
+                         </button>
+                       )}
+                       {member.id === profile.id && <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 700 }}>YOU</span>}
+                    </div>
+                  ))}
+               </div>
             </div>
           )}
 
@@ -261,35 +362,27 @@ export default function SettingsPage() {
                </div>
 
                <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Other Teams</h3>
-               {availableGroups.filter(g => g.id !== profile?.group_id).length === 0 ? (
-                 <p style={{ color: 'var(--text-sub)', fontStyle: 'italic' }}>No other teams found.</p>
-               ) : (
-                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                    {availableGroups.filter(g => g.id !== profile?.group_id).map(group => (
-                      <div 
-                        key={group.id} 
-                        style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                      >
-                          <div>
-                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
-                          </div>
-                          <button 
-                            onClick={() => {
-                              if (confirm(`Switch to ${group.name}?`)) {
-                                handleSwitchGroup(group.id)
-                              }
-                            }}
-                            disabled={switching}
-                            className="btn btn-primary" 
-                            style={{ width: 'auto', padding: '0.5rem 1rem' }}
-                          >
-                            Join Team
-                          </button>
-                      </div>
-                    ))}
-                 </div>
-               )}
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+                  {availableGroups.filter(g => g.id !== profile?.group_id).map(group => (
+                    <div 
+                      key={group.id} 
+                      style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
+                        </div>
+                        <button 
+                          onClick={() => handleSwitchGroup(group.id)}
+                          disabled={switching}
+                          className="btn btn-primary" 
+                          style={{ width: 'auto', padding: '0.5rem 1rem' }}
+                        >
+                          Join
+                        </button>
+                    </div>
+                  ))}
+               </div>
             </div>
           )}
 
@@ -299,7 +392,7 @@ export default function SettingsPage() {
                
                <div style={{ marginBottom: '3rem' }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                     <PaletteIcon size={20} color="var(--brand)" /> Choose a Color Theme
+                     <PaletteIcon size={20} color="var(--brand)" /> Color Themes
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                      {PALETTES.map(p => (
@@ -377,30 +470,22 @@ export default function SettingsPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                      <div>
                         <h4 style={{ margin: 0 }}>Export My Data</h4>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Download all your task and activity data as JSON.</p>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Download all your task and activity data.</p>
                      </div>
-                     <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}><Download size={16} /> Export</button>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid var(--error)', borderRadius: 'var(--radius)' }}>
-                     <div>
-                        <h4 style={{ margin: 0, color: 'var(--error)' }}>Account Deletion</h4>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Delete your account and all associated data.</p>
-                     </div>
-                     <button className="btn" onClick={() => setIsDeleteModalOpen(true)} style={{ width: 'auto', background: 'var(--error)', color: 'white' }}><Trash2 size={16} /> Delete</button>
+                     <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}>Export</button>
                   </div>
                </div>
             </div>
           )}
        </div>
 
-       {/* Delete Modal Component */}
        {isDeleteModalOpen && (
           <div className="modal-overlay" style={{ zIndex: 9999 }}>
              <div className="modal-content" style={{ maxWidth: '450px', textAlign: 'center' }}>
                 <div style={{ marginBottom: '1.5rem', color: 'var(--error)' }}><AlertTriangle size={60} /></div>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Final Confirmation</h3>
                 <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
-                   This will permanently delete your account. All scores, tasks, and messages will be lost.
+                   This will permanently delete your account.
                 </p>
                 <input 
                   type="text" className="form-input" placeholder="Type DELETE to confirm" value={deleteConfirmation} 

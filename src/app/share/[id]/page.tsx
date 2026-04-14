@@ -11,7 +11,8 @@ import {
   ShieldCheck,
   Zap,
   Clock,
-  UserCircle
+  UserCircle,
+  Lock
 } from 'lucide-react'
 import { ThemeProvider } from '@/context/ThemeContext'
 
@@ -30,7 +31,6 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
 
   const fetchData = async () => {
     setLoading(true)
-    // Fetching data from public-accessible sources (assuming RLS is configured for anonymous read on these tables for specific IDs)
     const [groupData, tasksData, membersData, artifactsData] = await Promise.all([
       supabase.from('groups').select('*').eq('id', groupId).single(),
       supabase.from('tasks').select('*').eq('group_id', groupId),
@@ -48,6 +48,8 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
     setLoading(false)
   }
 
+  const isEncrypted = group?.is_encrypted
+
   // --- METRICS ENGINE ---
   const doneTasks = tasks.filter(t => t.status === 'Done').length
   const completionRate = tasks.length > 0 ? Math.round((doneTasks / tasks.length) * 100) : 0
@@ -56,7 +58,6 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
   const riskLevel = overdueTasks > 3 ? 'Critical' : overdueTasks > 0 ? 'Elevated' : 'Optimal'
   
   const totalEvidence = artifacts.length
-  const evidenceDensity = tasks.length > 0 ? (totalEvidence / tasks.length).toFixed(1) : '0'
 
   if (loading) {
     return (
@@ -75,13 +76,19 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           
           <header style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(26, 115, 232, 0.1)', color: 'var(--brand)', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-              <ShieldCheck size={16} />
-              <span>Public Verification Badge</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: isEncrypted ? 'rgba(239, 68, 68, 0.1)' : 'rgba(26, 115, 232, 0.1)', color: isEncrypted ? 'var(--error)' : 'var(--brand)', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.85rem', fontWeight: 700, marginBottom: '1.5rem', border: `1px solid ${isEncrypted ? 'var(--error)' : 'transparent'}` }}>
+              {isEncrypted ? <Lock size={16} /> : <ShieldCheck size={16} />}
+              <span>{isEncrypted ? 'PRIVATE ENCRYPTED VIEW' : 'PUBLIC VERIFICATION BADGE'}</span>
             </div>
-            <h1 style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0, color: 'var(--text-main)' }}>{group?.name}</h1>
+            <h1 style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0, color: 'var(--text-main)' }}>
+              {isEncrypted ? `Group ${groupId.slice(0, 4)}` : group?.name}
+            </h1>
             <p style={{ color: 'var(--text-sub)', fontSize: '1.25rem', marginTop: '1rem', maxWidth: '700px', margin: '1rem auto' }}>
-              Live project audit for module <strong>{group?.module_code}</strong>. Real-time verification of team velocity and artifact density.
+              {isEncrypted ? (
+                "Visibility encryption is active. Identifiable project data is masked."
+              ) : (
+                <>Live project audit for module <strong>{group?.module_code}</strong>. Real-time verification of team velocity and artifact density.</>
+              )}
             </p>
           </header>
 
@@ -104,22 +111,28 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
           </div>
 
           <section style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2.5rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>Certified Project Participants</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+               {isEncrypted ? 'Member Performance (Anonymized)' : 'Certified Project Participants'}
+            </h2>
             <div style={{ display: 'grid', gap: '1.5rem' }}>
-              {members.map(member => (
+              {members.map((member, idx) => (
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'var(--bg-main)', borderRadius: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : <UserCircle size={24} color="var(--text-sub)" />}
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)' }}>
+                      {isEncrypted ? <UserCircle size={24} /> : (member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : <UserCircle size={24} />)}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{member.full_name}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>{member.email?.replace(/(.{3}).+@/, "$1***@")}</div>
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                        {isEncrypted ? `Collaborator ${idx + 1}` : member.full_name}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>
+                        {isEncrypted ? "Contact Hidden" : member.email?.replace(/(.{3}).+@/, "$1***@")}
+                      </div>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--brand)' }}>{member.total_score}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 700, textTransform: 'uppercase' }}>Expertise Score</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 700, textTransform: 'uppercase' }}>Contribution Score</div>
                   </div>
                 </div>
               ))}
@@ -129,9 +142,9 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
           <footer style={{ marginTop: '4rem', textAlign: 'center', color: 'var(--text-sub)', fontSize: '0.9rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <TrendingUp size={16} />
-              <span>Generated by GroupFlow Intelligence Protocol</span>
+              <span>Generated by GroupFlow Integrity Protocol</span>
             </div>
-            <p>© 2026 GroupFlow. All execution metrics are cryptographically tied to module activity.</p>
+            <p>© 2026 GroupFlow. All execution metrics are verified through module activity.</p>
           </footer>
 
         </div>

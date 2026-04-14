@@ -26,7 +26,10 @@ export async function createGroup(formData: FormData) {
   // Update the user's profile to join this group
   await supabase
     .from('profiles')
-    .update({ group_id: newGroup.id })
+    .update({ 
+      group_id: newGroup.id,
+      role: 'admin' 
+    })
     .eq('id', user.id)
 
   revalidatePath('/dashboard', 'layout')
@@ -65,4 +68,50 @@ export async function joinGroup(formData: FormData) {
 
   revalidatePath('/dashboard', 'layout')
   redirect('/dashboard')
+}
+
+export async function kickUser(userId: string) {
+  const supabase = await createClient()
+  const { data: { user: adminUser } } = await supabase.auth.getUser()
+  if (!adminUser) return { error: 'Not authenticated' }
+
+  // 1. Verify caller is admin of the same group
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('group_id, role')
+    .eq('id', adminUser.id)
+    .single()
+
+  if (!adminProfile || adminProfile.role !== 'admin') {
+    return { error: 'Unauthorized: Only admins can manage team members' }
+  }
+
+  // 2. Verify target user is in the same group and NOT an admin
+  const { data: targetProfile } = await supabase
+    .from('profiles')
+    .select('group_id, role')
+    .eq('id', userId)
+    .single()
+
+  if (!targetProfile || targetProfile.group_id !== adminProfile.group_id) {
+    return { error: 'Target user not found in your team' }
+  }
+
+  if (targetProfile.role === 'admin') {
+    return { error: 'Cannot kick another administrator' }
+  }
+
+  // 3. Kick the user (Reset group and role)
+  const { error } = await supabase
+    .from('profiles')
+    .update({ 
+      group_id: null,
+      role: 'collaborator' 
+    })
+    .eq('id', userId)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/dashboard/settings')
+  return { success: true }
 }

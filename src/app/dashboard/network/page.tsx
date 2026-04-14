@@ -12,6 +12,7 @@ export default function NetworkPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [currentUserGroup, setCurrentUserGroup] = useState<string | null>(null)
   const supabase = createClient()
   const { onlineUsers } = usePresence()
 
@@ -29,14 +30,23 @@ export default function NetworkPage() {
   }
 
   useEffect(() => {
+    fetchCurrentGroup()
     fetchUsers()
   }, [])
+
+  const fetchCurrentGroup = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
+      if (data) setCurrentUserGroup(data.group_id)
+    }
+  }
 
   const fetchUsers = async () => {
     setLoading(true)
     let query = supabase
       .from('profiles')
-      .select('*, groups(name, module_code)')
+      .select('*, groups(name, module_code, is_encrypted)') // Added is_encrypted
       .order('total_score', { ascending: false })
     
     if (search.trim()) {
@@ -68,20 +78,20 @@ export default function NetworkPage() {
                onClick={() => setViewMode('grid')}
                style={{ padding: '0.5rem', borderRadius: '8px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', display: 'flex', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}
              >
-                <LayoutGrid size(20) />
+                <LayoutGrid size={20} />
              </button>
              <button 
                onClick={() => setViewMode('list')}
                style={{ padding: '0.5rem', borderRadius: '8px', border: 'none', background: viewMode === 'list' ? 'var(--surface)' : 'transparent', color: viewMode === 'list' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', display: 'flex', boxShadow: viewMode === 'list' ? 'var(--shadow-sm)' : 'none' }}
              >
-                <List size(20) />
+                <List size={20} />
              </button>
           </div>
        </div>
 
        {/* Search Bar Block */}
        <div style={{ position: 'relative', marginBottom: '3rem' }}>
-          <Search size(22) style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)', opacity: 0.6 }} />
+          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)', opacity: 0.6 }} />
           <input 
             type="text" 
             className="form-input" 
@@ -95,7 +105,7 @@ export default function NetworkPage() {
             }}
           />
           <div style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>
-             <SlidersHorizontal size(18) />
+             <SlidersHorizontal size={18} />
              <span>Filter</span>
           </div>
        </div>
@@ -140,16 +150,18 @@ export default function NetworkPage() {
                          {u.avatar_url ? (
                            <img src={u.avatar_url} alt={u.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                          ) : (
-                           <User size(viewMode === 'grid' ? 32 : 24) color="var(--text-sub)" />
+                           <User size={viewMode === 'grid' ? 32 : 24} color="var(--text-sub)" />
                          )}
                       </div>
                       <div style={{ minWidth: 0 }}>
-                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{u.full_name}</h3>
+                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                            {u.groups?.is_encrypted && u.group_id !== currentUserGroup ? 'Private Student' : u.full_name}
+                         </h3>
                          <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem', margin: '0.1rem 0 0' }}>Software Engineer</p>
                       </div>
                       {!isOnline && viewMode === 'list' && (
                         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', fontSize: '0.8rem' }}>
-                           <Clock size(14) />
+                           <Clock size={14} />
                            <span>Seen {formatLastSeen(u.last_seen)}</span>
                         </div>
                       )}
@@ -178,15 +190,17 @@ export default function NetworkPage() {
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                          <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Project Team</span>
                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600 }}>
-                            <MapPin size(14) color="var(--accent)" />
-                            <span>{u.groups?.module_code || 'Unassigned'}</span>
+                            <MapPin size={14} color="var(--accent)" />
+                            <span>
+                              {u.groups?.is_encrypted && u.group_id !== currentUserGroup ? 'Encrypted Team' : (u.groups?.module_code || 'Unassigned')}
+                            </span>
                          </div>
                       </div>
                    </div>
 
                    {viewMode === 'grid' && (
                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text-sub)' }}>
-                        <Clock size(16) />
+                        <Clock size={16} />
                         <span>{isOnline ? <strong style={{ color: 'var(--success)' }}>Active Now</strong> : `Last active ${formatLastSeen(u.last_seen)}`}</span>
                      </div>
                    )}
