@@ -213,7 +213,7 @@ export default function TaskModal({
        
        fetchArtifacts() // Re-sync network state explicitly
      } catch (err: any) {
-       setError("File transmission logic failed dynamically: " + err.message)
+       setError("File upload failed: " + err.message)
      } finally {
        setUploading(false)
      }
@@ -226,7 +226,7 @@ export default function TaskModal({
     
     const { error } = await supabase.from('artifacts').delete().eq('id', artifactId)
     if (error) {
-      setError(`Failed to delete evidence link: ${error.message}`)
+      setError(`Failed to delete: ${error.message}`)
       setArtifacts(original)
     }
   }
@@ -253,10 +253,10 @@ export default function TaskModal({
         {/* Sleek Google-style Header */}
         <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-sub)' }}>
           <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {isEditMode ? 'Task Configuration' : 'New Sprint Task'}
+            {isEditMode ? 'Edit Task' : 'New Task'}
             {isEditMode && assignees.length > 0 && (
                <span className="badge" style={{ backgroundColor: 'var(--brand)', color: 'white', marginLeft: '0.5rem' }}>
-                 {assignees.length} Member{assignees.length !== 1 && 's'}
+                 {assignees.length} Member{assignees.length !== 1 && 's'} assigned
                </span>
             )}
           </h2>
@@ -271,23 +271,23 @@ export default function TaskModal({
           {/* Form Fields */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1rem' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Task Title</label>
+              <label className="form-label">Task Name</label>
               <input 
                 className="form-input" 
                 value={title} 
                 onChange={e => setTitle(e.target.value)} 
-                placeholder="e.g. Implement OAuth Pipeline"
+                placeholder="What needs to be done?"
                 autoFocus
               />
             </div>
             
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Extended Details</label>
+              <label className="form-label">Description</label>
               <textarea 
                 className="form-input" 
                 value={description || ''} 
                 onChange={e => setDescription(e.target.value)} 
-                placeholder="Specific architectural notes or problem context..."
+                placeholder="Add more details about this task..."
                 rows={3}
                 style={{ resize: 'vertical' }}
               />
@@ -295,22 +295,22 @@ export default function TaskModal({
 
              <div style={{ display: 'flex', gap: '1rem', width: '100%', alignItems: 'center' }}>
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                 <label className="form-label">Execution Status</label>
+                 <label className="form-label">Status</label>
                  <select className="form-input" value={status} onChange={e => setStatus(e.target.value as TaskStatus)}>
                    {COLUMNS.map(c => <option key={c} value={c}>{c}</option>)}
                  </select>
                </div>
                
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                 <label className="form-label">Classification</label>
+                 <label className="form-label">Category</label>
                  <select className="form-input" value={isCodingTask ? 'true' : 'false'} onChange={e => setIsCodingTask(e.target.value === 'true')}>
-                   <option value="true">Engineering (Code)</option>
-                   <option value="false">Production (Design)</option>
+                   <option value="true">Coding</option>
+                   <option value="false">Design</option>
                  </select>
                </div>
                
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                 <label className="form-label" style={{ color: 'var(--error)' }}>Deadline</label>
+                 <label className="form-label" style={{ color: 'var(--error)' }}>Due Date</label>
                  <input 
                    type="date"
                    className="form-input"
@@ -323,7 +323,7 @@ export default function TaskModal({
             
             {/* COLLABORATOR SELECTION GRID */}
             <div style={{ marginTop: '0.5rem' }}>
-              <label className="form-label" style={{ marginBottom: '1rem', display: 'block' }}>Assignees & Collaboration</label>
+              <label className="form-label" style={{ marginBottom: '1rem', display: 'block' }}>Assignments</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
                 {members.map(member => {
                   const isAssigned = assignees.includes(member.id)
@@ -385,26 +385,26 @@ export default function TaskModal({
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '1.5rem' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                  <LinkIcon size={18} color="var(--brand)" />
-                 <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Project Evidence</h3>
+                 <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Attachments</h3>
                </div>
-               <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Attach Figma, Docs, or external PRs to verify completion status.</p>
+               <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Add links or upload files to show the task is complete.</p>
 
                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
                  <input 
                    type="url" 
                    className="form-input" 
-                   placeholder="https://figma.com/file/... or Google Doc link"
+                   placeholder="Add a link (Figma, Docs, etc.)"
                    value={newUrl}
                    onChange={(e) => setNewUrl(e.target.value)}
                    style={{ flex: 1 }}
                  />
                  <button className="btn btn-primary" onClick={handleUploadEvidence} disabled={uploading || !newUrl} style={{ width: 'auto', whiteSpace: 'nowrap' }}>
-                   {uploading ? 'Linking...' : 'Attach URl Proof'}
+                    {uploading ? 'Adding...' : 'Add Link'}
                  </button>
                  
                  <div style={{ position: 'relative', width: 'auto', display: 'flex' }}>
                     <button className="btn" disabled={uploading} style={{ backgroundColor: 'var(--bg-sub)', border: '1px dashed var(--brand)', color: 'var(--brand)', width: 'auto', whiteSpace: 'nowrap' }}>
-                       <FileUp size={16} /> Upload File
+                       <FileUp size={16} /> Upload
                     </button>
                    <input 
                       type="file" 
@@ -417,10 +417,10 @@ export default function TaskModal({
 
                <div>
                   {evidenceLoading ? (
-                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>Synchronizing documentation...</p>
+                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>Loading files...</p>
                   ) : artifacts.length === 0 ? (
                      <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
-                        <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>No verification documents attached.</p>
+                        <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>No attachments found.</p>
                      </div>
                  ) : (
                    artifacts.map(artifact => {
@@ -430,25 +430,25 @@ export default function TaskModal({
                            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
                              <a href={artifact.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
                                <ExternalLink size={14} />
-                               Link Artifact
+                               View Link
                              </a>
                              <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginTop: '0.25rem' }}>
-                               Transmitted: {new Date(artifact.created_at).toLocaleString()}
+                               Added at: {new Date(artifact.created_at).toLocaleString()}
                              </div>
                            </div>
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                              <button 
-                               title="Endorsement"
-                               className="btn btn-secondary" 
-                               onClick={() => handleEndorse(artifact.id, artifact.endorsements_count)}
-                               style={{ width: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.75rem', border: '1px solid var(--brand)', color: 'var(--brand)' }}
+                                title="Like"
+                                className="btn btn-secondary" 
+                                onClick={() => handleEndorse(artifact.id, artifact.endorsements_count)}
+                                style={{ width: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.75rem', border: '1px solid var(--brand)', color: 'var(--brand)' }}
                              >
-                               <ThumbsUp size={14} />
-                               {artifact.endorsements_count}
+                                <ThumbsUp size={14} />
+                                {artifact.endorsements_count}
                              </button>
                             
-                            {isOwner && (
+                             {isOwner && (
                                 <button 
                                  title="Delete"
                                  onClick={() => handleDeleteArtifact(artifact.id)}
@@ -456,7 +456,7 @@ export default function TaskModal({
                                 >
                                    <Trash2 size={14} />
                                 </button>
-                            )}
+                             )}
                           </div>
                        </div>
                      )
@@ -476,7 +476,7 @@ export default function TaskModal({
            )}
            <button className="btn btn-secondary" onClick={onClose} style={{ width: 'auto' }}>Cancel</button>
            <button className="btn btn-primary" onClick={handleSave} disabled={loading} style={{ width: 'auto' }}>
-             {loading ? 'Saving...' : 'Save Configuration'}
+             {loading ? 'Saving...' : 'Save Task'}
            </button>
         </div>
 

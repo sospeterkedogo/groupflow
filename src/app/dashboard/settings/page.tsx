@@ -125,7 +125,7 @@ export default function SettingsPage() {
       .update({ group_id: newGroupId })
       .eq('id', profile.id)
       
-    if (switchError) setError("Failed to transition workspace node.")
+    if (switchError) setError("Failed to switch team.")
     else {
       await fetchUserData() // Refresh profile state
       setSuccess(true)
@@ -154,7 +154,7 @@ export default function SettingsPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-sub)' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="spinner" style={{ border: '3px solid var(--border)', borderTop: '3px solid var(--brand)', borderRadius: '50%', width: '30px', height: '30px', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
-          <span>Configuring System...</span>
+          <span>Loading settings...</span>
         </div>
       </div>
     )
@@ -173,8 +173,8 @@ export default function SettingsPage() {
        {/* Tab Navigation */}
        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
           {[
-            { id: 'identity', label: 'Identity', icon: User },
-            { id: 'workspace', label: 'Workspace', icon: MapPin },
+            { id: 'identity', label: 'Profile', icon: User },
+            { id: 'workspace', label: 'My Team', icon: MapPin },
             { id: 'appearance', label: 'Appearance', icon: PaletteIcon },
             { id: 'security', label: 'Security', icon: Shield },
             { id: 'data', label: 'Data & Privacy', icon: AlertTriangle },
@@ -218,35 +218,35 @@ export default function SettingsPage() {
                      </label>
                   </div>
                   <div>
-                     <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Avatar Representation</h3>
-                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Upload a photo or capture a biometric verification profile.</p>
+                     <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Profile Photo</h3>
+                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Upload or take a photo for your student profile.</p>
                      {uploadingAvatar && <p style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }}>Uploading...</p>}
                   </div>
                </div>
 
                <form onSubmit={handleUpdateProfile} style={{ maxWidth: '500px' }}>
                   <div className="form-group">
-                     <label className="form-label">Global Alias</label>
-                     <input type="text" className="form-input" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Display Name" />
+                     <label className="form-label">Full Name</label>
+                     <input type="text" className="form-input" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Enter your name" />
                   </div>
                   <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto', marginTop: '1rem' }}>
-                     {saving ? 'Synchronizing...' : 'Update Context'}
+                     {saving ? 'Saving...' : 'Save Changes'}
                   </button>
-                  {success && <span style={{ marginLeft: '1rem', color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem' }}>Settings updated.</span>}
+                  {success && <span style={{ marginLeft: '1rem', color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem' }}>Changes saved.</span>}
                </form>
             </div>
           )}
 
           {activeTab === 'workspace' && (
             <div className="auth-card" style={{ maxWidth: '100%' }}>
-               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Workspace Migration</h2>
-               <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Transition your identity to a different module or project team.</p>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Team Management</h2>
+               <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Switch to a different project team or module.</p>
                
                <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Alignment</div>
-                     <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{profile?.groups?.name || 'Unassigned Independent'}</div>
-                     <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{profile?.groups?.module_code || 'No parent module'}</div>
+                     <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Team</div>
+                     <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{profile?.groups?.name || 'No team assigned'}</div>
+                     <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{profile?.groups?.module_code || 'Independent'}</div>
                   </div>
                   {profile?.group_id && (
                     <button 
@@ -255,39 +255,39 @@ export default function SettingsPage() {
                       className="btn" 
                       style={{ width: 'auto', background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)' }}
                     >
-                      Leave Current Team
+                      Leave Team
                     </button>
                   )}
                </div>
 
-               <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Available Systems</h3>
+               <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Other Teams</h3>
                {availableGroups.filter(g => g.id !== profile?.group_id).length === 0 ? (
-                 <p style={{ color: 'var(--text-sub)', fontStyle: 'italic' }}>No other active systems detected in the registry.</p>
+                 <p style={{ color: 'var(--text-sub)', fontStyle: 'italic' }}>No other teams found.</p>
                ) : (
                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-                   {availableGroups.filter(g => g.id !== profile?.group_id).map(group => (
-                     <div 
-                       key={group.id} 
-                       style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                     >
-                         <div>
-                           <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
-                           <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
-                         </div>
-                         <button 
-                           onClick={() => {
-                             if (confirm(`Transition to ${group.name}? Your current task context will change.`)) {
-                               handleSwitchGroup(group.id)
-                             }
-                           }}
-                           disabled={switching}
-                           className="btn btn-primary" 
-                           style={{ width: 'auto', padding: '0.5rem 1rem' }}
-                         >
-                           Join Team
-                         </button>
-                     </div>
-                   ))}
+                    {availableGroups.filter(g => g.id !== profile?.group_id).map(group => (
+                      <div 
+                        key={group.id} 
+                        style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      >
+                          <div>
+                            <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              if (confirm(`Switch to ${group.name}?`)) {
+                                handleSwitchGroup(group.id)
+                              }
+                            }}
+                            disabled={switching}
+                            className="btn btn-primary" 
+                            style={{ width: 'auto', padding: '0.5rem 1rem' }}
+                          >
+                            Join Team
+                          </button>
+                      </div>
+                    ))}
                  </div>
                )}
             </div>
@@ -295,11 +295,11 @@ export default function SettingsPage() {
 
           {activeTab === 'appearance' && (
             <div className="auth-card" style={{ maxWidth: '100%' }}>
-               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Interface Configuration</h2>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Appearance Settings</h2>
                
                <div style={{ marginBottom: '3rem' }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                     <PaletteIcon size={20} color="var(--brand)" /> 13-Color Semantic Palettes
+                     <PaletteIcon size={20} color="var(--brand)" /> Choose a Color Theme
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
                      {PALETTES.map(p => (
@@ -327,7 +327,7 @@ export default function SettingsPage() {
 
                <div>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                     <ImageIcon size={20} color="var(--brand)" /> Custom Environmental Backdrop
+                     <ImageIcon size={20} color="var(--brand)" /> Background Image
                   </h3>
                   <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', textAlign: 'center' }}>
                      {customBg ? (
@@ -346,7 +346,7 @@ export default function SettingsPage() {
                        </div>
                      )}
                      <label className="btn btn-secondary" style={{ width: 'auto', cursor: 'pointer' }}>
-                        {uploadingBg ? 'Installing Image...' : customBg ? 'Swap Backdrop' : 'Upload Custom Image'}
+                        {uploadingBg ? 'Saving...' : customBg ? 'Change Image' : 'Upload Image'}
                         <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'bg')} style={{ display: 'none' }} />
                      </label>
                   </div>
@@ -356,37 +356,37 @@ export default function SettingsPage() {
 
           {activeTab === 'security' && (
             <div className="auth-card" style={{ maxWidth: '100%' }}>
-               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Security Protocol</h2>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Login Security</h2>
                <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                   <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                      <Key size={24} />
                   </div>
                   <div>
-                     <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Github Identity Authenticated</h3>
+                     <h3 style={{ margin: 0, fontSize: '1.1rem' }}>GitHub Login</h3>
                      <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.875rem' }}>{profile?.email}</p>
                   </div>
-                  <span className="badge badge-code" style={{ marginLeft: 'auto', padding: '0.4rem 0.8rem' }}>Verified Node</span>
+                  <span className="badge badge-code" style={{ marginLeft: 'auto', padding: '0.4rem 0.8rem' }}>Verified Account</span>
                </div>
             </div>
           )}
 
           {activeTab === 'data' && (
             <div className="auth-card" style={{ maxWidth: '100%', border: '1px solid var(--error)' }}>
-               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--error)' }}>Danger Matrix</h2>
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--error)' }}>Advanced Options</h2>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                      <div>
-                        <h4 style={{ margin: 0 }}>Binary Export</h4>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Extract all task data as absolute JSON.</p>
+                        <h4 style={{ margin: 0 }}>Export My Data</h4>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Download all your task and activity data as JSON.</p>
                      </div>
                      <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}><Download size={16} /> Export</button>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid var(--error)', borderRadius: 'var(--radius)' }}>
                      <div>
-                        <h4 style={{ margin: 0, color: 'var(--error)' }}>Account Termination</h4>
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Irreversibly wipe all data and identity.</p>
+                        <h4 style={{ margin: 0, color: 'var(--error)' }}>Account Deletion</h4>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Delete your account and all associated data.</p>
                      </div>
-                     <button className="btn" onClick={() => setIsDeleteModalOpen(true)} style={{ width: 'auto', background: 'var(--error)', color: 'white' }}><Trash2 size={16} /> Terminate</button>
+                     <button className="btn" onClick={() => setIsDeleteModalOpen(true)} style={{ width: 'auto', background: 'var(--error)', color: 'white' }}><Trash2 size={16} /> Delete</button>
                   </div>
                </div>
             </div>
@@ -400,20 +400,20 @@ export default function SettingsPage() {
                 <div style={{ marginBottom: '1.5rem', color: 'var(--error)' }}><AlertTriangle size={60} /></div>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Final Confirmation</h3>
                 <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
-                   This will permanently purge your student configuration. All scores, tasks, and communications will be lost.
+                   This will permanently delete your account. All scores, tasks, and messages will be lost.
                 </p>
                 <input 
-                  type="text" className="form-input" placeholder="Type DELETE to execute" value={deleteConfirmation} 
+                  type="text" className="form-input" placeholder="Type DELETE to confirm" value={deleteConfirmation} 
                   onChange={e => setDeleteConfirmation(e.target.value)} 
                   style={{ border: '2px solid var(--error)', textAlign: 'center', fontWeight: 'bold' }}
                 />
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                   <button className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Abort</button>
+                   <button className="btn btn-secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancel</button>
                    <button 
                      className="btn" onClick={handleAccountTermination} disabled={isDeleting || deleteConfirmation !== 'DELETE'}
                      style={{ background: 'var(--error)', color: 'white', opacity: deleteConfirmation === 'DELETE' ? 1 : 0.4 }}
                    >
-                      {isDeleting ? 'Terminating...' : 'Wipe Account'}
+                      {isDeleting ? 'Deleting...' : 'Delete Account'}
                    </button>
                 </div>
              </div>

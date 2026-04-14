@@ -120,11 +120,11 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--brand)', marginBottom: '1rem', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
             <BarChart3 size={18} />
-            <span>Project Intelligence Dashboard</span>
+            <span>Project Analytics</span>
           </div>
           <h1 style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0, lineHeight: 1 }}>{group?.name || 'Project Registry'}</h1>
           <p style={{ color: 'var(--text-sub)', fontSize: '1.2rem', marginTop: '1rem', fontWeight: 500 }}>
-            {group?.module_code} • Comprehensive real-time execution analytics for project verification.
+            {group?.module_code} • Real-time project tracking and verification stats.
           </p>
         </div>
         
@@ -147,7 +147,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             </div>
             <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--brand)' }}>{completionRate}%</div>
           </div>
-          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-sub)', fontWeight: 600 }}>Execution Confidence</h3>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-sub)', fontWeight: 600 }}>Project Progress</h3>
           <div style={{ height: '6px', background: 'var(--bg-main)', borderRadius: '10px', marginTop: '1rem', overflow: 'hidden' }}>
             <div style={{ width: `${completionRate}%`, height: '100%', background: 'var(--brand)', borderRadius: '10px' }} />
           </div>
@@ -160,8 +160,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             </div>
             <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--success)' }}>{evidenceDensity}</div>
           </div>
-          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-sub)', fontWeight: 600 }}>Evidence Multiplier</h3>
-          <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--text-sub)' }}>Artifacts per task milestone</p>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-sub)', fontWeight: 600 }}>Extra Details</h3>
+          <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--text-sub)' }}>Attached proof per task</p>
         </div>
 
         <div className="stat-card" style={{ background: 'var(--surface)', padding: '2rem', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}>
@@ -171,7 +171,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: 900, color: riskLevel === 'Optimal' ? 'var(--success)' : 'var(--error)', textTransform: 'uppercase' }}>{riskLevel}</div>
           </div>
-          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-sub)', fontWeight: 600 }}>Pipeline Delay Risk</h3>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-sub)', fontWeight: 600 }}>Overdue Risk</h3>
           <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--text-sub)' }}>{overdueTasks} nodes currently overdue</p>
         </div>
 
@@ -192,15 +192,15 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         {/* Team Performance Leaderboard */}
         <section style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Contribution matrix</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Team Leaderboard</h2>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)', fontWeight: 600 }}>RANKED BY SCORE</div>
           </div>
           
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-sub)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
-                <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 700 }}>Participant</th>
-                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Validity Score</th>
+                <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 700 }}>Member</th>
+                <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Total Score</th>
                 <th style={{ textAlign: 'center', padding: '1rem', fontWeight: 700 }}>Assignments</th>
                 <th style={{ textAlign: 'right', padding: '1rem 0', fontWeight: 700 }}>Status</th>
               </tr>
@@ -275,7 +275,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2rem', flex: 1 }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Clock size={20} color="var(--brand)" /> 
-              Verification Log
+              Recent History
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {tasks.filter(t => t.status === 'Done').slice(0, 3).map(t => (

@@ -178,7 +178,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   }, [globalProbability, tasks.length, hasCelebrated])
 
   if (loading) {
-    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-sub)' }}>Mounting Kanban Flow...</div>
+    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-sub)' }}>Loading tasks...</div>
   }
 
   return (
@@ -193,10 +193,10 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
       {/* Master Milestone HUD */}
       <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', marginBottom: '0.5rem' }}>
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Global Project Network Pipeline</h3>
+             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
              {overdueCount > 0 && (
                <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                 <AlertCircle size={14} /> {overdueCount} Critical Overdue Nodes
+                 <AlertCircle size={14} /> {overdueCount} Overdue Tasks
                </span>
              )}
          </div>
@@ -204,13 +204,13 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
             <div style={{ width: `${globalProbability}%`, height: '100%', backgroundColor: globalProbability < 30 ? 'var(--error)' : 'var(--brand)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
          </div>
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>Total Completion Profile: <span style={{ color: 'var(--text-main)' }}>{globalProbability}%</span></span>
-            <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>{tasks.length} Active Nodes</span>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>Overall Progress: <span style={{ color: 'var(--text-main)' }}>{globalProbability}%</span></span>
+            <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>{tasks.length} Tasks</span>
          </div>
       </div>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Drag and drop computational modules. Progress dynamically recalculates against absolute deadlines.</p>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Drag and drop tasks. Progress updates automatically based on deadlines.</p>
         <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
            + New Task
         </button>
@@ -245,7 +245,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                   {/* DYNAMIC PROGRESS BAR */}
                   <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      <span>Confidence</span>
+                      <span>Completion Chance</span>
                       <span style={{ color: calculateProbability(task) < 30 ? 'var(--error)' : 'var(--text-sub)' }}>
                         {calculateProbability(task)}% 
                         {(task.artifacts?.length ?? 0) > 0 && <span style={{ color: 'var(--success)', marginLeft: '0.25rem', fontSize: '0.6rem' }}>(+{Math.min((task.artifacts?.length ?? 0) * 5, 15)}% Boost)</span>}

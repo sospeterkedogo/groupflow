@@ -189,7 +189,7 @@ export default function Sidebar({ user }: { user: any }) {
       <div style={{ padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', opacity: isOpen ? 1 : 0 }}>
          {isOpen && (
            <>
-              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '2px' }}>Temporal Status</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '2px' }}>Current Time</span>
               <DigitalClock />
            </>
          )}

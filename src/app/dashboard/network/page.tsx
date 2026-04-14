@@ -60,32 +60,32 @@ export default function NetworkPage() {
        
        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '1.5rem' }}>
           <div>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Global Network</h1>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem' }}>Discover calibrated peers and benchmark cross-module execution scores.</p>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Student Network</h1>
+            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem' }}>Find other students and compare project scores.</p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
              <button 
                onClick={() => setViewMode('grid')}
                style={{ padding: '0.5rem', borderRadius: '8px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', display: 'flex', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}
              >
-                <LayoutGrid size={20} />
+                <LayoutGrid size(20) />
              </button>
              <button 
                onClick={() => setViewMode('list')}
                style={{ padding: '0.5rem', borderRadius: '8px', border: 'none', background: viewMode === 'list' ? 'var(--surface)' : 'transparent', color: viewMode === 'list' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', display: 'flex', boxShadow: viewMode === 'list' ? 'var(--shadow-sm)' : 'none' }}
              >
-                <List size={20} />
+                <List size(20) />
              </button>
           </div>
        </div>
 
        {/* Search Bar Block */}
        <div style={{ position: 'relative', marginBottom: '3rem' }}>
-          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)', opacity: 0.6 }} />
+          <Search size(22) style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)', opacity: 0.6 }} />
           <input 
             type="text" 
             className="form-input" 
-            placeholder="Search network binary by identity or module..." 
+            placeholder="Search students by name or team..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
@@ -95,7 +95,7 @@ export default function NetworkPage() {
             }}
           />
           <div style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>
-             <SlidersHorizontal size={18} />
+             <SlidersHorizontal size(18) />
              <span>Filter</span>
           </div>
        </div>
@@ -103,11 +103,11 @@ export default function NetworkPage() {
        {loading && users.length === 0 ? (
          <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-sub)' }}>
             <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
-            <span>Scanning Synaptic Registry...</span>
+            <span>Searching for students...</span>
          </div>
        ) : users.length === 0 ? (
          <div style={{ textAlign: 'center', padding: '6rem', background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-            <p style={{ color: 'var(--text-sub)', margin: 0, fontSize: '1.1rem' }}>Zero search matches across the current calibration grid.</p>
+            <p style={{ color: 'var(--text-sub)', margin: 0, fontSize: '1.1rem' }}>No students found matching your search.</p>
          </div>
        ) : (
          <div style={viewMode === 'grid' ? { 
@@ -140,7 +140,7 @@ export default function NetworkPage() {
                          {u.avatar_url ? (
                            <img src={u.avatar_url} alt={u.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                          ) : (
-                           <User size={viewMode === 'grid' ? 32 : 24} color="var(--text-sub)" />
+                           <User size(viewMode === 'grid' ? 32 : 24) color="var(--text-sub)" />
                          )}
                       </div>
                       <div style={{ minWidth: 0 }}>
@@ -149,7 +149,7 @@ export default function NetworkPage() {
                       </div>
                       {!isOnline && viewMode === 'list' && (
                         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', fontSize: '0.8rem' }}>
-                           <Clock size={14} />
+                           <Clock size(14) />
                            <span>Seen {formatLastSeen(u.last_seen)}</span>
                         </div>
                       )}
@@ -172,13 +172,13 @@ export default function NetworkPage() {
                      flex: viewMode === 'list' ? '0 0 350px' : 'unset'
                    }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Validity Score</span>
+                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Total Score</span>
                          <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Workspace</span>
+                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Project Team</span>
                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600 }}>
-                            <MapPin size={14} color="var(--accent)" />
+                            <MapPin size(14) color="var(--accent)" />
                             <span>{u.groups?.module_code || 'Unassigned'}</span>
                          </div>
                       </div>
@@ -186,7 +186,7 @@ export default function NetworkPage() {
 
                    {viewMode === 'grid' && (
                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text-sub)' }}>
-                        <Clock size={16} />
+                        <Clock size(16) />
                         <span>{isOnline ? <strong style={{ color: 'var(--success)' }}>Active Now</strong> : `Last active ${formatLastSeen(u.last_seen)}`}</span>
                      </div>
                    )}

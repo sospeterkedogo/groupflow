@@ -95,10 +95,10 @@ export default function OnboardingModal({ user, onComplete }: { user: any, onCom
               <ShieldCheck size={32} />
             </div>
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to GroupFlow</h1>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Let's calibrate your specialist identity. How should the registry identify you?</p>
+            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Let's set up your profile. What name should we show in the dashboard?</p>
             
             <div className="form-group">
-               <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>GRADUATE ALIAS / FULL NAME</label>
+               <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>YOUR FULL NAME</label>
                <input 
                  type="text" className="form-input" 
                  value={fullName} onChange={e => setFullName(e.target.value)} 
@@ -114,15 +114,15 @@ export default function OnboardingModal({ user, onComplete }: { user: any, onCom
               className="btn btn-primary" 
               style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
             >
-              Configure Identity <ArrowRight size={20} />
+              Continue <ArrowRight size={20} />
             </button>
           </div>
         )}
 
         {step === 2 && (
           <div style={{ animation: 'slideIn 0.4s ease-out' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1.5rem' }}>Select Signal Icon</h2>
-            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Choose a premium signal pattern to represent your contributions.</p>
+            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1.5rem' }}>Choose an Avatar</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Select a profile icon to represent you in the workspace.</p>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '3rem' }}>
               {PRESET_AVATARS.map((url, i) => (
@@ -147,7 +147,7 @@ export default function OnboardingModal({ user, onComplete }: { user: any, onCom
               className="btn btn-primary" 
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
             >
-              {saving ? 'Synchronizing...' : 'Finalize Identity'} <CheckCircle2 size={20} />
+              {saving ? 'Saving...' : 'Finish Setup'} <CheckCircle2 size={20} />
             </button>
           </div>
         )}
@@ -161,15 +161,15 @@ export default function OnboardingModal({ user, onComplete }: { user: any, onCom
             }}>
               <Sparkles size={48} />
             </div>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>Calibration Complete</h2>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Your specialist node is now active. Welcome to the workspace, {fullName.split(' ')[0]}.</p>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>All Set!</h2>
+            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Your profile is ready. Welcome to the team, {fullName.split(' ')[0]}.</p>
             
             <button 
               onClick={handleNext} 
               className="btn btn-primary" 
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
             >
-              Enter Dashboard <Zap size={20} />
+              Go to Dashboard <Zap size={20} />
             </button>
           </div>
         )}
