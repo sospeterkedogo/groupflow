@@ -4,6 +4,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'GroupFlow - Automating Accountability',
   description: 'A Data-Driven Collaboration Platform for Mitigating Social Loafing',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({

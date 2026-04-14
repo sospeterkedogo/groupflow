@@ -6,7 +6,7 @@ const rateLimitMap = new Map<string, { count: number, resetAt: number }>()
 const LIMIT = 60 // requests
 const WINDOW_MS = 60 * 1000 // 1 minute
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || 'anonymous'
   const now = Date.now()
   
@@ -41,6 +41,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Skip static assets and internals
-    '/((?!_next/static|_next/image|favicon.ico|assets|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|assets|favicon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
