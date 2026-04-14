@@ -25,6 +25,7 @@ export default function TaskModal({
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'To Do')
   const [isCodingTask, setIsCodingTask] = useState(task ? task.is_coding_task : true)
   const [assignees, setAssignees] = useState<string[]>(task?.assignees || [])
+  const [dueDate, setDueDate] = useState<string>(task?.due_date ? task.due_date.substring(0, 10) : '')
   const [currentUser, setCurrentUser] = useState<any>(null)
   
   const [loading, setLoading] = useState(false)
@@ -83,7 +84,8 @@ export default function TaskModal({
       status,
       is_coding_task: isCodingTask,
       group_id: groupId,
-      assignees // Pass array payload!
+      assignees, // Pass array payload!
+      due_date: dueDate ? new Date(dueDate).toISOString() : null
     }
 
     let err
@@ -254,7 +256,7 @@ export default function TaskModal({
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+             <div style={{ display: 'flex', gap: '1rem', width: '100%', alignItems: 'center' }}>
                <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
                  <label className="form-label">Execution Status</label>
                  <select className="form-input" value={status} onChange={e => setStatus(e.target.value as TaskStatus)}>
@@ -269,7 +271,18 @@ export default function TaskModal({
                    <option value="false">Design Vector (Doc)</option>
                  </select>
                </div>
-            </div>
+               
+               <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                 <label className="form-label" style={{ color: 'var(--danger-color)' }}>Execution Deadline</label>
+                 <input 
+                   type="date"
+                   className="form-input"
+                   value={dueDate}
+                   onChange={e => setDueDate(e.target.value)}
+                   style={{ borderColor: dueDate ? 'var(--border-color)' : 'rgba(239,68,68,0.5)' }}
+                 />
+               </div>
+             </div>
             
             {/* COLLABORATOR TOGGLE STRIP */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px dashed var(--border-color)', marginTop: '0.5rem' }}>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Settings, Save, CheckCircle2, Shield, Download, Trash2, Github, AlertTriangle, X } from 'lucide-react'
+import { Settings, Save, CheckCircle2, Shield, Download, Trash2, Key, AlertTriangle, X } from 'lucide-react'
 import TransientError from '@/components/TransientError'
 
 export default function SettingsPage() {
@@ -143,7 +143,7 @@ export default function SettingsPage() {
           
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
              <div style={{ backgroundColor: 'black', color: 'white', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Github size={20} />
+                <Key size={20} />
              </div>
              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Linked to Github Identity</span>

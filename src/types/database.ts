@@ -24,6 +24,7 @@ export type Task = {
   assignees: string[]; // Replaces old assignee_id logic!
   group_id: string;
   is_coding_task: boolean;
+  due_date: string | null;
   created_at: string;
 };
 
