@@ -227,6 +227,69 @@ export default function Sidebar({ user }: { user: any }) {
          )}
       </div>
 
+      {/* User Identity Pill - Personal Ownership Anchor */}
+      <div style={{ padding: '0.5rem 1rem', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
+         <Link 
+           href="/dashboard/profile"
+           title={profile?.full_name || 'My Profile'}
+           style={{
+             display: 'flex',
+             alignItems: 'center',
+             gap: isOpen ? '0.75rem' : '0',
+             padding: '0.75rem',
+             borderRadius: '16px',
+             background: 'var(--bg-main)',
+             border: '1px solid var(--border)',
+             textDecoration: 'none',
+             justifyContent: isOpen ? 'flex-start' : 'center',
+             transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+           }}
+           className="identity-pill"
+         >
+            <div style={{ position: 'relative' }}>
+               <div style={{ 
+                 width: '32px', 
+                 height: '32px', 
+                 borderRadius: '50%', 
+                 overflow: 'hidden', 
+                 border: '2px solid var(--brand)',
+                 background: 'var(--surface)',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center'
+               }}>
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <UserCircle size={20} color="var(--text-sub)" />
+                  )}
+               </div>
+               <div style={{ 
+                 position: 'absolute', 
+                 bottom: '-2px', 
+                 right: '-2px', 
+                 width: '10px', 
+                 height: '10px', 
+                 borderRadius: '50%', 
+                 backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)',
+                 border: '2px solid var(--bg-main)',
+                 boxShadow: isOnline ? '0 0 4px var(--success)' : 'none'
+               }} />
+            </div>
+            
+            {isOpen && (
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                 <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    {profile?.full_name || 'Anonymous User'}
+                 </div>
+                 <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Technical Profile
+                 </div>
+              </div>
+            )}
+         </Link>
+      </div>
+
       {/* Theme Switcher Bubble */}
       <div style={{ padding: '0.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
          <button 

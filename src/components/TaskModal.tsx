@@ -42,6 +42,7 @@ export default function TaskModal({
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Evidence Logic
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
@@ -59,7 +60,7 @@ export default function TaskModal({
   const fetchMembers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, email')
+      .select('id, full_name, avatar_url, email, school_id')
       .eq('group_id', groupId)
     if (data) setMembers(data)
   }
@@ -371,9 +372,34 @@ export default function TaskModal({
             
             {/* COLLABORATOR SELECTION GRID */}
             <div style={{ marginTop: '0.5rem' }}>
-              <label className="form-label" style={{ marginBottom: '1rem', display: 'block' }}>Assignments</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
-                {members.map(member => {
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <label className="form-label" style={{ margin: 0 }}>Assignments</label>
+                <div style={{ position: 'relative', width: '220px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Search name or ID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ 
+                      width: '100%', 
+                      fontSize: '0.75rem', 
+                      padding: '0.4rem 0.75rem', 
+                      borderRadius: '8px', 
+                      border: '1px solid var(--border)', 
+                      background: 'var(--bg-main)' 
+                    }}
+                  />
+                </div>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', maxHeight: '200px', overflowY: 'auto', padding: '0.25rem' }}>
+                {members
+                  .filter(m => 
+                    !searchQuery || 
+                    m.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                    m.school_id?.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map(member => {
                   const isAssigned = assignees.includes(member.id)
                   const isOnline = onlineUsers.has(member.id)
                   const initials = member.full_name ? member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '?'

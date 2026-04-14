@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('group_id, full_name, total_score')
+    .select('*')
     .eq('id', user.id)
     .single()
 
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="main-content">
-      <DashboardHome groupId={profile.group_id} initialScore={profile.total_score || 0} />
+      <DashboardHome groupId={profile.group_id} profile={profile} />
     </main>
   )
 }
