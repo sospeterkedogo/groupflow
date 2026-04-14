@@ -7,6 +7,7 @@ import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
 import TaskModal from './TaskModal'
 import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
+import { usePresence } from './PresenceProvider'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
@@ -22,6 +23,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   
   const supabase = createClient()
+  const { onlineUsers } = usePresence()
 
   useEffect(() => {
     fetchTasks()
@@ -257,29 +259,45 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                           task.assignees.map(userId => {
                             const user = groupMembers.find(m => m.id === userId)
                             const initial = user?.full_name ? user.full_name.substring(0, 1).toUpperCase() : '?'
+                            const isOnline = onlineUsers.has(userId)
                             
-                            return user?.avatar_url ? (
-                              <img 
-                                key={userId} 
-                                src={user.avatar_url} 
-                                title={user.full_name || 'Unknown'} 
-                                style={{ 
-                                  width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', 
-                                  border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' 
-                                }} 
-                                onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.removeAttribute('style') }}
-                              />
-                            ) : (
-                              <div 
-                                key={userId} 
-                                title={user?.full_name || 'Unknown User'} 
-                                style={{ 
-                                  width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'white', 
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold',
-                                  border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)'
-                                }}
-                              >
-                                {initial}
+                            return (
+                              <div key={userId} style={{ position: 'relative' }}>
+                                {user?.avatar_url ? (
+                                  <img 
+                                    src={user.avatar_url} 
+                                    title={user.full_name || 'Unknown'} 
+                                    style={{ 
+                                      width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', 
+                                      border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' 
+                                    }} 
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.removeAttribute('style') }}
+                                  />
+                                ) : (
+                                  <div 
+                                    title={user?.full_name || 'Unknown User'} 
+                                    style={{ 
+                                      width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--primary-color)', color: 'white', 
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold',
+                                      border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)'
+                                    }}
+                                  >
+                                    {initial}
+                                  </div>
+                                )}
+                                {isOnline && (
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '-2px',
+                                    right: '-2px',
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--success-color)',
+                                    border: '1.5px solid var(--card-bg)',
+                                    boxShadow: '0 0 4px var(--success-color)'
+                                  }} />
+                                )}
                               </div>
                             )
                           })

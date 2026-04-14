@@ -15,6 +15,7 @@ import {
   FolderDot,
   Plus
 } from 'lucide-react'
+import { usePresence } from './PresenceProvider'
 
 export default function Sidebar({ user }: { user: any }) {
   const [isOpen, setIsOpen] = useState(true)
@@ -22,6 +23,8 @@ export default function Sidebar({ user }: { user: any }) {
   const [profile, setProfile] = useState<any>(null)
   const pathname = usePathname()
   const supabase = createClient()
+  const { onlineUsers } = usePresence()
+  const isOnline = onlineUsers.has(user.id)
 
   useEffect(() => {
      fetchInitialData()
@@ -78,7 +81,12 @@ export default function Sidebar({ user }: { user: any }) {
     <div className="sidebar-container" style={{ width: isOpen ? '280px' : '80px' }}>
       {/* Header / Toggle */}
       <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border-color)' }}>
-         {isOpen && <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--primary-color)' }}>GroupFlow</Link>}
+         {isOpen && (
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+             <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--primary-color)' }}>GroupFlow</Link>
+             <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success-color)' : 'var(--text-secondary)', boxShadow: isOnline ? '0 0 4px var(--success-color)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
+           </div>
+         )}
          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
             {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
          </button>

@@ -2,13 +2,28 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Search, MapPin } from 'lucide-react'
+import { Search, MapPin, Clock } from 'lucide-react'
+import { usePresence } from '@/components/PresenceProvider'
 
 export default function NetworkPage() {
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const supabase = createClient()
+  const { onlineUsers } = usePresence()
+
+  // Relative Time Decoder helper
+  const formatLastSeen = (timestamp: string | null) => {
+    if (!timestamp) return 'Never'
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  }
 
   useEffect(() => {
     // We intentionally ignore the exhaustive-deps warning here because we want
@@ -78,29 +93,56 @@ export default function NetworkPage() {
          </div>
        ) : (
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-           {users.map(u => (
-             <div key={u.id} className="kanban-card" style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', cursor: 'default' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                   <div>
-                     <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>{u.full_name}</h3>
-                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Registered Software Engineer</p>
-                   </div>
-                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', padding: '0.5rem 1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Validity</span>
-                      <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-color)' }}>{u.total_score}</span>
-                   </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                   <MapPin size={16} />
-                   {u.groups ? (
-                     <span>Assigned to Cohort: <strong style={{ color: 'var(--text-color)' }}>{u.groups.module_code}</strong></span>
-                   ) : (
-                     <span>Awaiting Module Assignment</span>
+            {users.map(u => {
+              const isOnline = onlineUsers.has(u.id)
+              return (
+                <div key={u.id} className="kanban-card" style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', cursor: 'default', position: 'relative' }}>
+                   {isOnline && (
+                     <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '0.25rem 0.6rem', borderRadius: '50px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success-color)', boxShadow: '0 0 4px var(--success-color)' }} />
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--success-color)', textTransform: 'uppercase' }}>Online</span>
+                     </div>
                    )}
+                   
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', border: '2px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                         {u.avatar_url ? (
+                           <img src={u.avatar_url} alt={u.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                         ) : (
+                           <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-secondary)' }}>{u.full_name?.substring(0, 1).toUpperCase()}</span>
+                         )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>{u.full_name}</h3>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>Registered Software Engineer</p>
+                      </div>
+                   </div>
+
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                         <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Validity</span>
+                         <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-color)' }}>{u.total_score}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                         <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Status</span>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                            <Clock size={12} />
+                            <span>{isOnline ? 'Active Now' : `Seen ${formatLastSeen(u.last_seen)}`}</span>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                      <MapPin size={16} />
+                      {u.groups ? (
+                        <span>Assigned to Cohort: <strong style={{ color: 'var(--text-color)' }}>{u.groups.module_code}</strong></span>
+                      ) : (
+                        <span>Awaiting Module Assignment</span>
+                      )}
+                   </div>
                 </div>
-             </div>
-           ))}
+              )
+            })}
          </div>
        )}
     </div>

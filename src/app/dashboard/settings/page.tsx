@@ -91,7 +91,7 @@ export default function SettingsPage() {
        setSuccess(true)
        setTimeout(() => setSuccess(false), 3000)
      } catch (err: any) {
-       setError("Biometric capture failed dynamically: " + err.message)
+       setError("Image upload failed: " + err.message)
      } finally {
        setUploadingAvatar(false)
      }
@@ -134,24 +134,23 @@ export default function SettingsPage() {
        
        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
          <Settings size={28} color="var(--primary-color)" />
-         <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: 800 }}>Global Account Hierarchy</h1>
+         <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: 800 }}>Settings</h1>
        </div>
        
        {error && <TransientError message={error} />}
        
        {/* 1. PERSONAL INFO ZONE */}
        <div className="auth-card" style={{ maxWidth: '100%', margin: 0, borderTop: '4px solid var(--primary-color)' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 600 }}>Personal Identity Boundaries</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Manage how your algorithmic signature represents itself to peers across GroupFlow.</p>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 600 }}>Personal Information</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Manage your profile details and how you appear to others on GroupFlow.</p>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '1.5rem' }}>
              <div style={{ position: 'relative', width: '100px', height: '100px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', border: '2px dashed var(--accent-color)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Biometric Vector" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={avatarUrl} alt="Profile Picture" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <Camera size={32} color="var(--text-secondary)" />
                 )}
-                {/* Native OS Sensor injection */}
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -159,37 +158,37 @@ export default function SettingsPage() {
                   onChange={handleAvatarUpload} 
                   disabled={uploadingAvatar} 
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
-                  title="Upload / Snap Representation"
+                  title="Upload Profile Picture"
                 />
              </div>
              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>Network Object Binding Status</p>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Accepts native OS hardware sensors.<br/>Images uniquely computed out locally before transmission.</p>
-                {uploadingAvatar && <p style={{ fontSize: '0.75rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>Executing device-local compression...</p>}
+                <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>Profile Picture</p>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Click to upload an image or take a photo.<br/>Images are automatically compressed.</p>
+                {uploadingAvatar && <p style={{ fontSize: '0.75rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>Uploading image...</p>}
              </div>
           </div>
 
           <form onSubmit={handleUpdateProfile}>
             <div className="form-group" style={{ maxWidth: '400px' }}>
-               <label className="form-label">Active Full Name</label>
+               <label className="form-label">Full Name</label>
                <input 
                  type="text" 
                  className="form-input" 
                  value={fullName}
                  onChange={e => setFullName(e.target.value)}
-                 placeholder="Enter your legal representation"
+                 placeholder="Enter your name"
                />
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
               <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto' }}>
                  <Save size={18} />
-                 {saving ? 'Syncing Networks...' : 'Save Configuration'}
+                 {saving ? 'Saving...' : 'Save Settings'}
               </button>
               
               {success && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success-color)', fontSize: '0.875rem', fontWeight: 500 }}>
-                   <CheckCircle2 size={16} /> Broadcasted globally.
+                   <CheckCircle2 size={16} /> Successfully saved.
                 </div>
               )}
             </div>
@@ -200,9 +199,9 @@ export default function SettingsPage() {
        <div className="auth-card" style={{ maxWidth: '100%', margin: 0, borderLeft: '4px solid var(--accent-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Shield size={20} color="var(--accent-color)" />
-            <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 600 }}>Security Constraints</h2>
+            <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 600 }}>Security</h2>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Your authentication is strictly delegated to external secure providers.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Manage your sign-in methods.</p>
           
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
              <div style={{ backgroundColor: 'black', color: 'white', padding: '0.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -220,28 +219,28 @@ export default function SettingsPage() {
        <div className="auth-card" style={{ maxWidth: '100%', margin: 0, border: '1px solid rgba(239, 68, 68, 0.2)', backgroundColor: 'transparent' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <AlertTriangle size={20} color="var(--danger-color)" />
-            <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 600, color: 'var(--danger-color)' }}>Data Portability & Deletion</h2>
+            <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 600, color: 'var(--danger-color)' }}>Data & Privacy</h2>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Export your entire algorithmic footprint, or securely wipe your existence from the network.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Download your data or request account deletion.</p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
              
              {/* Read / Export Array */}
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                   <span style={{ fontWeight: 600 }}>Export Configuration Archive</span>
-                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Download a full JSON compilation of all your tasks and evidence.</span>
+                   <span style={{ fontWeight: 600 }}>Export Data</span>
+                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Download a complete JSON record of your tasks.</span>
                 </div>
                 <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}>
-                   <Download size={16} /> Dump Payload
+                   <Download size={16} /> Download
                 </button>
              </div>
 
              {/* Delete Matrix */}
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                   <span style={{ fontWeight: 600, color: 'var(--danger-color)' }}>Permanent Obliteration</span>
-                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Eradicate your profile, auth-token, and data streams instantly.</span>
+                   <span style={{ fontWeight: 600, color: 'var(--danger-color)' }}>Delete Account</span>
+                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Permanently remove your profile and data.</span>
                 </div>
                 <button 
                   className="btn" 
@@ -260,14 +259,14 @@ export default function SettingsPage() {
          <div className="modal-overlay" style={{ zIndex: 9999 }}>
             <div className="modal-content" style={{ maxWidth: '400px', borderTop: '4px solid var(--danger-color)' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--danger-color)' }}>Confirm Annihilation</h3>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--danger-color)' }}>Delete Account</h3>
                   <button onClick={() => setIsDeleteModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                      <X size={20} />
                   </button>
                </div>
                
                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                 This action is irreversible. It bypasses soft-deletes and natively destroys your global Supabase Auth token. You will instantly lose access to all modules and your Validity Score.
+                 This action is irreversible. All your data, profile, and active modules will be permanently removed.
                </p>
                
                <div className="form-group">
@@ -292,7 +291,7 @@ export default function SettingsPage() {
                    disabled={isDeleting || deleteConfirmation !== 'DELETE'}
                    style={{ backgroundColor: 'var(--danger-color)', color: 'white', opacity: deleteConfirmation === 'DELETE' ? 1 : 0.5 }}
                  >
-                   {isDeleting ? 'Obliterating...' : 'Permanently Terminate'}
+                   {isDeleting ? 'Deleting...' : 'Delete Forever'}
                  </button>
                </div>
             </div>
