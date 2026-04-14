@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 import { useTheme, PALETTES } from '../context/ThemeContext'
+import NotificationBell from './NotificationBell'
 
 function DigitalClock() {
   const [time, setTime] = useState<Date | null>(null)
@@ -115,9 +116,12 @@ export default function Sidebar({ user }: { user: any }) {
              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 4px var(--success)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
            </div>
          )}
-         <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
-            {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
-         </button>
+         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <NotificationBell />
+            <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
+               {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
+            </button>
+         </div>
       </div>
 
       {/* Main Navigation */}

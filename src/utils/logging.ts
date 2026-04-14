@@ -17,11 +17,13 @@ export async function logActivity(
   groupId: string | null, 
   actionType: ActionType, 
   description: string, 
-  metadata: any = {}
+  metadata: any = {},
+  notifyUserId?: string // Optional: targeted notification
 ) {
   const supabase = createClient()
   
-  const { error } = await supabase
+  // 1. Audit Log Entry
+  const { error: logError } = await supabase
     .from('activity_log')
     .insert({
       user_id: userId,
@@ -31,7 +33,20 @@ export async function logActivity(
       metadata
     })
 
-  if (error) {
-    console.error('Activity Logging Failed:', error)
+  if (logError) console.error('Audit Logging Failed:', logError)
+
+  // 2. Real-time Notification Trigger (if applicable)
+  if (notifyUserId) {
+    await supabase.from('notifications').insert({
+      user_id: notifyUserId,
+      type: actionType,
+      title: actionType.replace('_', ' ').toUpperCase(),
+      message: description,
+      link: '/dashboard'
+    })
+  } else if (actionType === 'task_created' || actionType === 'privacy_toggled') {
+    // Broadcast notification to group members (conceptual)
+    // For a real app, we'd use an Edge Function to scatter-gather.
+    // For now, we target the current group if needed.
   }
 }

@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import KanbanBoard from '@/components/KanbanBoard'
-import { redirect } from 'next/navigation'
+import DashboardHome from '@/components/DashboardHome'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -18,10 +17,10 @@ export default async function DashboardPage() {
   if (!profile?.group_id) {
     return (
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>Welcome to GroupFlow</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>You are not assigned to a group module yet.</p>
+        <h2 style={{ marginBottom: '1rem', fontSize: '2rem', fontWeight: 900 }}>Welcome to GroupFlow</h2>
+        <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', fontWeight: 500 }}>Your workspace is currently a blank canvas. Join a project module to begin orchestrating.</p>
         
-        <Link href="/dashboard/join" className="btn btn-primary" style={{ padding: '0.75rem 2rem', width: 'auto', fontSize: '1rem' }}>
+        <Link href="/dashboard/join" className="btn btn-primary" style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem', borderRadius: '16px' }}>
            Join a Module / Group
         </Link>
       </main>
@@ -29,20 +28,8 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="main-content" style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-         <div>
-           <h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Sprint Board</h1>
-           <p style={{ color: 'var(--text-secondary)' }}>Drag and drop tasks. Github webhooks will automatically advance tracked technical issues.</p>
-         </div>
-         <div style={{ textAlign: 'right' }}>
-           <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Your Validity Score</div>
-           <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent-color)' }}>{profile.total_score}</div>
-         </div>
-      </div>
-
-      {/* Render the core feature! */}
-      <KanbanBoard groupId={profile.group_id} />
+    <main className="main-content">
+      <DashboardHome groupId={profile.group_id} initialScore={profile.total_score || 0} />
     </main>
   )
 }

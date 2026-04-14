@@ -6,17 +6,18 @@ import {
   Settings, Save, CheckCircle2, Shield, Download, Trash2, 
   Key, AlertTriangle, X, Camera, Palette as PaletteIcon, 
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
-  UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History
+  UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail
 } from 'lucide-react'
 import ActiveUsersList from '@/components/ActiveUsersList'
 import ActivityLogView from '@/components/ActivityLogView'
+import EmailCenter from '@/components/EmailCenter'
 import TransientError from '@/components/TransientError'
 import imageCompression from 'browser-image-compression'
 import { useTheme, PALETTES } from '@/context/ThemeContext'
 import { kickUser } from '../join/actions'
 import { logActivity } from '@/utils/logging'
 
-type Tab = 'identity' | 'pulse' | 'activity' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
+type Tab = 'identity' | 'pulse' | 'activity' | 'intercom' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab ] = useState<Tab>('identity')
@@ -236,9 +237,10 @@ export default function SettingsPage() {
        <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
           {[
             { id: 'identity', label: 'Profile', icon: User },
-            { id: 'pulse', label: 'Live Pulse', icon: PulseIcon },
-            { id: 'activity', label: 'My Activity', icon: History },
-            { id: 'team', label: 'Team Admin', icon: Shield, hidden: !isAdmin },
+            { id: 'pulse', label: 'Presence', icon: PulseIcon },
+            { id: 'activity', label: 'History', icon: History },
+            { id: 'intercom', label: 'Intercom', icon: Mail },
+            { id: 'team', label: 'Admin', icon: Shield, hidden: !isAdmin },
             { id: 'workspace', label: 'My Team', icon: MapPin },
             { id: 'appearance', label: 'Appearance', icon: PaletteIcon },
             { id: 'security', label: 'Security', icon: Shield },
@@ -263,6 +265,14 @@ export default function SettingsPage() {
 
         {/* Content Panels */}
         <div style={{ minHeight: '400px' }}>
+
+           {activeTab === 'intercom' && profile && (
+             <div className="auth-card" style={{ maxWidth: '100%' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Direct Intercom & Mail</h2>
+                <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Management hub for automated reminders and verifiable PDF reports.</p>
+                <EmailCenter groupId={profile.group_id} profile={profile} />
+             </div>
+           )}
            
            {activeTab === 'activity' && profile && (
              <div className="auth-card" style={{ maxWidth: '100%' }}>

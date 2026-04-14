@@ -1,0 +1,145 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+import { Bell, Check, Clock, ExternalLink, Inbox } from 'lucide-react'
+import { useNotifications } from './NotificationProvider'
+
+export default function NotificationBell() {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div style={{ position: 'relative' }} ref={menuRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="nav-bubble"
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          cursor: 'pointer', 
+          position: 'relative',
+          padding: '0.5rem',
+          color: unreadCount > 0 ? 'var(--brand)' : 'var(--text-sub)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.2s'
+        }}
+      >
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <div style={{ 
+            position: 'absolute', 
+            top: '0', 
+            right: '0', 
+            background: 'var(--error)', 
+            color: 'white', 
+            fontSize: '10px', 
+            fontWeight: 800, 
+            width: '18px', 
+            height: '18px', 
+            borderRadius: '50%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            border: '2px solid var(--surface)',
+            boxShadow: '0 0 10px rgba(var(--error-rgb), 0.3)'
+          }}>
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </div>
+        )}
+      </button>
+
+      {isOpen && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '100%', 
+          right: '-10px', 
+          width: '320px', 
+          background: 'var(--surface)', 
+          border: '1px solid var(--border)', 
+          borderRadius: '16px', 
+          marginTop: '1rem', 
+          boxShadow: 'var(--shadow-lg)', 
+          zIndex: 1000,
+          animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          overflow: 'hidden'
+        }}>
+          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>Project Alerts</h3>
+             <button 
+               onClick={markAllAsRead} 
+               style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: 'var(--brand)', cursor: 'pointer', fontWeight: 600 }}
+             >
+                Clear All
+             </button>
+          </div>
+
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {notifications.length === 0 ? (
+              <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-sub)' }}>
+                 <Inbox size={32} style={{ marginBottom: '1rem', opacity: 0.3 }} />
+                 <p style={{ fontSize: '0.875rem' }}>No new signals detected.</p>
+              </div>
+            ) : (
+              notifications.map((notif) => (
+                <div 
+                  key={notif.id} 
+                  onClick={() => markAsRead(notif.id)}
+                  style={{ 
+                    padding: '1rem', 
+                    borderBottom: '1px solid var(--bg-main)', 
+                    cursor: 'pointer',
+                    background: notif.read ? 'transparent' : 'rgba(var(--brand-rgb), 0.03)',
+                    transition: 'background 0.2s'
+                  }}
+                  className="notif-item"
+                >
+                   <div style={{ display: 'flex', gap: '0.75rem' }}>
+                      <div style={{ marginTop: '0.2rem' }}>
+                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: notif.read ? 'transparent' : 'var(--brand)' }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: notif.read ? 'var(--text-sub)' : 'var(--text-main)' }}>{notif.title}</span>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>
+                               {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                         </div>
+                         <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{notif.message}</p>
+                      </div>
+                   </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          <div style={{ padding: '0.75rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+             <button style={{ background: 'none', border: 'none', fontSize: '0.7rem', color: 'var(--text-sub)', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center', width: '100%' }}>
+                <Clock size={12} /> View Full Timeline
+             </button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes popIn {
+          from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .notif-item:hover { background: var(--bg-main) !important; }
+      `}</style>
+    </div>
+  )
+}

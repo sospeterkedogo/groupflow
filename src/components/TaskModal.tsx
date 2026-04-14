@@ -13,12 +13,14 @@ export default function TaskModal({
   task, 
   groupId, 
   onClose,
-  onRefresh
+  onRefresh,
+  initialDueDate
 }: { 
   task: Task | null, 
   groupId: string,
   onClose: () => void,
-  onRefresh: () => void
+  onRefresh: () => void,
+  initialDueDate?: string
 }) {
   const isEditMode = !!task
 
@@ -27,7 +29,13 @@ export default function TaskModal({
   const [status, setStatus] = useState<TaskStatus>(task?.status || 'To Do')
   const [isCodingTask, setIsCodingTask] = useState(task ? task.is_coding_task : true)
   const [assignees, setAssignees] = useState<string[]>(task?.assignees || [])
-  const [dueDate, setDueDate] = useState<string>(task?.due_date ? task.due_date.substring(0, 10) : '')
+  const [dueDate, setDueDate] = useState<string>(
+    task?.due_date 
+      ? task.due_date.substring(0, 10) 
+      : initialDueDate 
+        ? initialDueDate 
+        : ''
+  )
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [members, setMembers] = useState<any[]>([])
   const { onlineUsers } = usePresence()
@@ -265,7 +273,7 @@ export default function TaskModal({
           groupId,
           'artifact_uploaded',
           `Removed an attachment from task`,
-          { task_id: task.id }
+          { task_id: task?.id || 'deleted' }
         )
       }
     }

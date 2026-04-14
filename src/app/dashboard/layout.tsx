@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { PresenceProvider } from '@/components/PresenceProvider'
+import { NotificationProvider } from '@/components/NotificationProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
 
 import OnboardingWrapper from '@/components/OnboardingWrapper'
@@ -34,11 +35,13 @@ export default async function DashboardLayout({
       <OnboardingWrapper profile={profile} user={user}>
         <div className="dashboard-layout">
           <PresenceProvider user={user}>
-            <Sidebar user={user} />
-            
-            <main className="main-content">
-              {children}
-            </main>
+            <NotificationProvider>
+              <Sidebar user={user} />
+              
+              <main className="main-content">
+                {children}
+              </main>
+            </NotificationProvider>
           </PresenceProvider>
         </div>
       </OnboardingWrapper>
