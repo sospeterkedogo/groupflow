@@ -67,15 +67,18 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   // --- EXPORT LOGIC ---
   const exportToCSV = () => {
     const headers = ['Task ID', 'Title', 'Status', 'Assignees', 'Due Date', 'Evidence Count', 'Created At']
-    const rows = tasks.map(t => [
-      t.id,
-      t.title,
-      t.status,
-      t.assignees?.join('; ') || 'Unassigned',
-      t.due_date || 'N/A',
-      artifacts.filter(a => a.task_id === t.id).length,
-      t.created_at
-    ])
+    const rows = tasks.map(t => {
+      const assigneeNames = t.assignees?.map((id: string) => members.find(m => m.id === id)?.full_name || 'Anonymous').join('; ')
+      return [
+        t.id,
+        t.title,
+        t.status,
+        assigneeNames || 'Unassigned',
+        t.due_date || 'N/A',
+        artifacts.filter(a => a.task_id === t.id).length,
+        t.created_at
+      ]
+    })
 
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n")
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })

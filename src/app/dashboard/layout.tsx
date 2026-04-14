@@ -4,6 +4,8 @@ import Sidebar from '@/components/Sidebar'
 import { PresenceProvider } from '@/components/PresenceProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
 
+import OnboardingWrapper from '@/components/OnboardingWrapper'
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -18,7 +20,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('theme_config, custom_bg_url')
+    .select('theme_config, custom_bg_url, full_name, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -29,15 +31,17 @@ export default async function DashboardLayout({
 
   return (
     <ThemeProvider initialTheme={initialTheme}>
-      <div className="dashboard-layout">
-        <PresenceProvider user={user}>
-          <Sidebar user={user} />
-          
-          <main className="main-content">
-            {children}
-          </main>
-        </PresenceProvider>
-      </div>
+      <OnboardingWrapper profile={profile} user={user}>
+        <div className="dashboard-layout">
+          <PresenceProvider user={user}>
+            <Sidebar user={user} />
+            
+            <main className="main-content">
+              {children}
+            </main>
+          </PresenceProvider>
+        </div>
+      </OnboardingWrapper>
     </ThemeProvider>
   )
 }
