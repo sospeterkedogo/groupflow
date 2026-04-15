@@ -1,4 +1,4 @@
-import { createClient } from './supabase/client'
+import { createBrowserSupabaseClient } from './supabase/client'
 
 export type ActionType = 
   | 'task_created' 
@@ -20,7 +20,7 @@ export async function logActivity(
   metadata: any = {},
   notifyUserId?: string // Optional: targeted notification
 ) {
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
   
   // 1. Audit Log Entry
   const { error: logError } = await supabase

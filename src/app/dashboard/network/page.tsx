@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Search, MapPin, Clock, LayoutGrid, List, SlidersHorizontal, User } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 
@@ -13,7 +13,7 @@ export default function NetworkPage() {
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [currentUserGroup, setCurrentUserGroup] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
   const { onlineUsers } = usePresence()
 
   // Relative Time Decoder helper

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   BarChart3, 
   Users, 
@@ -23,7 +23,7 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
   const [tasks, setTasks] = useState<any[]>([])
   const [members, setMembers] = useState<any[]>([])
   const [artifacts, setArtifacts] = useState<any[]>([])
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
     fetchData()

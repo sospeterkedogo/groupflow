@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import {
   BarChart3, Users, FileCheck, AlertCircle, Download, Printer,
   ChevronRight, TrendingUp, ShieldCheck, Zap, Clock, UserCircle, CheckCircle2, Circle, Timer
@@ -43,7 +43,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [members, setMembers] = useState<any[]>([])
   const [artifacts, setArtifacts] = useState<any[]>([])
   const { onlineUsers } = usePresence()
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   useEffect(() => { fetchData() }, [groupId])
 

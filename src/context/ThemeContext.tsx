@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { logActivity } from '@/utils/logging'
 
 export type Palette = {
@@ -110,7 +110,7 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
   })
   
   const [customBg, setCustomBg] = useState<string | null>(initialTheme?.bgUrl || null)
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
     if (initialTheme?.palette) {

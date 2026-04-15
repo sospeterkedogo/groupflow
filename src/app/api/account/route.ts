@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@/utils/supabase/server'
+import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function GET(req: Request) {
   try {
-    const supabase = await createServerClient()
+    const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const supabase = await createServerClient()
+    const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

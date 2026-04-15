@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   User, 
   MapPin, 
@@ -22,7 +22,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
   const [profile, setProfile] = useState<any>(null)
   const [tasks, setTasks] = useState<any[]>([])
   const { onlineUsers } = usePresence()
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
     fetchData()

@@ -1,11 +1,11 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 export async function createGroup(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return redirect('/login')
 
@@ -38,7 +38,7 @@ export async function createGroup(formData: FormData) {
 }
 
 export async function joinGroup(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return redirect('/login')
 
@@ -78,7 +78,7 @@ export async function joinGroup(formData: FormData) {
 }
 
 export async function kickUser(userId: string) {
-  const supabase = await createClient()
+  const supabase = await createServerSupabaseClient()
   const { data: { user: adminUser } } = await supabase.auth.getUser()
   if (!adminUser) return { error: 'Not authenticated' }
 
@@ -124,8 +124,8 @@ export async function kickUser(userId: string) {
 }
 
 export async function sendJoinRequest(groupId: string, senderName: string) {
-  const { createAdminClient, createClient } = await import('@/utils/supabase/server')
-  const supabase = await createClient()
+  const { createAdminClient, createServerSupabaseClient } = await import('@/utils/supabase/server')
+  const supabase = await createServerSupabaseClient()
   const adminSupabase = await createAdminClient()
 
   // 1. Verify the requester is actually logged in

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { User, MapPin, Activity, Award, Mail, Calendar, ShieldCheck } from 'lucide-react'
 
 import Link from 'next/link'
@@ -10,7 +10,7 @@ export default function ProfilePage() {
    const [profile, setProfile] = useState<any>(null)
    const [loading, setLoading] = useState(true)
 
-   const supabase = createClient()
+   const supabase = createBrowserSupabaseClient()
 
    useEffect(() => {
       fetchProfile()

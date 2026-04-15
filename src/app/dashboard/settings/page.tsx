@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import {
   Settings, Save, CheckCircle2, Shield, Download, Trash2,
@@ -52,7 +52,7 @@ export default function SettingsPage() {
   const [pendingRequests, setPendingRequests] = useState<string[]>([])
   const [sentRequests, setSentRequests] = useState<string[]>([])
 
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
     fetchUserData()
