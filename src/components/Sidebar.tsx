@@ -27,7 +27,16 @@ export default function Sidebar({ user }: { user: any }) {
   const [isOnline, setIsOnline] = useState(true)
   const pathname = usePathname()
   const supabase = createClient()
-  const { theme, toggleTheme } = useTheme()
+  const { currentPalette, setPalette } = useTheme()
+
+  const toggleTheme = () => {
+    const paletteNames = ['Google Light', 'Deep Oceanic', 'Cyberpunk']
+    const currentIndex = paletteNames.indexOf(currentPalette.name)
+    const nextIndex = (currentIndex + 1) % paletteNames.length
+    setPalette(paletteNames[nextIndex])
+  }
+
+  const isDark = currentPalette.name !== 'Google Light'
 
   useEffect(() => {
     fetchProfile()
@@ -197,7 +206,7 @@ export default function Sidebar({ user }: { user: any }) {
                style={{ flex: 1, padding: '0.7rem', borderRadius: '14px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                title="Switch Perception"
              >
-               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
              </button>
              <button 
                onClick={handleSignOut}
