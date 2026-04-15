@@ -60,11 +60,23 @@ export default function Sidebar({ user }: { user: any }) {
   }, [user.id])
 
   const fetchProfile = async () => {
-    const { data, error } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
-    if (error) {
-      console.error('Profile fetch error:', error)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*, groups(*)')
+        .eq('id', user.id)
+        .single()
+      
+      if (error) {
+        console.error('Sidebar fetch error:', error.message)
+        // If it's a fetch error, we don't want to clear what we might have
+        return
+      }
+      
+      if (data) setProfile(data)
+    } catch (err) {
+      console.error('Sidebar unexpected error:', err)
     }
-    if (data) setProfile(data)
   }
 
   const handleSignOut = async () => {
