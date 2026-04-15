@@ -1,209 +1,59 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import {
-  LayoutDashboard,
-  Users,
-  Settings,
-  UserCircle,
-  LogOut,
-  ChevronLeft,
+import { 
+  LayoutDashboard, 
+  Users, 
+  BarChart3, 
+  UserCircle, 
+  Settings, 
+  LogOut, 
+  ChevronLeft, 
   ChevronRight,
-  FolderDot,
-  Plus,
-  BarChart3,
-  Palette as PaletteIcon
+  Activity,
+  User,
+  Shield,
+  Moon,
+  Sun
 } from 'lucide-react'
-import { usePresence } from './PresenceProvider'
-import { useTheme, PALETTES } from '../context/ThemeContext'
-import NotificationBell from './NotificationBell'
-
-
-import confetti from 'canvas-confetti'
-
-const QUIZ_QUESTIONS = [
-  {
-    q: "Which hook handles side effects?",
-    a: ["useState", "useEffect", "useMemo", "useRef"],
-    correct: 1
-  },
-  {
-    q: "Default Next.js dev port?",
-    a: ["8080", "5000", "3000", "8000"],
-    correct: 2
-  },
-  {
-    q: "Icon library in this app?",
-    a: ["FontAwesome", "Lucide", "Heroicons", "Material"],
-    correct: 1
-  },
-  {
-    q: "The 'L' in LCA stands for?",
-    a: ["Level", "Linear", "Life", "Logic"],
-    correct: 2
-  },
-  {
-    q: "Primary GroupFlow Database?",
-    a: ["MongoDB", "Supabase", "Firebase", "MySQL"],
-    correct: 1
-  }
-]
-
-function SidebarQuiz() {
-  const [currentQ, setCurrentQ] = useState(0)
-  const [score, setScore] = useState(0)
-  const [quizState, setQuizState] = useState<'intro' | 'active' | 'complete'>('intro')
-  const [selected, setSelected] = useState<number | null>(null)
-
-  const handleAnswer = (idx: number) => {
-    if (selected !== null) return
-    setSelected(idx)
-    
-    if (idx === QUIZ_QUESTIONS[currentQ].correct) {
-      setScore(s => s + 20)
-    }
-
-    setTimeout(() => {
-      if (currentQ < QUIZ_QUESTIONS.length - 1) {
-        setCurrentQ(c => c + 1)
-        setSelected(null)
-      } else {
-        setQuizState('complete')
-      }
-    }, 800)
-  }
-
-  const reset = () => {
-    if (score === 100) {
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#00d4ff', '#00b4d8', '#90e0ef']
-      })
-    }
-    setCurrentQ(0)
-    setScore(0)
-    setQuizState('intro')
-    setSelected(null)
-  }
-
-  if (quizState === 'intro') {
-    return (
-      <div style={{ padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid var(--border)', margin: '1rem' }}>
-        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Technical Break</div>
-        <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)' }}>Ready for a 60s Quiz?</div>
-        <button onClick={() => setQuizState('active')} className="btn btn-primary" style={{ padding: '0.4rem', fontSize: '0.75rem' }}>Start Quiz</button>
-      </div>
-    )
-  }
-
-  if (quizState === 'complete') {
-    return (
-      <div style={{ padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid var(--border)', margin: '1rem', textAlign: 'center' }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)', marginBottom: '0.5rem' }}>{score}%</div>
-        <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-sub)' }}>
-          {score === 100 ? 'Academic Dominance!' : 'Keep building!'}
-        </div>
-        <button onClick={reset} className="btn btn-secondary" style={{ padding: '0.4rem', fontSize: '0.75rem' }}>
-          {score === 100 ? 'Celebrate & Reset' : 'Try Again'}
-        </button>
-      </div>
-    )
-  }
-
-  const q = QUIZ_QUESTIONS[currentQ]
-
-  return (
-    <div style={{ padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid var(--border)', margin: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--brand)' }}>Q: {currentQ + 1}/5</span>
-        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)' }}>SCORE: {score}</span>
-      </div>
-      <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-main)', minHeight: '2.5rem' }}>{q.q}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-        {q.a.map((ans, i) => (
-          <button
-            key={i}
-            onClick={() => handleAnswer(i)}
-            disabled={selected !== null}
-            style={{
-              padding: '0.5rem',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              background: selected === i 
-                ? (i === q.correct ? 'var(--success)' : 'var(--error)')
-                : 'var(--bg-sub)',
-              color: selected === i ? 'white' : 'var(--text-sub)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            {ans}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
+import { useTheme } from '@/context/ThemeContext'
 
 export default function Sidebar({ user }: { user: any }) {
-  const { currentPalette, setPalette } = useTheme()
   const [isOpen, setIsOpen] = useState(true)
-  const [groups, setGroups] = useState<any[]>([])
   const [profile, setProfile] = useState<any>(null)
+  const [isOnline, setIsOnline] = useState(true)
   const pathname = usePathname()
   const supabase = createClient()
-  const { onlineUsers } = usePresence()
-  const isOnline = onlineUsers.has(user.id)
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
-    fetchInitialData()
+    fetchProfile()
+    
+    if (window.innerWidth <= 768) {
+      setIsOpen(false)
+    }
 
-    // Realtime subscriptions for TRUE instant UI changes
-    const channel = supabase.channel('sidebar_sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'groups' }, () => {
-        fetchGroups()
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, () => {
-        fetchProfile()
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [user.id, pathname])
-
-  const switchActiveGroup = async (groupId: string) => {
-    if (profile?.group_id === groupId) return
-
-    // 1. Optimistic Update ensuring fast UI snap.
-    setProfile((p: any) => ({ ...p, group_id: groupId }))
-
-    // 2. Perform Backend Profile Update securely modifying absolute project binding.
-    await supabase.from('profiles').update({ group_id: groupId }).eq('id', user.id)
-
-    // 3. Fire absolute browser refresh to physically snap the Kanban pipeline to new target.
-    window.location.href = '/dashboard'
-  }
-
-  const fetchGroups = async () => {
-    const { data } = await supabase.from('groups').select('*').order('created_at', { ascending: false })
-    if (data) setGroups(data)
-  }
+    // Simple online simulation
+    const interval = setInterval(() => {
+      setIsOnline(true)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [user.id])
 
   const fetchProfile = async () => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    const { data, error } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
+    if (error) {
+      console.error('Profile fetch error:', error)
+    }
     if (data) setProfile(data)
   }
 
-  const fetchInitialData = () => {
-    fetchGroups()
-    fetchProfile()
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/login'
   }
 
   const navLinks = [
@@ -215,249 +65,150 @@ export default function Sidebar({ user }: { user: any }) {
   ]
 
   return (
-    <div className="sidebar-container" style={{ width: isOpen ? '280px' : '80px' }}>
-      {/* Header / Toggle */}
-      <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border)' }}>
-        {isOpen && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--brand)' }}>GroupFlow</Link>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 4px var(--success)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
-          </div>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <NotificationBell />
-          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
-            {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Navigation */}
-      <div style={{ padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderBottom: '1px solid var(--border)' }}>
-        {navLinks.map(link => {
-          const isActive = pathname === link.path
-          return (
-            <Link
-              key={link.name}
-              href={link.path}
-              title={!isOpen ? link.name : ''}
-              className={`nav-bubble ${isActive ? 'active' : ''}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: isOpen ? 'flex-start' : 'center',
-                gap: isOpen ? '0.75rem' : '0',
-                padding: isOpen ? '0.65rem 1rem' : '0',
-                width: isOpen ? '100%' : '48px',
-                height: isOpen ? 'auto' : '48px',
-                margin: isOpen ? '0' : '0 auto',
-                background: isActive ? 'var(--brand)' : 'transparent',
-                color: isActive ? 'white' : 'var(--text-sub)',
-                borderRadius: isOpen ? '12px' : '50%',
-                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                border: 'none',
-                boxShadow: isActive ? '0 8px 16px rgba(var(--brand-rgb), 0.3)' : 'none',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <link.icon size={20} color={isActive ? 'white' : 'var(--text-sub)'} />
-              {isOpen && <span style={{ fontWeight: 600 }}>{link.name}</span>}
-
-              {/* Glossy Overlay for Active State */}
-              {isActive && (
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(45deg, rgba(255,255,255,0.1), transparent)', pointerEvents: 'none' }} />
-              )}
-            </Link>
-          )
-        })}
-      </div>
-
-      <div style={{ overflowY: 'auto', flex: 1, padding: '1rem 0' }}>
-         {/* Dynamic Projects Hub */}
-         <div style={{ padding: '0 1rem' }}>
-            {isOpen && (
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingLeft: '1rem', paddingRight: '0.5rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Teams</span>
-                  <Link href="/dashboard/join" title="Join / Create Project">
-                     <Plus size={16} color="var(--text-sub)" />
-                  </Link>
-               </div>
-            )}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-               {groups.length === 0 ? (
-                  [1, 2, 3].map(i => (
-                     <div key={i} className="skeleton" style={{ height: isOpen ? '42px' : '40px', borderRadius: isOpen ? 'var(--radius)' : '50%', margin: isOpen ? '0' : '4px auto', width: isOpen ? '100%' : '40px' }} />
-                  ))
-               ) : (
-                  groups.map(group => {
-                     const isActiveProject = profile?.group_id === group.id
-                     return (
-                        <Link
-                           key={group.id}
-                           href={`/dashboard/analytics/${group.id}`}
-                           style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: isOpen ? '1rem' : '0',
-                              padding: isOpen ? '0.5rem 1rem' : '0',
-                              margin: isOpen ? '0' : '4px auto',
-                              width: isOpen ? '100%' : '40px',
-                              height: isOpen ? 'auto' : '40px',
-                              borderRadius: isOpen ? 'var(--radius)' : '50%',
-                              cursor: 'pointer',
-                              backgroundColor: isActiveProject ? 'rgba(var(--brand-rgb), 0.1)' : 'transparent',
-                              border: isActiveProject ? '1px solid rgba(var(--brand-rgb), 0.2)' : '1px solid transparent',
-                              justifyContent: isOpen ? 'flex-start' : 'center',
-                              transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                              boxShadow: isActiveProject && !isOpen ? '0 0 12px rgba(var(--brand-rgb), 0.3)' : 'none',
-                              textDecoration: 'none'
-                           }}
-                           className={`project-bubble ${isActiveProject ? 'active-project' : ''}`}
-                        >
-                           <FolderDot size={18} color={isActiveProject ? 'var(--brand)' : 'var(--text-sub)'} />
-                           {isOpen && (
-                              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                 <span style={{ fontSize: '0.875rem', fontWeight: isActiveProject ? 600 : 500, color: isActiveProject ? 'var(--text-main)' : 'var(--text-sub)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                                    {group.name}
-                                 </span>
-                                 <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>{group.module_code}</span>
-                              </div>
-                           )}
-                        </Link>
-                     )
-                  })
-               )}
-            </div>
-         </div>
-
-         {/* Break Point Fun - Moved below teams */}
-         {isOpen && <SidebarQuiz />}
-      </div>
-
-
-      {/* Bottom Identity & Actions — single unified row */}
-      <div style={{
-        padding: '0.6rem 0.75rem',
-        borderTop: '1px solid var(--border)',
-        display: 'flex',
+    <div style={{ display: 'contents' }}>
+      {/* Mobile Top Header */}
+      <div className="mobile-header glass" style={{
+        display: 'none',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 'var(--h-nav)',
+        zIndex: 1000,
         alignItems: 'center',
-        gap: '0.5rem',
-        flexShrink: 0,
+        justifyContent: 'space-between',
+        padding: '0 1.25rem',
+        borderBottom: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
       }}>
-        {/* Profile Avatar Bubble */}
-        <Link
-          href="/dashboard/profile"
-          title={profile?.full_name || 'My Profile'}
-          style={{
-            flex: isOpen ? 1 : 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-            padding: '0.4rem 0.6rem',
-            borderRadius: '12px',
-            background: 'var(--bg-main)',
-            border: '1px solid var(--border)',
-            textDecoration: 'none',
-            minWidth: '40px',
-            overflow: 'hidden',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          }}
-          className="identity-pill"
-        >
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div style={{
-              width: '30px',
-              height: '30px',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              border: '2px solid var(--brand)',
-              background: 'var(--surface)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <UserCircle size={18} color="var(--text-sub)" />
-              )}
-            </div>
-            <div style={{
-              position: 'absolute',
-              bottom: '-1px',
-              right: '-1px',
-              width: '9px',
-              height: '9px',
-              borderRadius: '50%',
-              backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)',
-              border: '2px solid var(--bg-main)',
-              boxShadow: isOnline ? '0 0 4px var(--success)' : 'none'
-            }} />
-          </div>
-          {isOpen && (
-            <div style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {profile?.full_name || 'Anonymous'}
-              </div>
-              <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Profile
-              </div>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px' }}>
+            <Activity size={24} />
+          </button>
+          <span style={{ fontWeight: 900, color: 'var(--brand)', fontSize: '1.2rem', letterSpacing: '-0.04em' }}>GroupFlow</span>
+        </div>
+        <Link href="/dashboard/profile" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid var(--brand)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <UserCircle size={24} color="var(--text-sub)" />
           )}
         </Link>
+      </div>
 
-        {/* Theme Switcher Bubble */}
-        <button
-          onClick={() => {
-            const currentIndex = PALETTES.findIndex(p => p.name === currentPalette.name)
-            const nextIndex = (currentIndex + 1) % PALETTES.length
-            setPalette(PALETTES[nextIndex].name)
-          }}
-          title={`Theme: ${currentPalette.name}`}
-          style={{
-            width: '38px',
-            height: '38px',
-            flexShrink: 0,
-            background: 'rgba(var(--brand-rgb), 0.1)',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--brand)',
-            borderRadius: '12px',
-            transition: 'all 0.25s',
-          }}
-          className="theme-bubble"
-        >
-          <PaletteIcon size={17} />
-        </button>
-
-        {/* Logout Bubble */}
-        <form action="/auth/signout" method="post" style={{ flexShrink: 0 }}>
-          <button
-            type="submit"
-            title="Sign Out"
-            style={{
-              width: '38px',
-              height: '38px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--error)',
-              borderRadius: '12px',
-              transition: 'all 0.25s',
-            }}
-            className="logout-bubble"
+      <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`} style={{ 
+        width: isOpen ? '280px' : '80px',
+        maxWidth: '85vw',
+        height: 'var(--vh-dynamic)',
+        backgroundColor: 'var(--bg-sub)',
+        borderRight: '1px solid var(--border)',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: 50
+      }}>
+        {/* Header / Toggle */}
+        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border)' }}>
+          {isOpen && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--brand)' }}>GroupFlow</Link>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 4px var(--success)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
+            </div>
+          )}
+          <button 
+            onClick={() => setIsOpen(!isOpen)}
+            style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex' }}
+            className="hover-card"
           >
-            <LogOut size={17} />
+            {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
-        </form>
+        </div>
+
+        {/* Nav Links */}
+        <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {navLinks.map((link) => {
+            const isActive = pathname === link.path
+            return (
+              <Link 
+                key={link.path}
+                href={link.path}
+                className={`nav-bubble ${isActive ? 'active-project' : ''}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '0.75rem 1.5rem',
+                  color: isActive ? 'var(--brand)' : 'var(--text-sub)',
+                  backgroundColor: isActive ? 'rgba(56, 189, 248, 0.08)' : 'transparent',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  justifyContent: isOpen ? 'flex-start' : 'center'
+                }}
+                title={!isOpen ? link.name : ''}
+                onClick={() => { if (window.innerWidth <= 768) setIsOpen(false) }}
+              >
+                <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                {isOpen && <span>{link.name}</span>}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Footer / User Profile */}
+        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+           <div style={{ 
+             display: 'flex', 
+             alignItems: 'center', 
+             gap: '0.75rem', 
+             padding: isOpen ? '0.75rem' : '0', 
+             backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent',
+             borderRadius: '16px',
+             border: isOpen ? '1px solid var(--border)' : 'none',
+             justifyContent: isOpen ? 'flex-start' : 'center',
+             cursor: 'pointer'
+           }}
+           className="identity-pill"
+           onClick={() => window.location.href = '/dashboard/profile'}
+           >
+             <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 900, flexShrink: 0, overflow: 'hidden', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  profile?.full_name?.charAt(0) || 'U'
+                )}
+             </div>
+             {isOpen && (
+               <div style={{ overflow: 'hidden' }}>
+                 <div style={{ color: 'var(--text-main)', fontWeight: 800, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                   {profile?.full_name || 'Anonymous User'}
+                 </div>
+                 <div style={{ color: 'var(--success)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                   {isOnline ? 'Active Pulse' : 'Syncing...'}
+                 </div>
+               </div>
+             )}
+           </div>
+
+           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.75rem' }}>
+             <button 
+               onClick={toggleTheme}
+               className="theme-bubble"
+               style={{ flex: 1, padding: '0.7rem', borderRadius: '14px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               title="Switch Perception"
+             >
+               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+             </button>
+             <button 
+               onClick={handleSignOut}
+               className="logout-bubble"
+               style={{ flex: 1, padding: '0.7rem', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               title="Terminate Session"
+             >
+               <LogOut size={18} />
+             </button>
+           </div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -467,6 +218,25 @@ export default function Sidebar({ user }: { user: any }) {
         }
         .nav-bubble:active, .theme-bubble:active, .logout-bubble:active { transform: scale(0.95); }
         .identity-pill:hover { border-color: var(--brand) !important; }
+        
+        @media (max-width: 768px) {
+          .mobile-header { display: flex !important; }
+          .sidebar-container { 
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            z-index: 2000 !important;
+            background: var(--bg-main) !important;
+            box-shadow: 20px 0 50px rgba(0,0,0,0.4) !important;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            width: 280px !important;
+          }
+          .sidebar-container.open { transform: translateX(0); }
+          .sidebar-container.closed { transform: translateX(-100%); }
+        }
+
         .active-project {
           position: relative;
         }
@@ -488,7 +258,6 @@ export default function Sidebar({ user }: { user: any }) {
           100% { transform: scale(1); opacity: 0.2; }
         }
       `}</style>
-
     </div>
   )
 }

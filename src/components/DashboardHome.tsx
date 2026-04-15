@@ -109,31 +109,33 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
             )}
           </div>
           <div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '6px' }}>{greeting}, {profile?.full_name?.split(' ')[0] || 'there'}</h2>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h2 className="fluid-h1" style={{ fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '8px' }}>
+              {greeting}, {profile?.full_name?.split(' ')[0] || 'there'}
+            </h2>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                <span style={{ color: 'var(--brand)' }}>TEAM LEADER</span>
-               <span style={{ opacity: 0.3 }}>•</span>
+               <span style={{ opacity: 0.3 }} className="mobile-hide">•</span>
                <span>{profile?.group_id ? `${personalTaskCount} ACTIVE TASKS TO DO` : 'NO ACTIVE PROJECT'}</span>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
           {[
-            { icon: <Zap size={16} />, label: 'Points Earned', value: profile?.total_score || 0, color: 'var(--brand)', badge: 'TOP 5%', tip: 'Total points from your work' },
-            { icon: <TrendingUp size={16} />, label: 'Current Level', value: 'Senior', color: 'var(--success)', tip: 'Based on your recent work speed' },
-            { icon: <Award size={16} />, label: 'Achievements', value: 14, color: '#f59e0b', tip: 'Badges earned for helping and quality' }
+            { icon: <Zap size={16} />, label: 'Points', value: profile?.total_score || 0, color: 'var(--brand)', badge: 'TOP 5%', tip: 'Total points from your work' },
+            { icon: <TrendingUp size={16} />, label: 'Rank', value: 'Senior', color: 'var(--success)', tip: 'Based on your recent work speed' },
+            { icon: <Award size={16} />, label: 'Badges', value: 14, color: '#f59e0b', tip: 'Badges earned for helping and quality' }
           ].map((stat, i) => (
             <div key={i} className="stat-pill" data-tooltip={stat.tip} style={{
-              padding: '0.75rem 1.25rem', borderRadius: '18px', background: 'var(--bg-main)', border: '1px solid var(--border)', minWidth: '140px',
-              transition: 'transform 0.3s ease'
+              padding: '0.75rem 1rem', borderRadius: '18px', background: 'var(--bg-main)', border: '1px solid var(--border)', flex: '1 1 120px',
+              transition: 'transform 0.3s ease', minWidth: '100px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-sub)', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-sub)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>
                 <span style={{ color: stat.color, filter: 'drop-shadow(0 0 5px currentColor)' }}>{stat.icon}</span> {stat.label}
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)' }}>{stat.value}</div>
-                {stat.badge && <span style={{ fontSize: '0.6rem', color: stat.color, fontWeight: 900, padding: '2px 6px', background: 'rgba(56, 189, 248, 0.1)', borderRadius: '6px' }}>{stat.badge}</span>}
+                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-main)' }}>{stat.value}</div>
+                {stat.badge && <span className="mobile-hide" style={{ fontSize: '0.55rem', color: stat.color, fontWeight: 900, padding: '2px 6px', background: 'rgba(56, 189, 248, 0.1)', borderRadius: '6px' }}>{stat.badge}</span>}
               </div>
             </div>
           ))}
@@ -235,6 +237,10 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
       <style jsx>{`
          .hud-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--brand); }
          .stat-pill:hover { transform: scale(1.03); background: var(--surface); border-color: var(--brand); }
+         @media (max-width: 768px) {
+           .mobile-hide { display: none !important; }
+           .hud-card { padding: 1.25rem !important; }
+         }
        `}</style>
     </div>
   )

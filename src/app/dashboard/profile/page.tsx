@@ -50,11 +50,11 @@ export default function ProfilePage() {
       <div style={{ maxWidth: '900px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
 
          {/* Profile Header Block */}
-         <div className="auth-card" style={{ maxWidth: '100%', marginBottom: '2rem', padding: '3rem', position: 'relative', overflow: 'hidden' }}>
+         <div className="auth-card" style={{ maxWidth: '100%', marginBottom: '2rem', padding: 'clamp(1.5rem, 5vw, 3rem)', position: 'relative', overflow: 'hidden' }}>
             {/* Subtle Accent pattern */}
             <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', opacity: 0.05, filter: 'blur(40px)' }} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
                <div style={{ position: 'relative' }}>
                   <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'var(--bg-sub)', border: '4px solid var(--surface)', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                      {profile?.avatar_url ? (
@@ -66,17 +66,17 @@ export default function ProfilePage() {
                   <div style={{ position: 'absolute', bottom: '5px', right: '5px', width: '24px', height: '24px', borderRadius: '50%', background: 'var(--success)', border: '3px solid var(--surface)', boxShadow: 'var(--shadow-sm)' }} />
                </div>
 
-               <div>
-                  <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>{profile?.full_name}</h1>
-                  <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', margin: '0.25rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               <div style={{ flex: '1 1 300px' }}>
+                  <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{profile?.full_name}</h1>
+                  <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', margin: '0.5rem 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <ShieldCheck size={18} color="var(--brand)" />
                     {profile?.course_name || 'Software Engineer'} • {profile?.groups?.name || 'Unassigned Workspace'}
                   </p>
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)' }}>
                         <Mail size={14} /> {profile?.email}
                      </span>
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)' }}>
+                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)' }}>
                         <Calendar size={14} /> Joined {new Date(profile?.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
                      </span>
                   </div>

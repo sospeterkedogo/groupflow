@@ -239,40 +239,54 @@ export default function SettingsPage() {
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
+    <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
-        <Settings size={32} color="var(--brand)" />
-        <h1 style={{ fontSize: '2.25rem', margin: 0, fontWeight: 800, letterSpacing: '-0.02em' }}>Settings</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+        <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '12px' }}>
+          <Settings size={28} color="white" />
+        </div>
+        <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 900 }}>Settings</h1>
       </div>
 
       {error && <TransientError message={error} />}
 
       {/* Tab Navigation */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '0.5rem', 
+        borderBottom: '1px solid var(--border)', 
+        marginBottom: '2.5rem', 
+        overflowX: 'auto', 
+        paddingBottom: '0.75rem',
+        marginLeft: 'calc(var(--p-safe) * -1)',
+        marginRight: 'calc(var(--p-safe) * -1)',
+        paddingLeft: 'var(--p-safe)',
+        paddingRight: 'var(--p-safe)',
+        scrollbarWidth: 'none'
+      }}>
         {[
           { id: 'identity', label: 'Profile', icon: User },
           { id: 'pulse', label: 'Presence', icon: PulseIcon },
           { id: 'activity', label: 'History', icon: History },
-          { id: 'intercom', label: 'Intercom', icon: Mail },
+          { id: 'intercom', label: 'Mail', icon: Mail },
           { id: 'team', label: 'Admin', icon: Shield, hidden: !isAdmin },
           { id: 'workspace', label: 'My Team', icon: MapPin },
-          { id: 'appearance', label: 'Appearance', icon: PaletteIcon },
+          { id: 'appearance', label: 'Look', icon: PaletteIcon },
           { id: 'security', label: 'Security', icon: Shield },
-          { id: 'data', label: 'Data & Privacy', icon: AlertTriangle },
+          { id: 'data', label: 'Privacy', icon: AlertTriangle },
         ].filter(t => !t.hidden).map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as Tab)}
             style={{
-              display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.75rem 1.25rem',
-              background: activeTab === tab.id ? 'var(--brand)' : 'transparent',
+              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem',
+              background: activeTab === tab.id ? 'var(--brand)' : 'var(--bg-sub)',
               color: activeTab === tab.id ? 'white' : 'var(--text-sub)',
-              border: 'none', borderRadius: 'var(--radius)', cursor: 'pointer', fontWeight: 600,
-              transition: 'all 0.2s ease', whiteSpace: 'nowrap'
+              border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 700,
+              transition: 'all 0.2s ease', whiteSpace: 'nowrap', fontSize: '0.8rem'
             }}
           >
-            <tab.icon size={18} />
+            <tab.icon size={16} />
             {tab.label}
           </button>
         ))}

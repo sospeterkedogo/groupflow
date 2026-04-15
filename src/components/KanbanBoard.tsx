@@ -78,11 +78,12 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
     setBoardError(null)
     const { data, error } = await supabase
       .from('tasks')
-      .select('*, artifacts(id)')
+      .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false })
       
     if (error) {
+      console.error('Task fetch error:', error)
       setBoardError('Failed to synchronize tasks with the server.')
     }
     
@@ -439,6 +440,21 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
           gap: 1.5rem;
           min-height: 70vh;
         }
+        
+        @media (max-width: 1024px) {
+          .kanban-board {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 2rem;
+            min-height: auto;
+          }
+          .kanban-column {
+            flex: 0 0 calc(100vw - 3rem);
+            scroll-snap-align: center;
+          }
+        }
+
         .kanban-column {
           background: var(--bg-main);
           border-radius: var(--radius);
