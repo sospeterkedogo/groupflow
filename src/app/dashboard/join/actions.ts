@@ -11,11 +11,12 @@ export async function createGroup(formData: FormData) {
 
   const groupName = formData.get('name') as string
   const moduleCode = formData.get('module_code') as string
+  const joinPassword = formData.get('join_password') as string
 
   // Create the group
   const { data: newGroup, error: groupError } = await supabase
     .from('groups')
-    .insert([{ name: groupName, module_code: moduleCode }])
+    .insert([{ name: groupName, module_code: moduleCode, join_password: joinPassword }])
     .select('id')
     .single()
 
@@ -42,16 +43,22 @@ export async function joinGroup(formData: FormData) {
   if (!user) return redirect('/login')
 
   const moduleCode = formData.get('module_code') as string
+  const joinPassword = formData.get('join_password') as string
 
   // Search for the group
   const { data: group } = await supabase
     .from('groups')
-    .select('id')
+    .select('id, join_password')
     .eq('module_code', moduleCode)
     .single()
 
   if (!group) {
     redirect('/dashboard/join?error=' + encodeURIComponent('Could not find a group with that Module Code.'))
+  }
+
+  // Verify password
+  if (group.join_password && group.join_password !== joinPassword) {
+    redirect('/dashboard/join?error=' + encodeURIComponent('Incorrect Join Password for this module.'))
   }
 
   // Update the user's profile to join this group

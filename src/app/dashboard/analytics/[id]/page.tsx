@@ -16,14 +16,14 @@ import {
 } from 'recharts'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Implementation': '#38bdf8',
-  'Architecture':   '#8b5cf6',
-  'UX/UI Design':   '#ec4899',
-  'Quality Assurance': '#10b981',
+  'Building': '#38bdf8',
+  'Structure':   '#8b5cf6',
+  'Design':   '#ec4899',
+  'Testing': '#10b981',
   'Research':       '#f59e0b',
-  'Management':     '#6366f1',
-  'Documentation':  '#64748b',
-  'DevOps':         '#06b6d4',
+  'Helping':     '#6366f1',
+  'Writing':  '#64748b',
+  'Systems':         '#06b6d4',
   'Ethics':         '#ef4444',
 }
 
@@ -156,10 +156,51 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-sub)' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: '40px', height: '40px', border: '4px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
-        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Loading analytics...</p>
+        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Loading project data...</p>
       </div>
     </div>
   )
+
+  if (!isMember) {
+    return (
+      <div style={{ maxWidth: '1000px', margin: '4rem auto', textAlign: 'center' }}>
+        <div style={{ padding: '4rem', background: 'var(--bg-sub)', borderRadius: '32px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)' }}>
+           <div style={{ width: '80px', height: '80px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
+              <ShieldCheck size={40} />
+           </div>
+           <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>{group?.name || 'Private Team'}</h1>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.2rem', marginBottom: '2.5rem' }}>
+             This team is private. You must be a member to view their tasks, artifacts, and activity history.
+           </p>
+
+           <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3rem' }}>
+              <div style={{ textAlign: 'center' }}>
+                 <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{members.length}</div>
+                 <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', textTransform: 'uppercase', fontWeight: 700 }}>Team Members</div>
+              </div>
+              <div style={{ width: '1px', background: 'var(--border)' }} />
+              <div style={{ textAlign: 'center' }}>
+                 <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>{group?.module_code || '---'}</div>
+                 <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', textTransform: 'uppercase', fontWeight: 700 }}>Module Code</div>
+              </div>
+           </div>
+
+           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button 
+                onClick={handleJoinRequest} 
+                className="btn btn-primary" 
+                style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem' }}
+              >
+                Request to Join
+              </button>
+              <Link href="/dashboard/network" className="btn btn-secondary" style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem' }}>
+                Back to Network
+              </Link>
+           </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>

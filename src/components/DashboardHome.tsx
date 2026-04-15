@@ -9,7 +9,6 @@ import TaskModal from './TaskModal'
 
 export default function DashboardHome({ groupId, profile }: { groupId: string, profile: any }) {
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
-
   const [greeting, setGreeting] = useState('Welcome')
   const [personalTaskCount, setPersonalTaskCount] = useState(0)
   const [group, setGroup] = useState<any>(null)
@@ -53,6 +52,7 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
     const { count } = await supabase
       .from('tasks')
       .select('*', { count: 'exact', head: true })
+      .eq('group_id', groupId)
       .filter('assignees', 'cs', `{"${profile.id}"}`)
       .neq('status', 'Done')
     

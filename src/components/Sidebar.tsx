@@ -163,10 +163,9 @@ export default function Sidebar({ user }: { user: any }) {
             groups.map(group => {
               const isActiveProject = profile?.group_id === group.id
               return (
-                <div
+                <Link
                   key={group.id}
-                  title={group.name}
-                  onClick={() => switchActiveGroup(group.id)}
+                  href={`/dashboard/analytics/${group.id}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -181,7 +180,8 @@ export default function Sidebar({ user }: { user: any }) {
                     border: isActiveProject ? '1px solid rgba(var(--brand-rgb), 0.2)' : '1px solid transparent',
                     justifyContent: isOpen ? 'flex-start' : 'center',
                     transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    boxShadow: isActiveProject && !isOpen ? '0 0 12px rgba(var(--brand-rgb), 0.3)' : 'none'
+                    boxShadow: isActiveProject && !isOpen ? '0 0 12px rgba(var(--brand-rgb), 0.3)' : 'none',
+                    textDecoration: 'none'
                   }}
                   className={`project-bubble ${isActiveProject ? 'active-project' : ''}`}
                 >
@@ -194,7 +194,7 @@ export default function Sidebar({ user }: { user: any }) {
                       <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>{group.module_code}</span>
                     </div>
                   )}
-                </div>
+                </Link>
               )
             })
           )}

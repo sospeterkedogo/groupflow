@@ -1,11 +1,34 @@
+"use client"
+
 import { createGroup, joinGroup } from './actions'
 import { Plus, Key } from 'lucide-react'
 import TransientError from '@/components/TransientError'
+import { useFormStatus } from 'react-dom'
 
-// Read standard Next.js 15 searchParams natively as a Promise on page load to securely extract validation errors
-export default async function JoinGroupPage(props: { searchParams?: Promise<{ error?: string }> }) {
-  const searchParams = await props.searchParams
-  const error = searchParams?.error
+function SubmitButton({ label, secondary = false }: { label: string, secondary?: boolean }) {
+  const { pending } = useFormStatus()
+  return (
+    <button 
+      className={secondary ? "btn btn-secondary" : "btn btn-primary"} 
+      disabled={pending} 
+      style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+    >
+      {pending ? (
+        <>
+          <div className="spinner-mini" style={{ borderTopColor: secondary ? 'var(--brand)' : 'white' }} />
+          <span>Processing...</span>
+        </>
+      ) : label}
+    </button>
+  )
+}
+
+import { useSearchParams } from 'next/navigation'
+
+// Client component for joining/creating groups
+export default function JoinGroupPage() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
 
   return (
     <main className="main-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>
@@ -23,7 +46,7 @@ export default async function JoinGroupPage(props: { searchParams?: Promise<{ er
              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
                 Form a new team module on the GroupFlow platform.
              </p>
-             <form>
+             <form action={createGroup}>
                 <div className="form-group">
                    <label className="form-label" htmlFor="name">Group Name:</label>
                    <input className="form-input" id="name" name="name" type="text" placeholder="e.g. Apollo Team" required />
@@ -32,9 +55,11 @@ export default async function JoinGroupPage(props: { searchParams?: Promise<{ er
                    <label className="form-label" htmlFor="module_code">Module Code (Unique):</label>
                    <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
                 </div>
-                <button className="btn btn-primary" formAction={createGroup} style={{ marginTop: '0.5rem' }}>
-                   Create Team
-                </button>
+                <div className="form-group">
+                   <label className="form-label" htmlFor="join_password">Join Password:</label>
+                   <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Set a group password" required />
+                </div>
+                <SubmitButton label="Create Team" />
              </form>
           </div>
 
@@ -47,14 +72,16 @@ export default async function JoinGroupPage(props: { searchParams?: Promise<{ er
              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
                 Link your account to an existing class cohort using the module code given by your lecturer.
              </p>
-             <form>
+             <form action={joinGroup}>
                 <div className="form-group">
                    <label className="form-label" htmlFor="module_code">Module Code:</label>
                    <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
                 </div>
-                <button className="btn btn-secondary" formAction={joinGroup} style={{ marginTop: '0.5rem' }}>
-                   Verify & Join
-                </button>
+                <div className="form-group">
+                   <label className="form-label" htmlFor="join_password">Join Password:</label>
+                   <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Enter group password" required />
+                </div>
+                <SubmitButton label="Verify & Join" secondary />
              </form>
           </div>
 

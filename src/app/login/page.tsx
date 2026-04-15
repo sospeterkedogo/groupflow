@@ -4,14 +4,38 @@ import { useState, use } from 'react'
 import { signup, login } from './actions'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
-import { ShieldCheck, BookOpen, User, Lock, CheckCircle2 } from 'lucide-react'
+import { BookOpen, User, Lock } from 'lucide-react'
+import { useFormStatus } from 'react-dom'
 
-export default function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAccepted: boolean }) {
+  const { pending } = useFormStatus()
+  
+  return (
+    <button
+      className="btn btn-primary"
+      style={{ width: '100%', height: '3.5rem', borderRadius: '16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+      disabled={pending || (isSignUp && !legalAccepted)}
+    >
+      {pending ? (
+        <>
+          <div className="spinner-mini" />
+          <span>{isSignUp ? 'Creating account...' : 'Signing in...'}</span>
+        </>
+      ) : (
+        isSignUp ? 'Create account' : 'Sign in'
+      )}
+    </button>
+  )
+}
+
+import { useSearchParams } from 'next/navigation'
+
+export default function LoginPage() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
   const [isSignUp, setIsSignUp] = useState(false)
   const [legalAccepted, setLegalAccepted] = useState(false)
   const [activePolicy, setActivePolicy] = useState<'privacy' | 'terms' | 'cookies' | null>(null)
-
-  const { error } = use(searchParams)
 
   return (
     <div style={{
@@ -122,13 +146,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ er
           )}
 
           <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <button
-              className="btn btn-primary"
-              style={{ width: '100%', height: '3.5rem', borderRadius: '16px', fontSize: '1.1rem' }}
-              disabled={isSignUp && !legalAccepted}
-            >
-              {isSignUp ? 'Create account' : 'Sign in'}
-            </button>
+            <SubmitButton isSignUp={isSignUp} legalAccepted={legalAccepted} />
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
