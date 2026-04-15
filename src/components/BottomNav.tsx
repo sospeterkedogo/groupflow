@@ -27,6 +27,7 @@ export default function BottomNav() {
       left: 0,
       right: 0,
       height: 'var(--h-mobile-bottom)',
+      display: 'flex',
       backgroundColor: 'rgba(var(--bg-sub-rgb), 0.8)',
       backdropFilter: 'blur(20px)',
       borderTop: '1px solid var(--border)',

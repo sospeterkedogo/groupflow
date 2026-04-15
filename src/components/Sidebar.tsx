@@ -295,7 +295,7 @@ export default function Sidebar({ user }: { user: { id: string } }) {
             left: 0 !important;
             top: 0 !important;
             bottom: 0 !important;
-            z-index: 2000 !important;
+            z-index: 4600 !important;
             background: var(--bg-main) !important;
             box-shadow: 20px 0 50px rgba(0,0,0,0.4) !important;
             transform: translateX(-100%);
