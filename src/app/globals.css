@@ -24,7 +24,7 @@
   /* Responsive Tokens */
   --h-nav: 64px;
   --h-mobile-bottom: 74px;
-  --p-safe: 1.5rem;
+  --p-safe: 1rem;
   --vh-dynamic: 100dvh;
 }
 
@@ -61,6 +61,23 @@ body {
   overscroll-behavior-x: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.body-lock {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+}
+
+.hide-mobile { display: none !important; }
+
+.hide-desktop { display: none !important; }
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .hide-desktop { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .hide-mobile { display: block !important; }
 }
 
 .scroll-x-allowed {
@@ -201,7 +218,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  padding: 2.5rem;
+  padding: clamp(1rem, 5vw, 2.5rem);
   width: 100%;
   max-width: 420px;
   border: 1px solid var(--border);
@@ -443,22 +460,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .main-content {
   flex: 1;
-  padding: 2.5rem;
-  background-color: var(--bg-main);
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative; /* Ensure it stays contained */
-  height: var(--vh-dynamic);
-  /* Override global scrollbar kill — this is the ONE scroll surface */
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 1.5rem;
+    padding: 1rem;
     padding-top: calc(var(--h-nav) + 1rem);
-    padding-bottom: calc(1.5rem + var(--h-mobile-bottom));
+    padding-bottom: calc(var(--h-nav) + 2rem);
   }
 }
 .main-content::-webkit-scrollbar {
@@ -663,11 +670,30 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Fluid Text Utility */
 .fluid-h1 {
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.04em;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 .fluid-p {
   font-size: clamp(1rem, 2vw, 1.25rem);
+}
+/* Sidebar Backdrop */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  z-index: 4500;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-backdrop.visible {
+  opacity: 1;
+  visibility: visible;
 }

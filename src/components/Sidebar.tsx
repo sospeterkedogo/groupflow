@@ -45,19 +45,26 @@ export default function Sidebar({ user }: { user: any }) {
       setIsOpen(false)
     }
 
-    // Simple online simulation
-    const interval = setInterval(() => {
-      setIsOnline(true)
-    }, 5000)
-    // Synchronization for profile updates across components
+    // Body scroll lock logic
+    const handleBodyLock = () => {
+      if (window.innerWidth <= 768 && isOpen) {
+        document.body.classList.add('body-lock')
+      } else {
+        document.body.classList.remove('body-lock')
+      }
+    }
+
+    handleBodyLock()
+
+    // Synchronization for profile updates
     const handleProfileUpdate = () => fetchProfile()
     window.addEventListener('PROFILE_UPDATED', handleProfileUpdate)
 
     return () => {
-      clearInterval(interval)
+      document.body.classList.remove('body-lock')
       window.removeEventListener('PROFILE_UPDATED', handleProfileUpdate)
     }
-  }, [user.id])
+  }, [user.id, isOpen])
 
   const fetchProfile = async () => {
     try {
@@ -69,7 +76,6 @@ export default function Sidebar({ user }: { user: any }) {
       
       if (error) {
         console.error('Sidebar fetch error:', error.message)
-        // If it's a fetch error, we don't want to clear what we might have
         return
       }
       
@@ -94,6 +100,12 @@ export default function Sidebar({ user }: { user: any }) {
 
   return (
     <div style={{ display: 'contents' }}>
+      {/* Mobile Backdrop */}
+      <div 
+        className={`sidebar-backdrop ${isOpen ? 'visible' : ''}`} 
+        onClick={() => setIsOpen(false)}
+      />
+
       {/* Mobile Top Header */}
       <div className="mobile-header glass" style={{
         display: 'none',
@@ -102,24 +114,26 @@ export default function Sidebar({ user }: { user: any }) {
         left: 0,
         right: 0,
         height: 'var(--h-nav)',
-        zIndex: 3000,
+        zIndex: 5000,
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1.25rem',
+        padding: '0 1rem',
         borderBottom: '1px solid var(--border)',
         boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px' }}>
-            <Activity size={24} />
+          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+               <Activity size={20} />
+            </div>
           </button>
-          <span style={{ fontWeight: 900, color: 'var(--brand)', fontSize: '1.2rem', letterSpacing: '-0.04em' }}>GroupFlow</span>
+          <span style={{ fontWeight: 900, color: 'var(--brand)', fontSize: '1.1rem', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>GroupFlow</span>
         </div>
-        <Link href="/dashboard/profile" style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid var(--brand)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Link href="/dashboard/profile" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)' }}>
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <UserCircle size={24} color="var(--text-sub)" />
+            <UserCircle size={20} color="var(--text-sub)" />
           )}
         </Link>
       </div>
@@ -133,27 +147,27 @@ export default function Sidebar({ user }: { user: any }) {
         display: 'flex',
         flexDirection: 'column',
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 50
+        zIndex: 4600
       }}>
         {/* Header / Toggle */}
-        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--brand)' }}>GroupFlow</Link>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 4px var(--success)' : 'none' }} title={isOnline ? 'Online' : 'Connecting...'} />
+              <Link href="/dashboard" style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</Link>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} />
             </div>
           )}
           <button 
             onClick={() => setIsOpen(!isOpen)}
-            style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex' }}
-            className="hover-card"
+            style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', padding: '4px' }}
+            className="hover-card hide-mobile"
           >
             {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
         </div>
 
         {/* Nav Links */}
-        <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           {navLinks.map((link) => {
             const isActive = pathname === link.path
             return (
@@ -165,31 +179,37 @@ export default function Sidebar({ user }: { user: any }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  padding: '0.75rem 1.5rem',
+                  padding: '0.8rem 1.5rem',
                   color: isActive ? 'var(--brand)' : 'var(--text-sub)',
-                  backgroundColor: isActive ? 'rgba(56, 189, 248, 0.08)' : 'transparent',
-                  fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.9rem',
+                  backgroundColor: isActive ? 'rgba(var(--brand-rgb), 0.06)' : 'transparent',
+                  fontWeight: isActive ? 800 : 600,
+                  fontSize: '0.875rem',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  justifyContent: isOpen ? 'flex-start' : 'center'
+                  justifyContent: isOpen ? 'flex-start' : 'center',
+                  borderRadius: '0 50px 50px 0',
+                  marginRight: '1rem',
+                  position: 'relative'
                 }}
                 title={!isOpen ? link.name : ''}
                 onClick={() => { if (window.innerWidth <= 768) setIsOpen(false) }}
               >
                 <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 {isOpen && <span>{link.name}</span>}
+                {isActive && (
+                  <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '4px', background: 'var(--brand)', borderRadius: '0 4px 4px 0' }} />
+                )}
               </Link>
             )
           })}
         </nav>
 
         {/* Footer / User Profile */}
-        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
            <div style={{ 
              display: 'flex', 
              alignItems: 'center', 
              gap: '0.75rem', 
-             padding: isOpen ? '0.75rem' : '0', 
+             padding: isOpen ? '0.6rem' : '0', 
              backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent',
              borderRadius: '16px',
              border: isOpen ? '1px solid var(--border)' : 'none',
@@ -199,39 +219,37 @@ export default function Sidebar({ user }: { user: any }) {
            className="identity-pill"
            onClick={() => window.location.href = '/dashboard/profile'}
            >
-             <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 900, flexShrink: 0, overflow: 'hidden', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 900, flexShrink: 0, overflow: 'hidden' }}>
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   profile?.full_name?.charAt(0) || 'U'
                 )}
-             </div>
+              </div>
              {isOpen && (
-               <div style={{ overflow: 'hidden' }}>
-                 <div style={{ color: 'var(--text-main)', fontWeight: 800, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                   {profile?.full_name || 'Anonymous User'}
+               <div style={{ flex: 1, overflow: 'hidden' }}>
+                 <div style={{ color: 'var(--text-main)', fontWeight: 800, fontSize: '0.8rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                   {profile?.full_name || 'Anonymous'}
                  </div>
-                 <div style={{ color: 'var(--success)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                   {isOnline ? 'Active Pulse' : 'Syncing...'}
+                 <div style={{ color: 'var(--success)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                   Online
                  </div>
                </div>
              )}
            </div>
 
-           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.75rem' }}>
+           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.5rem' }}>
              <button 
                onClick={toggleTheme}
-               className="theme-bubble"
-               style={{ flex: 1, padding: '0.7rem', borderRadius: '14px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-               title="Switch Perception"
+               style={{ flex: 1, height: '40px', borderRadius: '12px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               title="Theme"
              >
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
              </button>
              <button 
                onClick={handleSignOut}
-               className="logout-bubble"
-               style={{ flex: 1, padding: '0.7rem', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-               title="Terminate Session"
+               style={{ flex: 1, height: '40px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               title="Sign Out"
              >
                <LogOut size={18} />
              </button>

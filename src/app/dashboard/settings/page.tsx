@@ -326,67 +326,81 @@ export default function SettingsPage() {
 
         {activeTab === 'identity' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Personal Profile</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Personal Profile</h2>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '2.5rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
-              <div style={{ position: 'relative', width: '120px', height: '120px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-sm)', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
+              <div style={{ position: 'relative', width: 'var(--avatar-size)', height: 'var(--avatar-size)' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <User size={48} color="var(--text-sub)" />
+                    <User size={32} color="var(--text-sub)" />
                   )}
                 </div>
-                <label style={{ position: 'absolute', bottom: '0', right: '0', width: '36px', height: '36px', borderRadius: '50%', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '3px solid var(--surface)' }}>
-                  <Camera size={18} />
+                <label style={{ position: 'absolute', bottom: '0', right: '0', width: '30px', height: '30px', borderRadius: '50%', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '2px solid var(--surface)' }}>
+                  <Camera size={14} />
                   <input type="file" accept="image/*" capture="user" onChange={e => handleFileUpload(e, 'avatar')} style={{ display: 'none' }} />
                 </label>
               </div>
               <div style={{ flex: '1 1 200px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Profile Photo</h3>
-                <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem', marginTop: '0.25rem' }}>Update your professional identity.</p>
-                {uploadingAvatar && <p style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }}>Uploading...</p>}
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Profile Photo</h3>
+                <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem', marginTop: '0.2rem' }}>Update your professional identity.</p>
+                {uploadingAvatar && <p style={{ fontSize: '0.75rem', color: 'var(--brand)', fontWeight: 800, marginTop: '0.4rem' }}>Optimizing...</p>}
               </div>
             </div>
 
-            <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+            <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Full Name</label>
-                  <input type="text" className="form-input" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Enter your name" />
+                  <input type="text" className="form-input" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Full Name" />
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">What are you studying?</label>
-                  <input type="text" className="form-input" value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="e.g. Computer Science with AI" />
+                  <label className="form-label">Degree/Course</label>
+                  <input type="text" className="form-input" value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="e.g. Computer Science" />
                 </div>
               </div>
 
-              <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Calendar size={16} color="var(--brand)" />
-                  Academic Journey Timeline
+              <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                <h4 style={{ fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
+                  <Calendar size={14} color="var(--brand)" />
+                  Academic Roadmap
                 </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.25rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Enrollment Year</label>
+                    <label className="form-label">Enrollment</label>
                     <input type="number" className="form-input" value={enrollmentYear} onChange={e => setEnrollmentYear(parseInt(e.target.value))} />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Expected Completion</label>
+                    <label className="form-label">Completion</label>
                     <input type="number" className="form-input" value={completionYear} onChange={e => setCompletionYear(parseInt(e.target.value))} />
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto' }}>
-                  {saving ? 'Saving...' : 'Save Changes'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto', padding: '0.75rem 1.5rem' }}>
+                  {saving ? 'Syncing...' : 'Update Settings'}
                 </button>
-                {success && <span style={{ color: 'var(--success)', fontWeight: 600, fontSize: '0.9rem' }}>Changes saved.</span>}
+                {success && <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: '0.85rem' }}>Saved!</span>}
               </div>
             </form>
           </div>
         )}
+
+        {/* CSS Variables for Settings Component */}
+        <style jsx>{`
+          :root {
+            --gap-sm: 2.5rem;
+            --avatar-size: 120px;
+          }
+          @media (max-width: 768px) {
+            :root {
+              --gap-sm: 1.25rem;
+              --avatar-size: 80px;
+            }
+          }
+        `}</style>
 
         {activeTab === 'team' && isAdmin && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>

@@ -206,68 +206,78 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
 
       {/* Header */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--brand)', marginBottom: '0.75rem', fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
-            <BarChart3 size={16} /><span>Project Analytics</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            <BarChart3 size={14} /><span>Project Analytics</span>
           </div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0, lineHeight: 1 }}>{group?.name || 'Project'}</h1>
-          <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.75rem', fontWeight: 500 }}>
+          <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{group?.name || 'Project'}</h1>
+          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>
             {group?.module_code} • Live project tracking
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={exportToCSV} className="btn btn-ghost btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Download size={16} /> Export CSV
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={exportToCSV} className="btn btn-ghost btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+            <Download size={14} /> CSV
           </button>
-          <button onClick={() => window.print()} className="btn btn-primary btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Printer size={16} /> Print Report
+          <button onClick={() => window.print()} className="btn btn-primary btn-inline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+            <Printer size={14} /> Print
           </button>
         </div>
       </header>
 
       {/* KPI Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="kpi-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+        gap: 'var(--gap-sm)', 
+        marginBottom: '1.5rem' 
+      }}>
         {[
-          { icon: <Zap size={20} />, label: 'Completion', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
-          { icon: <CheckCircle2 size={20} />, label: 'Tasks Done', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Users size={20} />, label: 'Team Size', value: members.length, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
-          { icon: <AlertCircle size={20} />, label: 'Overdue Risk', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
-          { icon: <ShieldCheck size={20} />, label: 'Evidence/Task', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Timer size={20} />, label: 'Overdue', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
+          { icon: <Zap size={18} />, label: 'Completion', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { icon: <CheckCircle2 size={18} />, label: 'Tasks Done', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { icon: <Users size={18} />, label: 'Team Size', value: members.length, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { icon: <AlertCircle size={18} />, label: 'Overdue Risk', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
+          { icon: <ShieldCheck size={18} />, label: 'Density', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { icon: <Timer size={18} />, label: 'Overdue', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
         ].map(kpi => (
-          <div key={kpi.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ padding: '0.6rem', background: kpi.bg, color: kpi.color, borderRadius: '12px', flexShrink: 0 }}>{kpi.icon}</div>
+          <div key={kpi.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'var(--kpi-p)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ padding: '0.5rem', background: kpi.bg, color: kpi.color, borderRadius: '10px', flexShrink: 0 }}>{kpi.icon}</div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: kpi.color, lineHeight: 1 }}>{kpi.value}</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-sub)', marginTop: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{kpi.label}</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: kpi.color, lineHeight: 1 }}>{kpi.value}</div>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{kpi.label}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div className="charts-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+        gap: 'var(--gap-sm)', 
+        marginBottom: '1.5rem' 
+      }}>
 
         {/* Task Status Donut */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 700 }}>Task Status</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1rem' }}>
+          <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>Task Status</h3>
           {tasks.length === 0 ? (
-            <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.9rem' }}>No tasks yet</div>
+            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>No tasks yet</div>
           ) : (
             <>
-              <ResponsiveContainer width="100%" height={180}>
+              <ResponsiveContainer width="100%" height={160}>
                 <PieChart>
-                  <Pie data={statusPieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+                  <Pie data={statusPieData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={2} dataKey="value">
                     {statusPieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
-                  <Tooltip formatter={(v, n) => [`${v} tasks`, n]} contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.8rem' }} />
+                  <Tooltip formatter={(v, n) => [`${v} tasks`, n]} contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.75rem' }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
                 {statusPieData.map(d => (
-                  <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 600 }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: d.color }} />
+                  <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', fontWeight: 700 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color }} />
                     <span style={{ color: 'var(--text-sub)' }}>{d.name} ({d.value})</span>
                   </div>
                 ))}
@@ -277,17 +287,17 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         </div>
 
         {/* Task Categories Bar */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 700 }}>By Category</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1rem' }}>
+          <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>By Category</h3>
           {categoryBarData.length === 0 ? (
-            <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.9rem' }}>No categorised tasks</div>
+            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>No tasks</div>
           ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={categoryBarData} layout="vertical" margin={{ left: 0, right: 10, top: 0, bottom: 0 }}>
-                <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-sub)' }} allowDecimals={false} />
-                <YAxis type="category" dataKey="fullName" tick={{ fontSize: 10, fill: 'var(--text-sub)' }} width={90} />
-                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.8rem' }} formatter={(v) => [`${v} tasks`]} />
-                <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={categoryBarData} layout="vertical" margin={{ left: -20, right: 10, top: 0, bottom: 0 }}>
+                <XAxis type="number" hide />
+                <YAxis type="category" dataKey="fullName" tick={{ fontSize: 9, fill: 'var(--text-sub)' }} width={80} />
+                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.75rem' }} />
+                <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={12}>
                   {categoryBarData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                 </Bar>
               </BarChart>
@@ -296,20 +306,20 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         </div>
 
         {/* Member Contribution */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: 700 }}>Member Contribution</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1rem' }}>
+          <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>Contribution</h3>
           {members.length === 0 ? (
-            <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.9rem' }}>No members yet</div>
+            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>No members</div>
           ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={memberBarData} margin={{ left: -10, right: 10, top: 0, bottom: 20 }}>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={memberBarData} margin={{ left: -25, right: 10, top: 0, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-sub)' }} angle={-30} textAnchor="end" interval={0} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--text-sub)' }} allowDecimals={false} />
-                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.8rem' }} />
-                <Legend wrapperStyle={{ fontSize: '0.75rem', paddingTop: '0.5rem' }} />
-                <Bar dataKey="assigned" name="Assigned" fill="rgba(56,189,248,0.3)" radius={[4,4,0,0]} />
-                <Bar dataKey="completed" name="Completed" fill="#10b981" radius={[4,4,0,0]} />
+                <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'var(--text-sub)' }} angle={-30} textAnchor="end" interval={0} />
+                <YAxis tick={{ fontSize: 9, fill: 'var(--text-sub)' }} allowDecimals={false} />
+                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.75rem' }} />
+                <Legend iconSize={8} wrapperStyle={{ fontSize: '0.65rem', paddingTop: '0.5rem' }} />
+                <Bar dataKey="assigned" name="Assigned" fill="rgba(56,189,248,0.2)" radius={[2,2,0,0]} />
+                <Bar dataKey="completed" name="Done" fill="#10b981" radius={[2,2,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -317,38 +327,33 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Progress Bar — overall */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <span style={{ fontWeight: 700 }}>Overall Project Progress</span>
-          <span style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)' }}>{completionRate}%</span>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>Project Pulse</span>
+          <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--brand)' }}>{completionRate}%</span>
         </div>
-        <div style={{ height: '10px', background: 'var(--bg-main)', borderRadius: '10px', overflow: 'hidden' }}>
-          <div style={{ width: `${completionRate}%`, height: '100%', background: 'linear-gradient(90deg, var(--brand), #10b981)', borderRadius: '10px', transition: 'width 1s ease' }} />
-        </div>
-        <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
-          {[['To Do', todoTasks, '#64748b'], ['In Progress', inProgressTasks, '#f59e0b'], ['Done', doneTasks, '#10b981']].map(([label, count, color]) => (
-            <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 600 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: color as string }} />
-              <span style={{ color: 'var(--text-sub)' }}>{label}: {count}</span>
-            </div>
-          ))}
+        <div style={{ height: '8px', background: 'var(--bg-main)', borderRadius: '8px', overflow: 'hidden' }}>
+          <div style={{ width: `${completionRate}%`, height: '100%', background: 'linear-gradient(90deg, var(--brand), #10b981)', borderRadius: '8px', transition: 'width 1s ease' }} />
         </div>
       </div>
 
       {/* Main Two-Column */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+      <div className="analytics-details-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+        gap: 'var(--gap-sm)' 
+      }}>
 
         {/* Team Leaderboard — fixed table */}
-        <section style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Team Leaderboard</h2>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>By Score</span>
+        <section style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 900, margin: 0 }}>Team Leaderboard</h2>
           </div>
 
           {members.length === 0 ? (
-            <p style={{ color: 'var(--text-sub)', textAlign: 'center', padding: '2rem 0' }}>No members yet.</p>
+            <p style={{ color: 'var(--text-sub)', textAlign: 'center', padding: '1rem 0' }}>No members yet.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {members.map((member, idx) => {
                 const isOnline = onlineUsers.has(member.id)
                 const effort = calculateMemberEffort(member.id)
@@ -356,44 +361,28 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                 const assigned = tasks.filter(t => t.assignees?.includes(member.id)).length
                 return (
                   <div key={member.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.75rem',
-                    padding: '0.75rem 1rem', borderRadius: '14px',
-                    background: idx === 0 ? 'rgba(56,189,248,0.06)' : 'var(--bg-main)',
-                    border: `1px solid ${idx === 0 ? 'rgba(56,189,248,0.2)' : 'var(--border)'}`,
-                    flexWrap: 'wrap'
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    padding: '0.6rem 0.75rem', borderRadius: '12px',
+                    background: idx === 0 ? 'rgba(56,189,248,0.05)' : 'var(--bg-main)',
+                    border: `1px solid ${idx === 0 ? 'rgba(56,189,248,0.1)' : 'var(--border)'}`,
+                    flexWrap: 'nowrap'
                   }}>
-                    {/* Rank */}
-                    <div style={{ width: '24px', textAlign: 'center', fontWeight: 900, fontSize: '0.85rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-sub)', flexShrink: 0 }}>
-                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
+                    <div style={{ width: '18px', textAlign: 'center', fontWeight: 900, fontSize: '0.75rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-sub)', flexShrink: 0 }}>
+                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
                     </div>
-                    {/* Avatar */}
                     <div style={{ position: 'relative', flexShrink: 0 }}>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={22} color="var(--text-sub)" />}
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-sub)', border: '1px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={18} color="var(--text-sub)" />}
                       </div>
-                      <div style={{ position: 'absolute', bottom: 0, right: 0, width: '9px', height: '9px', borderRadius: '50%', background: isOnline ? '#10b981' : 'var(--border)', border: '2px solid var(--surface)', boxShadow: isOnline ? '0 0 6px #10b981' : 'none' }} />
+                      <div style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? '#10b981' : 'var(--border)', border: '2px solid var(--surface)' }} />
                     </div>
-                    {/* Name & email */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.full_name || 'Unknown'}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.email}</div>
+                      <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous'}</div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.email}</div>
                     </div>
-                    {/* Contribution bar */}
-                    <div style={{ width: '80px', flexShrink: 0 }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginBottom: '3px', textAlign: 'right' }}>{pct}%</div>
-                      <div style={{ height: '5px', background: 'var(--bg-sub)', borderRadius: '5px', overflow: 'hidden' }}>
-                        <div style={{ width: `${pct}%`, height: '100%', background: 'var(--brand)', borderRadius: '5px' }} />
-                      </div>
-                    </div>
-                    {/* Score */}
-                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '48px' }}>
-                      <div style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--brand)' }}>{member.total_score ?? 0}</div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600 }}>pts</div>
-                    </div>
-                    {/* Tasks */}
                     <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '40px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: effort > 0 ? '#10b981' : 'var(--text-sub)' }}>{effort}/{assigned}</div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600 }}>tasks</div>
+                      <div style={{ fontWeight: 900, fontSize: '1rem', color: 'var(--brand)' }}>{member.total_score ?? 0}</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', fontWeight: 700 }}>pts</div>
                     </div>
                   </div>
                 )
@@ -401,65 +390,63 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
             </div>
           )}
 
-          {/* Activity Log */}
-          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.25rem' }}>Activity Log</h3>
-            <ActivityLogView groupId={groupId} limit={15} />
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '1rem' }}>Activity Stream</h3>
+            <ActivityLogView groupId={groupId} limit={10} />
           </div>
         </section>
 
         {/* Right sidebar */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
           {/* Pipeline Metrics */}
-          <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <TrendingUp size={18} color="var(--brand)" /> Task Categories
+          <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.25rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <TrendingUp size={16} color="var(--brand)" /> Focus Areas
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {Object.entries(CATEGORY_COLORS).map(([cat, color]) => {
                 const count = tasks.filter(t => t.category === cat).length
                 if (count === 0) return null
                 const pct = tasks.length > 0 ? (count / tasks.length) * 100 : 0
                 return (
                   <div key={cat}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.8rem', color: 'var(--text-sub)' }}>
-                      <span style={{ fontWeight: 600 }}>{cat}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px', fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 700 }}>
+                      <span>{cat}</span>
                       <span>{count}</span>
                     </div>
-                    <div style={{ height: '5px', background: 'var(--bg-main)', borderRadius: '10px' }}>
+                    <div style={{ height: '4px', background: 'var(--bg-main)', borderRadius: '10px' }}>
                       <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: '10px' }} />
                     </div>
                   </div>
                 )
               })}
-              {tasks.length === 0 && <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem' }}>No tasks yet.</p>}
+              {tasks.length === 0 && <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem' }}>No data yet</p>}
             </div>
           </div>
 
           {/* Recently Completed */}
-          <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Clock size={18} color="var(--brand)" /> Recently Completed
+          <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.25rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Clock size={16} color="var(--brand)" /> Success Log
             </h3>
             {tasks.filter(t => t.status === 'Done').length === 0 ? (
-              <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem' }}>No completed tasks yet.</p>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem' }}>Check back later</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {tasks.filter(t => t.status === 'Done').slice(0, 5).map(t => (
-                  <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', background: 'var(--bg-main)', borderRadius: '12px' }}>
-                    <FileCheck size={16} color="#10b981" style={{ flexShrink: 0 }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {tasks.filter(t => t.status === 'Done').slice(0, 4).map(t => (
+                  <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem', background: 'var(--bg-main)', borderRadius: '10px' }}>
+                    <FileCheck size={14} color="#10b981" style={{ flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{t.title}</div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-sub)' }}>
-                        {t.category && <span style={{ color: CATEGORY_COLORS[t.category] || 'var(--brand)', fontWeight: 600 }}>{t.category} • </span>}
-                        {new Date(t.created_at).toLocaleDateString()}
+                      <div style={{ fontSize: '0.8rem', fontWeight: 800, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{t.title}</div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>
+                        {t.category && <span style={{ color: CATEGORY_COLORS[t.category] || 'var(--brand)', fontWeight: 800 }}>{t.category}</span>}
                       </div>
                     </div>
                   </div>
                 ))}
-                <Link href="/dashboard" style={{ fontSize: '0.82rem', color: 'var(--brand)', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
-                  View all tasks <ChevronRight size={14} />
+                <Link href="/dashboard" style={{ fontSize: '0.75rem', color: 'var(--brand)', fontWeight: 800, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.4rem' }}>
+                  Full Board <ChevronRight size={12} />
                 </Link>
               </div>
             )}
@@ -469,6 +456,20 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       <style jsx>{`
+        .kpi-grid, .charts-grid, .analytics-details-grid {
+           --gap-sm: 1.5rem;
+           --kpi-p: 1.25rem 1.5rem;
+        }
+        @media (max-width: 768px) {
+          .kpi-grid { 
+            grid-template-columns: repeat(2, 1fr) !important; 
+            --gap-sm: 0.75rem;
+            --kpi-p: 1rem;
+          }
+          .charts-grid, .analytics-details-grid {
+            --gap-sm: 1rem;
+          }
+        }
         @media print {
           button { display: none !important; }
           body { background: white !important; }

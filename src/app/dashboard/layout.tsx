@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import BottomNav from '@/components/BottomNav'
 import { PresenceProvider } from '@/components/PresenceProvider'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { ThemeProvider } from '@/context/ThemeContext'
@@ -43,6 +44,8 @@ export default async function DashboardLayout({
               <main className="main-content">
                 {children}
               </main>
+
+              <BottomNav />
             </NotificationProvider>
           </PresenceProvider>
         </div>

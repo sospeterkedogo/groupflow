@@ -35,7 +35,7 @@ export default function Home() {
   const faqs = [
     {
       q: "Is GroupFlow free to use?",
-      a: "Yes. During our 2026 Dissertation research phase, all features including advanced analytics and the Proof of Work engine are completely free for students and tutors."
+      a: "Yes. During my 2026 Dissertation research phase, all features including advanced analytics and the Proof of Work engine are completely free for students and tutors."
     },
     {
       q: "How is my data protected?",
@@ -43,7 +43,7 @@ export default function Home() {
     },
     {
       q: "Can I delete my account?",
-      a: "Absolutely. We believe in data sovereignty. You can delete your account and all associated project data permanently with a single click in your settings at any time."
+      a: "Absolutely. I believe in data sovereignty. You can delete your account and all associated project data permanently with a single click in your settings at any time."
     },
     {
       q: "Who is the creator of GroupFlow?",
@@ -180,7 +180,7 @@ export default function Home() {
            
            <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '750px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
               GroupFlow is a project intelligence space designed to bridge the accountability gap. 
-              We turn every commit, every file, and every idea into a verifiable ledger of your team's success.
+              I turn every commit, every file, and every idea into a verifiable ledger of your team's success.
            </p>
 
            <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -251,7 +251,7 @@ export default function Home() {
         {/* HOW IT WORKS */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
            <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Built for Transparency.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.35rem', marginBottom: '6rem', maxWidth: '800px', margin: '0 auto 6rem' }}>We turn complex team dynamics into simple, verifiable metrics of success.</p>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.35rem', marginBottom: '6rem', maxWidth: '800px', margin: '0 auto 6rem' }}>I turn complex team dynamics into simple, verifiable metrics of success.</p>
 
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
@@ -301,7 +301,7 @@ export default function Home() {
               <div style={{ position: 'relative', zIndex: 1 }}>
                  <h2 style={{ fontSize: '4rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Join the Mission.</h2>
                  <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.9)', marginBottom: '3.5rem', maxWidth: '700px', margin: '0 auto 3.5rem', lineHeight: 1.5 }}>
-                    Help us pioneer the next generation of academic collaboration. 
+                    Help me pioneer the next generation of academic collaboration. 
                     No cost, total data sovereignty, pure recognition.
                  </p>
                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>

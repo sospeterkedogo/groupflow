@@ -107,16 +107,19 @@ export default function NetworkPage() {
        </div>
 
        {loading && users.length === 0 ? (
-         <div style={viewMode === 'grid' ? { 
-           display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' 
-         } : {
-           display: 'flex', flexDirection: 'column', gap: '1rem'
-         }}>
+         <div 
+           className="network-grid" 
+           style={viewMode === 'grid' ? { 
+             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--grid-gap)' 
+           } : {
+             display: 'flex', flexDirection: 'column', gap: '0.75rem'
+           }}
+         >
            {[1, 2, 3, 4, 5, 6].map(i => (
              <div key={i} style={{ 
                 display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
                 alignItems: viewMode === 'grid' ? 'stretch' : 'center',
-                padding: '1.5rem', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', gap: '1rem'
+                padding: 'var(--card-p)', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', gap: '1rem'
              }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
                   <div className="skeleton skeleton-avatar" style={{ width: '48px', height: '48px', flexShrink: 0 }} />
@@ -130,15 +133,18 @@ export default function NetworkPage() {
            ))}
          </div>
        ) : users.length === 0 ? (
-         <div style={{ textAlign: 'center', padding: '6rem', background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-            <p style={{ color: 'var(--text-sub)', margin: 0, fontSize: '1.1rem' }}>No students found matching your search.</p>
+         <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+            <p style={{ color: 'var(--text-sub)', margin: 0, fontSize: '1rem' }}>No students found matching your search.</p>
          </div>
        ) : (
-         <div style={viewMode === 'grid' ? { 
-           display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' 
-         } : {
-           display: 'flex', flexDirection: 'column', gap: '1rem'
-         }}>
+         <div 
+           className="network-grid" 
+           style={viewMode === 'grid' ? { 
+             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--grid-gap)' 
+           } : {
+             display: 'flex', flexDirection: 'column', gap: '0.75rem'
+           }}
+         >
             {users.map(u => {
               const isOnline = onlineUsers.has(u.id)
               return (
@@ -149,40 +155,34 @@ export default function NetworkPage() {
                     display: 'flex', 
                     flexDirection: viewMode === 'grid' ? 'column' : 'row',
                     alignItems: viewMode === 'grid' ? 'stretch' : 'center',
-                    padding: '1.5rem', 
+                    padding: 'var(--card-p)', 
                     cursor: 'default', 
                     position: 'relative',
-                    gap: viewMode === 'grid' ? '1.5rem' : '2rem'
+                    gap: viewMode === 'grid' ? '1rem' : '1.5rem'
                   }}
                 >
                    {isOnline && viewMode === 'grid' && (
-                     <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)', boxShadow: '0 0 8px var(--success)', border: '2px solid var(--surface)' }} />
+                     <div style={{ position: 'absolute', top: '1rem', right: '1rem', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--success)', boxShadow: '0 0 8px var(--success)', border: '2px solid var(--surface)' }} />
                    )}
                    
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                      <div style={{ width: viewMode === 'grid' ? '64px' : '48px', height: viewMode === 'grid' ? '64px' : '48px', borderRadius: '50%', backgroundColor: 'var(--bg-sub)', border: '2px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ width: viewMode === 'grid' ? '56px' : '44px', height: viewMode === 'grid' ? '56px' : '44px', borderRadius: '50%', backgroundColor: 'var(--bg-sub)', border: '2px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
                          {u.avatar_url ? (
                            <img src={u.avatar_url} alt={u.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                          ) : (
-                           <User size={viewMode === 'grid' ? 32 : 24} color="var(--text-sub)" />
+                           <User size={viewMode === 'grid' ? 28 : 22} color="var(--text-sub)" />
                          )}
                       </div>
                       <div style={{ minWidth: 0 }}>
-                         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                         <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                             {u.groups?.is_encrypted && u.group_id !== currentUserGroup ? 'Private Student' : u.full_name}
                          </h3>
-                         <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem', margin: '0.1rem 0 0' }}>Software Engineer</p>
+                         <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem', margin: '0.1rem 0 0' }}>Software Engineer</p>
                       </div>
                       {!isOnline && viewMode === 'list' && (
-                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', fontSize: '0.8rem' }}>
-                           <Clock size={14} />
-                           <span>Seen {formatLastSeen(u.last_seen)}</span>
-                        </div>
-                      )}
-                      {isOnline && viewMode === 'list' && (
-                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontSize: '0.8rem', fontWeight: 700 }}>
-                           <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success)' }} />
-                           <span>ACTIVE</span>
+                        <div style={{ marginLeft: 'auto', display: 'none', alignItems: 'center', gap: '0.3rem', color: 'var(--text-sub)', fontSize: '0.75rem' }} className="seen-badge">
+                           <Clock size={12} />
+                           <span>{formatLastSeen(u.last_seen)}</span>
                         </div>
                       )}
                    </div>
@@ -192,30 +192,30 @@ export default function NetworkPage() {
                      justifyContent: 'space-between', 
                      alignItems: 'center', 
                      background: 'var(--bg-sub)', 
-                     padding: '1rem 1.25rem', 
-                     borderRadius: '16px', 
+                     padding: '0.75rem 1rem', 
+                     borderRadius: '12px', 
                      border: '1px solid var(--border)',
-                     flex: viewMode === 'list' ? '1 1 300px' : 'unset',
+                     flex: viewMode === 'list' ? '1 1 200px' : 'unset',
                      width: viewMode === 'list' ? 'auto' : '100%'
                    }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Total Score</span>
-                         <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</span>
+                         <span style={{ fontSize: '0.6rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 800 }}>Score</span>
+                         <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                         <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Project Team</span>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 600 }}>
-                            <MapPin size={14} color="var(--accent)" />
+                         <span style={{ fontSize: '0.6rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 800 }}>Team</span>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 700 }}>
+                            <MapPin size={12} color="var(--accent)" />
                             <span>
-                              {u.groups?.is_encrypted && u.group_id !== currentUserGroup ? 'Encrypted Team' : (u.groups?.module_code || 'Unassigned')}
+                               {u.groups?.is_encrypted && u.group_id !== currentUserGroup ? 'Private' : (u.groups?.module_code || 'Unassigned')}
                             </span>
                          </div>
                       </div>
                    </div>
 
                    {viewMode === 'grid' && (
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text-sub)' }}>
-                        <Clock size={16} />
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--text-sub)' }}>
+                        <Clock size={14} />
                         <span>{isOnline ? <strong style={{ color: 'var(--success)' }}>Active Now</strong> : `Last active ${formatLastSeen(u.last_seen)}`}</span>
                      </div>
                    )}
@@ -226,6 +226,17 @@ export default function NetworkPage() {
        )}
 
        <style jsx>{`
+          .network-grid {
+             --grid-gap: 2rem;
+             --card-p: 1.5rem;
+          }
+          @media (max-width: 768px) {
+             .network-grid {
+                --grid-gap: 1rem;
+                --card-p: 1rem;
+             }
+             .seen-badge { display: flex !important; }
+          }
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
        `}</style>
