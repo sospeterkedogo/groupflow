@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GroupFlow 🚀
 
-## Getting Started
+**Dynamic Academic Identity & Team Synergy Platform**
 
-First, run the development server:
+GroupFlow is a state-of-the-art educational technology platform designed to transform how students collaborate on complex projects. It moves beyond simple task tracking, creating a verifiable **Academic Identity Hub** that bridges the gap between coursework and professional readiness.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![GroupFlow Banner](public/assets/auth_bg.png)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌟 Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🎓 Academic Identity Hub
+- **Dynamic Roadmap**: Real-time visualization of your degree progress (Year 1, 2, 3...) based on enrollment data.
+- **Technical Arsenal**: A curated and customizable skill matrix where students track their proficiency in tools like React, TypeScript, and more.
+- **Verifiable Audit Logs**: Generate professional PDF reports of team performance and individual contributions, perfect for portfolio evidence.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 📊 Advanced Project Analytics
+- **Live KPI Tracking**: Monitor completion rates, evidence density, and overdue risks at a glance.
+- **Effort Distribution**: Transparent breakdown of team contributions to ensure fair project participation.
+- **Interactive Kanban**: A futuristic, student-focused task board with integrated risk assessments.
 
-## Learn More
+### 💬 Seamless Collaboration
+- **Real-time Team Chat**: WhatsApp-style communication embedded directly into the workspace.
+- **Presence System**: See who's online and actively contributing to the pipeline.
+- **Join Requests**: Secure team discovery and request management via an admin-approval workflow.
+- **Zen Mode**: A built-in "Break Point" Quiz to keep your technical knowledge sharp during build waits.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **Styling**: Vanilla CSS with High-End Glassmorphism & Cyberpunk Aesthetics
+- **Visualization**: [Recharts](https://recharts.org/)
+- **Reporting**: [jsPDF](https://github.com/parallax/jsPDF)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Getting Started
 
-## Deploy on Vercel
+### Prerequisites
+- Node.js 18+ 
+- Supabase Project
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Installation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/groupflow.git
+   cd groupflow
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**
+   Create a `.env.local` file with the following:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_key
+   GITHUB_CLIENT_ID=your_id
+   GITHUB_CLIENT_SECRET=your_secret
+   ```
+
+4. **Run development server**
+   ```bash
+   npm run dev
+   ```
+
+## 🏗️ Deployment Pipeline
+
+This repository is equipped with a **Tip-Top Deployment Pipeline** via GitHub Actions:
+- **Build Verification**: Automatically runs `npm run build` on every PR to ensure production stability.
+- **Type Safety**: Enforces strict TypeScript checks across the entire ecosystem.
+
+---
+
+Built with ❤️ for the next generation of engineers.
