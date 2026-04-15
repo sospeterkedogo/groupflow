@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, GitCommit, Link as LinkIcon, UserPlus, UserMinus, UserCircle, Check } from 'lucide-react'
@@ -33,6 +34,7 @@ export default function TaskModal({
   onRefresh: () => void,
   initialDueDate?: string
 }) {
+  const router = useRouter()
   const isEditMode = !!task
 
   const [title, setTitle] = useState(task?.title || '')
@@ -133,23 +135,24 @@ export default function TaskModal({
 
     setLoading(false)
 
-    if (err) {
-      setError(`Failed to save task: ${err.message}`)
-    } else {
-      // Verifiable Logging
-      if (currentUser) {
-        logActivity(
-          currentUser.id,
-          groupId,
-          isEditMode ? 'task_updated' : 'task_created',
-          isEditMode ? `Updated task: ${title}` : `Created task: ${title}`,
-          { task_id: task?.id || 'new' }
-        )
+      if (err) {
+        setError(`Failed to save task: ${err.message}`)
+      } else {
+        // Verifiable Logging
+        if (currentUser) {
+          logActivity(
+            currentUser.id,
+            groupId,
+            isEditMode ? 'task_updated' : 'task_created',
+            isEditMode ? `Updated task: ${title}` : `Created task: ${title}`,
+            { task_id: task?.id || 'new' }
+          )
+        }
+        onRefresh()
+        router.refresh()
+        onClose()
       }
-      onRefresh()
-      onClose()
     }
-  }
 
   const handleDelete = async () => {
     if (!task) return
@@ -172,6 +175,7 @@ export default function TaskModal({
         )
       }
       onRefresh()
+      router.refresh()
       onClose()
     }
   }

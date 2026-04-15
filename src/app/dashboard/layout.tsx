@@ -7,6 +7,8 @@ import { ThemeProvider } from '@/context/ThemeContext'
 
 import OnboardingWrapper from '@/components/OnboardingWrapper'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardLayout({
   children,
 }: {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
 import {
   Settings, Save, CheckCircle2, Shield, Download, Trash2,
   Key, AlertTriangle, X, Camera, Palette as PaletteIcon,
@@ -21,6 +22,7 @@ import { logActivity } from '@/utils/logging'
 type Tab = 'identity' | 'pulse' | 'activity' | 'intercom' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
 
 export default function SettingsPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('identity')
   const [profile, setProfile] = useState<any>(null)
   const [fullName, setFullName] = useState('')
@@ -111,6 +113,7 @@ export default function SettingsPage() {
       // Verifiable Logging
       logActivity(profile.id, profile.group_id, 'setting_updated', 'Updated personal profile details and academic journey')
       window.dispatchEvent(new CustomEvent('PROFILE_UPDATED'))
+      router.refresh()
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     }
@@ -141,7 +144,7 @@ export default function SettingsPage() {
         await setCustomBg(publicUrl)
       }
       window.dispatchEvent(new CustomEvent('PROFILE_UPDATED'))
-
+      router.refresh()
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err: any) {

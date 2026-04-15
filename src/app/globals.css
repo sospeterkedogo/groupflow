@@ -51,7 +51,7 @@ html, body {
   height: 100%;
   height: var(--vh-dynamic);
   overflow-x: hidden;
-  overflow-y: hidden; /* Global scroll is locked, only .main-content scrolls */
+  overflow-y: auto; /* Restored for landing page and general accessibility */
   position: relative;
   width: 100%;
   overscroll-behavior-x: none;
@@ -440,6 +440,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--bg-main);
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative; /* Ensure it stays contained */
   height: var(--vh-dynamic);
   /* Override global scrollbar kill — this is the ONE scroll surface */
   scrollbar-width: thin;

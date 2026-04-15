@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Zap, Shield, Users, Activity, BarChart3, ChevronRight, Globe, Layers } from 'lucide-react'
 
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const features = [
     { 
       icon: <Zap size={24} />, 
@@ -26,10 +28,54 @@ export default function Home() {
   ]
 
   return (
-    <div style={{ minHeight: 'var(--vh-dynamic)', display: 'flex', flexDirection: 'column', background: 'var(--bg-main)', position: 'relative', overflowX: 'hidden' }}>
-      {/* Mesh Gradient Backdrop */}
-      <div style={{ position: 'absolute', top: -100, right: -100, width: '400px', height: '400px', background: 'var(--brand)', filter: 'blur(120px)', opacity: 0.1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: -100, left: -100, width: '400px', height: '400px', background: 'var(--accent)', filter: 'blur(120px)', opacity: 0.1, pointerEvents: 'none' }} />
+     <div style={{ minHeight: 'var(--vh-dynamic)', display: 'flex', flexDirection: 'column', background: 'var(--bg-main)', position: 'relative', overflowX: 'hidden' }}>
+       {/* Mesh Gradient Backdrop */}
+       <div style={{ position: 'absolute', top: -100, right: -100, width: '400px', height: '400px', background: 'var(--brand)', filter: 'blur(120px)', opacity: 0.1, pointerEvents: 'none' }} />
+       <div style={{ position: 'absolute', bottom: -100, left: -100, width: '400px', height: '400px', background: 'var(--accent)', filter: 'blur(120px)', opacity: 0.1, pointerEvents: 'none' }} />
+
+       {/* Dissertation Project Modal */}
+       {isModalOpen && (
+         <div style={{ position: 'fixed', inset: 0, background: 'var(--overlay)', backdropFilter: 'blur(12px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+           <div 
+             className="page-fade"
+             style={{ background: 'var(--surface)', maxWidth: '650px', width: '100%', borderRadius: '32px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', padding: '2.5rem', position: 'relative' }}
+           >
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'var(--bg-sub)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}
+              >✕</button>
+              
+              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
+                DISSERTATION PROJECT 2026
+              </div>
+              <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Restoring Team Balance</h2>
+              
+              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
+                 <div>
+                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>What is GroupFlow?</strong>
+                    GroupFlow is a project management and analytics verify-engine designed to address "Social Loafing"—a phenomenon where individual effort decreases in group settings.
+                 </div>
+                 <div>
+                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Why build this?</strong>
+                    Traditional tools fail to capture the quality and authenticity of individual contributions. My dissertation explores how real-time telemetry and artifact-based verification can close this "accountability gap," ensuring grades reflect actual effort.
+                 </div>
+                 <div>
+                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Who is it for?</strong>
+                    I've designed this primarily for University Students and Tutors. Students gain a high-performance workspace, while Tutors receive deep, objective insights for fair and accurate grading.
+                 </div>
+              </div>
+
+              <div style={{ marginTop: '2rem', padding: '1.25rem', background: 'var(--bg-sub)', borderRadius: '16px', border: '1px solid var(--border)', fontSize: '0.9rem' }}>
+                 <Globe size={18} style={{ marginBottom: '0.5rem', color: 'var(--brand)' }} />
+                 This project is part of my final year research into collaborative dynamics and automated attribution systems.
+              </div>
+
+              <button className="btn btn-primary" style={{ marginTop: '2rem', width: '100%' }} onClick={() => setIsModalOpen(false)}>
+                Got it, let's explore
+              </button>
+           </div>
+         </div>
+       )}
 
       {/* Navigation */}
       <header style={{ 
