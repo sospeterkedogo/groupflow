@@ -162,7 +162,7 @@ export default function Home() {
         </section>
 
         {/* THE PROBLEM: Social Loafing */}
-        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)', borderY: '1px solid var(--border)' }}>
+        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '4rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ flex: 1, minWidth: '320px' }}>
                <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1.5rem' }}>The Hidden Cost of "Teamwork"</h2>
