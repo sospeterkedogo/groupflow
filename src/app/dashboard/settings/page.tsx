@@ -388,19 +388,6 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* CSS Variables for Settings Component */}
-        <style jsx>{`
-          :root {
-            --gap-sm: 2.5rem;
-            --avatar-size: 120px;
-          }
-          @media (max-width: 768px) {
-            :root {
-              --gap-sm: 1.25rem;
-              --avatar-size: 80px;
-            }
-          }
-        `}</style>
 
         {activeTab === 'team' && isAdmin && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -802,6 +789,16 @@ export default function SettingsPage() {
       )}
 
       <style jsx>{`
+          :root {
+            --gap-sm: 2.5rem;
+            --avatar-size: 120px;
+          }
+          @media (max-width: 768px) {
+            :root {
+              --gap-sm: 1.25rem;
+              --avatar-size: 80px;
+            }
+          }
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
        `}</style>
