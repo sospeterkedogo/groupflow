@@ -9,15 +9,15 @@ import { logActivity } from '@/utils/logging'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
-  'Building', 
-  'Structure', 
-  'Design', 
-  'Testing', 
+  'Implementation', 
+  'Architecture', 
+  'UX/UI Design', 
+  'Quality Assurance', 
   'Research', 
-  'Helping', 
-  'Writing', 
-  'Systems', 
-  'Ethics'
+  'Mentorship', 
+  'Documentation', 
+  'DevOps', 
+  'Ethics & Legal'
 ]
 
 export default function TaskModal({ 

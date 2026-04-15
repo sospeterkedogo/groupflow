@@ -24,9 +24,9 @@ function SubmitButton({ label, secondary = false }: { label: string, secondary?:
 }
 
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-// Client component for joining/creating groups
-export default function JoinGroupPage() {
+function JoinGroupContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
 
@@ -87,5 +87,17 @@ export default function JoinGroupPage() {
 
        </div>
     </main>
+  )
+}
+
+export default function JoinGroupPage() {
+  return (
+    <Suspense fallback={
+       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+          <div className="spinner" />
+       </div>
+    }>
+       <JoinGroupContent />
+    </Suspense>
   )
 }

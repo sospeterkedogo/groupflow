@@ -18,15 +18,15 @@ export type Profile = {
 export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';
 
 export type TaskCategory = 
-  | 'Building' 
-  | 'Structure' 
-  | 'Design' 
-  | 'Testing' 
+  | 'Implementation' 
+  | 'Architecture' 
+  | 'UX/UI Design' 
+  | 'Quality Assurance' 
   | 'Research' 
-  | 'Helping' 
-  | 'Writing' 
-  | 'Systems' 
-  | 'Ethics';
+  | 'Mentorship' 
+  | 'Documentation' 
+  | 'DevOps' 
+  | 'Ethics & Legal';
 
 export type Task = {
   id: string;

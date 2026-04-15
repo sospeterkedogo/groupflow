@@ -29,8 +29,9 @@ function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAcc
 }
 
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginContent() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -168,5 +169,17 @@ export default function LoginPage() {
         @keyframes slideIn { from { opacity: 0; height: 0; } to { opacity: 1; height: auto; } }
       `}</style>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
+        <div className="spinner" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }
