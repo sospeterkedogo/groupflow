@@ -30,15 +30,44 @@ export const useNotifications = () => {
   return context
 }
 
+type Toast = {
+  id: string
+  title: string
+  message: string
+  type: string
+}
+
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [toasts, setToasts] = useState<any[]>([])
+  const [toasts, setToasts] = useState<Toast[]>([])
   const supabase = createClient()
+
+  const addToast = (title: string, message: string, type: string = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9)
+    setToasts(prev => [...prev, { id, title, message, type }])
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id))
+    }, 5000)
+  }
+
+  const fetchNotifications = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (data) setNotifications(data)
+  }
 
   useEffect(() => {
     fetchNotifications()
     
-    let channel: any
+    let channel: any = null
     let active = true
 
     const setupSubscription = async () => {
@@ -68,20 +97,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   }, [])
 
-  const fetchNotifications = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    if (data) setNotifications(data)
-  }
-
   const markAsRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     await supabase.from('notifications').update({ read: true }).eq('id', id)
@@ -92,14 +107,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (!user) return
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     await supabase.from('notifications').update({ read: true }).eq('user_id', user.id)
-  }
-
-  const addToast = (title: string, message: string, type: string = 'info') => {
-    const id = Math.random().toString(36).substr(2, 9)
-    setToasts(prev => [...prev, { id, title, message, type }])
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id))
-    }, 5000)
   }
 
   const unreadCount = notifications.filter(n => !n.read).length

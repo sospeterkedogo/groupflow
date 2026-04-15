@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
-import { X, Trash2, ExternalLink, ThumbsUp, FileUp, GitCommit, Link as LinkIcon, UserPlus, UserMinus, UserCircle, Check } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
+import { Task, TaskStatus, Artifact, TaskCategory, Profile } from '@/types/database'
+import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 
@@ -49,8 +50,8 @@ export default function TaskModal({
         ? initialDueDate 
         : ''
   )
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [members, setMembers] = useState<any[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [members, setMembers] = useState<Array<Profile & { avatar_url?: string; school_id?: string }>>([])
   const { onlineUsers } = usePresence()
   
   const [loading, setLoading] = useState(false)
@@ -65,17 +66,29 @@ export default function TaskModal({
 
   const supabase = createClient()
 
+  async function fetchMembers() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, email, school_id')
+      .eq('group_id', groupId)
+    if (data) setMembers(data as Array<Profile & { avatar_url?: string; school_id?: string }>)
+  }
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
     fetchMembers()
   }, [groupId])
 
-  const fetchMembers = async () => {
+  async function fetchArtifacts() {
+    if (!task) return
     const { data } = await supabase
-      .from('profiles')
-      .select('id, full_name, avatar_url, email, school_id')
-      .eq('group_id', groupId)
-    if (data) setMembers(data)
+      .from('artifacts')
+      .select('*')
+      .eq('task_id', task.id)
+      .order('created_at', { ascending: false })
+    
+    if (data) setArtifacts(data as Artifact[])
+    setEvidenceLoading(false)
   }
 
   useEffect(() => {
@@ -91,18 +104,6 @@ export default function TaskModal({
 
     return () => { supabase.removeChannel(channel) }
   }, [task?.id])
-
-  const fetchArtifacts = async () => {
-    if (!task) return
-    const { data } = await supabase
-      .from('artifacts')
-      .select('*')
-      .eq('task_id', task.id)
-      .order('created_at', { ascending: false })
-    
-    if (data) setArtifacts(data as Artifact[])
-    setEvidenceLoading(false)
-  }
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -447,7 +448,7 @@ export default function TaskModal({
                             <img 
                               src={member.avatar_url} 
                               style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }} 
-                              alt={member.full_name}
+                              alt={member.full_name || 'Member avatar'}
                             />
                           ) : (
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>

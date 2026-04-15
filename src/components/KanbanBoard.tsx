@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Task, TaskStatus } from '@/types/database'
+import { Task, TaskStatus, Profile } from '@/types/database'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
+
+type MemberProfileStats = {
+  id: string
+  full_name: string | null
+  email: string | null
+  avatar_url: string | null
+  total_score: number
+  role: string
+}
 import TaskModal from './TaskModal'
 import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
@@ -16,11 +25,17 @@ const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
 export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [groupMembers, setGroupMembers] = useState<any[]>([])
-  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null)
+  const [groupMembers, setGroupMembers] = useState<MemberProfileStats[]>([])
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   
   const [loading, setLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 60000)
+    return () => window.clearInterval(interval)
+  }, [])
   
   // Modal Orchestration State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -60,10 +75,19 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const fetchGroupMembers = async () => {
      const { data } = await supabase
        .from('profiles')
-       .select('id, full_name, email, avatar_url')
+       .select('id, full_name, email, avatar_url, role, total_score')
        .eq('group_id', groupId)
        
-     if (data) setGroupMembers(data)
+     if (data) {
+       setGroupMembers(data.map(item => ({
+         id: item.id,
+         full_name: item.full_name ?? null,
+         email: item.email ?? null,
+         avatar_url: item.avatar_url ?? null,
+         role: item.role ?? 'Member',
+         total_score: typeof item.total_score === 'number' ? item.total_score : 0,
+       })))
+     }
   }
 
   const fetchCurrentUser = async () => {
@@ -148,7 +172,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   }
 
   // ALGORITHMIC COMPLETION ENGINE (Enhanced with Evidence Weight)
-  const calculateProbability = (task: any) => {
+  const calculateProbability = (task: Task) => {
      if (task.status === 'Done') return 100
      let base = task.status === 'In Review' ? 85 : task.status === 'In Progress' ? 50 : 10
      
@@ -157,7 +181,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
      base += artifactBoost
 
      if (task.due_date) {
-        const remainingHours = (new Date(task.due_date).getTime() - Date.now()) / (1000 * 60 * 60)
+        const remainingHours = (new Date(task.due_date).getTime() - now) / (1000 * 60 * 60)
         if (remainingHours < 0) {
             base = Math.max(0, base - 50) 
         } else if (remainingHours < 48) {
@@ -171,7 +195,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
     ? Math.round(tasks.reduce((acc, t) => acc + calculateProbability(t), 0) / tasks.length)
     : 0
 
-  const overdueCount = tasks.filter(t => t.due_date && new Date(t.due_date).getTime() < Date.now() && t.status !== 'Done').length
+  const overdueCount = tasks.filter(t => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
   const [hasCelebrated, setHasCelebrated] = useState(false)
 
   // IMMERSIVE GAMIFICATION REWARD MATRIX

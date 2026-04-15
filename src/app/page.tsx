@@ -117,7 +117,8 @@ export default function Home() {
           <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none' }}>Sign In</Link>
           <Link href="/login" className="btn btn-primary btn-sm btn-inline">Get Started</Link>
         </div>
-      </heade      <main style={{ padding: '4rem 0' }}>
+      </header>
+      <main style={{ padding: '4rem 0' }}>
         
         {/* HERO: The Accountability Hook */}
         <section style={{ textAlign: 'center', marginBottom: '8rem', padding: '0 var(--p-safe)', position: 'relative' }}>
@@ -229,7 +230,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-on>
 
         {/* EXTERNAL COLLABORATION: The Sync Layer */}
         <section style={{ padding: '8rem var(--p-safe)', textAlign: 'center' }}>

@@ -21,13 +21,26 @@ import {
 } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 
-export default function Sidebar({ user }: { user: any }) {
+type SidebarProfile = {
+  id: string
+  full_name?: string
+  avatar_url?: string
+  email?: string
+  school_id?: string
+  group_id?: string
+  role?: string
+  theme_config?: { palette?: string }
+  custom_bg_url?: string
+  groups?: any
+}
+
+export default function Sidebar({ user }: { user: { id: string } }) {
   const [isOpen, setIsOpen] = useState(true)
-  const [profile, setProfile] = useState<any>(null)
-  const [isOnline, setIsOnline] = useState(true)
+  const [profile, setProfile] = useState<SidebarProfile | null>(null)
   const pathname = usePathname()
   const supabase = createClient()
   const { currentPalette, setPalette } = useTheme()
+  const isOnline = Boolean(profile)
 
   const toggleTheme = () => {
     const paletteNames = ['Google Light', 'Deep Oceanic', 'Cyberpunk']
@@ -37,6 +50,25 @@ export default function Sidebar({ user }: { user: any }) {
   }
 
   const isDark = currentPalette.name !== 'Google Light'
+
+  async function fetchProfile() {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, theme_config, custom_bg_url, full_name, avatar_url')
+        .eq('id', user.id)
+        .single()
+      
+      if (error) {
+        console.error('Sidebar fetch error:', error.message)
+        return
+      }
+      
+      if (data) setProfile(data)
+    } catch (err) {
+      console.error('Sidebar unexpected error:', err)
+    }
+  }
 
   useEffect(() => {
     fetchProfile()
@@ -65,25 +97,6 @@ export default function Sidebar({ user }: { user: any }) {
       window.removeEventListener('PROFILE_UPDATED', handleProfileUpdate)
     }
   }, [user.id, isOpen])
-
-  const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*, groups(*)')
-        .eq('id', user.id)
-        .single()
-      
-      if (error) {
-        console.error('Sidebar fetch error:', error.message)
-        return
-      }
-      
-      if (data) setProfile(data)
-    } catch (err) {
-      console.error('Sidebar unexpected error:', err)
-    }
-  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()

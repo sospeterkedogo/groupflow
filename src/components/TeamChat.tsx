@@ -1,14 +1,19 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { 
-  Send, User, MessageSquare, X, ChevronRight, Hash, 
-  Paperclip, Image as ImageIcon, Smile, Check, CheckCheck, Clock,
+  Send, MessageSquare, X, Paperclip, CheckCheck, Clock,
   Trash2, Shield
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
+
+type ChatPayload = {
+  type: 'image' | 'file'
+  url: string
+  name?: string
+}
 
 interface ChatMessage {
   id: string
@@ -98,17 +103,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
     }
   }, [groupId, isOpen, user.id])
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchMessages()
-    }
-  }, [isOpen, groupId])
-
-  useEffect(() => {
-    if (messages.length > 0 && isOpen) scrollToBottom('smooth')
-  }, [messages, isOpen])
-
-  const fetchMessages = async () => {
+  async function fetchMessages() {
     setLoading(true)
     const { data } = await supabase
       .from('messages')
@@ -122,6 +117,16 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
     setTimeout(() => scrollToBottom('auto'), 50)
   }
 
+  useEffect(() => {
+    if (isOpen) {
+      fetchMessages()
+    }
+  }, [isOpen, groupId])
+
+  useEffect(() => {
+    if (messages.length > 0 && isOpen) scrollToBottom('smooth')
+  }, [messages, isOpen])
+
   const handleTyping = (text: string) => {
     setNewMessage(text)
     setTypingStatus(true)
@@ -131,7 +136,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
     }, 2000)
   }
 
-  const handleSendMessage = async (e: React.FormEvent, contentOverride?: string, payload?: any) => {
+  const handleSendMessage = async (e: React.FormEvent | null, contentOverride?: string, payload?: ChatPayload) => {
     e?.preventDefault()
     const content = contentOverride || newMessage.trim()
     if (!content && !payload) return
@@ -219,10 +224,10 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
 
      const { data: publicUrlData } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
      await handleSendMessage(
-        null as any, 
-        '', 
-        { 
-          type: file.type.startsWith('image/') ? 'image' : 'file', 
+        null,
+        '',
+        {
+          type: file.type.startsWith('image/') ? 'image' : 'file',
           url: publicUrlData.publicUrl,
           name: file.name
         }
