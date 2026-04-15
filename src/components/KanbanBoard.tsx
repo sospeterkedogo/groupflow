@@ -246,9 +246,14 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
       {boardError && (
-        <div className="error-message" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-           <AlertCircle size={16} />
-           <span>{boardError}</span>
+        <div className="error-message" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <AlertCircle size={16} />
+            <span>{boardError}</span>
+          </div>
+          <button className="btn btn-secondary" style={{ marginTop: '0.5rem' }} onClick={fetchTasks}>
+            Retry Sync
+          </button>
         </div>
       )}
       

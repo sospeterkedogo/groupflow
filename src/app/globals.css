@@ -733,7 +733,8 @@ h1, h2, h3, h4, h5, h6 {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
+  /* Removed blur for a cleaner overlay */
+  backdrop-filter: none;
   z-index: 4500;
   opacity: 0;
   visibility: hidden;
