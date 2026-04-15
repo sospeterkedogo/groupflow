@@ -95,6 +95,30 @@ export default function ProfilePage() {
                </p>
             </div>
 
+            {/* Academic Journey Card */}
+            <div className="auth-card" style={{ maxWidth: '100%', background: 'linear-gradient(135deg, var(--bg-sub), var(--surface))' }}>
+               <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Calendar size={20} color="var(--brand)" />
+                  Academic Journey
+               </h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Course of Study</div>
+                     <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{profile?.course_name || 'General Studies'}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem' }}>
+                     <div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Enrolled</div>
+                        <div style={{ fontWeight: 700 }}>{profile?.enrollment_year || 'N/A'}</div>
+                     </div>
+                     <div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Completion</div>
+                        <div style={{ fontWeight: 700 }}>{profile?.completion_year || 'N/A'}</div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
             {/* Core Configuration */}
             <div className="auth-card" style={{ maxWidth: '100%' }}>
                <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

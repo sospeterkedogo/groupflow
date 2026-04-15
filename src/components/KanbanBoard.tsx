@@ -302,23 +302,23 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
                           display: 'flex', 
                           alignItems: 'center', 
                           gap: '0.25rem',
-                          background: task.category === 'Implementation' ? 'rgba(var(--brand-rgb), 0.1)' : 
-                                      task.category === 'Architecture' ? 'rgba(139, 92, 246, 0.1)' :
-                                      task.category === 'UX/UI Design' ? 'rgba(236, 72, 153, 0.1)' :
-                                      task.category === 'Quality Assurance' ? 'rgba(16, 185, 129, 0.1)' :
+                          background: task.category === 'Building' ? 'rgba(var(--brand-rgb), 0.1)' : 
+                                      task.category === 'Structure' ? 'rgba(139, 92, 246, 0.1)' :
+                                      task.category === 'Design' ? 'rgba(236, 72, 153, 0.1)' :
+                                      task.category === 'Testing' ? 'rgba(16, 185, 129, 0.1)' :
                                       task.category === 'Research' ? 'rgba(245, 158, 11, 0.1)' :
-                                      task.category === 'Management' ? 'rgba(99, 102, 241, 0.1)' :
-                                      task.category === 'Documentation' ? 'rgba(100, 116, 139, 0.1)' :
-                                      task.category === 'DevOps' ? 'rgba(6, 182, 212, 0.1)' :
+                                      task.category === 'Helping' ? 'rgba(99, 102, 241, 0.1)' :
+                                      task.category === 'Writing' ? 'rgba(100, 116, 139, 0.1)' :
+                                      task.category === 'Systems' ? 'rgba(6, 182, 212, 0.1)' :
                                       'rgba(239, 68, 68, 0.1)',
-                          color: task.category === 'Implementation' ? 'var(--brand)' : 
-                                 task.category === 'Architecture' ? '#8b5cf6' :
-                                 task.category === 'UX/UI Design' ? '#ec4899' :
-                                 task.category === 'Quality Assurance' ? '#10b981' :
+                          color: task.category === 'Building' ? 'var(--brand)' : 
+                                 task.category === 'Structure' ? '#8b5cf6' :
+                                 task.category === 'Design' ? '#ec4899' :
+                                 task.category === 'Testing' ? '#10b981' :
                                  task.category === 'Research' ? '#f59e0b' :
-                                 task.category === 'Management' ? '#6366f1' :
-                                 task.category === 'Documentation' ? '#64748b' :
-                                 task.category === 'DevOps' ? '#06b6d4' :
+                                 task.category === 'Helping' ? '#6366f1' :
+                                 task.category === 'Writing' ? '#64748b' :
+                                 task.category === 'Systems' ? '#06b6d4' :
                                  '#ef4444',
                           border: 'none',
                           fontSize: '0.65rem',

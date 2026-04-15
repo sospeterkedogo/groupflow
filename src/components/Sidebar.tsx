@@ -147,7 +147,7 @@ export default function Sidebar({ user }: { user: any }) {
       <div style={{ padding: '1.25rem 1rem', flex: 1, minHeight: '180px', overflowY: 'auto' }}>
         {isOpen && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingLeft: '1rem', paddingRight: '0.5rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Other Teams</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Teams</span>
             <Link href="/dashboard/join" title="Join / Create Project">
               <Plus size={16} color="var(--text-sub)" />
             </Link>

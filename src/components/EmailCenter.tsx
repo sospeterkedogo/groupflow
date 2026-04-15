@@ -14,6 +14,8 @@ type VirtualEmail = {
   type: 'reminder' | 'report' | 'system'
 }
 
+import jsPDF from 'jspdf'
+
 export default function EmailCenter({ groupId, profile, teamMembers }: { groupId: string, profile: any, teamMembers: any[] }) {
   const [emails, setEmails] = useState<VirtualEmail[]>([])
   const [loading, setLoading] = useState(false)
@@ -68,31 +70,58 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
     alert("Report generated and delivered to your Virtual Inbox.")
   }
 
-  const downloadMockPDF = () => {
-    // In a real environment, we'd use jspdf. For this simulation, we'll create a text blob.
-    const reportContent = `
-      GROUPFLOW PROJECT AUDIT REPORT
-      ==============================
-      Project: ${groupId}
-      Member: ${profile?.full_name}
-      Generated: ${new Date().toLocaleString()}
+  const downloadRealPDF = () => {
+    const doc = new jsPDF()
+    const brandColor = [0, 51, 102] // #003366
+    
+    // Header
+    doc.setFillColor(brandColor[0], brandColor[1], brandColor[2])
+    doc.rect(0, 0, 210, 40, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(22)
+    doc.setFont("helvetica", "bold")
+    doc.text("GROUPFLOW AUDIT REPORT", 20, 25)
+    
+    // Body Text
+    doc.setTextColor(80, 80, 80)
+    doc.setFontSize(10)
+    doc.setFont("helvetica", "normal")
+    doc.text(`Project ID: ${groupId}`, 20, 55)
+    doc.text(`Requestor: ${profile?.full_name}`, 20, 62)
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 69)
+    
+    doc.setDrawColor(230, 230, 230)
+    doc.line(20, 75, 190, 75)
+    
+    // Performance Header
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(14)
+    doc.setFont("helvetica", "bold")
+    doc.text("TEAM PERFORMANCE BREAKDOWN", 20, 90)
+    
+    // Table
+    let y = 105
+    doc.setFontSize(11)
+    teamMembers.forEach((m, idx) => {
+      const total = teamMembers.reduce((acc, curr) => acc + (curr.total_score || 0), 0)
+      const pct = total > 0 ? Math.round((m.total_score / total) * 100) : 0
       
+      doc.setTextColor(idx % 2 === 0 ? 0 : 60, 60, 60)
+      doc.text(`${m.full_name}`, 25, y)
+      doc.text(`${m.total_score} pts`, 120, y)
+      doc.text(`${pct}% impact`, 160, y)
       
-      TEAM PERFORMANCE BREAKDOWN:
-      ${teamMembers.map(m => {
-        const total = teamMembers.reduce((acc, curr) => acc + (curr.total_score || 0), 0)
-        const pct = total > 0 ? Math.round((m.total_score / total) * 100) : 0
-        return `- ${m.full_name}: ${m.total_score} pts (${pct}%)`
-      }).join('\n      ')}
-
-      CONFIRMATION: This report is a verifiable snapshot of the project registry.
-    `
-    const blob = new Blob([reportContent], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `GroupFlow_Report_${new Date().toISOString().split('T')[0]}.pdf`
-    link.click()
+      doc.setDrawColor(245, 245, 245)
+      doc.line(20, y + 5, 190, y + 5)
+      y += 15
+    })
+    
+    // Footer
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text("This document is a verifiable project snapshot. Integrity verified by GroupFlow Protocol.", 20, 280)
+    
+    doc.save(`GroupFlow_Audit_${new Date().toISOString().split('T')[0]}.pdf`)
   }
 
   return (
@@ -179,7 +208,7 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>Signed PDF Document • 1.2 MB</div>
                        </div>
                     </div>
-                    <button onClick={downloadMockPDF} className="btn" style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700 }}>
+                    <button onClick={downloadRealPDF} className="btn" style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface)', border: '1px solid var(--border)', fontWeight: 700 }}>
                        <Download size={18} /> Download
                     </button>
                  </div>

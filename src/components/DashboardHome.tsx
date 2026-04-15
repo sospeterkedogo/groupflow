@@ -6,8 +6,10 @@ import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
 import { LayoutDashboard, Calendar, History, Activity, Zap, TrendingUp, Award, UserCircle } from 'lucide-react'
 import TaskModal from './TaskModal'
+import { useRouter } from 'next/navigation'
 
 export default function DashboardHome({ groupId, profile }: { groupId: string, profile: any }) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
   const [greeting, setGreeting] = useState('Welcome')
   const [personalTaskCount, setPersonalTaskCount] = useState(0)
@@ -156,7 +158,7 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
                className="btn-sm btn-secondary btn-inline" 
                style={{ padding: '0.5rem 1rem' }} 
                data-tooltip="View activity and files"
-               onClick={() => { /* Could navigate to activity tab */ }}
+               onClick={() => router.push(`/dashboard/analytics/${groupId}`)}
             >Activity</button>
             <button 
                className="btn-sm btn-ghost btn-inline" 
