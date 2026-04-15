@@ -47,11 +47,15 @@
   }
 }
 
-html, body {
+html {
   height: 100%;
-  height: var(--vh-dynamic);
+}
+
+body {
+  min-height: 100%;
+  height: auto;
   overflow-x: hidden;
-  overflow-y: auto; /* Restored for landing page and general accessibility */
+  overflow-y: auto; 
   position: relative;
   width: 100%;
   overscroll-behavior-x: none;
@@ -413,9 +417,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Dashboard Layout */
 .dashboard-layout {
   height: 100vh;
+  height: var(--vh-dynamic);
   display: flex;
   overflow: hidden;
-  position: relative;
+  position: fixed; /* Lock to viewport for app feel */
+  top: 0;
+  left: 0;
   width: 100%;
   max-width: 100vw;
 }
