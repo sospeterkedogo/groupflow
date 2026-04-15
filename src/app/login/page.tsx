@@ -48,10 +48,10 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ er
             <BookOpen color="white" size={32} />
           </div>
           <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'white', letterSpacing: '-0.02em', margin: 0 }}>
-            {isSignUp ? 'Join GroupFlow' : 'Global Dispatch'}
+            {isSignUp ? 'Create an account' : 'Welcome back'}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem', fontWeight: 500 }}>
-            {isSignUp ? 'Orchestrate your academic project today.' : 'Authenticate to sync with your cohort.'}
+            {isSignUp ? 'Set up your GroupFlow account to get started.' : 'Sign in to your GroupFlow workspace.'}
           </p>
         </div>
 
@@ -59,7 +59,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ er
 
         <form action={isSignUp ? signup : login} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Identity (Email)</label>
+            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Email</label>
             <div style={{ position: 'relative' }}>
               <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
               <input
@@ -74,7 +74,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ er
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Secure Token (Password)</label>
+            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Password</label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
               <input
@@ -90,7 +90,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ er
 
           {isSignUp && (
             <div className="form-group" style={{ marginBottom: 0, animation: 'slideIn 0.3s ease-out' }}>
-              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Unique School ID</label>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Student ID</label>
               <input
                 className="form-input"
                 name="school_id"
@@ -127,14 +127,14 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ er
               style={{ width: '100%', height: '3.5rem', borderRadius: '16px', fontSize: '1.1rem' }}
               disabled={isSignUp && !legalAccepted}
             >
-              {isSignUp ? 'Initialize Profile' : 'Access Workspace'}
+              {isSignUp ? 'Create account' : 'Sign in'}
             </button>
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
               style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
             >
-              {isSignUp ? 'Already have an identity? Access here' : 'New cohort member? Create identity'}
+              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
           </div>
         </form>

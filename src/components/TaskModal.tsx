@@ -9,14 +9,14 @@ import { logActivity } from '@/utils/logging'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
-  'Implementation', 
-  'Architecture', 
-  'UX/UI Design', 
-  'Quality Assurance', 
+  'Building', 
+  'Structure', 
+  'Design', 
+  'Testing', 
   'Research', 
-  'Management', 
-  'Documentation', 
-  'DevOps', 
+  'Helping', 
+  'Writing', 
+  'Systems', 
   'Ethics'
 ]
 
@@ -404,63 +404,69 @@ export default function TaskModal({
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', maxHeight: '200px', overflowY: 'auto', padding: '0.25rem' }}>
-                {members
-                  .filter(m => 
-                    !searchQuery || 
-                    m.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                    m.school_id?.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-                  .map(member => {
-                  const isAssigned = assignees.includes(member.id)
-                  const isOnline = onlineUsers.has(member.id)
-                  const initials = member.full_name ? member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '?'
+                {members.length === 0 ? (
+                  [1, 2, 3, 4].map(i => (
+                    <div key={i} className="skeleton" style={{ height: '48px', borderRadius: '12px' }} />
+                  ))
+                ) : (
+                  members
+                    .filter(m => 
+                      !searchQuery || 
+                      m.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      m.school_id?.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map(member => {
+                    const isAssigned = assignees.includes(member.id)
+                    const isOnline = onlineUsers.has(member.id)
+                    const initials = member.full_name ? member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '?'
 
-                  return (
-                    <div 
-                      key={member.id}
-                      onClick={() => toggleMemberAssignment(member.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        padding: '0.75rem',
-                        borderRadius: '12px',
-                        backgroundColor: isAssigned ? 'var(--bg-sub)' : 'transparent',
-                        border: isAssigned ? '1px solid var(--brand)' : '1px solid var(--border)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                        position: 'relative',
-                        boxShadow: isAssigned ? 'var(--shadow-sm)' : 'none'
-                      }}
-                    >
-                      <div style={{ position: 'relative' }}>
-                        {member.avatar_url ? (
-                          <img 
-                            src={member.avatar_url} 
-                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }} 
-                            alt={member.full_name}
-                          />
-                        ) : (
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
-                            {initials}
+                    return (
+                      <div 
+                        key={member.id}
+                        onClick={() => toggleMemberAssignment(member.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.75rem',
+                          borderRadius: '12px',
+                          backgroundColor: isAssigned ? 'var(--bg-sub)' : 'transparent',
+                          border: isAssigned ? '1px solid var(--brand)' : '1px solid var(--border)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative',
+                          boxShadow: isAssigned ? 'var(--shadow-sm)' : 'none'
+                        }}
+                      >
+                        <div style={{ position: 'relative' }}>
+                          {member.avatar_url ? (
+                            <img 
+                              src={member.avatar_url} 
+                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }} 
+                              alt={member.full_name}
+                            />
+                          ) : (
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                              {initials}
+                            </div>
+                          )}
+                          {isOnline && (
+                            <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)', boxShadow: '0 0 4px var(--success)' }} />
+                          )}
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous'}</div>
+                          <div style={{ fontSize: '0.65rem', color: isOnline ? 'var(--success)' : 'var(--text-sub)', fontWeight: 500 }}>{isOnline ? 'Online Now' : 'Offline'}</div>
+                        </div>
+                        {isAssigned && (
+                          <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Check size={12} />
                           </div>
                         )}
-                        {isOnline && (
-                          <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)', boxShadow: '0 0 4px var(--success)' }} />
-                        )}
                       </div>
-                      <div style={{ overflow: 'hidden' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous'}</div>
-                        <div style={{ fontSize: '0.65rem', color: isOnline ? 'var(--success)' : 'var(--text-sub)', fontWeight: 500 }}>{isOnline ? 'Online Now' : 'Offline'}</div>
-                      </div>
-                      {isAssigned && (
-                        <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Check size={12} />
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+                    )
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -500,14 +506,18 @@ export default function TaskModal({
                  </div>
                </div>
 
-               <div>
-                  {evidenceLoading ? (
-                     <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>Loading files...</p>
-                  ) : artifacts.length === 0 ? (
-                     <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
-                        <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>No attachments found.</p>
-                     </div>
-                 ) : (
+                <div>
+                   {evidenceLoading || uploading ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {[1, 2].map(i => (
+                          <div key={i} className="skeleton" style={{ height: '60px', borderRadius: '12px' }} />
+                        ))}
+                      </div>
+                   ) : artifacts.length === 0 ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
+                         <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>No attachments found.</p>
+                      </div>
+                  ) : (
                    artifacts.map(artifact => {
                      const isOwner = currentUser?.id === artifact.uploaded_by;
                                           return (

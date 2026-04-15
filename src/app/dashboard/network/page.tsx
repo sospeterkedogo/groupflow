@@ -111,9 +111,27 @@ export default function NetworkPage() {
        </div>
 
        {loading && users.length === 0 ? (
-         <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-sub)' }}>
-            <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
-            <span>Searching for students...</span>
+         <div style={viewMode === 'grid' ? { 
+           display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' 
+         } : {
+           display: 'flex', flexDirection: 'column', gap: '1rem'
+         }}>
+           {[1, 2, 3, 4, 5, 6].map(i => (
+             <div key={i} style={{ 
+                display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
+                alignItems: viewMode === 'grid' ? 'stretch' : 'center',
+                padding: '1.5rem', background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', gap: '1rem'
+             }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+                  <div className="skeleton skeleton-avatar" style={{ width: '48px', height: '48px', flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                     <div className="skeleton skeleton-title" style={{ width: '60%', marginBottom: '8px' }} />
+                     <div className="skeleton skeleton-text" style={{ width: '40%' }} />
+                  </div>
+                </div>
+                {viewMode === 'grid' && <div className="skeleton skeleton-card" style={{ height: '60px', marginTop: '1rem' }} />}
+             </div>
+           ))}
          </div>
        ) : users.length === 0 ? (
          <div style={{ textAlign: 'center', padding: '6rem', background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>

@@ -284,40 +284,52 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
       }}
       className="responsive-chat"
     >
-       {/* WhatsApp Header */}
-       <div style={{ padding: '0.75rem 1rem', background: '#075e54', color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
-          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-             <User size={24} />
+       {/* Chat Header */}
+       <div style={{ padding: '0.75rem 1rem', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+             <MessageSquare size={20} />
           </div>
-          <div style={{ flex: 1 }}>
-             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Team Dispatch</h3>
-             <div style={{ fontSize: '0.7rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+             <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Team Chat</h3>
+             <div style={{ fontSize: '0.68rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 {othersTyping.length > 0 ? (
                   <span style={{ fontStyle: 'italic', fontWeight: 600 }}>typing...</span>
                 ) : (
                   <>
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
-                    {onlineUsers.size} active
+                    {onlineUsers.size} online
                   </>
                 )}
              </div>
           </div>
-          <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', opacity: 0.8 }}><X size={20} /></button>
+          <button onClick={() => setIsOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.3rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}><X size={18} /></button>
        </div>
 
-       {/* Messages List with Wallpaper */}
+       {/* Messages */}
        <div className="chat-viewport" style={{ 
           flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
-          backgroundColor: '#e5ddd5', backgroundImage: `url('https://w0.peakpx.com/wallpaper/580/630/wallpaper-whatsapp-plain-background.jpg')`, backgroundSize: 'cover', backgroundBlendMode: 'overlay'
+          background: 'var(--bg-sub)',
        }}>
           {loading ? (
-            <div style={{ textAlign: 'center', color: '#667781', fontSize: '0.75rem', padding: '1rem', background: 'rgba(255,255,255,0.8)', borderRadius: '8px', width: 'fit-content', margin: '1rem auto' }}>Loading history...</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem' }}>
+              {[85, 60, 75, 50, 90].map((w, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: i % 2 === 0 ? 'flex-end' : 'flex-start' }}>
+                  <div style={{ width: `${w}%`, height: '44px', borderRadius: '12px', background: 'var(--border)', animation: 'shimmer 1.5s infinite', backgroundSize: '200% 100%' }} />
+                </div>
+              ))}
+            </div>
           ) : (
             <>
+              {messages.length === 0 && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', color: 'var(--text-sub)', padding: '2rem' }}>
+                  <MessageSquare size={36} style={{ opacity: 0.3 }} />
+                  <p style={{ textAlign: 'center', fontSize: '0.85rem', margin: 0 }}>No messages yet.<br/>Be the first to say something!</p>
+                </div>
+              )}
               {groupedMessages.map((group) => (
                 <div key={group.date} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                   <div style={{ textAlign: 'center', margin: '1rem 0' }}>
-                      <span style={{ padding: '0.4rem 0.8rem', background: '#d1f4ff', color: '#111b21', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', boxShadow: '0 1px 1px rgba(0,0,0,0.1)' }}>{group.date}</span>
+                   <div style={{ textAlign: 'center', margin: '0.5rem 0' }}>
+                      <span style={{ padding: '0.3rem 0.8rem', background: 'var(--surface)', color: 'var(--text-sub)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: '0.68rem', fontWeight: 700 }}>{group.date}</span>
                    </div>
                    
                    {group.msgs.map((m) => {
@@ -325,65 +337,59 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
                      const canDelete = isOwn || user.role === 'admin'
                      
                      return (
-                       <div key={m.id} style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start', marginBottom: '4px' }}>
+                       <div key={m.id} style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start', marginBottom: '2px' }}>
                           <div 
                             className={`msg-bubble ${isOwn ? 'own' : 'other'} ${m.pending ? 'pending' : ''} ${m.is_deleted ? 'deleted' : ''}`}
                             style={{
-                              padding: '0.5rem 0.75rem', borderRadius: '8px', maxWidth: '85%', fontSize: '0.9rem', lineHeight: 1.4,
-                              position: 'relative', boxShadow: '0 1px 1px rgba(0,0,0,0.1)',
-                              background: isOwn ? '#dcf8c6' : '#ffffff',
-                              color: m.is_deleted ? '#667781' : '#111b21',
+                              padding: '0.45rem 0.75rem', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                              maxWidth: '82%', fontSize: '0.875rem', lineHeight: 1.45,
+                              position: 'relative', boxShadow: 'var(--shadow-sm)',
+                              background: isOwn ? 'var(--brand)' : 'var(--surface)',
+                              color: isOwn ? 'white' : 'var(--text-main)',
+                              border: isOwn ? 'none' : '1px solid var(--border)',
                               minWidth: '60px',
-                              fontStyle: m.is_deleted ? 'italic' : 'normal'
+                              fontStyle: m.is_deleted ? 'italic' : 'normal',
+                              opacity: m.is_deleted ? 0.6 : 1,
+                              transition: 'opacity 0.2s',
                             }}
                           >
                              {!isOwn && (
-                               <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#27ae60', marginBottom: '2px', display: 'flex', justifyContent: 'space-between' }}>
+                               <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--brand)', marginBottom: '3px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                  <span>{m.profiles?.full_name || 'Student'}</span>
-                                 {m.profiles?.role === 'admin' && <Shield size={10} style={{ marginLeft: '4px' }} />}
+                                 {m.profiles?.role === 'admin' && <Shield size={10} style={{ marginLeft: '4px', opacity: 0.7 }} />}
                                </div>
                              )}
                              
                              {!m.is_deleted && m.payload?.type === 'image' && (
-                               <img src={m.payload.url} style={{ width: '100%', borderRadius: '4px', marginTop: '0.25rem' }} />
+                               <img src={m.payload.url} style={{ width: '100%', borderRadius: '8px', marginBottom: '0.25rem' }} />
                              )}
                              {!m.is_deleted && m.payload?.type === 'file' && (
-                               <a href={m.payload.url} target="_blank" className="file-attachment" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.05)', padding: '0.5rem', borderRadius: '4px', textDecoration: 'none', color: '#111b21' }}>
-                                  <Paperclip size={14} /> <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.payload.name}</span>
+                               <a href={m.payload.url} target="_blank" className="file-attachment" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.08)', padding: '0.4rem 0.6rem', borderRadius: '8px', textDecoration: 'none', color: 'inherit', marginBottom: '0.25rem' }}>
+                                  <Paperclip size={12} /> <span style={{ fontSize: '0.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.payload.name}</span>
                                </a>
                              )}
 
-                             <div style={{ wordBreak: 'break-word', marginTop: m.payload ? '0.5rem' : '0' }}>
+                             <div style={{ wordBreak: 'break-word' }}>
                                 {m.is_deleted ? (
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Trash2 size={12} /> This message was deleted</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}><Trash2 size={11} /> Message deleted</div>
                                 ) : m.content}
                              </div>
                              
-                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', marginTop: '4px' }}>
-                                <span style={{ fontSize: '0.65rem', color: '#667781' }}>
+                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px', marginTop: '3px' }}>
+                                <span style={{ fontSize: '0.62rem', opacity: 0.65 }}>
                                   {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 {isOwn && !m.is_deleted && (
-                                  <span style={{ display: 'inline-flex' }}>
-                                     {m.pending ? <Clock size={10} color="#667781" /> : <CheckCheck size={12} color="#34b7f1" />}
+                                  <span style={{ display: 'inline-flex', opacity: 0.8 }}>
+                                     {m.pending ? <Clock size={10} /> : <CheckCheck size={11} />}
                                   </span>
                                 )}
                                 {canDelete && !m.is_deleted && !m.pending && (
-                                  <button onClick={() => handleDeleteMessage(m.id)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#667781', opacity: 0, transition: 'opacity 0.2s' }} className="delete-btn">
+                                  <button onClick={() => handleDeleteMessage(m.id)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit', opacity: 0, transition: 'opacity 0.2s' }} className="delete-btn">
                                     <Trash2 size={10} />
                                   </button>
                                 )}
                              </div>
-                             
-                             <div style={{
-                               position: 'absolute', top: 0,
-                               [isOwn ? 'right' : 'left']: '-8px',
-                               width: 0, height: 0,
-                               borderTop: `10px solid ${isOwn ? '#dcf8c6' : '#ffffff'}`,
-                               borderLeft: isOwn ? '12px solid transparent' : 'none',
-                               borderRight: isOwn ? 'none' : '12px solid transparent',
-                               zIndex: 1
-                             }} />
                           </div>
                        </div>
                      )
@@ -391,10 +397,9 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
                 </div>
               ))}
               {othersTyping.length > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start', margin: '0.5rem 0' }}>
-                   <div style={{ background: 'white', padding: '0.4rem 0.8rem', borderRadius: '12px', fontSize: '0.8rem', color: '#667781', boxShadow: '0 1px 1px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div className="typing-dots"><span>.</span><span>.</span><span>.</span></div>
-                      Someone is typing
+                <div style={{ display: 'flex', justifyContent: 'flex-start', margin: '0.25rem 0' }}>
+                   <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '0.4rem 0.9rem', borderRadius: '16px', fontSize: '0.8rem', color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div className="typing-dots"><span>•</span><span>•</span><span>•</span></div>
                    </div>
                 </div>
               )}
@@ -403,36 +408,39 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
           <div ref={messagesEndRef} />
        </div>
 
-       {/* WhatsApp Input Bar */}
-       <div style={{ padding: '0.5rem 0.75rem', background: '#f0f2f5', borderTop: '1px solid #d1d7db', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', color: '#54656f' }}>
-             <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit' }}><Smile size={24} /></button>
-             <label style={{ cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center' }}>
-                <Paperclip size={24} />
+       {/* Input Bar */}
+       <div style={{ padding: '0.6rem 0.75rem', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', gap: '0.35rem', color: 'var(--text-sub)' }}>
+             <label style={{ cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center', padding: '0.3rem', borderRadius: '8px', transition: 'background 0.2s' }} className="icon-btn">
+                <Paperclip size={20} />
                 <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} />
              </label>
           </div>
-          <form onSubmit={handleSendMessage} style={{ flex: 1, position: 'relative' }}>
+          <form onSubmit={handleSendMessage} style={{ flex: 1 }}>
              <input 
                type="text" value={newMessage} onChange={e => handleTyping(e.target.value)}
                placeholder="Type a message..."
                style={{ 
-                 width: '100%', background: 'white', border: 'none', borderRadius: '8px', padding: '0.6rem 1rem', fontSize: '0.95rem', outline: 'none', color: '#111b21',
-                 boxShadow: '0 1px 1px rgba(0,0,0,0.1)'
+                 width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px',
+                 padding: '0.55rem 1rem', fontSize: '0.875rem', outline: 'none', color: 'var(--text-main)',
+                 transition: 'border-color 0.2s'
                }}
              />
           </form>
           <button 
              onClick={(e) => handleSendMessage(e as any)}
+             disabled={!newMessage.trim() && !uploading}
              style={{ 
-               background: newMessage.trim() ? '#00a884' : 'none', 
-               color: newMessage.trim() ? 'white' : '#54656f', 
-               border: 'none', borderRadius: '50%', width: '40px', height: '40px', 
+               background: newMessage.trim() ? 'var(--brand)' : 'var(--bg-main)', 
+               color: newMessage.trim() ? 'white' : 'var(--text-sub)', 
+               border: `1px solid ${newMessage.trim() ? 'transparent' : 'var(--border)'}`,
+               borderRadius: '50%', width: '38px', height: '38px', flexShrink: 0,
                display: 'flex', alignItems: 'center', justifyContent: 'center', 
-               cursor: 'pointer', transition: 'all 0.2s'
+               cursor: newMessage.trim() ? 'pointer' : 'default',
+               transition: 'all 0.2s',
              }}
           >
-             <Send size={20} fill={newMessage.trim() ? 'currentColor' : 'none'} />
+             <Send size={17} />
           </button>
        </div>
 
@@ -441,15 +449,21 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
             from { opacity: 0; transform: translateY(40px) scale(0.9); } 
             to { opacity: 1; transform: translateY(0) scale(1); } 
           }
-          .msg-bubble.pending { opacity: 0.7; }
-          .file-attachment:hover { background: rgba(0,0,0,0.1) !important; }
-          .chat-viewport::-webkit-scrollbar { width: 6px; }
-          .chat-viewport::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
-          .typing-dots span { animation: blink 1.4s infinite; opacity: 0; margin: 0 1px; }
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          .msg-bubble.pending { opacity: 0.65; }
+          .chat-viewport::-webkit-scrollbar { display: block; width: 4px; }
+          .chat-viewport::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+          .chat-viewport { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+          .typing-dots span { animation: blink 1.4s infinite; opacity: 0; font-size: 1.1rem; margin: 0 0.5px; }
           .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
           .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
           @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
-          .msg-bubble:hover .delete-btn { opacity: 1 !important; }
+          .msg-bubble:hover .delete-btn { opacity: 0.7 !important; }
+          .icon-btn:hover { background: var(--border); }
+          .chat-toggle:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
        `}</style>
     </div>
   )

@@ -73,15 +73,24 @@ export default function CalendarView({ groupId }: { groupId: string }) {
     <div className="calendar-container" style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2rem', boxShadow: 'var(--shadow-md)', animation: 'fadeIn 0.5s ease-out' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Calendar size={28} color="var(--brand)" />
-            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-          </h2>
-          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>Central Scheduling Hub</p>
+          {loading ? (
+            <>
+              <div className="skeleton skeleton-title" style={{ width: '250px', height: '2rem', marginBottom: '0.4rem' }} />
+              <div className="skeleton skeleton-text" style={{ width: '150px' }} />
+            </>
+          ) : (
+            <>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Calendar size={28} color="var(--brand)" />
+                {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              </h2>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>Central Scheduling Hub</p>
+            </>
+          )}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={handlePrevMonth} className="btn-icon" style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer' }}><ChevronLeft size={20} /></button>
-          <button onClick={handleNextMonth} className="btn-icon" style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer' }}><ChevronRight size={20} /></button>
+          <button onClick={handlePrevMonth} className="btn-icon" disabled={loading} style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.5 : 1 }}><ChevronLeft size={20} /></button>
+          <button onClick={handleNextMonth} className="btn-icon" disabled={loading} style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.5 : 1 }}><ChevronRight size={20} /></button>
         </div>
       </header>
 
@@ -92,7 +101,16 @@ export default function CalendarView({ groupId }: { groupId: string }) {
           </div>
         ))}
 
-        {days.map((day, idx) => {
+        {loading ? (
+          Array.from({ length: 35 }).map((_, idx) => (
+            <div key={idx} style={{ background: 'var(--bg-sub)', minHeight: '120px', padding: '0.75rem' }}>
+              <div className="skeleton skeleton-avatar" style={{ width: '24px', height: '24px', marginBottom: '0.75rem' }} />
+              {idx % 5 === 0 && <div className="skeleton skeleton-text" style={{ width: '80%', height: '14px', borderRadius: '4px' }} />}
+              {idx % 7 === 0 && <div className="skeleton skeleton-text" style={{ width: '60%', height: '14px', borderRadius: '4px' }} />}
+            </div>
+          ))
+        ) : (
+        days.map((day, idx) => {
           const dayTasks = day ? getTasksForDay(day) : []
           const isToday = day && new Date().toDateString() === new Date(year, month, day).toDateString()
           
@@ -175,7 +193,8 @@ export default function CalendarView({ groupId }: { groupId: string }) {
               )}
             </div>
           )
-        })}
+        })
+        )}
       </div>
 
       {isModalOpen && (

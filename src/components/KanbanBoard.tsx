@@ -175,8 +175,12 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
 
   // IMMERSIVE GAMIFICATION REWARD MATRIX
   useEffect(() => {
-     if (tasks.length > 0 && globalProbability === 100 && !hasCelebrated) {
+     const sessionKey = `celebrated_${groupId}`
+     const alreadyCelebrated = sessionStorage.getItem(sessionKey)
+
+     if (tasks.length > 0 && globalProbability === 100 && !hasCelebrated && !alreadyCelebrated) {
         setHasCelebrated(true)
+        sessionStorage.setItem(sessionKey, 'true')
         const duration = 3000
         const end = Date.now() + duration
 
@@ -186,13 +190,33 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
           if (Date.now() < end) requestAnimationFrame(frame)
         }
         frame()
-     } else if (globalProbability < 100 && hasCelebrated) {
-        setHasCelebrated(false) // Reset sequence dynamically if pipeline decays
+     } else if (tasks.length > 0 && globalProbability < 100) {
+        setHasCelebrated(false)
+        sessionStorage.removeItem(sessionKey) // ONLY reset if they add more tasks (pipeline actually decays)
      }
-  }, [globalProbability, tasks.length, hasCelebrated])
+  }, [globalProbability, tasks.length, hasCelebrated, groupId])
 
   if (loading) {
-    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-sub)' }}>Loading tasks...</div>
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', marginTop: '1rem' }}>
+        {/* HUD skeleton */}
+        <div className="skeleton" style={{ height: '110px', borderRadius: '16px' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="skeleton skeleton-title" style={{ width: '30%', margin: 0 }} />
+          <div className="skeleton" style={{ width: '100px', height: '38px', borderRadius: '14px' }} />
+        </div>
+        {/* Columns skeleton */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="skeleton skeleton-title" style={{ width: '40%', height: '1.2rem', marginBottom: '0.2rem' }} />
+              <div className="skeleton skeleton-card" style={{ height: '120px' }} />
+              {i % 2 === 0 && <div className="skeleton skeleton-card" style={{ height: '90px' }} />}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (

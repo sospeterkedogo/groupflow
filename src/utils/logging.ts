@@ -27,19 +27,19 @@ export async function logActivity(
     .from('activity_log')
     .insert({
       user_id: userId,
-      group_id: groupId,
+      group_id: groupId || null, // Ensure empty string becomes null for valid UUID columns
       action_type: actionType,
       description,
       metadata
     })
 
   if (logError) {
-    console.error('Audit Logging Failed:', {
+    console.error('Audit Logging Failed:', JSON.stringify({
       action: actionType,
-      error: logError.message || logError,
-      code: (logError as any).code,
-      details: (logError as any).details
-    })
+      error: logError.message,
+      details: logError.details,
+      code: logError.code
+    }, null, 2))
   }
 
   // 2. Real-time Notification Trigger (if applicable)

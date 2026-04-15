@@ -96,29 +96,37 @@ export const useTheme = () => {
 }
 
 export const ThemeProvider = ({ children, initialTheme }: { children: React.ReactNode, initialTheme?: any }) => {
-  const [currentPalette, setCurrentPalette] = useState<Palette>(PALETTES[0])
-  const [customBg, setCustomBg] = useState<string | null>(null)
+  // Use initialTheme for initial state to prevent flash during hydration
+  const [currentPalette, setCurrentPalette] = useState<Palette>(() => {
+    if (initialTheme?.palette) {
+      return PALETTES.find(p => p.name === initialTheme.palette) || PALETTES[0]
+    }
+    // Fallback to localStorage if available (client-side only)
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('groupflow_palette')
+      if (saved) return PALETTES.find(p => p.name === saved) || PALETTES[0]
+    }
+    return PALETTES[0]
+  })
+  
+  const [customBg, setCustomBg] = useState<string | null>(initialTheme?.bgUrl || null)
   const supabase = createClient()
 
   useEffect(() => {
-    if (initialTheme) {
+    if (initialTheme?.palette) {
       const palette = PALETTES.find(p => p.name === initialTheme.palette)
       if (palette) setCurrentPalette(palette)
-      if (initialTheme.bgUrl) setCustomBg(initialTheme.bgUrl)
     }
+    if (initialTheme?.bgUrl) setCustomBg(initialTheme?.bgUrl)
   }, [initialTheme])
 
-  useEffect(() => {
-    const root = document.documentElement
-    Object.entries(currentPalette.colors).forEach(([key, value]) => {
-      root.style.setProperty(key, value)
-    })
-  }, [currentPalette])
+
 
   const setPalette = async (name: string) => {
     const palette = PALETTES.find(p => p.name === name)
     if (palette) {
       setCurrentPalette(palette)
+      localStorage.setItem('groupflow_palette', name) // Local persistence for instant load
       const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await supabase.from('profiles').update({ 
@@ -134,6 +142,9 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
 
   const handleSetCustomBg = async (url: string | null) => {
     setCustomBg(url)
+    if (url) localStorage.setItem('groupflow_bg', url)
+    else localStorage.removeItem('groupflow_bg')
+    
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       await supabase.from('profiles').update({ 
@@ -142,8 +153,20 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
     }
   }
 
+  const activeColors = currentPalette.colors
+
   return (
     <ThemeContext.Provider value={{ currentPalette, setPalette, customBg, setCustomBg: handleSetCustomBg }}>
+      {/* 
+          Injected style tag ensures variables are present BEFORE hydration finishes, 
+          eliminating the theme flash (FOUC) entirely.
+      */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        :root {
+          ${Object.entries(activeColors).map(([key, val]) => `${key}: ${val};`).join('\n')}
+        }
+      `}} />
+      
       <div 
         className="theme-wrapper"
         style={customBg ? { 

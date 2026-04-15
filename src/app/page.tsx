@@ -26,17 +26,17 @@ export default function Home() {
         {/* Hero Section */}
         <div style={{ textAlign: 'center', maxWidth: '800px', marginBottom: '5rem' }}>
           <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '1.5rem', lineHeight: 1.1 }}>
-            Eradicating Social Loafing <br />through <span style={{ color: 'var(--accent-color)' }}>Mathematical Proof</span>.
+            Team Fairness <br />through <span style={{ color: 'var(--accent-color)' }}>Proof of Work</span>.
           </h1>
           <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-            The first data-driven collaboration platform designed explicitly for undergraduate software engineering modules. We track your commits, quantify your designs, and automatically verify your fair share.
+            The easiest way to track team projects. We see who is working and who isn't by tracking your files, points, and helping hands.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <Link href="/login" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
               Launch Dashboard <ArrowRight size={20} />
             </Link>
             <a href="https://github.com/sospeterkedogo/groupflow" target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
-              <BookOpen size={20} /> Read the Research
+              <BookOpen size={20} /> Read Project Docs
             </a>
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function Home() {
                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><ShieldCheck size={16} /> {proj.score} Validity</span>
                   </div>
                   <Link href="/dashboard" className="btn btn-secondary" style={{ width: '100%' }}>
-                    Audit Project
+                    View Project
                   </Link>
                 </div>
              ))}
