@@ -122,3 +122,24 @@ export async function kickUser(userId: string) {
   revalidatePath('/dashboard/settings')
   return { success: true }
 }
+
+export async function sendJoinRequest(groupId: string, senderName: string) {
+  const { createAdminClient, createClient } = await import('@/utils/supabase/server')
+  const supabase = await createClient()
+  const adminSupabase = await createAdminClient()
+
+  // 1. Verify the requester is actually logged in
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // 2. Perform the insert using the ADMIN client to bypass member-only RLS
+  const { error } = await adminSupabase.from('messages').insert({
+    group_id: groupId,
+    user_id: user.id,
+    content: `👋 [JOIN REQUEST] I'd like to join the team. I'm ${senderName}.`,
+    is_system: true
+  })
+
+  if (error) throw new Error(error.message)
+  return { success: true }
+}

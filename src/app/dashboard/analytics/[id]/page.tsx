@@ -89,19 +89,15 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     if (!currentUser || !group) return
     
     setLoading(true)
-    const { error } = await supabase.from('messages').insert({
-      group_id: groupId,
-      user_id: currentUser.id, // The requester
-      content: `👋 [JOIN REQUEST] I'd like to join ${group.name}. I'm ${currentUser.full_name}.`,
-      is_system: true
-    })
-
-    if (!error) {
+    try {
+      const { sendJoinRequest } = await import('@/app/dashboard/join/actions')
+      await sendJoinRequest(groupId, currentUser.full_name || 'A student')
       alert('Request sent! The team will see your message in their chat.')
-    } else {
-      alert('Error sending request. You might not have permission to message this group.')
+    } catch (err: any) {
+      alert('Error sending request: ' + err.message)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   // --- METRICS ---

@@ -107,12 +107,13 @@ export default function ProfilePage() {
                
                {(() => {
                  const currentYear = new Date().getFullYear();
-                 const start = profile?.enrollment_year || currentYear - 1;
-                 const end = profile?.completion_year || currentYear + 2;
+                 const start = parseInt(profile?.enrollment_year) || currentYear - 1;
+                 const end = parseInt(profile?.completion_year) || currentYear + 2;
                  const total = end - start;
                  const elapsed = currentYear - start;
                  const percentage = Math.max(0, Math.min(100, (elapsed / total) * 100));
                  const isCompleted = currentYear > end;
+                 const isFinalYear = currentYear === end;
                  
                  return (
                    <div style={{ padding: '0.5rem 0' }}>
@@ -121,7 +122,7 @@ export default function ProfilePage() {
                            Progress Track
                         </div>
                         <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-                           {isCompleted ? 'Degree Completed' : `Year ${elapsed + 1} of ${total}`}
+                           {isCompleted ? 'Degree Completed' : isFinalYear ? `Final Year of ${total}` : `Year ${Math.max(1, elapsed + 1)} of ${total}`}
                         </div>
                      </div>
 
