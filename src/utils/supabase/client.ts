@@ -12,8 +12,9 @@ export function createBrowserSupabaseClient() {
       if (parts.length === 3) {
         const payload = JSON.parse(atob(parts[1]))
         if (payload.role === 'service_role') {
-          console.error("CRITICAL SECURITY ERROR: Browser client initialized with SUPABASE_SERVICE_ROLE_KEY. Access blocked.")
-          throw new Error("Forbidden use of secret API key in browser. Please check your environment variables.")
+          const maskedKey = anonKey.substring(0, 10) + '...'
+          console.error(`CRITICAL SECURITY ERROR: Browser client initialized with a SERVICE_ROLE key (starts with: ${maskedKey}). Access blocked.`)
+          throw new Error(`Forbidden use of secret API key in browser (Key starts with ${maskedKey}). Please check your NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local and RESTART your dev server.`)
         }
       }
     }
