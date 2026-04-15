@@ -55,7 +55,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
       
     if (error) {
       console.error('Task fetch error:', error)
-      setBoardError('Failed to synchronize tasks with the server.')
+      setBoardError(`Failed to synchronize tasks: ${error.message || 'Unknown server error'}`)
     }
     
     if (data) setTasks(data as Task[])

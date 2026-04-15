@@ -51,12 +51,17 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
   const fetchPersonalTaskCount = useCallback(async () => {
     if (!profile?.id || !groupId) return
 
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('group_id', groupId)
       .filter('assignees', 'cs', `{"${profile.id}"}`)
       .neq('status', 'Done')
+
+    if (error) {
+      console.warn('Silent failure on personal task count:', error.message)
+      return
+    }
 
     if (count !== null) setPersonalTaskCount(count)
   }, [profile, groupId, supabase])
