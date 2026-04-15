@@ -107,9 +107,21 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
       const pct = total > 0 ? Math.round((m.total_score / total) * 100) : 0
       
       doc.setTextColor(idx % 2 === 0 ? 0 : 60, 60, 60)
+      doc.setFont("helvetica", "bold")
       doc.text(`${m.full_name}`, 25, y)
+      
+      doc.setFont("helvetica", "normal")
       doc.text(`${m.total_score} pts`, 120, y)
       doc.text(`${pct}% impact`, 160, y)
+      
+      // Add arsenal tools if they exist
+      if (m.achievements && m.achievements.length > 0) {
+        doc.setFontSize(8)
+        doc.setTextColor(110, 110, 110)
+        const tools = m.achievements.map((a: any) => a.name).join(', ')
+        doc.text(`Arsenal: ${tools}`, 25, y + 6)
+        y += 7
+      }
       
       doc.setDrawColor(245, 245, 245)
       doc.line(20, y + 5, 190, y + 5)

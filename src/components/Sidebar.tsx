@@ -22,6 +22,136 @@ import { useTheme, PALETTES } from '../context/ThemeContext'
 import NotificationBell from './NotificationBell'
 
 
+import confetti from 'canvas-confetti'
+
+const QUIZ_QUESTIONS = [
+  {
+    q: "Which hook handles side effects?",
+    a: ["useState", "useEffect", "useMemo", "useRef"],
+    correct: 1
+  },
+  {
+    q: "Default Next.js dev port?",
+    a: ["8080", "5000", "3000", "8000"],
+    correct: 2
+  },
+  {
+    q: "Icon library in this app?",
+    a: ["FontAwesome", "Lucide", "Heroicons", "Material"],
+    correct: 1
+  },
+  {
+    q: "The 'L' in LCA stands for?",
+    a: ["Level", "Linear", "Life", "Logic"],
+    correct: 2
+  },
+  {
+    q: "Primary GroupFlow Database?",
+    a: ["MongoDB", "Supabase", "Firebase", "MySQL"],
+    correct: 1
+  }
+]
+
+function SidebarQuiz() {
+  const [currentQ, setCurrentQ] = useState(0)
+  const [score, setScore] = useState(0)
+  const [quizState, setQuizState] = useState<'intro' | 'active' | 'complete'>('intro')
+  const [selected, setSelected] = useState<number | null>(null)
+
+  const handleAnswer = (idx: number) => {
+    if (selected !== null) return
+    setSelected(idx)
+    
+    if (idx === QUIZ_QUESTIONS[currentQ].correct) {
+      setScore(s => s + 20)
+    }
+
+    setTimeout(() => {
+      if (currentQ < QUIZ_QUESTIONS.length - 1) {
+        setCurrentQ(c => c + 1)
+        setSelected(null)
+      } else {
+        setQuizState('complete')
+      }
+    }, 800)
+  }
+
+  const reset = () => {
+    if (score === 100) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#00d4ff', '#00b4d8', '#90e0ef']
+      })
+    }
+    setCurrentQ(0)
+    setScore(0)
+    setQuizState('intro')
+    setSelected(null)
+  }
+
+  if (quizState === 'intro') {
+    return (
+      <div style={{ padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid var(--border)', margin: '1rem' }}>
+        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Technical Break</div>
+        <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)' }}>Ready for a 60s Quiz?</div>
+        <button onClick={() => setQuizState('active')} className="btn btn-primary" style={{ padding: '0.4rem', fontSize: '0.75rem' }}>Start Quiz</button>
+      </div>
+    )
+  }
+
+  if (quizState === 'complete') {
+    return (
+      <div style={{ padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid var(--border)', margin: '1rem', textAlign: 'center' }}>
+        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)', marginBottom: '0.5rem' }}>{score}%</div>
+        <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-sub)' }}>
+          {score === 100 ? 'Academic Dominance!' : 'Keep building!'}
+        </div>
+        <button onClick={reset} className="btn btn-secondary" style={{ padding: '0.4rem', fontSize: '0.75rem' }}>
+          {score === 100 ? 'Celebrate & Reset' : 'Try Again'}
+        </button>
+      </div>
+    )
+  }
+
+  const q = QUIZ_QUESTIONS[currentQ]
+
+  return (
+    <div style={{ padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid var(--border)', margin: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--brand)' }}>Q: {currentQ + 1}/5</span>
+        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)' }}>SCORE: {score}</span>
+      </div>
+      <div style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--text-main)', minHeight: '2.5rem' }}>{q.q}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+        {q.a.map((ans, i) => (
+          <button
+            key={i}
+            onClick={() => handleAnswer(i)}
+            disabled={selected !== null}
+            style={{
+              padding: '0.5rem',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              background: selected === i 
+                ? (i === q.correct ? 'var(--success)' : 'var(--error)')
+                : 'var(--bg-sub)',
+              color: selected === i ? 'white' : 'var(--text-sub)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            {ans}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function Sidebar({ user }: { user: any }) {
   const { currentPalette, setPalette } = useTheme()
   const [isOpen, setIsOpen] = useState(true)
@@ -143,62 +273,67 @@ export default function Sidebar({ user }: { user: any }) {
         })}
       </div>
 
-      {/* Dynamic Projects Hub */}
-      <div style={{ padding: '1.25rem 1rem', flex: 1, minHeight: '180px', overflowY: 'auto' }}>
-        {isOpen && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingLeft: '1rem', paddingRight: '0.5rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Teams</span>
-            <Link href="/dashboard/join" title="Join / Create Project">
-              <Plus size={16} color="var(--text-sub)" />
-            </Link>
-          </div>
-        )}
+      <div style={{ overflowY: 'auto', flex: 1, padding: '1rem 0' }}>
+         {/* Dynamic Projects Hub */}
+         <div style={{ padding: '0 1rem' }}>
+            {isOpen && (
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingLeft: '1rem', paddingRight: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Teams</span>
+                  <Link href="/dashboard/join" title="Join / Create Project">
+                     <Plus size={16} color="var(--text-sub)" />
+                  </Link>
+               </div>
+            )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          {groups.length === 0 ? (
-            [1, 2, 3].map(i => (
-              <div key={i} className="skeleton" style={{ height: isOpen ? '42px' : '40px', borderRadius: isOpen ? 'var(--radius)' : '50%', margin: isOpen ? '0' : '4px auto', width: isOpen ? '100%' : '40px' }} />
-            ))
-          ) : (
-            groups.map(group => {
-              const isActiveProject = profile?.group_id === group.id
-              return (
-                <Link
-                  key={group.id}
-                  href={`/dashboard/analytics/${group.id}`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: isOpen ? '1rem' : '0',
-                    padding: isOpen ? '0.5rem 1rem' : '0',
-                    margin: isOpen ? '0' : '4px auto',
-                    width: isOpen ? '100%' : '40px',
-                    height: isOpen ? 'auto' : '40px',
-                    borderRadius: isOpen ? 'var(--radius)' : '50%',
-                    cursor: 'pointer',
-                    backgroundColor: isActiveProject ? 'rgba(var(--brand-rgb), 0.1)' : 'transparent',
-                    border: isActiveProject ? '1px solid rgba(var(--brand-rgb), 0.2)' : '1px solid transparent',
-                    justifyContent: isOpen ? 'flex-start' : 'center',
-                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    boxShadow: isActiveProject && !isOpen ? '0 0 12px rgba(var(--brand-rgb), 0.3)' : 'none',
-                    textDecoration: 'none'
-                  }}
-                  className={`project-bubble ${isActiveProject ? 'active-project' : ''}`}
-                >
-                  <FolderDot size={18} color={isActiveProject ? 'var(--brand)' : 'var(--text-sub)'} />
-                  {isOpen && (
-                    <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                      <span style={{ fontSize: '0.875rem', fontWeight: isActiveProject ? 600 : 500, color: isActiveProject ? 'var(--text-main)' : 'var(--text-sub)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                        {group.name}
-                      </span>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>{group.module_code}</span>
-                    </div>
-                  )}
-                </Link>
-              )
-            })
-          )}
-        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+               {groups.length === 0 ? (
+                  [1, 2, 3].map(i => (
+                     <div key={i} className="skeleton" style={{ height: isOpen ? '42px' : '40px', borderRadius: isOpen ? 'var(--radius)' : '50%', margin: isOpen ? '0' : '4px auto', width: isOpen ? '100%' : '40px' }} />
+                  ))
+               ) : (
+                  groups.map(group => {
+                     const isActiveProject = profile?.group_id === group.id
+                     return (
+                        <Link
+                           key={group.id}
+                           href={`/dashboard/analytics/${group.id}`}
+                           style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: isOpen ? '1rem' : '0',
+                              padding: isOpen ? '0.5rem 1rem' : '0',
+                              margin: isOpen ? '0' : '4px auto',
+                              width: isOpen ? '100%' : '40px',
+                              height: isOpen ? 'auto' : '40px',
+                              borderRadius: isOpen ? 'var(--radius)' : '50%',
+                              cursor: 'pointer',
+                              backgroundColor: isActiveProject ? 'rgba(var(--brand-rgb), 0.1)' : 'transparent',
+                              border: isActiveProject ? '1px solid rgba(var(--brand-rgb), 0.2)' : '1px solid transparent',
+                              justifyContent: isOpen ? 'flex-start' : 'center',
+                              transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                              boxShadow: isActiveProject && !isOpen ? '0 0 12px rgba(var(--brand-rgb), 0.3)' : 'none',
+                              textDecoration: 'none'
+                           }}
+                           className={`project-bubble ${isActiveProject ? 'active-project' : ''}`}
+                        >
+                           <FolderDot size={18} color={isActiveProject ? 'var(--brand)' : 'var(--text-sub)'} />
+                           {isOpen && (
+                              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                 <span style={{ fontSize: '0.875rem', fontWeight: isActiveProject ? 600 : 500, color: isActiveProject ? 'var(--text-main)' : 'var(--text-sub)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                    {group.name}
+                                 </span>
+                                 <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)' }}>{group.module_code}</span>
+                              </div>
+                           )}
+                        </Link>
+                     )
+                  })
+               )}
+            </div>
+         </div>
+
+         {/* Break Point Fun - Moved below teams */}
+         {isOpen && <SidebarQuiz />}
       </div>
 
 

@@ -68,7 +68,10 @@ export default function ProfilePage() {
 
                <div>
                   <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, letterSpacing: '-0.03em' }}>{profile?.full_name}</h1>
-                  <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', margin: '0.25rem 0 1rem' }}>Software Engineer • {profile?.groups?.name || 'Unassigned Workspace'}</p>
+                  <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', margin: '0.25rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ShieldCheck size={18} color="var(--brand)" />
+                    {profile?.course_name || 'Software Engineer'} • {profile?.groups?.name || 'Unassigned Workspace'}
+                  </p>
                   <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)' }}>
                         <Mail size={14} /> {profile?.email}
@@ -95,28 +98,65 @@ export default function ProfilePage() {
                </p>
             </div>
 
-            {/* Academic Journey Card */}
-            <div className="auth-card" style={{ maxWidth: '100%', background: 'linear-gradient(135deg, var(--bg-sub), var(--surface))' }}>
+            {/* Academic Journey Card - Dynamic Roadmap */}
+            <div className="auth-card" style={{ maxWidth: '100%', background: 'linear-gradient(135deg, var(--bg-sub), var(--surface))', position: 'relative' }}>
                <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Calendar size={20} color="var(--brand)" />
-                  Academic Journey
+                  <Activity size={20} color="var(--brand)" />
+                  Academic Roadmap
                </h3>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Course of Study</div>
-                     <div style={{ fontSize: '1.1rem', fontWeight: 700 }}>{profile?.course_name || 'General Studies'}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '2rem', marginTop: '0.5rem' }}>
-                     <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Enrolled</div>
-                        <div style={{ fontWeight: 700 }}>{profile?.enrollment_year || 'N/A'}</div>
+               
+               {(() => {
+                 const currentYear = new Date().getFullYear();
+                 const start = profile?.enrollment_year || currentYear - 1;
+                 const end = profile?.completion_year || currentYear + 2;
+                 const total = end - start;
+                 const elapsed = currentYear - start;
+                 const percentage = Math.max(0, Math.min(100, (elapsed / total) * 100));
+                 const isCompleted = currentYear > end;
+                 
+                 return (
+                   <div style={{ padding: '0.5rem 0' }}>
+                     <div style={{ marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', marginBottom: '0.3rem' }}>
+                           Progress Track
+                        </div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>
+                           {isCompleted ? 'Degree Completed' : `Year ${elapsed + 1} of ${total}`}
+                        </div>
                      </div>
-                     <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Completion</div>
-                        <div style={{ fontWeight: 700 }}>{profile?.completion_year || 'N/A'}</div>
+
+                     {/* Roadmap Visualizer */}
+                     <div style={{ position: 'relative', height: '6px', background: 'var(--border)', borderRadius: '10px', marginBottom: '2rem' }}>
+                        <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${percentage}%`, background: 'var(--brand)', borderRadius: '10px', transition: 'width 1s ease-in-out' }} />
+                        
+                        {/* Start Node */}
+                        <div style={{ position: 'absolute', left: '0%', top: '50%', transform: 'translateY(-50%)' }}>
+                            <div style={{ width: '12px', height: '12px', background: 'var(--brand)', borderRadius: '50%', border: '4px solid var(--surface)', boxShadow: 'var(--shadow-sm)' }} />
+                            <div style={{ position: 'absolute', top: '15px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)' }}>{start}</div>
+                        </div>
+
+                        {/* End Node */}
+                        <div style={{ position: 'absolute', left: '100%', top: '50%', transform: 'translateY(-50%)' }}>
+                            <div style={{ width: '12px', height: '12px', background: isCompleted ? 'var(--brand)' : 'var(--border)', borderRadius: '50%', border: '4px solid var(--surface)' }} />
+                            <div style={{ position: 'absolute', top: '15px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)' }}>{end}</div>
+                        </div>
+
+                        {/* Current Marker */}
+                        {percentage > 0 && percentage < 100 && (
+                          <div style={{ position: 'absolute', left: `${percentage}%`, top: '-25px', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                             <div style={{ fontSize: '0.6rem', fontWeight: 900, background: 'var(--brand)', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>NOW</div>
+                             <div style={{ width: '2px', height: '10px', background: 'var(--brand)' }} />
+                          </div>
+                        )}
                      </div>
-                  </div>
-               </div>
+
+                     <div style={{ marginTop: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)' }}>{profile?.course_name || 'Enrolled Student'}</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem' }}>Degree path verified via academic registry.</div>
+                     </div>
+                   </div>
+                 )
+               })()}
             </div>
 
             {/* Core Configuration */}

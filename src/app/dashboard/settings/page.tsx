@@ -46,6 +46,7 @@ export default function SettingsPage() {
   const [teamMembers, setTeamMembers] = useState<any[]>([])
   const [isEncrypted, setIsEncrypted] = useState(false)
   const [updatingGroup, setUpdatingGroup] = useState(false)
+  const [customToolInput, setCustomToolInput] = useState('')
 
   const supabase = createClient()
 
@@ -451,12 +452,11 @@ export default function SettingsPage() {
                     <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
                   </div>
                   <button
-                    onClick={() => handleSwitchGroup(group.id)}
-                    disabled={switching}
-                    className="btn btn-primary"
+                    onClick={() => window.location.href = `/dashboard/analytics/${group.id}`}
+                    className="btn btn-secondary"
                     style={{ width: 'auto', padding: '0.5rem 1rem' }}
                   >
-                    Join
+                    Request
                   </button>
                 </div>
               ))}
@@ -546,78 +546,163 @@ export default function SettingsPage() {
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
-              {[
-                'React', 'Next.js', 'Tailwind',
-                'Node.js', 'Python', 'Supabase', 'PostgreSQL',
-                'AWS', 'Docker', 'Vercel',
-                'Figma', 'VS Code'
-              ].map(tool => {
-                const isConnected = profile?.achievements?.some((a: any) => a.name === tool)
-                return (
-                  <div
-                    key={tool}
-                    style={{
-                      padding: '1.25rem',
-                      background: isConnected ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)',
-                      border: isConnected ? '2px solid var(--brand)' : '1px solid var(--border)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isConnected ? 'var(--brand)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'white' : 'var(--text-sub)' }}>
-                        <Settings size={16} />
+                {(() => {
+                  const DEFAULT_TOOLS = [
+                    'React', 'Next.js', 'Tailwind', 
+                    'Node.js', 'Python', 'Supabase', 'PostgreSQL', 
+                    'AWS', 'Docker', 'Vercel',
+                    'Figma', 'VS Code'
+                   ]
+                   
+                   // Combine defaults with any custom ones user has added
+                   const userAchievements = profile?.achievements || []
+                   const userCustomTools = userAchievements
+                    .filter((a: any) => !DEFAULT_TOOLS.includes(a.name))
+                    .map((a: any) => a.name)
+                   
+                   const allTools = [...DEFAULT_TOOLS, ...userCustomTools]
+                   
+                   return allTools.map(tool => {
+                    const isConnected = userAchievements.some((a: any) => a.name === tool)
+                    
+                    const toggleTool = async () => {
+                      const achievements = profile.achievements || []
+                      let newAchievements
+                      if (isConnected) {
+                        newAchievements = achievements.filter((a: any) => a.name !== tool)
+                      } else {
+                        newAchievements = [...achievements, { name: tool, date: new Date().toISOString() }]
+                      }
+                      
+                      setProfile({ ...profile, achievements: newAchievements })
+                      const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
+                      if (error) {
+                        setError("Synchronization failed.")
+                        setProfile(profile)
+                      } else {
+                        logActivity(profile.id, profile.group_id, isConnected ? 'setting_updated' : 'theme_changed', `${isConnected ? 'Disconnected' : 'Connected'} ${tool} to arsenal`)
+                        setSuccess(true)
+                        setTimeout(() => setSuccess(false), 3000)
+                      }
+                    }
+
+                    return (
+                      <div 
+                        key={tool}
+                        onClick={toggleTool}
+                        style={{
+                          padding: '1.25rem',
+                          background: isConnected ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)',
+                          border: isConnected ? '2px solid var(--brand)' : '1px solid var(--border)',
+                          borderRadius: '16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isConnected ? 'var(--brand)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'white' : 'var(--text-sub)' }}>
+                               <Settings size={16} />
+                            </div>
+                            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isConnected ? 'var(--text-main)' : 'var(--text-sub)' }}>{tool}</span>
+                         </div>
+                         
+                         <div style={{ padding: '0.4rem', color: isConnected ? 'var(--error)' : 'var(--brand)' }}>
+                            {isConnected ? <Trash2 size={16} /> : <CheckCircle2 size={16} />}
+                         </div>
                       </div>
-                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isConnected ? 'var(--text-main)' : 'var(--text-sub)' }}>{tool}</span>
-                    </div>
+                    )
+                   })
+                })()}
 
-                    <button
-                      onClick={async () => {
-                        const achievements = profile.achievements || []
-                        let newAchievements
-                        if (isConnected) {
-                          newAchievements = achievements.filter((a: any) => a.name !== tool)
-                        } else {
-                          newAchievements = [...achievements, { name: tool, date: new Date().toISOString() }]
-                        }
-
-                        setProfile({ ...profile, achievements: newAchievements })
-                        const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
-                        if (error) {
-                          setError("Synchonization failed.")
-                          setProfile(profile)
-                        } else {
-                          logActivity(profile.id, profile.group_id, isConnected ? 'setting_updated' : 'theme_changed', `${isConnected ? 'Disconnected' : 'Connected'} ${tool} to arsenal`)
-                          setSuccess(true)
-                          setTimeout(() => setSuccess(false), 3000)
-                        }
-                      }}
-                      style={{
-                        background: 'none', border: 'none', cursor: 'pointer', padding: '0.4rem', borderLeft: '1px solid var(--border)', marginLeft: '0.5rem', color: isConnected ? 'var(--error)' : 'var(--brand)'
-                      }}
-                    >
-                      {isConnected ? <Trash2 size={16} /> : <CheckCircle2 size={16} />}
-                    </button>
-                  </div>
-                )
-              })}
+                {/* Custom Add Card */}
+                <div 
+                  style={{
+                    padding: '1.25rem',
+                    background: 'var(--bg-sub)',
+                    border: '1.5px dashed var(--border)',
+                    borderRadius: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem'
+                  }}
+                >
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                      <Settings size={14} color="var(--brand)" />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Add Custom</span>
+                   </div>
+                   <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        placeholder="e.g. Docker" 
+                        value={customToolInput}
+                        onChange={e => setCustomToolInput(e.target.value)}
+                        onKeyDown={async (e) => {
+                          if (e.key === 'Enter' && customToolInput.trim()) {
+                            const toolName = customToolInput.trim()
+                            const achievements = profile.achievements || []
+                            if (achievements.some((a: any) => a.name.toLowerCase() === toolName.toLowerCase())) {
+                              setError("This tool is already in your arsenal.")
+                              return
+                            }
+                            const newAchievements = [...achievements, { name: toolName, date: new Date().toISOString() }]
+                            setProfile({ ...profile, achievements: newAchievements })
+                            const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
+                            if (error) {
+                              setError("Failed to add custom tool.")
+                            } else {
+                              setCustomToolInput('')
+                              setSuccess(true)
+                              setTimeout(() => setSuccess(false), 3000)
+                            }
+                          }
+                        }}
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }} 
+                      />
+                   </div>
+                </div>
             </div>
           </div>
         )}
 
         {activeTab === 'data' && (
-          <div className="auth-card" style={{ maxWidth: '100%', border: '1px solid var(--error)' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--error)' }}>Advanced Options</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div className="auth-card" style={{ maxWidth: '100%' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Personal Data Management</h2>
+              <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Audit and export your activity within the GroupFlow ecosystem.</p>
+              
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                 <div>
                   <h4 style={{ margin: 0 }}>Export My Data</h4>
                   <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Download all your task and activity data.</p>
                 </div>
                 <button className="btn btn-secondary" onClick={handleDownloadData} style={{ width: 'auto' }}>Export</button>
+              </div>
+            </div>
+
+            <div className="auth-card" style={{ maxWidth: '100%', border: '1.5px solid var(--error)', background: 'rgba(239, 68, 68, 0.02)' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trash2 size={24} /> Danger Zone
+              </h2>
+              <p style={{ color: 'var(--text-sub)', marginBottom: '2rem', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                Terminating your account is an irreversible action. You will lose access to all teams, progress metrics, specialized badges, and verifiable audit logs.
+              </p>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                <div>
+                  <h4 style={{ margin: 0, color: 'var(--error)', fontWeight: 800 }}>Delete this account</h4>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Once you delete your account, there is no going back. Please be certain.</p>
+                </div>
+                <button 
+                  className="btn" 
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  style={{ width: 'auto', background: 'var(--error)', color: 'white' }}
+                >
+                  Delete Account
+                </button>
               </div>
             </div>
           </div>
@@ -630,7 +715,7 @@ export default function SettingsPage() {
             <div style={{ marginBottom: '1.5rem', color: 'var(--error)' }}><AlertTriangle size={60} /></div>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Final Confirmation</h3>
             <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
-              This will permanently delete your account.
+              This will <strong>permanently delete</strong> your GroupFlow account and all associated data. This action cannot be undone.
             </p>
             <input
               type="text" className="form-input" placeholder="Type DELETE to confirm" value={deleteConfirmation}
