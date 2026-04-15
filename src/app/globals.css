@@ -438,6 +438,7 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
   .main-content {
     padding: 1.5rem;
+    padding-top: calc(var(--h-nav) + 1rem);
     padding-bottom: calc(1.5rem + var(--h-mobile-bottom));
   }
 }

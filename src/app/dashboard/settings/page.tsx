@@ -110,6 +110,7 @@ export default function SettingsPage() {
     else {
       // Verifiable Logging
       logActivity(profile.id, profile.group_id, 'setting_updated', 'Updated personal profile details and academic journey')
+      window.dispatchEvent(new CustomEvent('PROFILE_UPDATED'))
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     }
@@ -139,6 +140,7 @@ export default function SettingsPage() {
       } else {
         await setCustomBg(publicUrl)
       }
+      window.dispatchEvent(new CustomEvent('PROFILE_UPDATED'))
 
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
@@ -239,7 +241,7 @@ export default function SettingsPage() {
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 var(--p-safe)' }}>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
         <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '12px' }}>
@@ -323,7 +325,7 @@ export default function SettingsPage() {
           <div className="auth-card" style={{ maxWidth: '100%' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Personal Profile</h2>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '2.5rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
               <div style={{ position: 'relative', width: '120px', height: '120px' }}>
                 <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {avatarUrl ? (
@@ -337,9 +339,9 @@ export default function SettingsPage() {
                   <input type="file" accept="image/*" capture="user" onChange={e => handleFileUpload(e, 'avatar')} style={{ display: 'none' }} />
                 </label>
               </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Profile Photo</h3>
-                <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Update your professional identity.</p>
+              <div style={{ flex: '1 1 200px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Profile Photo</h3>
+                <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem', marginTop: '0.25rem' }}>Update your professional identity.</p>
                 {uploadingAvatar && <p style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }}>Uploading...</p>}
               </div>
             </div>

@@ -49,7 +49,14 @@ export default function Sidebar({ user }: { user: any }) {
     const interval = setInterval(() => {
       setIsOnline(true)
     }, 5000)
-    return () => clearInterval(interval)
+    // Synchronization for profile updates across components
+    const handleProfileUpdate = () => fetchProfile()
+    window.addEventListener('PROFILE_UPDATED', handleProfileUpdate)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('PROFILE_UPDATED', handleProfileUpdate)
+    }
   }, [user.id])
 
   const fetchProfile = async () => {
@@ -83,7 +90,7 @@ export default function Sidebar({ user }: { user: any }) {
         left: 0,
         right: 0,
         height: 'var(--h-nav)',
-        zIndex: 1000,
+        zIndex: 3000,
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 1.25rem',

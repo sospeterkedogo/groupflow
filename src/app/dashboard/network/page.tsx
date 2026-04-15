@@ -66,14 +66,14 @@ export default function NetworkPage() {
   }, [search])
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
        
-       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '1.5rem' }}>
-          <div>
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Student Network</h1>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem' }}>Find other students and compare project scores.</p>
+       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.25rem' }}>
+          <div style={{ flex: '1 1 300px' }}>
+            <h1 className="fluid-h1" style={{ marginBottom: '0.25rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0 }}>Student Network</h1>
+            <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', margin: 0 }}>Find collaborators and compare project scores.</p>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
              <button 
                onClick={() => setViewMode('grid')}
                style={{ padding: '0.5rem', borderRadius: '8px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', display: 'flex', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}
@@ -90,24 +90,20 @@ export default function NetworkPage() {
        </div>
 
        {/* Search Bar Block */}
-       <div style={{ position: 'relative', marginBottom: '3rem' }}>
-          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)', opacity: 0.6 }} />
+       <div style={{ position: 'relative', marginBottom: '2.5rem' }}>
+          <Search size={22} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)', opacity: 0.6 }} />
           <input 
             type="text" 
             className="form-input" 
-            placeholder="Search students by name or team..." 
+            placeholder="Search students..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
-              paddingLeft: '4rem', paddingRight: '1.5rem', height: '4.5rem', fontSize: '1.1rem', 
-              borderRadius: '100px', boxShadow: 'var(--shadow-md)', border: '1px solid var(--border)',
+              paddingLeft: '3.5rem', paddingRight: '1rem', height: '3.5rem', fontSize: '1rem', 
+              borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)',
               backgroundColor: 'var(--surface)'
             }}
           />
-          <div style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>
-             <SlidersHorizontal size={18} />
-             <span>Filter</span>
-          </div>
        </div>
 
        {loading && users.length === 0 ? (
@@ -199,7 +195,8 @@ export default function NetworkPage() {
                      padding: '1rem 1.25rem', 
                      borderRadius: '16px', 
                      border: '1px solid var(--border)',
-                     flex: viewMode === 'list' ? '0 0 350px' : 'unset'
+                     flex: viewMode === 'list' ? '1 1 300px' : 'unset',
+                     width: viewMode === 'list' ? 'auto' : '100%'
                    }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                          <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>Total Score</span>

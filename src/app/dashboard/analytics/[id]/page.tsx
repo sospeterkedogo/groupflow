@@ -203,7 +203,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
 
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
@@ -247,7 +247,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
 
         {/* Task Status Donut */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem' }}>
@@ -336,7 +336,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       </div>
 
       {/* Main Two-Column */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
 
         {/* Team Leaderboard — fixed table */}
         <section style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', overflow: 'hidden' }}>
@@ -360,6 +360,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                     padding: '0.75rem 1rem', borderRadius: '14px',
                     background: idx === 0 ? 'rgba(56,189,248,0.06)' : 'var(--bg-main)',
                     border: `1px solid ${idx === 0 ? 'rgba(56,189,248,0.2)' : 'var(--border)'}`,
+                    flexWrap: 'wrap'
                   }}>
                     {/* Rank */}
                     <div style={{ width: '24px', textAlign: 'center', fontWeight: 900, fontSize: '0.85rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-sub)', flexShrink: 0 }}>

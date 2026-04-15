@@ -47,7 +47,7 @@ export default function ProfilePage() {
    }
 
    return (
-      <div style={{ maxWidth: '900px', margin: '0 auto', animation: 'fadeIn 0.5s ease-out' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
 
          {/* Profile Header Block */}
          <div className="auth-card" style={{ maxWidth: '100%', marginBottom: '2rem', padding: 'clamp(1.5rem, 5vw, 3rem)', position: 'relative', overflow: 'hidden' }}>
@@ -262,15 +262,15 @@ export default function ProfilePage() {
                My Active Teams
             </h3>
             {profile?.groups ? (
-               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                  <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--bg-sub)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }}>
                      <MapPin size={24} color="var(--brand)" />
                   </div>
-                  <div>
-                     <h4 style={{ margin: 0, fontSize: '1.1rem' }}>{profile.groups.name}</h4>
-                     <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Module Reference: {profile.groups.module_code}</p>
+                  <div style={{ flex: 1, minWidth: '150px' }}>
+                     <h4 style={{ margin: 0, fontSize: '1rem' }}>{profile.groups.name}</h4>
+                     <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)' }}>Module Reference: {profile.groups.module_code}</p>
                   </div>
-                  <button className="btn btn-secondary" onClick={handleSwitchGroup} style={{ width: 'auto', marginLeft: 'auto' }}>Change Team</button>
+                  <button className="btn btn-secondary" onClick={handleSwitchGroup} style={{ width: 'auto', padding: '0.6rem 1rem', fontSize: '0.8rem' }}>Change Team</button>
                </div>
             ) : (
                <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
