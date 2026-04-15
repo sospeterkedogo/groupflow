@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Task, TaskStatus, Profile } from '@/types/database'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
+import { Task, TaskStatus, Profile } from '@/types/database'
 
 type MemberProfileStats = {
   id: string
@@ -42,37 +42,27 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedMember, setSelectedMember] = useState<any>(null)
   
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { onlineUsers } = usePresence()
 
-  useEffect(() => {
-    fetchTasks()
-    fetchGroupMembers()
-    fetchCurrentUser()
-    
-    // Subscribe to real-time task changes for this specific group
-    const channel = supabase
-      .channel('tasks_channel')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks',
-          filter: `group_id=eq.${groupId}`
-        },
-        (payload) => {
-          fetchTasks()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
+  const fetchTasks = useCallback(async () => {
+    setBoardError(null)
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: false })
+      
+    if (error) {
+      console.error('Task fetch error:', error)
+      setBoardError('Failed to synchronize tasks with the server.')
     }
-  }, [groupId])
+    
+    if (data) setTasks(data as Task[])
+    setLoading(false)
+  }, [supabase, groupId])
 
-  const fetchGroupMembers = async () => {
+  const fetchGroupMembers = useCallback(async () => {
      const { data } = await supabase
        .from('profiles')
        .select('id, full_name, email, avatar_url, role, total_score')
@@ -88,32 +78,41 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
          total_score: typeof item.total_score === 'number' ? item.total_score : 0,
        })))
      }
-  }
+  }, [supabase, groupId])
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       if (data) setCurrentUserProfile(data)
     }
-  }
+  }, [supabase])
 
-  const fetchTasks = async () => {
-    setBoardError(null)
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('group_id', groupId)
-      .order('created_at', { ascending: false })
-      
-    if (error) {
-      console.error('Task fetch error:', error)
-      setBoardError('Failed to synchronize tasks with the server.')
-    }
+  useEffect(() => {
+    fetchTasks()
+    fetchGroupMembers()
+    fetchCurrentUser()
     
-    if (data) setTasks(data as Task[])
-    setLoading(false)
-  }
+    const channel = supabase
+      .channel('tasks_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tasks',
+          filter: `group_id=eq.${groupId}`
+        },
+        () => {
+          fetchTasks()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchTasks, fetchGroupMembers, fetchCurrentUser, groupId, supabase])
 
   // HTML5 Drag and Drop Handlers
   const handleDragStart = (e: React.DragEvent, taskId: string) => {

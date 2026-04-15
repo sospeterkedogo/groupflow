@@ -1,23 +1,33 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { 
-  MessageSquare, CheckCircle, PlusCircle, Trash2, 
-  Settings, Palette, Shield, UserMinus, FileUp, 
-  History, Clock, Calendar
+import {
+  MessageSquare,
+  CheckCircle,
+  PlusCircle,
+  Trash2,
+  Settings,
+  Palette,
+  Shield,
+  UserMinus,
+  FileUp,
+  History,
+  Clock,
+  Calendar
 } from 'lucide-react'
 
 export type ActivityItem = {
   id: string
   action_type: string
   description: string
-  metadata: any
+  metadata: Record<string, unknown> | null
   created_at: string
   user_id: string
   profiles?: {
-    full_name: string
-    avatar_url: string
+    full_name?: string
+    avatar_url?: string
   }
 }
 
@@ -32,13 +42,9 @@ export default function ActivityLogView({
 }) {
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchLogs()
-  }, [userId, groupId])
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true)
     let query = supabase
       .from('activity_log')
@@ -50,9 +56,15 @@ export default function ActivityLogView({
     if (groupId) query = query.eq('group_id', groupId)
 
     const { data } = await query
-    if (data) setActivities(data as any[])
+    if (data) setActivities(data as ActivityItem[])
     setLoading(false)
-  }
+  }, [userId, groupId, limit, supabase])
+
+  useEffect(() => {
+    void (async () => {
+      await fetchLogs()
+    })()
+  }, [fetchLogs])
 
   const getActionIcon = (type: string) => {
     switch (type) {
@@ -151,7 +163,13 @@ export default function ActivityLogView({
                          </div>
                       </div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                         {activity.profiles?.avatar_url && <img src={activity.profiles.avatar_url} style={{ width: '16px', height: '16px', borderRadius: '50%' }} />}
+                         {activity.profiles?.avatar_url && (
+                           <img
+                             src={activity.profiles.avatar_url}
+                             alt={`${activity.profiles.full_name ?? 'System'} avatar`}
+                             style={{ width: '16px', height: '16px', borderRadius: '50%' }}
+                           />
+                         )}
                          <span>{activity.profiles?.full_name || 'System'}</span>
                       </div>
                    </div>

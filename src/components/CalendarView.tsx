@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { ChevronLeft, ChevronRight, Calendar, Clock, GitCommit, FileUp, AlertCircle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { Task } from '@/types/database'
 import TaskModal from './TaskModal'
 
 type CalendarTask = {
@@ -16,26 +17,13 @@ type CalendarTask = {
 export default function CalendarView({ groupId }: { groupId: string }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [tasks, setTasks] = useState<CalendarTask[]>([])
-  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    fetchTasks()
-    
-    // Subscribe to task changes to keep the calendar dots synced
-    const channel = supabase.channel(`calendar_${groupId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` }, () => {
-        fetchTasks()
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [groupId])
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
       .from('tasks')
@@ -43,9 +31,29 @@ export default function CalendarView({ groupId }: { groupId: string }) {
       .eq('group_id', groupId)
       .not('due_date', 'is', null)
 
-    if (data) setTasks(data as CalendarTask[])
+    setTasks((data ?? []) as CalendarTask[])
     setLoading(false)
-  }
+  }, [groupId, supabase])
+
+  useEffect(() => {
+    void (async () => {
+      await fetchTasks()
+    })()
+
+    const channel = supabase.channel(`calendar_${groupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
+        () => {
+          void fetchTasks()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchTasks, groupId, supabase])
 
   const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate()
   const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay()
@@ -161,7 +169,7 @@ export default function CalendarView({ groupId }: { groupId: string }) {
                         onClick={async (e) => {
                            e.stopPropagation() // Prevent triggering the day click
                            const { data } = await supabase.from('tasks').select('*').eq('id', task.id).single()
-                           setSelectedTask(data)
+                           setSelectedTask(data as Task | null)
                            setPreselectedDate(undefined)
                            setIsModalOpen(true)
                         }}

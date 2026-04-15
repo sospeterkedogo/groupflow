@@ -1,9 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { 
-  User, 
   CheckCircle2, 
   ArrowRight, 
   Sparkles, 
@@ -23,7 +23,7 @@ const PRESET_AVATARS = [
   'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar8&backgroundColor=22c55e',
 ]
 
-export default function OnboardingModal({ user, onComplete }: { user: any, onComplete: () => void }) {
+export default function OnboardingModal({ user, onComplete }: { user: { id: string }, onComplete: () => void }) {
   const [step, setStep] = useState(1)
   const [fullName, setFullName] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState('')
@@ -95,7 +95,7 @@ export default function OnboardingModal({ user, onComplete }: { user: any, onCom
               <ShieldCheck size={32} />
             </div>
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to GroupFlow</h1>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Let's set up your profile. What name should we show in the dashboard?</p>
+            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Let&apos;s set up your profile. What name should we show in the dashboard?</p>
             
             <div className="form-group">
                <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>YOUR FULL NAME</label>
@@ -136,7 +136,7 @@ export default function OnboardingModal({ user, onComplete }: { user: any, onCom
                     transform: selectedAvatar === url ? 'scale(1.1)' : 'scale(1)'
                   }}
                 >
-                  <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={url} alt="Avatar option" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </button>
               ))}
             </div>

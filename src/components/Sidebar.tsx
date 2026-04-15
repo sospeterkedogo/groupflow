@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -14,8 +14,6 @@ import {
   ChevronLeft, 
   ChevronRight,
   Activity,
-  User,
-  Shield,
   Moon,
   Sun
 } from 'lucide-react'
@@ -31,14 +29,14 @@ type SidebarProfile = {
   role?: string
   theme_config?: { palette?: string }
   custom_bg_url?: string
-  groups?: any
+  groups?: Array<{ id: string; name?: string }>
 }
 
 export default function Sidebar({ user }: { user: { id: string } }) {
   const [isOpen, setIsOpen] = useState(true)
   const [profile, setProfile] = useState<SidebarProfile | null>(null)
   const pathname = usePathname()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const { currentPalette, setPalette } = useTheme()
   const isOnline = Boolean(profile)
 
@@ -51,7 +49,7 @@ export default function Sidebar({ user }: { user: { id: string } }) {
 
   const isDark = currentPalette.name !== 'Google Light'
 
-  async function fetchProfile() {
+  const fetchProfile = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -68,35 +66,47 @@ export default function Sidebar({ user }: { user: { id: string } }) {
     } catch (err) {
       console.error('Sidebar unexpected error:', err)
     }
-  }
+  }, [supabase, user.id])
 
   useEffect(() => {
-    fetchProfile()
-    
-    if (window.innerWidth <= 768) {
-      setIsOpen(false)
-    }
+    let active = true
 
-    // Body scroll lock logic
-    const handleBodyLock = () => {
-      if (window.innerWidth <= 768 && isOpen) {
-        document.body.classList.add('body-lock')
-      } else {
+    const initialize = async () => {
+      await fetchProfile()
+      if (!active) return
+
+      if (window.innerWidth <= 768) {
+        setIsOpen(false)
+      }
+
+      // Body scroll lock logic
+      const handleBodyLock = () => {
+        if (window.innerWidth <= 768 && isOpen) {
+          document.body.classList.add('body-lock')
+        } else {
+          document.body.classList.remove('body-lock')
+        }
+      }
+
+      handleBodyLock()
+
+      // Synchronization for profile updates
+      const handleProfileUpdate = () => fetchProfile()
+      window.addEventListener('PROFILE_UPDATED', handleProfileUpdate)
+
+      return () => {
         document.body.classList.remove('body-lock')
+        window.removeEventListener('PROFILE_UPDATED', handleProfileUpdate)
       }
     }
 
-    handleBodyLock()
-
-    // Synchronization for profile updates
-    const handleProfileUpdate = () => fetchProfile()
-    window.addEventListener('PROFILE_UPDATED', handleProfileUpdate)
-
+    const cleanup = initialize()
     return () => {
-      document.body.classList.remove('body-lock')
-      window.removeEventListener('PROFILE_UPDATED', handleProfileUpdate)
+      active = false
+      cleanup.then(fn => fn && fn())
     }
-  }, [user.id, isOpen])
+
+  }, [fetchProfile, isOpen])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()

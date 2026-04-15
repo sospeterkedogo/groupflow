@@ -1,9 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import OnboardingModal from './OnboardingModal'
 
-export default function OnboardingWrapper({ profile, user, children }: { profile: any, user: any, children: React.ReactNode }) {
+type OnboardingWrapperProps = {
+  profile?: { full_name?: string; avatar_url?: string } | null
+  user: { id: string }
+  children: ReactNode
+}
+
+export default function OnboardingWrapper({ profile, user, children }: OnboardingWrapperProps) {
   const [showOnboarding, setShowOnboarding] = useState(!profile?.full_name || !profile?.avatar_url)
 
   if (showOnboarding) {

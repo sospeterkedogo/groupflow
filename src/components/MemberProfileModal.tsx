@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
-import { X, UserCircle, Zap, ShieldCheck, Mail, Target } from 'lucide-react'
+import { X, UserCircle, ShieldCheck, Mail, Target } from 'lucide-react'
+import { Task } from '@/types/database'
 
 type ProfileStats = {
   id: string
@@ -15,7 +15,7 @@ type ProfileStats = {
 type MemberProfileModalProps = {
   member: ProfileStats
   groupMembers: ProfileStats[]
-  tasks: any[]
+  tasks: Task[]
   onClose: () => void
 }
 
@@ -74,7 +74,7 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
              justifyContent: 'center'
            }}>
               {member.avatar_url ? (
-                <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={member.avatar_url} alt={member.full_name || 'Member avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <UserCircle size={60} color="var(--text-sub)" />
               )}

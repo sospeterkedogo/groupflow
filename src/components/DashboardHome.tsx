@@ -1,65 +1,93 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
-import { LayoutDashboard, Calendar, History, Activity, Zap, TrendingUp, Award, UserCircle } from 'lucide-react'
+import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Award, UserCircle } from 'lucide-react'
 import TaskModal from './TaskModal'
-import { useRouter } from 'next/navigation'
 
-export default function DashboardHome({ groupId, profile }: { groupId: string, profile: any }) {
+type Profile = {
+  id: string
+  full_name?: string
+  avatar_url?: string
+  group_id?: string
+  total_score?: number
+}
+
+type Group = {
+  id?: string
+  name?: string
+  module_code?: string
+}
+
+type DashboardHomeProps = {
+  groupId: string
+  profile: Profile
+}
+
+export default function DashboardHome({ groupId, profile }: DashboardHomeProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
-  const [greeting, setGreeting] = useState('Welcome')
+  const [greeting] = useState(() => {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good Morning'
+    if (hour < 18) return 'Good Afternoon'
+    return 'Good Evening'
+  })
   const [personalTaskCount, setPersonalTaskCount] = useState(0)
-  const [group, setGroup] = useState<any>(null)
+  const [group, setGroup] = useState<Group | null>(null)
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false)
   const [syncToken, setSyncToken] = useState(0)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
-  useEffect(() => {
-    const hour = new Date().getHours()
-    if (hour < 12) setGreeting('Good Morning')
-    else if (hour < 18) setGreeting('Good Afternoon')
-    else setGreeting('Good Evening')
-
-    if (profile?.id && groupId) {
-      fetchPersonalTaskCount()
-      fetchGroupDetails()
-      
-      // Real-time subscription for personalized task count
-      const channel = supabase.channel('personal_tasks_count')
-        .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'tasks',
-          filter: `group_id=eq.${groupId}` 
-        }, () => {
-          fetchPersonalTaskCount()
-        })
-        .subscribe()
-
-      return () => { supabase.removeChannel(channel) }
-    }
-  }, [profile?.id, groupId])
-
-  const fetchGroupDetails = async () => {
+  const fetchGroupDetails = useCallback(async () => {
     const { data } = await supabase.from('groups').select('*').eq('id', groupId).single()
     if (data) setGroup(data)
-  }
+  }, [groupId, supabase])
 
-  const fetchPersonalTaskCount = async () => {
+  const fetchPersonalTaskCount = useCallback(async () => {
     if (!profile?.id || !groupId) return
+
     const { count } = await supabase
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('group_id', groupId)
       .filter('assignees', 'cs', `{"${profile.id}"}`)
       .neq('status', 'Done')
-    
+
     if (count !== null) setPersonalTaskCount(count)
-  }
+  }, [profile, groupId, supabase])
+
+  useEffect(() => {
+    if (profile?.id && groupId) {
+      void (async () => {
+        await fetchPersonalTaskCount()
+        await fetchGroupDetails()
+      })()
+
+      const channel = supabase.channel('personal_tasks_count')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tasks',
+            filter: `group_id=eq.${groupId}`
+          },
+          () => {
+            void fetchPersonalTaskCount()
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchGroupDetails, supabase])
 
   if (!profile) {
     return (
@@ -101,7 +129,7 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <div style={{ width: '72px', height: '72px', borderRadius: '24px', border: '2px solid var(--border)', background: 'var(--bg-sub)', padding: '2px', overflow: 'hidden', boxShadow: 'var(--shadow-sm)', transform: 'rotate(-3deg)' }}>
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px' }} />
+              <img src={profile.avatar_url} alt={profile.full_name ? `${profile.full_name} profile picture` : 'Profile avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px' }} />
             ) : (
               <div style={{ width: '100%', height: '100%', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '20px' }}>
                 <UserCircle size={40} color="var(--text-sub)" />
@@ -179,7 +207,7 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
              </h1>
              {group && (
                <div className="badge badge-code" style={{ padding: '0.4rem 0.8rem', background: 'var(--bg-sub)', color: 'var(--brand)', border: '1px solid var(--brand)', fontSize: '0.8rem' }}>
-                 ACTIVE TEAM: {group.name.toUpperCase()} ({group.module_code || 'LAB'})
+                 ACTIVE TEAM: {(group.name || 'Unknown').toUpperCase()} ({group.module_code || 'LAB'})
                </div>
              )}
           </div>

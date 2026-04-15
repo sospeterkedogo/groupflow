@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
-import { Mail, Download, Clock, CheckCircle, FileText, Send, Inbox, AlertTriangle } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import jsPDF from 'jspdf'
+import { Mail, Download, FileText, Send, Inbox } from 'lucide-react'
 
 type VirtualEmail = {
   id: string
@@ -14,19 +14,31 @@ type VirtualEmail = {
   type: 'reminder' | 'report' | 'system'
 }
 
-import jsPDF from 'jspdf'
+type EmailProfile = {
+  full_name?: string
+  email?: string
+}
 
-export default function EmailCenter({ groupId, profile, teamMembers }: { groupId: string, profile: any, teamMembers: any[] }) {
+type TeamMember = {
+  full_name: string
+  total_score?: number
+  achievements?: Array<{ name: string }>
+}
+
+export default function EmailCenter({
+  groupId,
+  profile,
+  teamMembers
+}: {
+  groupId: string
+  profile: EmailProfile
+  teamMembers: TeamMember[]
+}) {
   const [emails, setEmails] = useState<VirtualEmail[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState<VirtualEmail | null>(null)
-  const supabase = createClient()
 
-  useEffect(() => {
-    generateSimulatedInbox()
-  }, [])
-
-  const generateSimulatedInbox = () => {
+  const generateSimulatedInbox = useCallback(() => {
     const mockEmails: VirtualEmail[] = [
       {
         id: '1',
@@ -48,13 +60,18 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
       }
     ]
     setEmails(mockEmails)
-  }
+  }, [profile?.full_name])
 
-  const generateAndSendReport = async () => {
+  useEffect(() => {
+    void (async () => {
+      await generateSimulatedInbox()
+    })()
+  }, [generateSimulatedInbox])
+
+  const generateAndSendReport = useCallback(async () => {
     setLoading(true)
-    // Simulate complex PDF compilation delay
-    await new Promise(r => setTimeout(r, 2000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
     const newEmail: VirtualEmail = {
       id: Math.random().toString(),
       subject: '📄 Verifiable Audit Report Generated',
@@ -64,11 +81,11 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
       hasAttachment: true,
       type: 'report'
     }
-    
-    setEmails([newEmail, ...emails])
+
+    setEmails((prev) => [newEmail, ...prev])
     setLoading(false)
-    alert("Report generated and delivered to your Virtual Inbox.")
-  }
+    alert('Report generated and delivered to your Virtual Inbox.')
+  }, [])
 
   const downloadRealPDF = () => {
     const doc = new jsPDF()
@@ -104,7 +121,7 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
     doc.setFontSize(11)
     teamMembers.forEach((m, idx) => {
       const total = teamMembers.reduce((acc, curr) => acc + (curr.total_score || 0), 0)
-      const pct = total > 0 ? Math.round((m.total_score / total) * 100) : 0
+      const pct = total > 0 ? Math.round(((m.total_score || 0) / total) * 100) : 0
       
       doc.setTextColor(idx % 2 === 0 ? 0 : 60, 60, 60)
       doc.setFont("helvetica", "bold")
@@ -118,11 +135,11 @@ export default function EmailCenter({ groupId, profile, teamMembers }: { groupId
       if (m.achievements && m.achievements.length > 0) {
         doc.setFontSize(8)
         doc.setTextColor(110, 110, 110)
-        const tools = m.achievements.map((a: any) => a.name).join(', ')
+        const tools = m.achievements.map((a) => a.name).join(', ')
         doc.text(`Arsenal: ${tools}`, 25, y + 6)
         y += 7
       }
-      
+
       doc.setDrawColor(245, 245, 245)
       doc.line(20, y + 5, 190, y + 5)
       y += 15

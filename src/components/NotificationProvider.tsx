@@ -1,6 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import { Bell, X, Info, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
 
@@ -40,7 +41,7 @@ type Toast = {
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const addToast = (title: string, message: string, type: string = 'info') => {
     const id = Math.random().toString(36).substr(2, 9)
@@ -50,7 +51,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }, 5000)
   }
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -62,15 +63,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       .limit(20)
 
     if (data) setNotifications(data)
-  }
+  }, [supabase])
 
   useEffect(() => {
-    fetchNotifications()
-    
-    let channel: any = null
+    let channel: RealtimeChannel | null = null
     let active = true
 
     const setupSubscription = async () => {
+      await fetchNotifications()
       const { data: { user } } = await supabase.auth.getUser()
       if (user && active) {
         channel = supabase
@@ -95,7 +95,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       active = false
       if (channel) supabase.removeChannel(channel)
     }
-  }, [])
+  }, [fetchNotifications])
 
   const markAsRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
