@@ -78,7 +78,7 @@ export default function DashboardHome({ groupId, profile }: { groupId: string, p
   }
 
   return (
-    <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Personalized Ownership HUD */}
       <div className="hud-card" style={{
         padding: '1.5rem 2rem',

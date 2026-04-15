@@ -255,7 +255,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
         </button>
       </div>
 
-      <div className="kanban-board">
+      <div className="kanban-board scroll-x-allowed">
         {COLUMNS.map((col) => (
           <div key={col} className="kanban-column">
             <div className="kanban-column-header">
