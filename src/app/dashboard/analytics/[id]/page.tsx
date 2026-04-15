@@ -85,13 +85,16 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     setLoading(false)
   }
 
+  const [hasSentRequest, setHasSentRequest] = useState(false)
+
   const handleJoinRequest = async () => {
-    if (!currentUser || !group) return
+    if (!currentUser || !group || hasSentRequest) return
     
     setLoading(true)
     try {
       const { sendJoinRequest } = await import('@/app/dashboard/join/actions')
       await sendJoinRequest(groupId, currentUser.full_name || 'A student')
+      setHasSentRequest(true)
       alert('Request sent! The team will see your message in their chat.')
     } catch (err: any) {
       alert('Error sending request: ' + err.message)
@@ -184,10 +187,11 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               <button 
                 onClick={handleJoinRequest} 
-                className="btn btn-primary" 
-                style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem' }}
+                disabled={hasSentRequest || loading}
+                className={hasSentRequest ? "btn btn-secondary" : "btn btn-primary"} 
+                style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem', opacity: hasSentRequest ? 0.7 : 1, cursor: hasSentRequest ? 'default' : 'pointer' }}
               >
-                Request to Join
+                {hasSentRequest ? 'Request sent. Waiting for team leader approval' : 'Request to Join'}
               </button>
               <Link href="/dashboard/network" className="btn btn-secondary" style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem' }}>
                 Back to Network

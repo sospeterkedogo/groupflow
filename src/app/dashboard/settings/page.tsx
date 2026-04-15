@@ -47,6 +47,8 @@ export default function SettingsPage() {
   const [isEncrypted, setIsEncrypted] = useState(false)
   const [updatingGroup, setUpdatingGroup] = useState(false)
   const [customToolInput, setCustomToolInput] = useState('')
+  const [pendingRequests, setPendingRequests] = useState<string[]>([])
+  const [sentRequests, setSentRequests] = useState<string[]>([])
 
   const supabase = createClient()
 
@@ -442,24 +444,55 @@ export default function SettingsPage() {
 
             <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Other Teams</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-              {availableGroups.filter(g => g.id !== profile?.group_id).map(group => (
-                <div
-                  key={group.id}
-                  style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
-                  </div>
-                  <button
-                    onClick={() => window.location.href = `/dashboard/analytics/${group.id}`}
-                    className="btn btn-secondary"
-                    style={{ width: 'auto', padding: '0.5rem 1rem' }}
+              {availableGroups.filter(g => g.id !== profile?.group_id).map(group => {
+                const isPending = pendingRequests.includes(group.id)
+                const isSent = sentRequests.includes(group.id)
+
+                const handleQuickRequest = async () => {
+                  if (isPending || isSent) return
+                  setPendingRequests(prev => [...prev, group.id])
+                  try {
+                    const { sendJoinRequest } = await import('../join/actions')
+                    await sendJoinRequest(group.id, fullName || 'A student')
+                    setSentRequests(prev => [...prev, group.id])
+                  } catch (err: any) {
+                    setError('Request failed: ' + err.message)
+                  } finally {
+                    setPendingRequests(prev => prev.filter(id => id !== group.id))
+                  }
+                }
+
+                return (
+                  <div
+                    key={group.id}
+                    style={{ padding: '1.25rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                   >
-                    Request
-                  </button>
-                </div>
-              ))}
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{group.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 700 }}>{group.module_code}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                       <button
+                         onClick={handleQuickRequest}
+                         disabled={isPending || isSent}
+                         className={isSent ? "btn btn-ghost" : "btn btn-secondary"}
+                         style={{ width: 'auto', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: isSent ? 0.7 : 1, fontSize: isSent ? '0.75rem' : '0.85rem' }}
+                       >
+                         {isPending ? <div className="spinner-mini" /> : isSent ? <CheckCircle2 size={16} color="var(--success)" /> : null}
+                         {isPending ? 'Sending...' : isSent ? 'Request sent. Waiting for team leader approval' : 'Request'}
+                       </button>
+                       <button
+                         onClick={() => window.location.href = `/dashboard/analytics/${group.id}`}
+                         className="btn btn-ghost"
+                         style={{ width: 'auto', padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                         title="Preview Analytics"
+                       >
+                         <Eye size={18} />
+                       </button>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
