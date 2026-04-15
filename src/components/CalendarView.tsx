@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { Task } from '@/types/database'
 import TaskModal from './TaskModal'
@@ -21,7 +21,7 @@ export default function CalendarView({ groupId }: { groupId: string }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const fetchTasks = useCallback(async () => {
     setLoading(true)

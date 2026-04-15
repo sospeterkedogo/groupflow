@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Bell, X, Info, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
 
 export type Notification = {
@@ -41,7 +41,7 @@ type Toast = {
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const addToast = (title: string, message: string, type: string = 'info') => {
     const id = Math.random().toString(36).substr(2, 9)

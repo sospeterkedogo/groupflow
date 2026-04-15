@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   CheckCircle2, 
   ArrowRight, 
@@ -28,7 +28,7 @@ export default function OnboardingModal({ user, onComplete }: { user: { id: stri
   const [fullName, setFullName] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState('')
   const [saving, setSaving] = useState(false)
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   const handleNext = async () => {
     if (step === 1 && !fullName) return

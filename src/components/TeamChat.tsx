@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, CheckCheck, Clock,
   Trash2, Shield
@@ -44,7 +44,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
   const { onlineUsers, typingUsers, setTypingStatus } = usePresence()
 
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {

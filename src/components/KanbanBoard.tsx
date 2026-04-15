@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
 import { Task, TaskStatus, Profile } from '@/types/database'
 
@@ -42,7 +42,7 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedMember, setSelectedMember] = useState<any>(null)
   
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { onlineUsers } = usePresence()
 
   const fetchTasks = useCallback(async () => {

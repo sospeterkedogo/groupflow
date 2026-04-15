@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Task, TaskStatus, Artifact, TaskCategory, Profile } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
@@ -64,7 +64,7 @@ export default function TaskModal({
   const [newUrl, setNewUrl] = useState('')
   const [uploading, setUploading] = useState(false)
 
-  const supabase = createClient()
+  const supabase = createBrowserSupabaseClient()
 
   async function fetchMembers() {
     const { data } = await supabase

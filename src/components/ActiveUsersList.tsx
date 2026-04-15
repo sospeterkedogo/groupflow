@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { usePresence } from './PresenceProvider'
 import { User, Shield } from 'lucide-react'
 
@@ -23,7 +23,7 @@ export default function ActiveUsersList({
 }) {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { onlineUsers, typingUsers } = usePresence()
 
   const fetchMembers = useCallback(async () => {

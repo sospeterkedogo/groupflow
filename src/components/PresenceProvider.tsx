@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
 type UserPresence = {
   user_id: string
@@ -38,7 +38,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const userId = user?.id
   const userName = user?.full_name
 

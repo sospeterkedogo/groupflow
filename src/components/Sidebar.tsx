@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   LayoutDashboard, 
   Users, 
@@ -36,7 +36,7 @@ export default function Sidebar({ user }: { user: { id: string } }) {
   const [isOpen, setIsOpen] = useState(true)
   const [profile, setProfile] = useState<SidebarProfile | null>(null)
   const pathname = usePathname()
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { currentPalette, setPalette } = useTheme()
   const isOnline = Boolean(profile)
 

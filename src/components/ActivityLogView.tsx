@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import {
   MessageSquare,
   CheckCircle,
@@ -42,7 +42,7 @@ export default function ActivityLogView({
 }) {
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const fetchLogs = useCallback(async () => {
     setLoading(true)

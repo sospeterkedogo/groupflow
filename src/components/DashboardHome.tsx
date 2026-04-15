@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
 import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Award, UserCircle } from 'lucide-react'
@@ -41,7 +41,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
   const [group, setGroup] = useState<Group | null>(null)
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false)
   const [syncToken, setSyncToken] = useState(0)
-  const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const fetchGroupDetails = useCallback(async () => {
     const { data } = await supabase.from('groups').select('*').eq('id', groupId).single()
