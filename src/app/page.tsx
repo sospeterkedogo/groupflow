@@ -117,39 +117,11 @@ export default function Home() {
           <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none' }}>Sign In</Link>
           <Link href="/login" className="btn btn-primary btn-sm btn-inline">Get Started</Link>
         </div>
-      </header>
-
-      <main style={{ padding: '6rem 0' }}>
+      </heade      <main style={{ padding: '4rem 0' }}>
         
-        {/* HERO: Immersive & Welcoming */}
-        <section style={{ textAlign: 'center', marginBottom: '10rem', padding: '0 var(--p-safe)', position: 'relative' }}>
+        {/* HERO: The Accountability Hook */}
+        <section style={{ textAlign: 'center', marginBottom: '8rem', padding: '0 var(--p-safe)', position: 'relative' }}>
            
-           {/* Floating UI Elements (Top Left) */}
-           <div className="floating-element" style={{ position: 'absolute', top: '0', left: '10%', animationDelay: '0s', display: 'none' }}>
-              <div className="glass" style={{ padding: '0.75rem 1rem', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: 'var(--shadow-md)' }}>
-                 <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BarChart3 size={16} color="white" />
-                 </div>
-                 <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)' }}>GROUP FAIRNESS</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>98.4% Accuracy</div>
-                 </div>
-              </div>
-           </div>
-
-           {/* Floating UI Elements (Bottom Right) */}
-           <div className="floating-element" style={{ position: 'absolute', bottom: '-20px', right: '15%', animationDelay: '1s', display: 'none' }}>
-              <div className="glass" style={{ padding: '0.75rem 1rem', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: 'var(--shadow-md)' }}>
-                 <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CheckCircle size={16} color="white" />
-                 </div>
-                 <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)' }}>VERIFIED ARTIFACT</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>Ledger Entry #442</div>
-                 </div>
-              </div>
-           </div>
-
            <div style={{ 
              display: 'inline-flex', 
              alignItems: 'center', 
@@ -162,107 +134,170 @@ export default function Home() {
              fontWeight: 800,
              textTransform: 'uppercase',
              letterSpacing: '1.5px',
-             marginBottom: '2.5rem',
+             marginBottom: '2rem',
              border: '1px solid rgba(var(--brand-rgb), 0.1)'
            }}>
-             <Sparkles size={16} /> Welcome to the Future of Collaboration
+             <Shield size={16} /> Bridging the Accountability Gap
            </div>
            
-           <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 9vw, 5.5rem)', maxWidth: '1100px', margin: '0 auto 2rem', fontWeight: 900 }}>
-             Where Teamwork Meets <br />
+           <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 8vw, 5rem)', maxWidth: '1150px', margin: '0 auto 2rem', fontWeight: 900, letterSpacing: '-0.05em' }}>
+             Teamwork is Broken. <br />
              <span style={{ 
-               background: 'linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)',
-               WebkitBackgroundClip: 'text',
-               WebkitTextFillColor: 'transparent',
-               display: 'inline-block'
-             }}>Deep Recognition.</span>
+                background: 'linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                display: 'inline-block'
+              }}>I Provide the Proof.</span>
            </h1>
            
-           <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '750px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
-              GroupFlow is a project intelligence space designed to bridge the accountability gap. 
-              I turn every commit, every file, and every idea into a verifiable ledger of your team's success.
+           <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
+              The education system forces "collaboration" without the tools to track it. 
+              Social loafing isn't a student failure—it's a system failure. 
+              GroupFlow turns the invisible work into a verifiable ledger of individual impact.
            </p>
 
-           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
-              <Link href="/login" className="btn btn-primary btn-lg" style={{ minWidth: '260px', padding: '1.4rem 2.5rem', fontSize: '1.1rem', borderRadius: '20px' }}>
+           <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
+              <Link href="/login" className="btn btn-primary btn-lg" style={{ minWidth: '240px', padding: '1.25rem 2rem', fontSize: '1.1rem', borderRadius: '18px' }}>
                 Join the Platform <ArrowRight size={22} />
               </Link>
-              <Link href="/demo" className="btn btn-secondary btn-lg" style={{ minWidth: '260px', padding: '1.4rem 2.5rem', fontSize: '1.1rem', borderRadius: '20px' }}>
+              <Link href="/demo" className="btn btn-secondary btn-lg" style={{ minWidth: '240px', padding: '1.25rem 2rem', fontSize: '1.1rem', borderRadius: '18px' }}>
                 Try Sandboxed Demo < Fingerprint size={22} />
               </Link>
            </div>
-           
-           <div style={{ marginTop: '3.5rem' }}>
-              <button 
-                onClick={() => setIsModalOpen(true)} 
-                style={{ background: 'none', border: 'none', color: 'var(--text-sub)', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px dashed var(--border)', paddingBottom: '4px' }}
-                className="hover-opacity"
-              >
-                 <BookOpen size={18} /> Read the Research Manifesto
-              </button>
-           </div>
         </section>
 
-        {/* THE PROBLEM: Understanding the Gap */}
-        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ flex: 1, minWidth: '320px' }}>
-               <h2 style={{ fontSize: '3.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>Celebrate Every Voice.</h2>
-               <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '2.5rem' }}>
-                  Group projects shouldn't be a game of hide-and-seek. GroupFlow makes contribution visible and verified, 
-                  ensuring that the people who drive the project get the recognition they deserve. 
-                  <strong> No more quiet contributors being left behind.</strong>
+        {/* THE MANIFESTO: Why Teamwork Fails */}
+        <section style={{ padding: '10rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ flex: '1 1 500px' }}>
+               <div style={{ color: 'var(--error)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>The Great Teamwork Lie</div>
+               <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>A Problem Decades in the making.</h2>
+               <p style={{ fontSize: '1.2rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
+                  For decades, students have been graded on "group performance" while the actual distribution of labor remains a black box. 
+                  Tutors lack visibility, and high-performers shoulder the weight of silent collaborators.
                </p>
-               <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '1.25rem' }}>
-                 {[
-                   { icon: <Users />, text: "Automated attribution for every team member" },
-                   { icon: <Milestone />, text: "Verification of work through artifact ledgers" },
-                   { icon: <Fingerprint />, text: "Secure, tamper-proof behavior telemetry" }
-                 ].map((item, i) => (
-                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 700, fontSize: '1.1rem' }}>
-                     <div style={{ color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', padding: '8px', borderRadius: '12px' }}>{item.icon}</div>
-                     {item.text}
-                   </li>
-                 ))}
-               </ul>
+               <p style={{ fontSize: '1.2rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
+                  In 2026, this opacity should be non-existent. GroupFlow uses behavioral telemetry to ensure accountability isn't just a goal—it's an automated record.
+               </p>
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
+                  <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
+                     <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><CheckCircle size={24} /></div>
+                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Verifiable Evidence</div>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>Links to your real work, not just your status updates.</p>
+                  </div>
+                  <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
+                     <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><Zap size={24} /></div>
+                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Fair Attribution</div>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>Celebrate the quiet leaders who drive the project forward.</p>
+                  </div>
+               </div>
             </div>
-            <div style={{ flex: 1, minWidth: '320px', position: 'relative' }}>
-               <div className="glass" style={{ padding: '3rem', borderRadius: '40px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: 0, right: 0, padding: '1.5rem' }}>
-                     <div className="badge badge-success" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}>STABILITY ACTIVE</div>
+            <div style={{ flex: '1 1 400px', position: 'relative' }}>
+               <div className="glass" style={{ padding: '3rem', borderRadius: '48px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem' }}>
+                     <div style={{ padding: '10px', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '12px' }}>
+                        <Activity size={24} color="var(--brand)" />
+                     </div>
+                     <div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Current System Status</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>Accountability Engine Active</div>
+                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}>
-                     <div style={{ width: '40px', height: '8px', background: 'var(--brand)', borderRadius: '99px' }} />
-                     <div style={{ width: '40px', height: '8px', background: 'var(--brand)', borderRadius: '99px', opacity: 0.4 }} />
-                     <div style={{ width: '40px', height: '8px', background: 'var(--brand)', borderRadius: '99px', opacity: 0.1 }} />
-                  </div>
-                  <h4 style={{ margin: 0, fontSize: '1.75rem', marginBottom: '0.75rem', fontWeight: 800 }}>Impact Recognition</h4>
-                  <div style={{ fontSize: '4.5rem', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-0.05em' }}>1.2x <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--success)', verticalAlign: 'middle', marginLeft: '1rem' }}>TOP PERFORMER</span></div>
-                  <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem' }}>This member has verified 4 artifacts in the last 24 hours.</p>
                   
-                  <div style={{ marginTop: '2rem', height: '60px', background: 'var(--bg-main)', borderRadius: '16px', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
-                     Telemetry Stream Verified... 100%
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                     {[
+                        { label: 'Attribution Accuracy', val: '99.8%', color: 'var(--success)' },
+                        { label: 'Social Loafing Detected', val: '0.2%', color: 'var(--brand)' },
+                        { label: 'Artifact Verification', val: 'Verified', color: 'var(--success)' }
+                     ].map((stat, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '14px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+                           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-sub)' }}>{stat.label}</span>
+                           <span style={{ fontSize: '0.85rem', fontWeight: 900, color: stat.color }}>{stat.val}</span>
+                        </div>
+                     ))}
+                  </div>
+                  
+                  <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+                     <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}> telemetry stream pulse</div>
+                     <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '0.75rem' }}>
+                        {[...Array(12)].map((_, i) => (
+                           <div key={i} style={{ width: '4px', height: '16px', background: 'var(--brand)', borderRadius: '99px', opacity: Math.random(), animation: `spin ${Math.random() + 1}s infinite linear` }} />
+                        ))}
+                     </div>
                   </div>
                </div>
             </div>
           </div>
         </section>
+on>
 
-        {/* HOW IT WORKS */}
+        {/* EXTERNAL COLLABORATION: The Sync Layer */}
+        <section style={{ padding: '8rem var(--p-safe)', textAlign: 'center' }}>
+           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+              <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Seamless Integration</div>
+              <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Your Tools, My Analytics.</h2>
+              <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '4rem' }}>
+                 I don't force you into a new editor. Keep collaborating where you're comfortable. Whether it's a shared Google Doc, 
+                 a Figma design system, or a LaTeX report—simply link your workspace.
+              </p>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '4rem', flexWrap: 'wrap', opacity: 0.6, filter: 'grayscale(1)' }}>
+                 {[
+                   { name: 'Google Docs', icon: <Globe size={40} /> },
+                   { name: 'Sheets', icon: <BarChart3 size={40} /> },
+                   { name: 'Figma', icon: <Layers size={40} /> },
+                   { name: 'VS Code', icon: <Fingerprint size={40} /> },
+                   { name: 'Overleaf', icon: <BookOpen size={40} /> }
+                 ].map((tool, i) => (
+                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                      {tool.icon}
+                      <span style={{ fontWeight: 800, fontSize: '0.75rem' }}>{tool.name}</span>
+                   </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* ACADEMIC USE CASES */}
+        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)' }}>
+           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '4rem', textAlign: 'center' }}>Tailored for Academic Excellence.</h2>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                 {[
+                    { title: 'Dissertations & Capstones', desc: 'Secure your year-long effort with a verifiable ledger of every draft and research phase.', icon: <Milestone /> },
+                    { title: 'Group Lab Reports', desc: 'Ensure data analysis and writing duties are clearly attributed across the squad.', icon: <Activity /> },
+                    { title: 'Software Engineering', desc: 'Connect your Git flow directly for deep behavioral insights into commit patterns.', icon: <Zap /> },
+                    { title: 'Case Study Competitions', desc: 'Verify each member\'s contribution in high-stakes, fast-paced team environments.', icon: <Users /> }
+                 ].map((usecase, i) => (
+                    <div key={i} className="hover-lift" style={{ padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '32px' }}>
+                       <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', marginBottom: '1.5rem' }}>
+                          {usecase.icon}
+                       </div>
+                       <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem' }}>{usecase.title}</h3>
+                       <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', lineHeight: 1.6 }}>{usecase.desc}</p>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* HOW IT WORKS: The 4-Step Ledger */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
-           <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Built for Transparency.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.35rem', marginBottom: '6rem', maxWidth: '800px', margin: '0 auto 6rem' }}>I turn complex team dynamics into simple, verifiable metrics of success.</p>
+           <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Evidence Over Management.</h2>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.35rem', marginBottom: '6rem', maxWidth: '800px', margin: '0 auto 6rem' }}>I turn team project chaos into a verified record of professional achievement.</p>
 
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3rem', maxWidth: '1200px', margin: '0 auto' }}>
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
-                { step: '01', title: 'Collaborate Naturally', desc: 'No complex overhead. Just connect your workflow and start building together.' },
-                { step: '02', title: 'Verify Effortlessly', desc: 'Every task is anchored by a verifiable artifact. Authentic work, automatically attributed.' },
-                { step: '03', title: 'Grow Fairly', desc: 'See deep insights into team health and individual contribution through clean, beautiful analytics.' }
+                { step: '01', title: 'Connect Workspaces', desc: 'Link your existing Google Docs, GitHub repos, or Figma files in seconds.' },
+                { step: '02', title: 'Stream Telemetry', desc: 'I silently verify activity patterns while you focus on the creative heavy lifting.' },
+                { step: '03', title: 'Anchor Artifacts', desc: 'Every major update is pushed to a verifiable ledger, creating immutable proof of work.' },
+                { step: '04', title: 'Extract Insights', desc: 'Tutors and teams get a deep-dive and fair view into contribution and balance.' }
               ].map((s, i) => (
-                <div key={i} className="hover-lift" style={{ padding: '3.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '40px', textAlign: 'left' }}>
-                   <div style={{ fontSize: '3.5rem', fontWeight: 900, color: 'rgba(var(--brand-rgb), 0.1)', marginBottom: '1.5rem', letterSpacing: '-0.05em' }}>{s.step}</div>
-                   <h3 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1.25rem' }}>{s.title}</h3>
-                   <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', lineHeight: 1.7 }}>{s.desc}</p>
+                <div key={i} style={{ padding: '3rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '40px', textAlign: 'left', position: 'relative' }}>
+                   <div style={{ fontSize: '4rem', fontWeight: 900, color: 'rgba(var(--brand-rgb), 0.05)', position: 'absolute', top: '1.5rem', right: '2rem', letterSpacing: '-0.05em' }}>{s.step}</div>
+                   <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', position: 'relative' }}>{s.title}</h3>
+                   <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', lineHeight: 1.6, position: 'relative' }}>{s.desc}</p>
                 </div>
               ))}
            </div>

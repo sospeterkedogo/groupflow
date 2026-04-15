@@ -22,12 +22,11 @@ export default function BottomNav() {
 
   return (
     <nav className="mobile-bottom-nav glass" style={{
-      display: 'none', // Shown via CSS media query
       position: 'fixed',
       bottom: 0,
       left: 0,
       right: 0,
-      height: 'calc(var(--h-nav) + 0.5rem)',
+      height: 'var(--h-mobile-bottom)',
       backgroundColor: 'rgba(var(--bg-sub-rgb), 0.8)',
       backdropFilter: 'blur(20px)',
       borderTop: '1px solid var(--border)',
@@ -89,13 +88,6 @@ export default function BottomNav() {
         )
       })}
 
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .mobile-bottom-nav {
-            display: flex !important;
-          }
-        }
-      `}</style>
     </nav>
   )
 }
