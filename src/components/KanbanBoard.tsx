@@ -24,6 +24,10 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
   const [loading, setLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
+  
+  // Collaborative State
+  const [draggingUsers, setDraggingUsers] = useState<Record<string, { taskId: string; userName: string }>>({})
+  const [activeBoardUsers, setActiveBoardUsers] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 60000)
@@ -80,8 +84,17 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     fetchGroupMembers()
     fetchCurrentUser()
     
-    const channel = supabase
-      .channel('tasks_channel')
+    if (!groupId) return
+
+    const channel = supabase.channel(`board_${groupId}`, {
+      config: {
+        presence: {
+          key: currentUserProfile?.id || 'anonymous',
+        },
+      },
+    })
+
+    channel
       .on(
         'postgres_changes',
         {
@@ -90,20 +103,84 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
           table: 'tasks',
           filter: `group_id=eq.${groupId}`
         },
-        () => {
-          fetchTasks()
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newTask = payload.new as Task
+            setTasks(prev => {
+              if (prev.some(t => t.id === newTask.id)) return prev
+              return [newTask, ...prev]
+            })
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedTask = payload.new as Task
+            setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old.id
+            setTasks(prev => prev.filter(t => t.id !== deletedId))
+          }
         }
       )
-      .subscribe()
+      .on('broadcast', { event: 'dragging' }, ({ payload }) => {
+        setDraggingUsers(prev => {
+          const next = { ...prev }
+          if (payload.taskId) {
+            next[payload.userId] = { taskId: payload.taskId, userName: payload.userName }
+          } else {
+            delete next[payload.userId]
+          }
+          return next
+        })
+      })
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState()
+        const userIds = new Set<string>()
+        Object.keys(state).forEach(key => userIds.add(key))
+        setActiveBoardUsers(userIds)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED' && currentUserProfile) {
+          await channel.track({
+            userId: currentUserProfile.id,
+            userName: currentUserProfile.full_name,
+            online_at: new Date().toISOString(),
+          })
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [fetchTasks, fetchGroupMembers, fetchCurrentUser, groupId, supabase])
+  }, [fetchTasks, fetchGroupMembers, fetchCurrentUser, groupId, supabase, currentUserProfile])
 
   // HTML5 Drag and Drop Handlers
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId)
+    
+    // Broadcast drag start
+    if (currentUserProfile) {
+      supabase.channel(`board_${groupId}`).send({
+        type: 'broadcast',
+        event: 'dragging',
+        payload: { 
+          taskId, 
+          userId: currentUserProfile.id, 
+          userName: currentUserProfile.full_name || 'Someone' 
+        }
+      })
+    }
+  }
+
+  const handleDragEnd = () => {
+    // Broadcast drag end
+    if (currentUserProfile) {
+      supabase.channel(`board_${groupId}`).send({
+        type: 'broadcast',
+        event: 'dragging',
+        payload: { 
+          taskId: null, 
+          userId: currentUserProfile.id 
+        }
+      })
+    }
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -137,11 +214,14 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
        setTasks(originalTasks) // Revert on failure
        setBoardError(`Could not move task: ${error.message}`)
        setTimeout(() => setBoardError(null), 5000)
-    } else if (newStatus === 'Done') {
-       // Fire secure anti-farming Score Node pipeline
-       const targetTask = originalTasks.find(t => t.id === taskId)
-       if (targetTask && targetTask.assignees) {
-          distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error("Score Distribution error", err))
+    } else {
+       handleDragEnd() // Clear broadcast state
+       if (newStatus === 'Done') {
+          // Fire secure anti-farming Score Node pipeline
+          const targetTask = originalTasks.find(t => t.id === taskId)
+          if (targetTask && targetTask.assignees) {
+             distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error("Score Distribution error", err))
+          }
        }
     }
 
@@ -246,8 +326,47 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
       
       {/* Master Milestone HUD */}
       <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', marginBottom: '0.5rem' }}>
-         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
+         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+             <div>
+               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
+               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
+                 <div style={{ display: 'flex', -webkit-mask-image: 'linear-gradient(to right, black 85%, transparent)' }}>
+                    {Array.from(activeBoardUsers).map((userId, idx) => {
+                      const user = groupMembers.find(m => m.id === userId) || (userId === currentUserProfile?.id ? currentUserProfile : null)
+                      if (!user) return null
+                      return (
+                        <div 
+                          key={userId} 
+                          style={{ 
+                            width: '24px', 
+                            height: '24px', 
+                            borderRadius: '50%', 
+                            border: '2px solid var(--bg-sub)',
+                            backgroundColor: 'var(--brand)',
+                            marginLeft: idx === 0 ? 0 : '-8px',
+                            zIndex: 10 - idx,
+                            position: 'relative'
+                          }}
+                          title={`${user.full_name || 'Anonymous'} is active`}
+                        >
+                          {user.avatar_url ? (
+                            <img src={user.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
+                              {(user.full_name || '?')[0]}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                 </div>
+                 {activeBoardUsers.size > 0 && (
+                   <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>
+                     {activeBoardUsers.size} {activeBoardUsers.size === 1 ? 'collaborator' : 'collaborators'} active
+                   </span>
+                 )}
+               </div>
+             </div>
              {overdueCount > 0 && (
                <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                  <AlertCircle size={14} /> {overdueCount} Overdue Tasks
@@ -286,15 +405,41 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col)}
             >
-              {tasks.filter(t => t.status === col).map(task => (
-                <div 
-                  key={task.id} 
-                  className="kanban-card"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, task.id)}
-                  onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
-                >
-                  <div className="kanban-card-title">{task.title}</div>
+              {tasks.filter(t => t.status === col).map(task => {
+                const draggingInfo = Object.values(draggingUsers).find(d => d.taskId === task.id)
+                
+                return (
+                  <div 
+                    key={task.id} 
+                    className={`kanban-card ${draggingInfo ? 'remote-dragging' : ''}`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, task.id)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
+                    style={{
+                      position: 'relative',
+                      border: draggingInfo ? '2px solid var(--brand)' : '1px solid var(--border)'
+                    }}
+                  >
+                    {draggingInfo && (
+                      <div style={{ 
+                        position: 'absolute', 
+                        top: '-10px', 
+                        right: '10px', 
+                        backgroundColor: 'var(--brand)', 
+                        color: 'white', 
+                        fontSize: '0.65rem', 
+                        padding: '2px 8px', 
+                        borderRadius: '10px',
+                        fontWeight: 700,
+                        boxShadow: '0 2px 10px rgba(var(--brand-rgb), 0.3)',
+                        zIndex: 2,
+                        animation: 'pulse 2s infinite'
+                      }}>
+                        {draggingInfo.userName} is moving this
+                      </div>
+                    )}
+                    <div className="kanban-card-title">{task.title}</div>
                   
                   {/* DYNAMIC PROGRESS BAR */}
                   <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
@@ -518,6 +663,18 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
           color: var(--text-main);
           margin-bottom: 0.5rem;
           line-height: 1.4;
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        .remote-dragging {
+          pointer-events: none;
+          opacity: 0.7;
+          filter: grayscale(0.5);
         }
       `}</style>
     </div>
