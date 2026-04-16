@@ -87,22 +87,42 @@ export default function ProfilePage() {
 
          <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
 
-            {/* Validity Engine Stats */}
-            <div style={{ background: 'var(--brand)', color: 'white', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '180px' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.75rem' }}>
-                  <Award size={18} />
-                  <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Points Earned</span>
+         {/* Profile Stats Grid */}
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ background: 'var(--brand)', color: 'white', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '140px' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.5rem' }}>
+                  <Award size={16} />
+                  <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Validity Score</span>
                </div>
-               <div style={{ fontSize: 'var(--points-size)', fontWeight: 900, lineHeight: 1 }}>{profile?.total_score || 0}</div>
-               <p style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '1rem', lineHeight: 1.4, fontWeight: 500 }}>
-                  Composite score derived from peer verification and absolute deadline execution.
+               <div style={{ fontSize: '2.5rem', fontWeight: 950, lineHeight: 1, letterSpacing: '-0.04em' }}>{profile?.total_score || 0}</div>
+               <p style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.5rem', fontWeight: 600 }}>Peer Verified Impact</p>
+            </div>
+
+            <div style={{ background: 'var(--surface)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>STANDING</span>
+                  <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--success)' }}>#{profile?.rank || 'Senior'}</span>
+               </div>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>GUILD ID</span>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{profile?.school_id || 'N/A'}</span>
+               </div>
+            </div>
+         </div>
+
+         {/* Biography & Academic Track */}
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+               <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
+                  Researcher Biography
+               </h3>
+               <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.8 }}>
+                  Active contributor in the GroupFlow network. Specialized in {profile?.course_name || 'Independent Research'}. Maintaining high standards of peer-verified output and project execution.
                </p>
             </div>
 
-            {/* Academic Journey Card - Dynamic Roadmap */}
             <div className="card-item" style={{ background: 'linear-gradient(135deg, var(--bg-sub), var(--surface))', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)', position: 'relative' }}>
-               <h3 style={{ fontSize: '1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
-                  <Activity size={18} color="var(--brand)" />
+               <h3 style={{ fontSize: '0.9rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
                   Academic Roadmap
                </h3>
                
@@ -110,7 +130,7 @@ export default function ProfilePage() {
                  const currentYear = new Date().getFullYear();
                  const start = parseInt(String(profile?.enrollment_year)) || currentYear - 1;
                  const end = parseInt(String(profile?.completion_year)) || currentYear + 2;
-                 const total = end - start;
+                 const total = end - start || 1;
                  const elapsed = currentYear - start;
                  const percentage = Math.max(0, Math.min(100, (elapsed / total) * 100));
                  const isCompleted = currentYear > end;
@@ -118,11 +138,8 @@ export default function ProfilePage() {
                  
                  return (
                    <div style={{ padding: '0.25rem 0' }}>
-                      <div style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                          <div>
-                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
-                               Progress Track
-                            </div>
                             <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>
                                {isCompleted ? 'Degree Completed' : isFinalYear ? `Final Year` : `Year ${Math.max(1, elapsed + 1)} of ${total}`}
                             </div>
@@ -130,126 +147,86 @@ export default function ProfilePage() {
                          <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>{Math.round(percentage)}%</div>
                       </div>
 
-                      {/* Roadmap Visualizer */}
                       <div style={{ position: 'relative', height: '6px', background: 'var(--border)', borderRadius: '10px', marginBottom: '1.75rem', marginInline: '5px' }}>
                          <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${percentage}%`, background: 'var(--brand)', borderRadius: '10px', transition: 'width 1s ease-in-out' }} />
                          
-                         {/* Start Node */}
                          <div style={{ position: 'absolute', left: '0%', top: '50%', transform: 'translateY(-50%)' }}>
                              <div style={{ width: '10px', height: '10px', background: 'var(--brand)', borderRadius: '50%', border: '3px solid var(--surface)', boxShadow: 'var(--shadow-sm)' }} />
-                             <div style={{ position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)' }}>{start}</div>
                          </div>
 
-                         {/* End Node */}
                          <div style={{ position: 'absolute', left: '100%', top: '50%', transform: 'translateY(-50%)' }}>
                              <div style={{ width: '10px', height: '10px', background: isCompleted ? 'var(--brand)' : 'var(--border)', borderRadius: '50%', border: '3px solid var(--surface)' }} />
-                             <div style={{ position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)', fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)' }}>{end}</div>
                          </div>
-
-                         {/* Current Marker */}
-                         {percentage > 0 && percentage < 100 && (
-                           <div style={{ position: 'absolute', left: `${percentage}%`, top: '-22px', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                              <div style={{ fontSize: '0.55rem', fontWeight: 900, background: 'var(--brand)', color: 'white', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>LIVE</div>
-                              <div style={{ width: '2px', height: '8px', background: 'var(--brand)' }} />
-                           </div>
-                         )}
-                      </div>
-
-                      <div style={{ marginTop: '0.75rem', background: 'rgba(var(--brand-rgb), 0.03)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
-                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)', textTransform: 'uppercase' }}>{profile?.course_name || 'Independent Researcher'}</div>
-                         <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.15rem' }}>Status: {profile?.rank || 'Senior'} Rank</div>
                       </div>
                    </div>
                  )
                })()}
             </div>
-
-            {/* Core Configuration */}
-            <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)' }}>
-               <h3 style={{ fontSize: '1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
-                  <ShieldCheck size={18} color="var(--brand)" />
-                  System Parameters
-               </h3>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.6rem', borderBottom: '1px solid var(--border)' }}>
-                     <span style={{ color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>Network ID</span>
-                     <span style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-sub)' }}>{profile?.id?.substring(0, 8)}...</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.6rem', borderBottom: '1px solid var(--border)' }}>
-                     <span style={{ color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>Module Track</span>
-                     <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>{(Array.isArray(profile?.groups) ? profile?.groups[0] : profile?.groups)?.module_code || 'None'}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                     <span style={{ color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>Security Level</span>
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 800, color: 'var(--success)', fontSize: '0.8rem' }}>
-                        Verified Identity
-                     </span>
-                  </div>
-               </div>
-            </div>
+         </div>
 
          </div>
 
-         {/* Technical Arsenal Gallery */}
-         <div className="card-item" style={{ maxWidth: '100%', marginTop: '1.5rem', background: 'var(--surface)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-               <h3 style={{ fontSize: '1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
-                  <Award size={18} color="var(--brand)" />
-                  Achievements
+         {/* Achievement Wall */}
+         <div className="card-item" style={{ maxWidth: '100%', marginTop: '1.5rem', background: 'var(--surface)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+               <h3 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
+                  <Award size={22} color="var(--brand)" />
+                  Achievement Wall
                </h3>
-               <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', padding: '0.2rem 0.6rem', borderRadius: '50px', border: '1px solid var(--brand)' }}>
-                  {profile?.achievements?.length || 0} BADGES
+               <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', padding: '0.3rem 0.8rem', borderRadius: '50px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+                  {profile?.badges_count || 0} EARNED
                </div>
             </div>
 
-            {profile?.achievements && profile.achievements.length > 0 ? (
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
-                  {profile.achievements.map((achievement: any) => (
+            {profile?.badges_count && profile.badges_count > 0 ? (
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+                  {[...Array(profile.badges_count)].map((_, i) => (
                      <div
-                        key={achievement.name}
+                        key={i}
                         className="badge-card"
                         style={{
-                           padding: '0.75rem',
+                           padding: '1.25rem',
                            background: 'var(--bg-sub)',
                            border: '1px solid var(--border)',
-                           borderRadius: '16px',
+                           borderRadius: '20px',
                            textAlign: 'center',
-                           position: 'relative',
-                           overflow: 'hidden',
                            display: 'flex',
                            flexDirection: 'column',
                            alignItems: 'center',
-                           gap: '0.5rem',
+                           gap: '0.75rem',
+                           transition: 'all 0.3s ease'
                         }}
                      >
                         <div style={{
-                           width: '32px',
-                           height: '32px',
-                           borderRadius: '8px',
+                           width: '40px',
+                           height: '40px',
+                           borderRadius: '12px',
                            background: 'var(--brand)',
                            display: 'flex',
                            alignItems: 'center',
                            justifyContent: 'center',
                            color: 'white',
+                           boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)'
                         }}>
-                           <Award size={16} />
+                           <Award size={20} />
                         </div>
                         <div>
-                           <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>{achievement.name}</div>
-                           <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', marginTop: '0.1rem', fontWeight: 600 }}>{new Date(achievement.date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</div>
+                           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>Credential #{i+1}</div>
+                           <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>VERIFIED</div>
                         </div>
                      </div>
                   ))}
                </div>
             ) : (
-               <div style={{ textAlign: 'center', padding: '2rem', background: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
-                  <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem', marginBottom: '1rem' }}>No achievements recorded yet.</p>
+               <div style={{ textAlign: 'center', padding: '3rem 1.5rem', background: 'var(--bg-sub)', borderRadius: '20px', border: '1px dashed var(--border)' }}>
+                  <Award size={48} color="var(--text-sub)" style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                  <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '1.5rem', fontWeight: 600 }}>You haven't earned any verifiable credentials yet.</p>
                   <button
-                     onClick={() => window.location.href = '/dashboard/settings'}
-                     className="btn btn-secondary"
-                     style={{ width: 'auto', fontSize: '0.8rem' }}
+                     className="btn btn-primary"
+                     style={{ width: 'auto', padding: '0.75rem 1.5rem' }}
+                     onClick={() => window.location.href = '/dashboard/network'}
                   >
-                     Configure Profile
+                     Earn Your First Badge
                   </button>
                </div>
             )}

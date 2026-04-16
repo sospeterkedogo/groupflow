@@ -69,11 +69,15 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
           borderRadius: '28px', 
           width: '100%', 
           maxWidth: '500px', 
-          overflow: 'hidden', 
+          maxHeight: '90vh',
+          overflowY: 'auto',
           border: '1px solid var(--border)',
           boxShadow: '0 25px 70px -12px rgba(0,0,0,0.6)',
-          animation: 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          animation: 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}
+        className="no-scrollbar"
       >
         {/* Header Visual with Gradient */}
         <div style={{ height: '140px', background: 'linear-gradient(135deg, var(--brand), #6366f1, #a855f7)', position: 'relative' }}>
@@ -113,9 +117,15 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.25rem', letterSpacing: '-0.03em' }}>{member.full_name || 'Anonymous Student'}</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.9rem' }}>
-                   <GraduationCap size={16} color="var(--brand)" /> 
-                   <span>{member.course_name || 'General Studies'}</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <GraduationCap size={16} color="var(--brand)" /> 
+                      <span style={{ fontWeight: 600 }}>{member.course_name || 'General Studies'}</span>
+                   </div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Calendar size={14} color="var(--text-sub)" />
+                      <span style={{ fontWeight: 500 }}>Joined {member.created_at ? new Date(member.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'N/A'}</span>
+                   </div>
                 </div>
               </div>
               <button 
@@ -142,39 +152,70 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
               </button>
            </div>
 
-           {/* Info Cards */}
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', marginBottom: '0.5rem', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                    <Hash size={14} /> School ID
+           {/* Profile Stats Grid */}
+           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', marginBottom: '2rem' }}>
+              <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', marginBottom: '0.25rem', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                    <Target size={14} color="var(--brand)" /> Score
                  </div>
-                 <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{member.school_id || 'N/A'}</div>
+                 <div style={{ fontSize: '1.4rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{member.total_score} <span style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.6 }}>pts</span></div>
               </div>
-              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', marginBottom: '0.5rem', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                    <Calendar size={14} /> Batch
+              <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', marginBottom: '0.25rem', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                    <ShieldCheck size={14} color="var(--success)" /> Standing
                  </div>
-                 <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{member.enrollment_year} - {member.completion_year}</div>
+                 <div style={{ fontSize: '1.4rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>#{member.rank || 'Senior'}</div>
               </div>
-              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '0.5rem', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                    <Target size={14} /> Total Score
+              <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', marginBottom: '0.25rem', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                    <Calendar size={14} /> Academic Batch
                  </div>
-                 <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>{member.total_score} pts</div>
+                 <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{member.enrollment_year} — {member.completion_year}</div>
               </div>
-              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', marginBottom: '0.5rem', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                    <ShieldCheck size={14} /> Global Rank
+              <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', marginBottom: '0.25rem', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                    <Hash size={14} /> Student ID
                  </div>
-                 <div style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>#{member.rank || 'Student'}</div>
+                 <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.9rem' }}>{member.school_id || 'N/A'}</div>
               </div>
            </div>
 
-           <div style={{ padding: '0.75rem 1rem', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '14px', border: '1px solid rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-              <Award size={20} color="var(--brand)" />
-              <div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--brand)' }}>Achievements</span>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)' }}>{member.badges_count || 0} Verifiable Digital Credentials earned</p>
+           {/* Personal Biography / About */}
+           <div style={{ marginBottom: '2rem' }}>
+              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Researcher Bio</h3>
+              <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.8 }}>
+                 A dedicated student specializing in {member.course_name || 'Academic Excellence'}. Focused on collaborative research and high-impact project execution.
+              </p>
+           </div>
+
+           {/* Achievements Wall */}
+           <div style={{ marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                 <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Achievement Wall</h3>
+                 <span style={{ fontSize: '0.7rem', fontWeight: 800, background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+                   {member.badges_count || 0} Badges
+                 </span>
+              </div>
+              <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.25rem' }}>
+                 {member.badges_count && member.badges_count > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                       {[...Array(Math.min(4, member.badges_count))].map((_, i) => (
+                          <div key={i} style={{ aspectRatio: '1', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
+                             <Award size={24} color={i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : 'var(--brand)'} />
+                          </div>
+                       ))}
+                       {member.badges_count > 4 && (
+                          <div style={{ aspectRatio: '1', background: 'var(--bg-sub)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 900, color: 'var(--text-sub)' }}>
+                             +{member.badges_count - 4}
+                          </div>
+                       )}
+                    </div>
+                 ) : (
+                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-sub)' }}>
+                       <Award size={32} style={{ opacity: 0.1, marginBottom: '0.5rem' }} />
+                       <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 600 }}>No verifiable credentials recorded yet.</p>
+                    </div>
+                 )}
               </div>
            </div>
 

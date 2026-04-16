@@ -20,6 +20,7 @@ import {
 import { useTheme } from '@/context/ThemeContext'
 import { Profile } from '@/types/auth'
 import { SidebarProps } from '@/types/ui'
+import NotificationBell from './NotificationBell'
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
@@ -165,11 +166,19 @@ export default function Sidebar({ user }: SidebarProps) {
         zIndex: 4600
       }}>
         {/* Header / Toggle */}
-        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
-          {isOpen && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
+          {isOpen ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
               <Link href="/dashboard" style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</Link>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} />
+              <div style={{ flex: 1 }} />
+              <div className="hide-mobile" style={{ marginRight: '0.5rem' }}>
+                <NotificationBell />
+              </div>
+            </div>
+          ) : (
+            <div className="hide-mobile" style={{ marginBottom: '0.5rem' }}>
+               <NotificationBell />
             </div>
           )}
           <button 
