@@ -114,8 +114,8 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
             <MessageSquare size={20} color="white" />
           </div>
           <div>
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Real-time Lab Chat</h3>
-            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--success)', fontWeight: 700 }}>VERIFIED CONNECTION</p>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Secure Messaging</h3>
+            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--success)', fontWeight: 800 }}>VERIFIED STUDENT CONNECTION</p>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -150,14 +150,14 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
       >
         {loadingHistory && (
           <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-sub)', fontSize: '0.8rem' }}>
-            Restoring laboratory archives...
+            Restoring message history...
           </div>
         )}
 
         {!loadingHistory && history.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Historical Logs</span>
+            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Previous Messages</span>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
           </div>
         )}
@@ -202,7 +202,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
         {(messages?.length || 0) > 0 && history.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)', opacity: 0.3 }} />
-            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase' }}>Live Bridge</span>
+            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase' }}>Live Updates</span>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)', opacity: 0.3 }} />
           </div>
         )}
