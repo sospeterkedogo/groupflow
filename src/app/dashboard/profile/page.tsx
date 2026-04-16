@@ -177,8 +177,54 @@ export default function ProfilePage() {
                   {profile?.badges_count || 0} EARNED
                </div>
             </div>
+            <div style={{ color: 'var(--text-sub)', fontSize: '0.95rem', lineHeight: '1.75', marginBottom: '1rem' }}>
+               This wall shows the verified achievements and badges you’ve earned through GroupFlow activity. Each card represents a credential tied to your verified work, teamwork, or milestone progress.
+            </div>
 
-            {profile?.badges_count && profile.badges_count > 0 ? (
+            {profile?.achievements && profile.achievements.length > 0 ? (
+               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
+                  {profile.achievements.map((achievement, i) => (
+                     <div
+                        key={achievement.id || `${achievement.name}-${i}`}
+                        className="badge-card"
+                        style={{
+                           padding: '1.25rem',
+                           background: 'var(--bg-sub)',
+                           border: '1px solid var(--border)',
+                           borderRadius: '20px',
+                           textAlign: 'center',
+                           display: 'flex',
+                           flexDirection: 'column',
+                           alignItems: 'center',
+                           gap: '0.75rem',
+                           transition: 'all 0.3s ease'
+                        }}
+                     >
+                        <div style={{
+                           width: '40px',
+                           height: '40px',
+                           borderRadius: '12px',
+                           background: 'var(--brand)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           color: 'white',
+                           boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)'
+                        }}>
+                           <Award size={20} />
+                        </div>
+                        <div>
+                           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                              {achievement.name || `Credential #${i + 1}`}
+                           </div>
+                           <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>
+                              {achievement.date ? new Date(achievement.date).toLocaleDateString() : 'VERIFIED'}
+                           </div>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            ) : profile?.badges_count && profile.badges_count > 0 ? (
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '1rem' }}>
                   {[...Array(profile.badges_count)].map((_, i) => (
                      <div
@@ -211,8 +257,12 @@ export default function ProfilePage() {
                            <Award size={20} />
                         </div>
                         <div>
-                           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>Credential #{i+1}</div>
-                           <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>VERIFIED</div>
+                           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                              Credential #{i + 1}
+                           </div>
+                           <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>
+                              VERIFIED
+                           </div>
                         </div>
                      </div>
                   ))}
