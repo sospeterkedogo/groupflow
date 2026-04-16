@@ -6,8 +6,8 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
-import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
+import { useOthers, useMutation } from "@/liveblocks.config";
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
@@ -54,6 +54,30 @@ export default function TaskModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Liveblocks hooks
+  const others = useOthers();
+  const onlineUserIds = new Set(others.map(o => o.connectionId.toString()));
+  
+  const addTaskToLiveStorage = useMutation(({ storage }, newTask: Task) => {
+    storage.get("tasks").push(newTask);
+  }, []);
+
+  const updateTaskInLiveStorage = useMutation(({ storage }, updatedTask: Task) => {
+    const liveTasks = storage.get("tasks");
+    const index = liveTasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+      liveTasks.set(index, updatedTask);
+    }
+  }, []);
+
+  const deleteTaskFromLiveStorage = useMutation(({ storage }, taskId: string) => {
+    const liveTasks = storage.get("tasks");
+    const index = liveTasks.findIndex(t => t.id === taskId);
+    if (index !== -1) {
+      liveTasks.delete(index);
+    }
+  }, []);
 
   // Evidence Logic
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
@@ -136,6 +160,15 @@ export default function TaskModal({
       if (err) {
         setError(`Failed to save task: ${err.message}`)
       } else {
+        // Sync to Liveblocks
+        if (isEditMode && task) {
+          updateTaskInLiveStorage({ ...task, ...payload } as Task)
+        } else {
+          // Note: In a real app, you'd get the inserted ID from Supabase
+          // For simplicity, we trigger a refresh or fetch the latest
+          onRefresh() 
+        }
+
         // Verifiable Logging
         if (currentUser) {
           logActivity(
@@ -146,8 +179,7 @@ export default function TaskModal({
             { task_id: task?.id || 'new' }
           )
         }
-        onRefresh()
-        router.refresh()
+        
         onClose()
       }
     }
@@ -163,6 +195,9 @@ export default function TaskModal({
     if (error) {
       setError(`Failed to delete: ${error.message}`)
     } else {
+      // Sync to Liveblocks
+      deleteTaskFromLiveStorage(task.id)
+
       // Verifiable Logging
       if (currentUser) {
         logActivity(
@@ -172,8 +207,6 @@ export default function TaskModal({
           `Deleted task: ${task.title}`
         )
       }
-      onRefresh()
-      router.refresh()
       onClose()
     }
   }
@@ -441,7 +474,7 @@ export default function TaskModal({
                     )
                     .map(member => {
                     const isAssigned = assignees.includes(member.id)
-                    const isOnline = onlineUsers.has(member.id)
+                    const isOnline = onlineUserIds.has(member.id)
                     const initials = member.full_name ? member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '?'
 
                     return (

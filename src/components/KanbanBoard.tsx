@@ -9,55 +9,94 @@ import { KanbanBoardProps } from '@/types/ui'
 import TaskModal from './TaskModal'
 import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
-import { usePresence } from './PresenceProvider'
 import TeamChat from './TeamChat'
 import { logActivity } from '@/utils/logging'
 import MemberProfileModal from './MemberProfileModal'
+import { 
+  RoomProvider, 
+  useStorage, 
+  useMutation, 
+  useMyPresence, 
+  useOthers,
+  useUpdateMyPresence
+} from "@/liveblocks.config";
+import { LiveList } from "@liveblocks/client";
+import { ClientSideSuspense } from "@liveblocks/react";
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
 export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
-  const [tasks, setTasks] = useState<Task[]>([])
+  if (!groupId) return <div>Invalid Group</div>;
+
+  return (
+    <RoomProvider 
+      id={groupId} 
+      initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
+      initialStorage={{ tasks: new LiveList<Task>([]) }}
+    >
+      <ClientSideSuspense fallback={<KanbanBoardSkeleton />}>
+        {() => <KanbanBoardContent groupId={groupId} profile={profile} />}
+      </ClientSideSuspense>
+    </RoomProvider>
+  )
+}
+
+function KanbanBoardContent({ groupId, profile }: KanbanBoardProps) {
+  const tasks = useStorage((root) => root.tasks);
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   
-  const [loading, setLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
   
-  // Collaborative State
-  const [draggingUsers, setDraggingUsers] = useState<Record<string, { taskId: string; userName: string }>>({})
-  const [activeBoardUsers, setActiveBoardUsers] = useState<Set<string>>(new Set())
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [selectedMember, setSelectedMember] = useState<any>(null)
+
+  // Presence & Others
+  const [{ draggingTaskId }, updateMyPresence] = useMyPresence();
+  const others = useOthers();
+  const othersDragging = others.filter(o => o.presence?.draggingTaskId);
+
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 60000)
     return () => window.clearInterval(interval)
   }, [])
   
-  // Modal Orchestration State
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [selectedMember, setSelectedMember] = useState<any>(null)
-  
-  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
-  const { onlineUsers } = usePresence()
+  // Reconcile Liveblocks Storage with Supabase Data
+  const reconcileTasks = useMutation(({ storage }, dbTasks: Task[]) => {
+    const liveTasks = storage.get("tasks");
+    
+    // 1. Add missing tasks
+    dbTasks.forEach(dbTask => {
+      const exists = liveTasks.some(t => t.id === dbTask.id);
+      if (!exists) {
+        liveTasks.push(dbTask);
+      }
+    });
 
-  const fetchTasks = useCallback(async () => {
-    setBoardError(null)
-    const { data, error } = await supabase
+    // 2. Remove deleted tasks (optional, but good for robustness)
+    const dbTaskIds = new Set(dbTasks.map(t => t.id));
+    for (let i = liveTasks.length - 1; i >= 0; i--) {
+      if (!dbTaskIds.has(liveTasks.get(i).id)) {
+        liveTasks.delete(i);
+      }
+    }
+  }, []);
+
+  const fetchTasksFromDB = useCallback(async () => {
+    const { data } = await supabase
       .from('tasks')
       .select('*')
       .eq('group_id', groupId)
       .order('created_at', { ascending: false })
       
-    if (error) {
-      console.error('Task fetch error:', error)
-      setBoardError(`Failed to synchronize tasks: ${error.message || 'Unknown server error'}`)
+    if (data) {
+      reconcileTasks(data as Task[]);
     }
-    
-    if (data) setTasks(data as Task[])
-    setLoading(false)
-  }, [supabase, groupId])
+  }, [supabase, groupId, reconcileTasks])
 
   const fetchGroupMembers = useCallback(async () => {
      const { data } = await supabase
@@ -80,107 +119,19 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
   }, [supabase, profile])
 
   useEffect(() => {
-    fetchTasks()
+    fetchTasksFromDB()
     fetchGroupMembers()
     fetchCurrentUser()
-    
-    if (!groupId) return
+  }, [fetchTasksFromDB, fetchGroupMembers, fetchCurrentUser])
 
-    const channel = supabase.channel(`board_${groupId}`, {
-      config: {
-        presence: {
-          key: currentUserProfile?.id || 'anonymous',
-        },
-      },
-    })
-
-    channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'tasks',
-          filter: `group_id=eq.${groupId}`
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            const newTask = payload.new as Task
-            setTasks(prev => {
-              if (prev.some(t => t.id === newTask.id)) return prev
-              return [newTask, ...prev]
-            })
-          } else if (payload.eventType === 'UPDATE') {
-            const updatedTask = payload.new as Task
-            setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
-          } else if (payload.eventType === 'DELETE') {
-            const deletedId = payload.old.id
-            setTasks(prev => prev.filter(t => t.id !== deletedId))
-          }
-        }
-      )
-      .on('broadcast', { event: 'dragging' }, ({ payload }) => {
-        setDraggingUsers(prev => {
-          const next = { ...prev }
-          if (payload.taskId) {
-            next[payload.userId] = { taskId: payload.taskId, userName: payload.userName }
-          } else {
-            delete next[payload.userId]
-          }
-          return next
-        })
-      })
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState()
-        const userIds = new Set<string>()
-        Object.keys(state).forEach(key => userIds.add(key))
-        setActiveBoardUsers(userIds)
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED' && currentUserProfile) {
-          await channel.track({
-            userId: currentUserProfile.id,
-            userName: currentUserProfile.full_name,
-            online_at: new Date().toISOString(),
-          })
-        }
-      })
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [fetchTasks, fetchGroupMembers, fetchCurrentUser, groupId, supabase, currentUserProfile])
-
-  // HTML5 Drag and Drop Handlers
+  // Collaborative Handlers (Liveblocks)
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId)
-    
-    // Broadcast drag start
-    if (currentUserProfile) {
-      supabase.channel(`board_${groupId}`).send({
-        type: 'broadcast',
-        event: 'dragging',
-        payload: { 
-          taskId, 
-          userId: currentUserProfile.id, 
-          userName: currentUserProfile.full_name || 'Someone' 
-        }
-      })
-    }
+    updateMyPresence({ draggingTaskId: taskId });
   }
 
   const handleDragEnd = () => {
-    // Broadcast drag end
-    if (currentUserProfile) {
-      supabase.channel(`board_${groupId}`).send({
-        type: 'broadcast',
-        event: 'dragging',
-        payload: { 
-          taskId: null, 
-          userId: currentUserProfile.id 
-        }
-      })
-    }
+    updateMyPresence({ draggingTaskId: null });
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -192,6 +143,17 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     e.currentTarget.classList.remove('drag-over')
   }
 
+  const moveTask = useMutation(({ storage }, taskId: string, newStatus: TaskStatus) => {
+    const liveTasks = storage.get("tasks");
+    const index = liveTasks.findIndex(t => t.id === taskId);
+    if (index !== -1) {
+      const task = liveTasks.get(index);
+      if (task) {
+        liveTasks.set(index, { ...task, status: newStatus });
+      }
+    }
+  }, []);
+
   const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
     e.preventDefault()
     e.currentTarget.classList.remove('drag-over')
@@ -199,36 +161,32 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     const taskId = e.dataTransfer.getData('taskId')
     if (!taskId) return
 
-    // Optimistically update UI
-    const originalTasks = [...tasks]
-    setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t))
+    // Multiplayer update
+    moveTask(taskId, newStatus);
+    handleDragEnd();
 
-    // Update DB
+    // Update DB (Persistent Sync)
     const { error } = await supabase
       .from('tasks')
       .update({ status: newStatus })
       .eq('id', taskId)
 
     if (error) {
-       console.error("Failed to move task", error)
-       setTasks(originalTasks) // Revert on failure
-       setBoardError(`Could not move task: ${error.message}`)
+       console.error("Failed to move task in DB", error)
+       setBoardError(`Persistence error: ${error.message}`)
        setTimeout(() => setBoardError(null), 5000)
-    } else {
-       handleDragEnd() // Clear broadcast state
-       if (newStatus === 'Done') {
-          // Fire secure anti-farming Score Node pipeline
-          const targetTask = originalTasks.find(t => t.id === taskId)
-          if (targetTask && targetTask.assignees) {
-             distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error("Score Distribution error", err))
-          }
+    } else if (newStatus === 'Done') {
+       // Fire secure anti-farming Score Node pipeline
+       const targetTask = Array.from(tasks).find((t: any) => t.id === taskId)
+       if (targetTask && (targetTask as any).assignees) {
+          distributeTaskScore(taskId, (targetTask as any).assignees).catch(err => console.error("Score Distribution error", err))
        }
     }
 
     // Verifiable Logging
-    if (!error && currentUserProfile) {
+    if (!error && (currentUserProfile || profile)) {
        logActivity(
-          currentUserProfile.id,
+          (currentUserProfile?.id || profile?.id)!,
           groupId,
           'task_updated',
           `Moved task to ${newStatus}`,
@@ -237,34 +195,40 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     }
   }
 
-  // ALGORITHMIC COMPLETION ENGINE (Enhanced with Evidence Weight)
+  const addTask = useMutation(({ storage }, newTask: Task) => {
+    storage.get("tasks").push(newTask);
+  }, []);
+
+  const updateTask = useMutation(({ storage }, updatedTask: Task) => {
+    const liveTasks = storage.get("tasks");
+    const index = liveTasks.findIndex(t => t.id === updatedTask.id);
+    if (index !== -1) {
+      liveTasks.set(index, updatedTask);
+    }
+  }, []);
+
+  // ALGORITHMIC COMPLETION ENGINE
   const calculateProbability = (task: Task) => {
      if (task.status === 'Done') return 100
      let base = task.status === 'In Review' ? 85 : task.status === 'In Progress' ? 50 : 10
-     
-     // 1. Evidence Boost (Max +15% for comprehensive documentation)
      const artifactBoost = Math.min((task.artifacts?.length || 0) * 5, 15)
      base += artifactBoost
-
      if (task.due_date) {
         const remainingHours = (new Date(task.due_date).getTime() - now) / (1000 * 60 * 60)
-        if (remainingHours < 0) {
-            base = Math.max(0, base - 50) 
-        } else if (remainingHours < 48) {
-            base = Math.max(0, base - 10) 
-        }
+        if (remainingHours < 0) base = Math.max(0, base - 50) 
+        else if (remainingHours < 48) base = Math.max(0, base - 10) 
      }
-     return Math.min(base, 99) // Cannot reach 100 without being 'Done'
+     return Math.min(base, 99)
   }
 
   const globalProbability = tasks.length > 0 
-    ? Math.round(tasks.reduce((acc, t) => acc + calculateProbability(t), 0) / tasks.length)
+    ? Math.round(Array.from(tasks).reduce((acc, t) => acc + calculateProbability(t), 0) / tasks.length)
     : 0
 
-  const overdueCount = tasks.filter(t => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
+  const overdueCount = Array.from(tasks).filter((t: any) => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
   const [hasCelebrated, setHasCelebrated] = useState(false)
 
-  // IMMERSIVE GAMIFICATION REWARD MATRIX
+  // Gamification
   useEffect(() => {
      const sessionKey = `celebrated_${groupId}`
      const alreadyCelebrated = sessionStorage.getItem(sessionKey)
@@ -274,7 +238,6 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
         sessionStorage.setItem(sessionKey, 'true')
         const duration = 3000
         const end = Date.now() + duration
-
         const frame = () => {
           confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0ea5e9', '#38bdf8', '#7dd3fc', '#ffffff'] })
           confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0ea5e9', '#38bdf8', '#7dd3fc', '#ffffff'] })
@@ -283,32 +246,9 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
         frame()
      } else if (tasks.length > 0 && globalProbability < 100) {
         setHasCelebrated(false)
-        sessionStorage.removeItem(sessionKey) // ONLY reset if they add more tasks (pipeline actually decays)
+        sessionStorage.removeItem(sessionKey)
      }
   }, [globalProbability, tasks.length, hasCelebrated, groupId])
-
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', marginTop: '1rem' }}>
-        {/* HUD skeleton */}
-        <div className="skeleton" style={{ height: '110px', borderRadius: '16px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="skeleton skeleton-title" style={{ width: '30%', margin: 0 }} />
-          <div className="skeleton" style={{ width: '100px', height: '38px', borderRadius: '14px' }} />
-        </div>
-        {/* Columns skeleton */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div className="skeleton skeleton-title" style={{ width: '40%', height: '1.2rem', marginBottom: '0.2rem' }} />
-              <div className="skeleton skeleton-card" style={{ height: '120px' }} />
-              {i % 2 === 0 && <div className="skeleton skeleton-card" style={{ height: '90px' }} />}
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
@@ -318,7 +258,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
             <AlertCircle size={16} />
             <span>{boardError}</span>
           </div>
-          <button className="btn btn-secondary" style={{ marginTop: '0.5rem' }} onClick={fetchTasks}>
+          <button className="btn btn-secondary" style={{ marginTop: '0.5rem' }} onClick={fetchTasksFromDB}>
             Retry Sync
           </button>
         </div>
@@ -331,12 +271,11 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
                  <div style={{ display: 'flex', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent)' }}>
-                    {Array.from(activeBoardUsers).map((userId, idx) => {
-                      const user = groupMembers.find(m => m.id === userId) || (userId === currentUserProfile?.id ? currentUserProfile : null)
-                      if (!user) return null
+                    {others.map((other, idx) => {
+                      const user = groupMembers.find(m => m.id === other.connectionId.toString()) || { full_name: (other.presence as any)?.userName || 'Someone', avatar_url: '' }
                       return (
                         <div 
-                          key={userId} 
+                          key={other.connectionId} 
                           style={{ 
                             width: '24px', 
                             height: '24px', 
@@ -347,29 +286,29 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
                             zIndex: 10 - idx,
                             position: 'relative'
                           }}
-                          title={`${user.full_name || 'Anonymous'} is active`}
+                          title={`${(user as any).full_name} is active`}
                         >
-                          {user.avatar_url ? (
-                            <img src={user.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                          {(user as any).avatar_url ? (
+                            <img src={(user as any).avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                           ) : (
                             <div style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
-                              {(user.full_name || '?')[0]}
+                              {((user as any).full_name || '?')[0]}
                             </div>
                           )}
                         </div>
                       )
                     })}
                  </div>
-                 {activeBoardUsers.size > 0 && (
+                 {others.length > 0 && (
                    <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>
-                     {activeBoardUsers.size} {activeBoardUsers.size === 1 ? 'collaborator' : 'collaborators'} active
+                     {others.length} {others.length === 1 ? 'collaborator' : 'collaborators'} active
                    </span>
                  )}
                </div>
              </div>
              {overdueCount > 0 && (
                <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                 <AlertCircle size={14} /> {overdueCount} Overdue Tasks
+                 <AlertCircle size(14) /> {overdueCount} Overdue Tasks
                </span>
              )}
          </div>
@@ -383,7 +322,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
       </div>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Drag and drop tasks. Progress updates automatically based on deadlines.</p>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Multiplayer active. Drag and drop tasks to collaborate in real-time.</p>
         <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
            + New Task
         </button>
@@ -395,7 +334,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
             <div className="kanban-column-header">
               {col}
               <span className="badge" style={{ backgroundColor: 'var(--bg-sub)', color: 'var(--text-sub)' }}>
-                {tasks.filter(t => t.status === col).length}
+                {Array.from(tasks).filter((t: any) => t.status === col).length}
               </span>
             </div>
             
@@ -405,23 +344,23 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col)}
             >
-              {tasks.filter(t => t.status === col).map(task => {
-                const draggingInfo = Object.values(draggingUsers).find(d => d.taskId === task.id)
+              {Array.from(tasks).filter((t: any) => t.status === col).map((task: any) => {
+                const draggingOther = othersDragging.find(o => o.presence?.draggingTaskId === task.id)
                 
                 return (
                   <div 
                     key={task.id} 
-                    className={`kanban-card ${draggingInfo ? 'remote-dragging' : ''}`}
+                    className={`kanban-card ${draggingOther ? 'remote-dragging' : ''}`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, task.id)}
                     onDragEnd={handleDragEnd}
                     onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
                     style={{
                       position: 'relative',
-                      border: draggingInfo ? '2px solid var(--brand)' : '1px solid var(--border)'
+                      border: draggingOther ? '2px solid var(--brand)' : '1px solid var(--border)'
                     }}
                   >
-                    {draggingInfo && (
+                    {draggingOther && (
                       <div style={{ 
                         position: 'absolute', 
                         top: '-10px', 
@@ -436,7 +375,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
                         zIndex: 2,
                         animation: 'pulse 2s infinite'
                       }}>
-                        {draggingInfo.userName} is moving this
+                        {(draggingOther.presence as any)?.userName} is moving this
                       </div>
                     )}
                     <div className="kanban-card-title">{task.title}</div>
@@ -495,26 +434,20 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
                       )}
                     </div>
                     
-                    {/* AVATAR RENDER MATRIX */}
                     <div style={{ display: 'flex', gap: '0.2rem', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: '40%' }}>
                       {(!task.assignees || task.assignees.length === 0) ? (
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>Unassigned</span>
                       ) : (
-                        task.assignees.map(userId => {
+                        task.assignees.map((userId: string) => {
                           const user = groupMembers.find(m => m.id === userId)
                           const initial = user?.full_name ? user.full_name.substring(0, 1).toUpperCase() : '?'
-                          const isOnline = onlineUsers.has(userId)
                           
                           return (
                             <button 
                               key={userId} 
                               onClick={(e) => { e.stopPropagation(); setSelectedMember(user); }}
                               style={{ 
-                                position: 'relative', 
-                                padding: 0, 
-                                background: 'none', 
-                                border: 'none', 
-                                cursor: 'pointer',
+                                position: 'relative', padding: 0, background: 'none', border: 'none', cursor: 'pointer',
                                 transition: 'transform 0.2s'
                               }}
                               className="avatar-bubble"
@@ -540,19 +473,6 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
                                   {initial}
                                 </div>
                               )}
-                              {isOnline && (
-                                <div style={{
-                                  position: 'absolute',
-                                  bottom: '-1px',
-                                  right: '-1px',
-                                  width: '8px',
-                                  height: '8px',
-                                  borderRadius: '50%',
-                                  backgroundColor: 'var(--success)',
-                                  border: '1.5px solid var(--surface)',
-                                  boxShadow: '0 0 4px var(--success)'
-                                }} />
-                              )}
                             </button>
                           )
                         })
@@ -565,9 +485,8 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
           </div>
         ))}
 
-        {/* Real-time Team Communications */}
-        {groupId && currentUserProfile && (
-          <TeamChat groupId={groupId} user={currentUserProfile} />
+        {groupId && (currentUserProfile || profile) && (
+          <TeamChat groupId={groupId} user={(currentUserProfile || profile)!} />
         )}
       </div>
       
@@ -575,7 +494,11 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
         <TaskModal 
           task={selectedTask} 
           groupId={groupId} 
-          onRefresh={fetchTasks}
+          onRefresh={() => {
+            fetchTasksFromDB();
+            // In multiplayer, TaskModal will also need to update Liveblocks storage
+            // This is a bridge for now
+          }}
           onClose={() => {
             setIsModalOpen(false)
             setSelectedTask(null)
@@ -587,96 +510,47 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
         <MemberProfileModal 
           member={selectedMember}
           groupMembers={groupMembers}
-          tasks={tasks}
+          tasks={Array.from(tasks) as any}
           onClose={() => setSelectedMember(null)}
         />
       )}
 
       <style jsx>{`
         .avatar-bubble:hover { transform: scale(1.15) translateY(-2px); z-index: 10; filter: brightness(1.1); }
-        .kanban-board {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1.5rem;
-          min-height: 70vh;
-        }
-        
+        .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; min-height: 70vh; }
         @media (max-width: 1024px) {
-          .kanban-board {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            padding-bottom: 2rem;
-            min-height: auto;
-          }
-          .kanban-column {
-            flex: 0 0 calc(100vw - 3rem);
-            scroll-snap-align: center;
-          }
+          .kanban-board { display: flex; overflow-x: auto; padding-bottom: 2rem; }
+          .kanban-column { flex: 0 0 calc(100vw - 3rem); }
         }
-
-        .kanban-column {
-          background: var(--bg-main);
-          border-radius: var(--radius);
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          border: 1px solid var(--border);
-        }
-        .kanban-column-header {
-          font-weight: 800;
-          font-size: 0.875rem;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--text-sub);
-          display: flex;
-          justify-content: space-between;
-          padding: 0.5rem;
-          border-bottom: 2px solid var(--border);
-          margin-bottom: 0.5rem;
-        }
-        .kanban-task-list {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          min-height: 200px;
-        }
-        .kanban-card {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 16px;
-          padding: 1.25rem;
-          cursor: grab;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: var(--shadow-sm);
-        }
-        .kanban-card:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-md);
-          border-color: var(--brand);
-        }
-        .kanban-card-title {
-          font-weight: 700;
-          font-size: 1rem;
-          color: var(--text-main);
-          margin-bottom: 0.5rem;
-          line-height: 1.4;
-        }
-
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.05); opacity: 0.8; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-
-        .remote-dragging {
-          pointer-events: none;
-          opacity: 0.7;
-          filter: grayscale(0.5);
-        }
+        .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid var(--border); }
+        .kanban-column-header { font-weight: 800; font-size: 0.875rem; text-transform: uppercase; color: var(--text-sub); display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 0.5rem; }
+        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: 1rem; min-height: 200px; }
+        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; cursor: grab; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .kanban-card:hover { transform: translateY(-4px); border-color: var(--brand); }
+        .kanban-card-title { font-weight: 700; font-size: 1rem; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.4; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .remote-dragging { pointer-events: none; opacity: 0.7; filter: grayscale(0.5); }
       `}</style>
+    </div>
+  )
+}
+
+function KanbanBoardSkeleton() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', marginTop: '1rem' }}>
+      <div className="skeleton" style={{ height: '110px', borderRadius: '16px' }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="skeleton skeleton-title" style={{ width: '30%' }} />
+        <div className="skeleton" style={{ width: '100px', height: '38px', borderRadius: '14px' }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="skeleton skeleton-title" style={{ width: '40%', height: '1.2rem' }} />
+            <div className="skeleton skeleton-card" style={{ height: '120px' }} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
