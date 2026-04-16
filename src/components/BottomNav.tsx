@@ -7,7 +7,8 @@ import {
   LayoutDashboard, 
   Users, 
   UserCircle, 
-  Settings 
+  Settings,
+  BarChart3
 } from 'lucide-react'
 
 export default function BottomNav() {
@@ -15,6 +16,7 @@ export default function BottomNav() {
 
   const navLinks = [
     { name: 'Board', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Stats', path: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Network', path: '/dashboard/network', icon: Users },
     { name: 'Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },

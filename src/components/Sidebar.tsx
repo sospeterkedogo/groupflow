@@ -53,7 +53,7 @@ export default function Sidebar({ user }: { user: { id: string } }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, theme_config, custom_bg_url, full_name, avatar_url')
+        .select('id, theme_config, custom_bg_url, full_name, avatar_url, group_id')
         .eq('id', user.id)
         .single()
       
