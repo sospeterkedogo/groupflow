@@ -31,6 +31,8 @@ export default function SettingsPage() {
   const [completionYear, setCompletionYear] = useState<number>(new Date().getFullYear() + 3)
   const [rank, setRank] = useState('Senior')
   const [badgesCount, setBadgesCount] = useState(0)
+  const [tagline, setTagline] = useState('')
+  const [biography, setBiography] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -90,14 +92,8 @@ export default function SettingsPage() {
         setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
         setRank(data.rank || 'Senior')
         setBadgesCount(data.badges_count ?? 0)
-        setAvatarUrl(data.avatar_url || '')
-        const mainGroup = Array.isArray(data.groups) ? data.groups[0] : data.groups
-        setIsEncrypted(mainGroup?.is_encrypted || false)
-
-        if (data.role === 'admin' && data.group_id) {
-          fetchTeam(data.group_id)
-        }
-
+          setTagline(data.tagline || '')
+          setBiography(data.biography || '')
         if (data.id) {
           fetchJoinRequests(data.id)
         }
@@ -113,6 +109,12 @@ export default function SettingsPage() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
+    const biographyWords = biography.trim() ? biography.trim().split(/\s+/).filter(Boolean).length : 0
+    if (biographyWords > 500) {
+      setError('Biography must be 500 words or fewer.')
+      return
+    }
+
     setSaving(true)
     setError(null)
 
@@ -125,7 +127,9 @@ export default function SettingsPage() {
         course_name: courseName,
         enrollment_year: enrollmentYear,
         completion_year: completionYear,
-        rank: rank
+        rank: rank,
+        tagline: tagline,
+        biography: biography
       })
       .eq('id', profile.id)
 
@@ -387,6 +391,31 @@ export default function SettingsPage() {
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Achievement Rank</label>
                   <input type="text" className="form-input" value={rank} onChange={e => setRank(e.target.value)} placeholder="e.g. Senior" />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: '1.25rem', marginTop: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Tagline / Preferred Title</label>
+                  <input type="text" className="form-input" value={tagline} onChange={e => setTagline(e.target.value)} placeholder="e.g. Research Lead, PhD Candidate" />
+                  <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>This appears on your profile and public researcher card.</p>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Researcher Biography</label>
+                  <textarea
+                    className="form-input"
+                    value={biography}
+                    onChange={e => setBiography(e.target.value)}
+                    rows={6}
+                    placeholder="Write up to 500 words about your research focus, experience, and goals."
+                    style={{ resize: 'vertical', minHeight: '140px' }}
+                  />
+                  <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.75rem', color: biography.trim().split(/\s+/).filter(Boolean).length > 500 ? 'var(--error)' : 'var(--text-sub)' }}>
+                      {biography.trim() ? biography.trim().split(/\s+/).filter(Boolean).length : 0} of 500 words
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>Share your research interests, achievements, and strengths.</span>
+                  </div>
                 </div>
               </div>
 

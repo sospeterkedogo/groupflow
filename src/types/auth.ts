@@ -18,6 +18,8 @@ export type Profile = {
   subscription_started_at?: string | null;
   total_score: number;
   created_at: string;
+  tagline?: string | null;
+  biography?: string | null;
   groups?: Group | Group[]; // Nested group data
   achievements?: Array<{ name: string; date: string; id?: string; icon?: string }>;
   theme_config?: { palette?: string; custom_bg_url?: string };

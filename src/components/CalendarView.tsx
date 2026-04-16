@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { Task } from '@/types/database'
 import TaskModal from './TaskModal'
 
-export default function CalendarView({ groupId }: { groupId: string }) {
+export default function CalendarView({ groupId, onTaskSaved }: { groupId: string; onTaskSaved?: () => Promise<void> | void }) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [tasks, setTasks] = useState<Task[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -202,6 +202,7 @@ export default function CalendarView({ groupId }: { groupId: string }) {
           task={selectedTask} 
           groupId={groupId} 
           onRefresh={fetchTasks}
+          onTaskSaved={onTaskSaved}
           initialDueDate={preselectedDate}
           onClose={() => {
             setIsModalOpen(false)

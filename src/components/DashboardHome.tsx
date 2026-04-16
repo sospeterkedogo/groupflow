@@ -25,6 +25,9 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
   const [group, setGroup] = useState<Group | null>(null)
   const [newTaskSignal, setNewTaskSignal] = useState(0)
   const [syncToken, setSyncToken] = useState(0)
+  const handleCalendarTaskSaved = useCallback(async () => {
+    setSyncToken(prev => prev + 1)
+  }, [])
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const fetchGroupDetails = useCallback(async () => {
@@ -270,7 +273,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
       <div style={{ position: 'relative' }}>
         {activeTab === 'board' 
           ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} profile={profile} newTaskSignal={newTaskSignal} /> 
-          : <CalendarView groupId={groupId} key={`cal-${syncToken}`} />
+          : <CalendarView groupId={groupId} key={`cal-${syncToken}`} onTaskSaved={handleCalendarTaskSaved} />
         }
       </div>
 

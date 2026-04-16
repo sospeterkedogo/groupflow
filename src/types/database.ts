@@ -23,6 +23,8 @@ export type Profile = {
   subscription_started_at?: string | null;
   total_score: number;
   created_at: string;
+  tagline?: string | null;
+  biography?: string | null;
   last_seen?: string | null;
 };
 

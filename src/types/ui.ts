@@ -155,6 +155,7 @@ export type TaskModalProps = {
   groupId: string
   onClose: () => void
   onRefresh: () => Promise<void> | void
+  onTaskSaved?: () => Promise<void> | void
   initialDueDate?: string
 }
 

@@ -7,7 +7,7 @@ import type { User } from '@supabase/supabase-js'
 import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
-import { useOthers, useMutation } from "@/liveblocks.config";
+import { useOthers } from '@/liveblocks.config'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
@@ -30,6 +30,7 @@ export default function TaskModal({
   groupId, 
   onClose,
   onRefresh,
+  onTaskSaved,
   initialDueDate
 }: TaskModalProps) {
   const router = useRouter()
@@ -56,29 +57,8 @@ export default function TaskModal({
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
 
-  // Liveblocks hooks
-  const others = useOthers();
-  const onlineUserIds = new Set(others.map(o => o.connectionId.toString()));
-  
-  const addTaskToLiveStorage = useMutation(({ storage }, newTask: Task) => {
-    storage.get("tasks").push(newTask);
-  }, []);
-
-  const updateTaskInLiveStorage = useMutation(({ storage }, updatedTask: Task) => {
-    const liveTasks = storage.get("tasks");
-    const index = liveTasks.findIndex(t => t.id === updatedTask.id);
-    if (index !== -1) {
-      liveTasks.set(index, updatedTask);
-    }
-  }, []);
-
-  const deleteTaskFromLiveStorage = useMutation(({ storage }, taskId: string) => {
-    const liveTasks = storage.get("tasks");
-    const index = liveTasks.findIndex(t => t.id === taskId);
-    if (index !== -1) {
-      liveTasks.delete(index);
-    }
-  }, []);
+  const others = useOthers()
+  const onlineUserIds = new Set(others.map(o => o.connectionId.toString()))
 
   // Evidence Logic
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
@@ -165,6 +145,7 @@ export default function TaskModal({
       }
 
       await onRefresh()
+      await onTaskSaved?.()
       onClose()
     } catch (err: any) {
       setError(`Failed to save task: ${err.message}`)
@@ -221,8 +202,8 @@ export default function TaskModal({
     if (error) {
       setError(`Failed to delete: ${error.message}`)
     } else {
-      // Sync to Liveblocks
-      deleteTaskFromLiveStorage(task.id)
+      await onRefresh()
+      await onTaskSaved?.()
 
       // Verifiable Logging
       if (currentUser) {

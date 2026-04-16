@@ -69,11 +69,16 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const reconcileTasks = useMutation(({ storage }, dbTasks: Task[]) => {
     const liveTasks = storage.get("tasks");
 
-    // 1. Add missing tasks
+    // 1. Add missing tasks and update existing ones
     dbTasks.forEach(dbTask => {
-      const exists = liveTasks.some(t => t.id === dbTask.id);
-      if (!exists) {
+      const index = liveTasks.findIndex(t => t.id === dbTask.id);
+      if (index === -1) {
         liveTasks.push(dbTask);
+      } else {
+        const liveTask = liveTasks.get(index)
+        if (liveTask && JSON.stringify(liveTask) !== JSON.stringify(dbTask)) {
+          liveTasks.set(index, dbTask)
+        }
       }
     });
 
@@ -123,7 +128,21 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     fetchTasksFromDB()
     fetchGroupMembers()
     fetchCurrentUser()
-  }, [fetchTasksFromDB, fetchGroupMembers, fetchCurrentUser])
+
+    const channel = supabase.channel(`kanban_${groupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
+        () => {
+          fetchTasksFromDB()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchTasksFromDB, fetchGroupMembers, fetchCurrentUser, groupId, supabase])
 
   useEffect(() => {
     if (typeof newTaskSignal === 'number' && newTaskSignal > 0) {
@@ -498,6 +517,16 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           <TeamChat groupId={groupId} user={(currentUserProfile || profile)!} />
         )}
       </div>
+
+      {isModalOpen && (
+        <TaskModal
+          task={selectedTask}
+          groupId={groupId}
+          onRefresh={fetchTasksFromDB}
+          onTaskSaved={fetchTasksFromDB}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
 
       {isModalOpen && (
         <TaskModal
