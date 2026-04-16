@@ -7,14 +7,25 @@ const client = createClient({
 });
 
 // Presence is used to track ephemeral state like cursors or dragging
+type ChatMessage = {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: string;
+};
+
+// Presence is used to track ephemeral state like cursors or dragging
 type Presence = {
   draggingTaskId: string | null;
   userName?: string;
+  isTyping?: boolean;
 };
 
 // Storage is the persistent, conflict-free state of the room
 type Storage = {
   tasks: LiveList<Task>;
+  messages: LiveList<ChatMessage>;
 };
 
 export const {

@@ -8,15 +8,17 @@ import {
   Users, 
   UserCircle, 
   Settings,
-  BarChart3
+  Bell
 } from 'lucide-react'
+import { useNotifications } from '@/components/NotificationProvider'
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const { unreadCount } = useNotifications()
 
   const navLinks = [
     { name: 'Board', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Stats', path: '/dashboard/analytics', icon: BarChart3 },
+    { name: 'Inbox', path: '/dashboard/notifications', icon: Bell },
     { name: 'Network', path: '/dashboard/network', icon: Users },
     { name: 'Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
@@ -65,7 +67,29 @@ export default function BottomNav() {
               transition: 'transform 0.3s ease'
             }}>
               <link.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              {isActive && (
+              {link.name === 'Inbox' && unreadCount > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-10px',
+                  minWidth: '18px',
+                  height: '18px',
+                  padding: '0 4px',
+                  borderRadius: '10px',
+                  background: 'var(--brand)',
+                  color: 'white',
+                  fontSize: '0.65rem',
+                  fontWeight: 900,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid var(--surface)',
+                  boxShadow: '0 0 10px rgba(var(--brand-rgb), 0.5)'
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </div>
+              )}
+              {isActive && link.name !== 'Inbox' && (
                 <div style={{
                   position: 'absolute',
                   top: '-4px',

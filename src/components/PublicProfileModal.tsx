@@ -1,9 +1,8 @@
-'use client'
-
-import { X, UserCircle, ShieldCheck, Mail, Target, Award, Hash, GraduationCap, Calendar, UserPlus, Check } from 'lucide-react'
+import { X, UserCircle, ShieldCheck, Mail, Target, Award, Hash, GraduationCap, Calendar, UserPlus, Check, MessageSquare } from 'lucide-react'
 import { Profile } from '@/types/database'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import ChatRoom from './ChatRoom'
 
 interface PublicProfileModalProps {
   member: Profile;
@@ -15,22 +14,46 @@ interface PublicProfileModalProps {
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [isConnected, setIsConnected] = useState(initialConnected)
   const [loading, setLoading] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [me, setMe] = useState<any>(null)
   const supabase = createBrowserSupabaseClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setMe(data.user))
+  }, [supabase])
 
   const handleConnect = async () => {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { error } = await supabase
+    // 1. Create a pending connection
+    const { error: connError } = await supabase
       .from('user_connections')
       .upsert({ 
         user_id: user.id, 
         target_id: member.id,
-        status: 'connected'
+        status: 'pending'
       })
 
-    if (!error) {
+    if (connError) {
+      console.error('Connection error:', connError)
+      setLoading(false)
+      return
+    }
+
+    // 2. Insert a notification for the target user
+    const { error: notifError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: member.id,
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${user.user_metadata?.full_name || user.email} wants to connect with you.`,
+        metadata: { sender_id: user.id }
+      })
+
+    if (!notifError) {
       setIsConnected(true)
       if (onConnect) onConnect()
     }
@@ -163,14 +186,33 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
               >
                 Close
               </button>
-              <a 
-                href={`mailto:${member.email}`}
-                className="btn btn-primary" 
-                style={{ flex: 1, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-              >
-                <Mail size={18} /> Send Message
-              </a>
+              {isConnected ? (
+                 <button 
+                   onClick={() => setShowChat(!showChat)}
+                   className="btn btn-primary" 
+                   style={{ flex: 1, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--success)' }}
+                 >
+                   <MessageSquare size={18} /> {showChat ? 'View Profile' : 'Live Chat'}
+                 </button>
+              ) : (
+                 <a 
+                   href={`mailto:${member.email}`}
+                   className="btn btn-primary" 
+                   style={{ flex: 1, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                 >
+                   <Mail size={18} /> Send Message
+                 </a>
+              )}
            </div>
+
+           {showChat && isConnected && (
+             <div style={{ marginTop: '2rem', height: '350px', animation: 'fadeIn 0.3s ease' }}>
+               <ChatRoom 
+                 roomId={`chat_${[me?.id, member.id].sort().join('_')}`} 
+                 currentUser={{ id: me?.id || '', name: me?.user_metadata?.full_name || 'Me' }} 
+               />
+             </div>
+           )}
         </div>
       </div>
 

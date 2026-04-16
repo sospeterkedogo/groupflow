@@ -1,0 +1,191 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { 
+  RoomProvider, 
+  useStorage, 
+  useMutation, 
+  useMyPresence, 
+  useOthers,
+  useUpdateMyPresence
+} from '@/liveblocks.config'
+import { LiveList } from '@liveblocks/client'
+import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare, Video } from 'lucide-react'
+import VideoCall from './VideoCall'
+
+interface ChatRoomProps {
+  roomId: string;
+  currentUser: { id: string; name: string };
+}
+
+function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
+  const messages = useStorage((root) => root.messages);
+  const [text, setText] = useState("");
+  const [showVideo, setShowVideo] = useState(false);
+  const updateMyPresence = useUpdateMyPresence();
+  const others = useOthers();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const isTyping = others.some((other) => other.presence.isTyping);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const sendMessage = useMutation(({ storage }, text: string) => {
+    const messages = storage.get("messages");
+    messages.push({
+      id: Math.random().toString(36).substr(2, 9),
+      senderId: currentUser.id,
+      senderName: currentUser.name,
+      text,
+      timestamp: new Date().toISOString(),
+    });
+    // Record activity or something?
+  }, [currentUser]);
+
+  const handleSend = () => {
+    if (!text.trim()) return;
+    sendMessage(text);
+    setText("");
+    updateMyPresence({ isTyping: false });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--surface)', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+      {/* Header */}
+      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(var(--brand-rgb), 0.03)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ padding: '0.6rem', background: 'var(--brand)', borderRadius: '12px' }}>
+            <MessageSquare size={20} color="white" />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Real-time Lab Chat</h3>
+            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--success)', fontWeight: 700 }}>VERIFIED CONNECTION</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button 
+            onClick={() => setShowVideo(true)}
+            style={{ 
+              background: 'var(--bg-sub)', border: 'none', padding: '0.5rem 0.75rem', 
+              borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', 
+              gap: '0.5rem', color: 'var(--brand)', fontWeight: 800, fontSize: '0.8rem' 
+            }}
+          >
+            <Video size={18} /> Start Video
+          </button>
+          <button style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer' }}>
+            <MoreVertical size={20} />
+          </button>
+        </div>
+      </div>
+
+      {showVideo && (
+        <VideoCall 
+          roomName={roomId} 
+          userName={currentUser.name} 
+          onClose={() => setShowVideo(false)} 
+        />
+      )}
+
+      {/* Messages Area */}
+      <div 
+        ref={scrollRef}
+        style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+      >
+        {messages?.map((msg) => {
+          const isMe = msg.senderId === currentUser.id;
+          return (
+            <div 
+              key={msg.id} 
+              style={{ 
+                alignSelf: isMe ? 'flex-end' : 'flex-start',
+                maxWidth: '80%',
+                display: 'flex',
+                gap: '0.75rem',
+                flexDirection: isMe ? 'row-reverse' : 'row'
+              }}
+            >
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: isMe ? 'var(--brand)' : 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <UserIcon size={16} color={isMe ? "white" : "var(--text-sub)"} />
+              </div>
+              <div style={{ 
+                padding: '0.75rem 1rem', 
+                borderRadius: isMe ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
+                background: isMe ? 'var(--brand)' : 'var(--bg-sub)',
+                color: isMe ? 'white' : 'var(--text-main)',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                {msg.text}
+                <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.4rem', textAlign: isMe ? 'right' : 'left' }}>
+                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {isTyping && (
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontStyle: 'italic', marginLeft: '3.25rem' }}>
+            Someone is typing...
+          </div>
+        )}
+      </div>
+
+      {/* Input Area */}
+      <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border)', background: 'var(--bg-sub)' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', color: 'var(--text-sub)' }}>
+             <Paperclip size={20} style={{ cursor: 'pointer' }} />
+             <Smile size={20} style={{ cursor: 'pointer' }} />
+          </div>
+          <input 
+            type="text"
+            className="form-input"
+            placeholder="Type a message..."
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              updateMyPresence({ isTyping: e.target.value.length > 0 });
+            }}
+            onKeyDown={handleKeyDown}
+            style={{ flex: 1, height: '3rem', borderRadius: '16px', paddingLeft: '1rem', border: '1px solid var(--border)', background: 'var(--surface)' }}
+          />
+          <button 
+            onClick={handleSend}
+            style={{ 
+              width: '3rem', height: '3rem', borderRadius: '16px', background: 'var(--brand)', 
+              color: 'white', border: 'none', display: 'flex', alignItems: 'center', 
+              justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.3)' 
+            }}
+          >
+            <Send size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ChatRoom({ roomId, currentUser }: ChatRoomProps) {
+  return (
+    <RoomProvider 
+       id={roomId} 
+       initialPresence={{ draggingTaskId: null, userName: currentUser.name, isTyping: false }}
+       initialStorage={{ tasks: new LiveList([]), messages: new LiveList([]) }}
+    >
+      <ChatContent currentUser={currentUser} roomId={roomId} />
+    </RoomProvider>
+  );
+}

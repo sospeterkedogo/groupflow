@@ -67,7 +67,7 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
   if (!currentGroupId) return null
 
   return (
-    <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.5rem', height: 'fit-content' }}>
+    <div className="collaborators-container" style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.5rem', height: 'fit-content' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
         <div style={{ padding: '0.5rem', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '10px' }}>
           <Users size={20} color="var(--brand)" />
@@ -159,6 +159,11 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
            These students are automatically suggested based on your shared project groups. Connecting makes them permanent in your network.
          </p>
       </div>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .collaborators-container { padding: 1rem !important; }
+        }
+      `}</style>
     </div>
   )
 }

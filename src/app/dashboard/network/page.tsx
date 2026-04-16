@@ -107,11 +107,11 @@ export default function NetworkPage() {
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
        
-       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2.5rem', alignItems: 'start' }}>
+       <div className="network-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2.5rem', alignItems: 'start' }}>
           
           {/* Main Network Section */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+            <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
               <div>
                 <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Student Network</h1>
                 <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Find researchers, collaborators, and verify academic ranks.</p>
@@ -127,11 +127,11 @@ export default function NetworkPage() {
             </div>
 
             {/* Smart Search Bar */}
-            <div style={{ position: 'relative', marginBottom: '3rem', zIndex: 100 }}>
+            <div className="search-container" style={{ position: 'relative', marginBottom: '3rem', zIndex: 100 }}>
               <Search size={24} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand)', opacity: 0.8 }} />
               <input 
                 type="text" 
-                className="form-input" 
+                className="form-input search-input" 
                 placeholder="Search by Name, Email or School ID (e.g. 2024...)" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -285,8 +285,15 @@ export default function NetworkPage() {
           .card-interactive:hover { transform: translateY(-8px); border-color: var(--brand); box-shadow: var(--shadow-xl); }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
           @media (max-width: 1024px) {
-            div[style*="gridTemplateColumns: 1fr 320px"] { grid-template-columns: 1fr !important; }
-            div[style*="position: sticky"] { position: static !important; }
+            .network-main-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+            .sidebar-area { position: static !important; }
+            .content-header { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
+          }
+          @media (max-width: 768px) {
+            .fluid-h1 { font-size: 2rem !important; }
+            .search-container { margin-bottom: 2rem !important; }
+            .search-input { height: 3.5rem !important; font-size: 0.95rem !important; padding-left: 3.5rem !important; }
+            .network-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
           }
        `}</style>
     </div>

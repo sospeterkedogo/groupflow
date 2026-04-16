@@ -32,7 +32,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
     <RoomProvider
       id={groupId}
       initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
-      initialStorage={{ tasks: new LiveList<Task>([]) }}
+      initialStorage={{ tasks: new LiveList<Task>([]), messages: new LiveList([]) }}
     >
       <ClientSideSuspense fallback={<KanbanBoardSkeleton />}>
         {() => <KanbanBoardContent groupId={groupId} profile={profile} />}

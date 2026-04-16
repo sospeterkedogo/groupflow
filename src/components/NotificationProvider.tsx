@@ -60,6 +60,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             const newNotif = payload.new as Notification
             setNotifications(prev => [newNotif, ...prev])
             addToast(newNotif.title, newNotif.message, newNotif.type)
+            
+            // Audio Ding Logic
+            try {
+              const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3') // High quality ding
+              audio.play().catch(e => console.warn('Audio play blocked:', e))
+            } catch (err) {
+              console.warn('Audio initialization failed:', err)
+            }
           })
           .subscribe()
       }
