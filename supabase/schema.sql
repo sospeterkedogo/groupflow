@@ -14,10 +14,12 @@ CREATE TABLE public.profiles (
     email TEXT,
     full_name TEXT,
     avatar_url TEXT,
-    course_name TEXT,
+    course_name TEXT DEFAULT 'Independent Researcher',
     enrollment_year INTEGER,
     completion_year INTEGER,
     role TEXT DEFAULT 'collaborator',
+    rank TEXT DEFAULT 'Senior',
+    badges_count INTEGER DEFAULT 14,
     group_id UUID REFERENCES public.groups(id) ON DELETE SET NULL,
     total_score NUMERIC DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL

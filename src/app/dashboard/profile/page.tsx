@@ -70,7 +70,7 @@ export default function ProfilePage() {
                   <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{profile?.full_name}</h1>
                   <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: '0.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 600 }}>
                     <ShieldCheck size={16} color="var(--brand)" />
-                    {profile?.course_name || 'Software Engineer'} • {profile?.groups?.name || 'Unassigned Workspace'}
+                    {profile?.course_name || 'Independent Researcher'} • {profile?.groups?.name || 'Unassigned Workspace'}
                   </p>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.3rem 0.6rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 600 }}>
@@ -155,8 +155,8 @@ export default function ProfilePage() {
                       </div>
 
                       <div style={{ marginTop: '0.75rem', background: 'rgba(var(--brand-rgb), 0.03)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
-                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)' }}>{profile?.course_name || 'Enrolled Student'}</div>
-                         <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.15rem' }}>Degree path verified via internal registry.</div>
+                         <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)', textTransform: 'uppercase' }}>{profile?.course_name || 'Independent Researcher'}</div>
+                         <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.15rem' }}>Status: {profile?.rank || 'Senior'} Rank</div>
                       </div>
                    </div>
                  )

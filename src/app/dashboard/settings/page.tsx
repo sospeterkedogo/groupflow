@@ -29,6 +29,8 @@ export default function SettingsPage() {
   const [courseName, setCourseName] = useState('')
   const [enrollmentYear, setEnrollmentYear] = useState<number>(new Date().getFullYear())
   const [completionYear, setCompletionYear] = useState<number>(new Date().getFullYear() + 3)
+  const [rank, setRank] = useState('Senior')
+  const [badgesCount, setBadgesCount] = useState(14)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -74,6 +76,8 @@ export default function SettingsPage() {
         setCourseName(data.course_name || '')
         setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
         setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
+        setRank(data.rank || 'Senior')
+        setBadgesCount(data.badges_count || 14)
         setAvatarUrl(data.avatar_url || '')
         setIsEncrypted(data.groups?.is_encrypted || false)
 
@@ -103,7 +107,8 @@ export default function SettingsPage() {
         full_name: fullName,
         course_name: courseName,
         enrollment_year: enrollmentYear,
-        completion_year: completionYear
+        completion_year: completionYear,
+        rank: rank
       })
       .eq('id', profile.id)
 
@@ -358,6 +363,10 @@ export default function SettingsPage() {
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Degree/Course</label>
                   <input type="text" className="form-input" value={courseName} onChange={e => setCourseName(e.target.value)} placeholder="e.g. Computer Science" />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Achievement Rank</label>
+                  <input type="text" className="form-input" value={rank} onChange={e => setRank(e.target.value)} placeholder="e.g. Senior" />
                 </div>
               </div>
 
