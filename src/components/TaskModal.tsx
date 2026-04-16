@@ -49,7 +49,6 @@ export default function TaskModal({
   )
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [members, setMembers] = useState<Profile[]>([])
-  const { onlineUsers } = usePresence()
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
