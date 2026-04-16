@@ -295,10 +295,10 @@ export default function Home() {
 
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
-                { step: '01', title: 'Connect your work', desc: 'Easily link your Google Docs, GitHub projects, or Figma designs in a few taps.' },
-                { step: '02', title: 'Focus on creating', desc: 'Work naturally with your team. I'll help you keep track of progress as it happens.' },
-                { step: '03', title: 'Share your progress', desc: 'Every milestone is saved, creating a clear and reliable history of your achievement.' },
-                { step: '04', title: 'Succeed together', desc: 'Get a clear view of how everyone is contributing, so your entire team can thrive.' }
+                { step: '01', title: 'Connect your work', desc: "Easily link your Google Docs, GitHub projects, or Figma designs in a few taps." },
+                { step: '02', title: 'Focus on creating', desc: "Work naturally with your team. I'll help you keep track of progress as it happens." },
+                { step: '03', title: 'Share your progress', desc: "Every milestone is saved, creating a clear and reliable history of your achievement." },
+                { step: '04', title: 'Succeed together', desc: "Get a clear view of how everyone is contributing, so your entire team can thrive." }
               ].map((s, i) => (
                 <div key={i} style={{ padding: '3.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '44px', textAlign: 'left', position: 'relative' }}>
                    <div style={{ fontSize: '4.5rem', fontWeight: 900, color: 'rgba(var(--brand-rgb), 0.05)', position: 'absolute', top: '1.5rem', right: '2rem', letterSpacing: '-0.05em' }}>{s.step}</div>
