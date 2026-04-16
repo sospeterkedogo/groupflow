@@ -330,7 +330,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
              <div>
                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
-                 <div style={{ display: 'flex', -webkit-mask-image: 'linear-gradient(to right, black 85%, transparent)' }}>
+                 <div style={{ display: 'flex', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent)' }}>
                     {Array.from(activeBoardUsers).map((userId, idx) => {
                       const user = groupMembers.find(m => m.id === userId) || (userId === currentUserProfile?.id ? currentUserProfile : null)
                       if (!user) return null
@@ -560,7 +560,7 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         ))}
