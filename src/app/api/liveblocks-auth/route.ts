@@ -2,8 +2,12 @@ import { Liveblocks } from "@liveblocks/node";
 import { createServerSupabaseClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
+const secret = process.env.LIVEBLOCKS_SECRET_KEY;
+
 const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET_KEY!,
+  secret: secret || "sk_placeholder", // Fallback to prevent build-time crash
 });
 
 export async function POST(request: Request) {
