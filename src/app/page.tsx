@@ -272,7 +272,7 @@ export default function Home() {
               <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2.5rem' }}>
                  {[
                     { title: 'Dissertations & Graduation', desc: 'Keep track of your research journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
-                    { title: 'Team Lab Reports', desc: 'I'll make sure every part of your analysis and writing is clearly noted and easy to share.', icon: <Activity /> },
+                    { title: 'Team Lab Reports', desc: "I'll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
                     { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
                     { title: 'Project Case Studies', desc: 'Make sure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
                  ].map((usecase, i) => (
