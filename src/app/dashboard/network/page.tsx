@@ -7,6 +7,7 @@ import { Search, MapPin, Clock, LayoutGrid, List, User, Users, GraduationCap, X,
 import { usePresence } from '@/components/PresenceProvider'
 import { Profile } from '@/types/database'
 import CollaboratorsList from '@/components/CollaboratorsList'
+import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 type ViewMode = 'grid' | 'list'
 
@@ -20,13 +21,18 @@ export default function NetworkPage() {
   const [currentUserGroup, setCurrentUserGroup] = useState<string | null>(null)
   const [connections, setConnections] = useState<Set<string>>(new Set())
   const router = useRouter()
+  const { withLoading } = useSmartLoading()
   
   const supabase = createBrowserSupabaseClient()
   const { onlineUsers } = usePresence()
 
   useEffect(() => {
-    fetchCurrentGroupAndConnections()
-    fetchUsers()
+    withLoading(async () => {
+      await Promise.all([
+        fetchCurrentGroupAndConnections(),
+        fetchUsers()
+      ])
+    }, 'Scanning Student Network...')
   }, [])
 
   const fetchCurrentGroupAndConnections = async () => {
@@ -154,7 +160,14 @@ export default function NetworkPage() {
                   {suggestions.map(s => (
                     <div 
                       key={s.id} 
-                      onClick={() => { router.push('/dashboard/network/profile/' + s.id); setSearch(''); setShowSuggestions(false); }}
+                      onClick={() => { 
+                        withLoading(async () => {
+                          await new Promise(r => setTimeout(r, 600));
+                          router.push('/dashboard/network/profile/' + s.id); 
+                        }, 'Redirecting to Profile...');
+                        setSearch(''); 
+                        setShowSuggestions(false); 
+                      }}
                       style={{ 
                         display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
                         borderRadius: '12px', cursor: 'pointer', transition: 'background 0.2s' 
@@ -198,7 +211,12 @@ export default function NetworkPage() {
                     <div 
                       key={u.id} 
                       className="kanban-card card-interactive" 
-                      onClick={() => router.push('/dashboard/network/profile/' + u.id)}
+                      onClick={() => {
+                        withLoading(async () => {
+                          await new Promise(r => setTimeout(r, 600));
+                          router.push('/dashboard/network/profile/' + u.id);
+                        }, 'Syncing Student Profile...');
+                      }}
                       style={{ 
                         padding: '1.5rem', cursor: 'pointer', borderRadius: '24px', position: 'relative',
                         display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
@@ -253,7 +271,12 @@ export default function NetworkPage() {
           <div style={{ position: 'sticky', top: '2rem' }}>
              <CollaboratorsList 
                 currentGroupId={currentUserGroup} 
-                onViewProfile={(profile) => router.push('/dashboard/network/profile/' + profile.id)} 
+                onViewProfile={(profile) => {
+                  withLoading(async () => {
+                    await new Promise(r => setTimeout(r, 600));
+                    router.push('/dashboard/network/profile/' + profile.id);
+                  }, 'Accessing Node Info...');
+                }} 
              />
              
              <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'linear-gradient(135deg, var(--brand), #6366f1)', borderRadius: '24px', color: 'white', boxShadow: 'var(--shadow-xl)' }}>

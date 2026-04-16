@@ -21,6 +21,8 @@ import { useTheme } from '@/context/ThemeContext'
 import { Profile } from '@/types/auth'
 import { SidebarProps } from '@/types/ui'
 import NotificationBell from './NotificationBell'
+import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { useRouter } from 'next/navigation'
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
@@ -101,9 +103,31 @@ export default function Sidebar({ user }: SidebarProps) {
 
   }, [fetchProfile, isOpen])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    window.location.href = '/login'
+  const router = useRouter()
+  const { withLoading, showConfirmation } = useSmartLoading()
+
+  const handleNav = async (path: string, name: string) => {
+    if (pathname === path) return;
+    await withLoading(async () => {
+      await new Promise(r => setTimeout(r, 600));
+      router.push(path);
+      if (window.innerWidth <= 768) setIsOpen(false);
+    }, `Syncing ${name}...`);
+  }
+
+  const handleSignOut = () => {
+    showConfirmation({
+      title: 'End Session?',
+      message: 'Are you sure you want to securely sign out of the GroupFlow environment?',
+      type: 'warning',
+      onConfirm: async () => {
+        await withLoading(async () => {
+          await supabase.auth.signOut();
+          window.location.href = '/login';
+        }, 'Securing Environment...');
+      },
+      onCancel: () => {}
+    });
   }
 
   const navLinks = [
@@ -145,13 +169,16 @@ export default function Sidebar({ user }: SidebarProps) {
           </button>
           <span style={{ fontWeight: 900, color: 'var(--brand)', fontSize: '1.1rem', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>GroupFlow</span>
         </div>
-        <Link href="/dashboard/profile" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)' }}>
+        <button 
+          onClick={() => handleNav('/dashboard/profile', 'Profile')} 
+          style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
+        >
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <UserCircle size={20} color="var(--text-sub)" />
           )}
-        </Link>
+        </button>
       </div>
 
       <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`} style={{ 
@@ -169,7 +196,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-              <Link href="/dashboard" style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</Link>
+              <button onClick={() => handleNav('/dashboard', 'Home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</button>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} />
               <div style={{ flex: 1 }} />
               <div className="hide-mobile" style={{ marginRight: '0.5rem' }}>
@@ -195,9 +222,9 @@ export default function Sidebar({ user }: SidebarProps) {
           {navLinks.map((link) => {
             const isActive = pathname === link.path
             return (
-              <Link 
+              <button 
                 key={link.name}
-                href={link.path}
+                onClick={() => handleNav(link.path, link.name)}
                 className={`nav-bubble ${isActive ? 'active-project' : ''}`}
                 style={{
                   display: 'flex',
@@ -212,17 +239,19 @@ export default function Sidebar({ user }: SidebarProps) {
                   justifyContent: isOpen ? 'flex-start' : 'center',
                   borderRadius: '0 50px 50px 0',
                   marginRight: '1rem',
-                  position: 'relative'
+                  position: 'relative',
+                  border: 'none',
+                  cursor: 'pointer',
+                  width: 'calc(100% - 1rem)'
                 }}
                 title={!isOpen ? link.name : ''}
-                onClick={() => { if (window.innerWidth <= 768) setIsOpen(false) }}
               >
                 <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 {isOpen && <span>{link.name}</span>}
                 {isActive && (
                   <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '4px', background: 'var(--brand)', borderRadius: '0 4px 4px 0' }} />
                 )}
-              </Link>
+              </button>
             )
           })}
         </nav>

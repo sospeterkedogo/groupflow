@@ -11,10 +11,14 @@ import {
   Bell
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { useRouter } from 'next/navigation'
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const { unreadCount } = useNotifications()
+  const { withLoading } = useSmartLoading()
 
   const navLinks = [
     { name: 'Board', path: '/dashboard', icon: LayoutDashboard },
@@ -23,6 +27,14 @@ export default function BottomNav() {
     { name: 'Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]
+
+  const handleNav = async (path: string, name: string) => {
+    if (pathname === path) return;
+    await withLoading(async () => {
+      await new Promise(r => setTimeout(r, 600));
+      router.push(path);
+    }, `Navigating to ${name}...`);
+  }
 
   return (
     <nav className="mobile-bottom-nav glass" style={{
@@ -37,25 +49,29 @@ export default function BottomNav() {
       zIndex: 4000,
       padding: '0 1rem',
       paddingBottom: 'env(safe-area-inset-bottom)',
+      display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center'
     }}>
       {navLinks.map((link) => {
         const isActive = pathname === link.path
         return (
-          <Link 
+          <button 
             key={link.path} 
-            href={link.path}
+            onClick={() => handleNav(link.path, link.name)}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '0.25rem',
-              textDecoration: 'none',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
               color: isActive ? 'var(--brand)' : 'var(--text-sub)',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               padding: '0.5rem',
-              flex: 1
+              flex: 1,
+              outline: 'none'
             }}
           >
             <div style={{
@@ -110,7 +126,7 @@ export default function BottomNav() {
             }}>
               {link.name}
             </span>
-          </Link>
+          </button>
         )
       })}
 

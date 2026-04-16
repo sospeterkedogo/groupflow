@@ -11,6 +11,7 @@ import {
 import Link from 'next/link'
 import { Profile } from '@/types/database'
 import ChatRoom from '@/components/ChatRoom'
+import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 export default function StudentProfilePage() {
   const params = useParams()
@@ -20,10 +21,10 @@ export default function StudentProfilePage() {
 
   const [member, setMember] = useState<Profile | null>(null)
   const [me, setMe] = useState<any>(null)
-  const [isConnected, setIsConnected] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(false)
+  const [isConnected, setIsConnected] = useState(false)
   const [activeTab, setActiveTab] = useState<'info' | 'chat' | 'video' | 'accomplishments'>('info')
+  const { withLoading, showConfirmation } = useSmartLoading()
 
   useEffect(() => {
     fetchProfileData()
@@ -60,26 +61,33 @@ export default function StudentProfilePage() {
 
   const handleConnect = async () => {
     if (!me || !member) return
-    setActionLoading(true)
-    const { error: connError } = await supabase
-      .from('user_connections')
-      .upsert({ user_id: me.id, target_id: member.id, status: 'pending' })
 
-    if (connError) {
-      setActionLoading(false)
-      return
-    }
+    await withLoading(async () => {
+      // 1. Create a pending connection
+      const { error: connError } = await supabase
+        .from('user_connections')
+        .upsert({ user_id: me.id, target_id: member.id, status: 'pending' })
 
-    await supabase.from('notifications').insert({
-      user_id: member.id,
-      type: 'connection_request',
-      title: 'New Connection Request',
-      message: `${me.user_metadata?.full_name || me.email} wants to connect with you.`,
-      metadata: { sender_id: me.id }
-    })
+      if (connError) throw connError
 
-    setIsConnected(true)
-    setActionLoading(false)
+      // 2. Insert notification
+      await supabase.from('notifications').insert({
+        user_id: member.id,
+        type: 'connection_request',
+        title: 'New Connection Request',
+        message: `${me.user_metadata?.full_name || me.email} wants to connect with you.`,
+        metadata: { sender_id: me.id }
+      })
+
+      setIsConnected(true)
+      
+      showConfirmation({
+        title: 'Request Transmitted',
+        message: `Your connection request has been securely sent to ${member.full_name?.split(' ')[0]}. They will be notified immediately.`,
+        type: 'success',
+        onConfirm: () => {}
+      })
+    }, 'Authenticating Request...')
   }
 
   if (loading) {
@@ -146,7 +154,7 @@ export default function StudentProfilePage() {
 
             <button 
               onClick={handleConnect}
-              disabled={isConnected || actionLoading}
+              disabled={isConnected}
               style={{ 
                 width: '100%', padding: '1.1rem', borderRadius: '18px', border: 'none', 
                 background: isConnected ? 'var(--bg-sub)' : 'var(--brand)', 
@@ -173,7 +181,17 @@ export default function StudentProfilePage() {
              ].map((item) => (
                <button
                  key={item.id}
-                 onClick={() => !item.disabled && setActiveTab(item.id as any)}
+                 onClick={async () => {
+                   if (item.disabled) return;
+                   if (item.id === 'chat' || item.id === 'video') {
+                     await withLoading(async () => {
+                        await new Promise(r => setTimeout(r, 1200)); // Simulated initialization
+                        setActiveTab(item.id as any);
+                     }, item.id === 'chat' ? 'Initializing Secure Room...' : 'Launching Video Lab...');
+                   } else {
+                     setActiveTab(item.id as any);
+                   }
+                 }}
                  style={{ 
                    aspectRatio: '1', borderRadius: '24px', border: activeTab === item.id ? `2px solid ${item.color}` : '1px solid var(--border)',
                    background: activeTab === item.id ? 'var(--surface)' : 'var(--surface)',

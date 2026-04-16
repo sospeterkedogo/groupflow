@@ -14,6 +14,7 @@ import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare, 
 import VideoCall from './VideoCall'
 
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 interface ChatRoomProps {
   roomId: string;
@@ -30,6 +31,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
   const others = useOthers();
   const scrollRef = useRef<HTMLDivElement>(null);
   const supabase = createBrowserSupabaseClient();
+  const { withLoading } = useSmartLoading();
 
   const isTyping = others.some((other) => other.presence.isTyping);
 
@@ -86,16 +88,18 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
     updateMyPresence({ isTyping: false });
 
     // 2. Permanent Archival via Supabase
-    const { error } = await supabase
-      .from('chat_messages')
-      .insert({
-        room_id: roomId,
-        sender_id: currentUser.id,
-        content: messageContent,
-        metadata: { sender_name: currentUser.name }
-      });
-    
-    if (error) console.error("Message backup failed:", error);
+    await withLoading(async () => {
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert({
+          room_id: roomId,
+          sender_id: currentUser.id,
+          content: messageContent,
+          metadata: { sender_name: currentUser.name }
+        });
+      
+      if (error) console.error("Message backup failed:", error);
+    }, 'Synchronizing Archive...')
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
