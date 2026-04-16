@@ -9,11 +9,11 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS completion_year INTEGER;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'collaborator';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS rank TEXT DEFAULT 'Senior';
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS badges_count INTEGER DEFAULT 14;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS badges_count INTEGER DEFAULT 0;
 
 -- 2. Update existing entries to have safe defaults
 UPDATE public.profiles SET rank = 'Senior' WHERE rank IS NULL;
-UPDATE public.profiles SET badges_count = 14 WHERE badges_count IS NULL;
+UPDATE public.profiles SET badges_count = 0 WHERE badges_count IS NULL;
 UPDATE public.profiles SET role = 'collaborator' WHERE role IS NULL;
 UPDATE public.profiles SET course_name = 'Independent Researcher' WHERE course_name IS NULL;
 
@@ -40,7 +40,7 @@ BEGIN
     new.raw_user_meta_data->>'school_id',
     'collaborator',
     'Senior',
-    14,
+    0,
     'Independent Researcher',
     extract(year from now())::int,
     (extract(year from now()) + 3)::int
@@ -52,5 +52,5 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 4. Verification Comments
 COMMENT ON COLUMN public.profiles.rank IS 'User progress rank displayed on dashboard';
-COMMENT ON COLUMN public.profiles.badges_count IS 'Total number of badges earned, initialized to match UI demo data';
+COMMENT ON COLUMN public.profiles.badges_count IS 'Total number of badges earned, initialized to 0 for new accounts';
 COMMENT ON COLUMN public.profiles.course_name IS 'Current academic course or degree path';

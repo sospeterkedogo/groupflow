@@ -141,7 +141,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
           {[
             { icon: <Zap size={16} />, label: 'Points', value: profile?.total_score || 0, color: 'var(--brand)', badge: 'TOP 5%', tip: 'Total points from your work' },
             { icon: <TrendingUp size={16} />, label: 'Rank', value: profile?.rank || 'Senior', color: 'var(--success)', tip: 'Based on your recent work speed' },
-            { icon: <Award size={16} />, label: 'Badges', value: profile?.badges_count || 14, color: '#f59e0b', tip: 'Badges earned for helping and quality' }
+            { icon: <Award size={16} />, label: 'Badges', value: profile?.badges_count ?? 0, color: '#f59e0b', tip: 'Badges earned for helping and quality' }
           ].map((stat, i) => (
             <div key={i} className="stat-pill" data-tooltip={stat.tip} style={{
               padding: '0.75rem 1rem', borderRadius: '18px', background: 'var(--bg-main)', border: '1px solid var(--border)', flex: '1 1 120px',

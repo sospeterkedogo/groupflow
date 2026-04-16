@@ -30,7 +30,7 @@ export default function SettingsPage() {
   const [enrollmentYear, setEnrollmentYear] = useState<number>(new Date().getFullYear())
   const [completionYear, setCompletionYear] = useState<number>(new Date().getFullYear() + 3)
   const [rank, setRank] = useState('Senior')
-  const [badgesCount, setBadgesCount] = useState(14)
+  const [badgesCount, setBadgesCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -77,7 +77,7 @@ export default function SettingsPage() {
         setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
         setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
         setRank(data.rank || 'Senior')
-        setBadgesCount(data.badges_count || 14)
+        setBadgesCount(data.badges_count ?? 0)
         setAvatarUrl(data.avatar_url || '')
         const mainGroup = Array.isArray(data.groups) ? data.groups[0] : data.groups
         setIsEncrypted(mainGroup?.is_encrypted || false)

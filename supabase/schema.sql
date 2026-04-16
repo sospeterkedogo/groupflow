@@ -19,7 +19,7 @@ CREATE TABLE public.profiles (
     completion_year INTEGER,
     role TEXT DEFAULT 'collaborator',
     rank TEXT DEFAULT 'Senior',
-    badges_count INTEGER DEFAULT 14,
+    badges_count INTEGER DEFAULT 0,
     group_id UUID REFERENCES public.groups(id) ON DELETE SET NULL,
     total_score NUMERIC DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
