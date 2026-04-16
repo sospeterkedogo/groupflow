@@ -4,8 +4,10 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, CheckCheck, Clock,
-  Trash2, Shield
+  Trash2, Shield, LayoutGrid, UserCircle, ChevronRight,
+  ExternalLink
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
 import { ChatMessage, ChatPayload } from '@/types/ui'
@@ -17,8 +19,11 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [showLobby, setShowLobby] = useState(false)
+  const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
+  const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createBrowserSupabaseClient()
   const { onlineUsers, typingUsers, setTypingStatus } = usePresence()
@@ -102,6 +107,19 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
   useEffect(() => {
     if (messages.length > 0 && isOpen) scrollToBottom('smooth')
   }, [messages, isOpen])
+
+  const fetchMembers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('group_id', groupId)
+    
+    if (data) setGroupMembers(data as Profile[])
+  }
+
+  useEffect(() => {
+    if (isOpen) fetchMembers()
+  }, [isOpen, groupId])
 
   const handleTyping = (text: string) => {
     setNewMessage(text)
@@ -267,14 +285,14 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
         bottom: 'calc(var(--h-mobile-bottom) + 1rem + env(safe-area-inset-bottom))', 
         right: 'min(2rem, 0.5rem)', 
         width: 'min(400px, calc(100vw - 1rem))', 
-        height: 'min(650px, calc(100vh - (var(--h-mobile-bottom) + 5rem)))', 
+        maxHeight: 'calc(var(--vh-dynamic) - var(--h-mobile-bottom) - var(--h-nav) - 2rem)', 
         background: 'var(--surface)', 
         borderRadius: '24px', 
         boxShadow: '0 24px 48px rgba(0,0,0,0.2)', 
         border: '1px solid var(--border)', 
         display: 'flex', 
         flexDirection: 'column', 
-        zIndex: 1000, 
+        zIndex: 5000, 
         overflow: 'hidden', 
         animation: 'whatsappIn 0.4s ease-out'
       }}
@@ -287,19 +305,88 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Team Chat</h3>
-             <div style={{ fontSize: '0.68rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+             <div style={{ fontSize: '0.68rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 {othersTyping.length > 0 ? (
                   <span style={{ fontStyle: 'italic', fontWeight: 600 }}>typing...</span>
                 ) : (
                   <>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
-                    {onlineUsers.size} online
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
+                      {onlineUsers.size} online
+                    </div>
                   </>
                 )}
+                <button 
+                  onClick={() => setShowLobby(!showLobby)}
+                  style={{ 
+                    background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '6px', 
+                    padding: '2px 6px', color: 'white', fontSize: '0.6rem', fontWeight: 900,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px',
+                    transition: 'all 0.2s'
+                  }}
+                  title="Team Lobby"
+                >
+                  <LayoutGrid size={10} /> {showLobby ? 'EXIT LOBBY' : 'LOBBY'}
+                </button>
              </div>
           </div>
           <button onClick={() => setIsOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.3rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}><X size={18} /></button>
        </div>
+
+        {/* Group Lobby Panel */}
+        {showLobby && (
+          <div style={{ 
+            position: 'absolute', top: '54px', left: 0, right: 0, bottom: 0, 
+            background: 'var(--surface)', zIndex: 100, display: 'flex', flexDirection: 'column', 
+            animation: 'slideUp 0.3s ease-out' 
+          }}>
+            <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-sub)' }}>
+               <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-sub)' }}>Group Active Members</h4>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {groupMembers.map((member) => (
+                    <div 
+                      key={member.id} 
+                      style={{ 
+                        background: 'var(--bg-sub)', padding: '0.8rem', borderRadius: '18px', 
+                        border: '1px solid var(--border)', display: 'flex', alignItems: 'center', 
+                        gap: '1rem', transition: 'all 0.2s'
+                      }}
+                      className="lobby-card"
+                    >
+                      <div style={{ 
+                        width: '42px', height: '42px', borderRadius: '14px', background: 'var(--brand)', 
+                        overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'white', fontWeight: 900
+                      }}>
+                        {member.avatar_url ? (
+                          <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          member.full_name?.charAt(0)
+                        )}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{member.id === user.id ? 'You' : member.full_name}</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>{member.role || 'Member'}</div>
+                      </div>
+                      <button 
+                        onClick={() => router.push(`/dashboard/network/profile/${member.id}`)}
+                        style={{ 
+                          background: 'var(--brand)', color: 'white', border: 'none', 
+                          borderRadius: '10px', width: '32px', height: '32px', 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                         <ExternalLink size={16} />
+                      </button>
+                    </div>
+                  ))}
+               </div>
+            </div>
+          </div>
+        )}
 
        {/* Messages */}
        <div className="chat-viewport" style={{ 
@@ -457,9 +544,14 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
           .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
           .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
           @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+          @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+          }
           .msg-bubble:hover .delete-btn { opacity: 0.7 !important; }
           .icon-btn:hover { background: var(--border); }
           .chat-toggle:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
+          .lobby-card:hover { transform: translateX(5px); border-color: var(--brand) !important; background: var(--surface) !important; }
 
           @media (min-width: 769px) {
             .chat-toggle {
