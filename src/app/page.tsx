@@ -14,20 +14,20 @@ export default function Home() {
   const features = [
     { 
       icon: <Zap size={24} />, 
-      title: "Real-time Verification", 
-      desc: "Total confidence through evidence: we analyze commit patterns to verify impact instantly and fairly.",
+      title: "Visual progress", 
+      desc: "See how your project is moving. We help you track contributions instantly so everyone stays on the same page.",
       color: "#0ea5e9"
     },
     { 
       icon: <Shield size={24} />, 
-      title: "Fairness Protocol", 
-      desc: "Our algorithms celebrate true contribution. We identify the quiet leaders and the over-performers.",
+      title: "Fair recognition", 
+      desc: "Every contribution counts. Our system ensures every team member's hard work is noticed and valued.",
       color: "#10b981"
     },
     { 
       icon: <Layers size={24} />, 
-      title: "Evidence Ledger", 
-      desc: "Every milestone is anchored by a verifiable artifact ledger: Proof of Work that tutors can trust.",
+      title: "Reliable records", 
+      desc: "Turn your shared work into clear proof of achievement that you and your tutors can always trust.",
       color: "#6366f1"
     }
   ]
@@ -35,19 +35,19 @@ export default function Home() {
   const faqs = [
     {
       q: "Is GroupFlow free to use?",
-      a: "Yes. During my 2026 Dissertation research phase, all features including advanced analytics and the Proof of Work engine are completely free for students and tutors."
+      a: "Yes. During this 2026 research phase, every feature is completely free for students and tutors to help them work better together."
     },
     {
       q: "How is my data protected?",
-      a: "We use enterprise-grade Supabase encryption for all project data. Your academic work and personal identification are never shared with third parties."
+      a: "Your privacy is our priority. We use secure encryption to keep your project work safe, and we never share your personal info with anyone else."
     },
     {
       q: "Can I delete my account?",
-      a: "Absolutely. I believe in data sovereignty: you can delete your account and all associated project data permanently with a single click in your settings at any time."
+      a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click at any time."
     },
     {
-      q: "Who is the creator of GroupFlow?",
-      a: "GroupFlow is a project by Sospeter, developed as a final year dissertation focusing on mitigating social loafing through behavioral telemetry and automated attribution."
+      q: "Who is behind GroupFlow?",
+      a: "GroupFlow was created by Sospeter as a dissertation project to help student teams feel more supported and recognized during group work."
     }
   ]
 
@@ -71,23 +71,23 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
-               RESEARCH MANIFESTO 2026
+               OUR MISSION
              </div>
-             <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Restoring Team Balance</h2>
+             <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Better teamwork for everyone</h2>
              
              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
                 <div>
-                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>What is index?</strong>
-                   To bridge the "Accountability Gap" in group projects. Traditional tools manage tasks; GroupFlow verifies participation.
+                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Why am I building this?</strong>
+                   I want to help bridge the gap in group projects by making every contribution visible and valued.
                 </div>
                 <div>
-                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Why it matters?</strong>
-                   Social loafing isn't just annoying: it's mathematically unfair. I am building a system where every update and artifact is a ledger entry for your grade.
+                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>What's the goal?</strong>
+                   To create a fair system where your actual effort is recognized, helping everyone in the team succeed together.
                 </div>
              </div>
 
              <button className="btn btn-primary" style={{ marginTop: '2rem', width: '100%' }} onClick={() => setIsModalOpen(false)}>
-               Continue to Explore
+               Sounds good
              </button>
           </div>
         </div>
@@ -114,13 +114,13 @@ export default function Home() {
            GroupFlow
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none' }}>Sign In</Link>
-          <Link href="/login" className="btn btn-primary btn-sm btn-inline" style={{ padding: '0.6rem 1.25rem', borderRadius: '12px' }}>Get Started</Link>
+          <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none' }}>Sign in</Link>
+          <Link href="/login" className="btn btn-primary btn-sm btn-inline" style={{ padding: '0.6rem 1.25rem', borderRadius: '12px' }}>Get started</Link>
         </div>
       </header>
       <main style={{ padding: '4rem 0' }}>
         
-        {/* HERO: The Accountability Hook */}
+        {/* HERO */}
         <section style={{ textAlign: 'center', marginBottom: '8rem', padding: '0 var(--p-safe)', position: 'relative' }}>
            
            <div style={{ 
@@ -138,58 +138,55 @@ export default function Home() {
              marginBottom: '2rem',
              border: '1px solid rgba(var(--brand-rgb), 0.1)'
            }}>
-             <Shield size={16} /> Orchestrate Accountability
+             <Sparkles size={16} /> Celebrate every contribution
            </div>
            
            <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', maxWidth: '1200px', margin: '0 auto 2rem', fontWeight: 900, letterSpacing: '-0.05em' }}>
-             Stop Managing Tasks. <br />
+             Group projects, <br />
              <span style={{ 
                 background: 'linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 display: 'inline-block'
-              }}>Start Verifying Impact.</span>
+              }}>made fair for everyone.</span>
            </h1>
            
            <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.4rem', lineHeight: 1.5 }}>
-              The current education system forces group work without the metrics to track it. 
-              Social loafing isn't a student failure: it's a technical void. 
-              GroupFlow transforms invisible effort into a verifiable ledger of academic achievement.
+              Group projects can be hard. We help student teams work better together by tracking contributions fairly, so everyone's hard work turns into the recognition it deserves.
            </p>
 
            <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
               <Link href="/login" className="btn btn-primary btn-lg" style={{ minWidth: '260px', padding: '1.25rem 2rem', fontSize: '1.1rem', borderRadius: '20px', boxShadow: '0 20px 40px -10px rgba(var(--brand-rgb), 0.3)' }}>
-                Initialize Your Project <ArrowRight size={22} />
+                Start your project <ArrowRight size={22} />
               </Link>
               <Link href="/demo" className="btn btn-secondary btn-lg" style={{ minWidth: '260px', padding: '1.25rem 2rem', fontSize: '1.1rem', borderRadius: '20px' }}>
-                Explore Sandbox < Fingerprint size={22} />
+                See how it works < ChevronRight size={22} />
               </Link>
            </div>
         </section>
 
-        {/* THE MANIFESTO: Why Teamwork Fails */}
+        {/* THE MANIFESTO */}
         <section style={{ padding: '10rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '6rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ flex: '1 1 500px' }}>
-               <div style={{ color: 'var(--error)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>The Great Collaboration Myth</div>
-               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>A Problem Decades in the Making.</h2>
+               <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Bringing teams together</div>
+               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Group work, without the guesswork.</h2>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
-                  For forty years, students have been graded on "group performance" while the actual distribution of labor remained a black box. 
-                  Tutors lack visibility, and elite performers shoulder the weight of silent collaborators.
+                  For a long time, group projects have felt a bit out of balance. Tutors often can't see who's doing what, and hard-working students often carry the load alone.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
-                  In 2026, this opacity ends here. GroupFlow uses behavioral telemetry to ensure accountability is more than a goal: it's an automated, immutable record.
+                  We're changing that. GroupFlow makes collaboration simple and transparent, so your team can focus on creating great work together.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
                      <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><CheckCircle size={24} /></div>
-                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Verifiable Evidence</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>Anchor your real work to your grade, not just your status updates.</p>
+                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>See your impact</div>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>Every part of your project is naturally linked to your shared goals.</p>
                   </div>
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
                      <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><Zap size={24} /></div>
-                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Elite Attribution</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>Recognize the quiet leaders who drive project trajectories forward.</p>
+                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Work that matters</div>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>We help highlight the effort of every team member, from leaders to creators.</p>
                   </div>
                </div>
             </div>
@@ -200,16 +197,16 @@ export default function Home() {
                         <Activity size={24} color="var(--brand)" />
                      </div>
                      <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Live Analytics Stream</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>Accountability Engine Active</div>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Your Team Hub</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>Always in sync</div>
                      </div>
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                      {[
-                        { label: 'Attribution Accuracy', val: '99.9%', color: 'var(--success)' },
-                        { label: 'Social Loafing Inhibited', val: '98.5%', color: 'var(--brand)' },
-                        { label: 'Artifact Verification', val: 'Secured', color: 'var(--success)' }
+                        { label: 'Work accurately tracked', val: 'Real-time', color: 'var(--success)' },
+                        { label: 'Team balance', val: 'Optimized', color: 'var(--brand)' },
+                        { label: 'Project records', val: 'Secure', color: 'var(--success)' }
                      ].map((stat, i) => (
                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
                            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-sub)' }}>{stat.label}</span>
@@ -219,18 +216,18 @@ export default function Home() {
                   </div>
                   
                   <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
-                     <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>behavioral heartrate pulse</div>
+                     <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Team pulse</div>
                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '1rem' }}>
                         {[0.1, 0.4, 0.1, 0.7, 0.3, 0.9, 0.2, 0.5, 0.8, 0.4, 0.6, 0.5].map((opacity, i) => (
                            <div 
                              key={i} 
                              style={{ 
-                               width: '4px', 
-                               height: '20px', 
-                               background: 'var(--brand)', 
-                               borderRadius: '99px', 
-                               opacity, 
-                               animation: `spin ${1 + (i % 5) * 0.2}s infinite linear` 
+                                width: '4px', 
+                                height: '20px', 
+                                background: 'var(--brand)', 
+                                borderRadius: '99px', 
+                                opacity, 
+                                animation: `spin ${1 + (i % 5) * 0.2}s infinite linear` 
                              }} 
                            />
                         ))}
@@ -241,13 +238,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* EXTERNAL COLLABORATION: The Sync Layer */}
+        {/* EXTERNAL COLLABORATION */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-              <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Frictionless Integration</div>
-              <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Your Tools: My Analytics.</h2>
+              <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Work your way</div>
+              <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Use the tools you love.</h2>
               <p style={{ fontSize: '1.3rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '4.5rem' }}>
-                 I never force you into a new editor. Collaborate where you thrive: keep using your Google Docs, Figma system, or Overleaf reports. Just link your workspace and let the engine handle the rest.
+                 We work with the tools you already use every day. Collaborate where you feel most creative—whether it's Google Docs, Figma, or GitHub—and we'll help you keep everything organized.
               </p>
               
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4.5rem', flexWrap: 'wrap', opacity: 0.6, filter: 'grayscale(1)' }}>
@@ -270,14 +267,14 @@ export default function Home() {
         {/* ACADEMIC USE CASES */}
         <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)' }}>
            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              <h2 style={{ fontSize: '2.75rem', fontWeight: 900, marginBottom: '4rem', textAlign: 'center', letterSpacing: '-0.03em' }}>Built for High-Stakes Achievement.</h2>
+              <h2 style={{ fontSize: '2.75rem', fontWeight: 900, marginBottom: '4rem', textAlign: 'center', letterSpacing: '-0.03em' }}>Built for student success.</h2>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem' }}>
                  {[
-                    { title: 'Dissertations & Capstones', desc: 'Secure your year-long effort with a verifiable ledger of every draft and research evolution.', icon: <Milestone /> },
-                    { title: 'Group Lab Reports', desc: 'Ensure data analysis and scientific writing duties are clearly attributed across your squad.', icon: <Activity /> },
-                    { title: 'Software Engineering', desc: 'Connect your Git flow directly for deep insights into modular impact and code ownership.', icon: <Zap /> },
-                    { title: 'High-Level Case Studies', desc: 'Verify each member\'s contribution in fast-paced, competitive team environments.', icon: <Users /> }
+                    { title: 'Dissertations & Graduation', desc: 'Keep track of your research journey with a clear history of how your work has evolved.', icon: <Milestone /> },
+                    { title: 'Team Lab Reports', desc: 'Make sure every part of your analysis and writing is clearly noted and easy to share.', icon: <Activity /> },
+                    { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
+                    { title: 'Project Case Studies', desc: 'Ensure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
                  ].map((usecase, i) => (
                     <div key={i} className="hover-lift" style={{ padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '32px' }}>
                        <div style={{ width: '52px', height: '52px', borderRadius: '13px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', marginBottom: '1.5rem' }}>
@@ -291,17 +288,17 @@ export default function Home() {
            </div>
         </section>
 
-        {/* HOW IT WORKS: The 4-Step Ledger */}
+        {/* HOW IT WORKS */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
-           <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Evidence Over Administration.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I transform team project friction into a verified record of collaborative excellence.</p>
+           <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Simple, transparent, and fair.</h2>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>We help you focus on the work, while we take care of the organization.</p>
 
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
-                { step: '01', title: 'Link Workspaces', desc: 'Connect your existing Google Docs, GitHub repositories, or Figma files in seconds.' },
-                { step: '02', title: 'Capture Telemetry', desc: 'I silently verify activity patterns while you focus on the creative heavy lifting.' },
-                { step: '03', title: 'Anchor Artifacts', desc: 'Every major upgrade is pushed to a verifiable ledger: clear, immutable proof of work.' },
-                { step: '04', title: 'Extract Insights', desc: 'Experience a transparent view into contribution and balance for both teams and tutors.' }
+                { step: '01', title: 'Connect your work', desc: 'Easily link your Google Docs, GitHub projects, or Figma designs in a few taps.' },
+                { step: '02', title: 'Focus on creating', desc: 'Work naturally with your team. We help keep track of progress as it happens.' },
+                { step: '03', title: 'Share your progress', desc: 'Every milestone is saved, creating a clear and reliable history of your achievement.' },
+                { step: '04', title: 'Succeed together', desc: 'Get a clear view of how everyone is contributing, helping your entire team thrive.' }
               ].map((s, i) => (
                 <div key={i} style={{ padding: '3.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '44px', textAlign: 'left', position: 'relative' }}>
                    <div style={{ fontSize: '4.5rem', fontWeight: 900, color: 'rgba(var(--brand-rgb), 0.05)', position: 'absolute', top: '1.5rem', right: '2rem', letterSpacing: '-0.05em' }}>{s.step}</div>
@@ -319,8 +316,8 @@ export default function Home() {
                  <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: 'var(--brand)' }}>
                     <HelpCircle size={32} />
                  </div>
-                 <h2 style={{ fontSize: '3.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Clarity & Absolute Trust.</h2>
-                 <p style={{ color: 'var(--text-sub)', fontSize: '1.15rem', marginTop: '1rem' }}>Everything you need to know about the GroupFlow mission.</p>
+                 <h2 style={{ fontSize: '3.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Always here to help.</h2>
+                 <p style={{ color: 'var(--text-sub)', fontSize: '1.15rem', marginTop: '1rem' }}>A few things you might want to know about our mission.</p>
               </div>
 
               <div style={{ display: 'grid', gap: '2rem' }}>
@@ -343,19 +340,18 @@ export default function Home() {
               <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: '40%', height: '80%', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)', filter: 'blur(40px)', transform: 'rotate(15deg)' }} />
               
               <div style={{ position: 'relative', zIndex: 1 }}>
-                 <h2 style={{ fontSize: '4.5rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Join the Mission.</h2>
+                 <h2 style={{ fontSize: '4.5rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Join the mission.</h2>
                  <p style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '750px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
-                    Help me pioneer the next generation of academic collaboration:
-                    no cost, total data sovereignty, and pure recognition.
+                    Help us build the future of group projects—totally free to use, and focused on your success.
                  </p>
                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/login" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Initialize Account</Link>
-                    <Link href="/demo" className="btn btn-secondary btn-lg" style={{ border: '2.5px solid white', color: 'white', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', fontWeight: 900 }}>Enter the Sandbox</Link>
+                    <Link href="/login" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Create your account</Link>
+                    <Link href="/demo" className="btn btn-secondary btn-lg" style={{ border: '2.5px solid white', color: 'white', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', fontWeight: 900 }}>See it in action</Link>
                  </div>
                  
                  <div style={{ marginTop: '4.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', fontSize: '1rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
-                    <Trash2 size={20} />
-                    <span>Permanent Sovereignty: delete everything instantly at any time.</span>
+                    <Shield size={20} />
+                    <span>Your work is always yours. You can delete everything at any time.</span>
                  </div>
               </div>
            </div>
@@ -367,15 +363,15 @@ export default function Home() {
          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '2rem', fontWeight: 900, justifyContent: 'center', marginBottom: '2rem', letterSpacing: '-0.04em' }}>
             <Activity size={36} color="var(--brand)" /> GroupFlow
          </div>
-         <p style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.75rem' }}>Architecture by Sospeter • Dissertation 2026</p>
+         <p style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.75rem' }}>Built by Sospeter • Dissertation 2026</p>
          <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto 4rem', lineHeight: 1.6 }}>
-            Dedicated to empowering student teams through deep metrics, behavioral telemetry, and verifiable artifact recognition.
+            Dedicated to helping student teams work better together through transparency, recognition, and fair teamwork.
          </p>
          
          <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', borderTop: '1px solid var(--border)', paddingTop: '4rem' }}>
-            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Inbound Portal</Link>
-            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Privacy Ledger</Link>
-            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Service Agreement</Link>
+            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Sign in</Link>
+            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Privacy</Link>
+            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Terms</Link>
          </div>
       </footer>
 
@@ -399,6 +395,8 @@ export default function Home() {
           100% { transform: translateY(0px) rotate(0deg); }
         }
       `}</style>
+    </div>
+  )
     </div>
   )
 }
