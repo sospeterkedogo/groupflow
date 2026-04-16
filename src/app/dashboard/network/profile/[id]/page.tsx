@@ -274,12 +274,9 @@ export default function StudentProfilePage() {
 
                    <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-sub)' }}>
-                         <Mail size={18} />
-                         <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{member.email}</span>
+                         <ShieldCheck size={18} />
+                         <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Contact details are private</span>
                       </div>
-                      <a href={`mailto:${member.email}`} style={{ textDecoration: 'none', color: 'var(--brand)', fontWeight: 800, fontSize: '0.9rem' }} className="hover-link">
-                         Send Direct Email →
-                      </a>
                    </div>
                 </div>
              )}

@@ -235,13 +235,14 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
                    <MessageSquare size={18} /> {showChat ? 'View Profile' : 'Live Chat'}
                  </button>
               ) : (
-                 <a 
-                   href={`mailto:${member.email}`}
+                 <button 
+                   onClick={handleConnect}
+                   disabled={loading}
                    className="btn btn-primary" 
                    style={{ flex: 1, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                  >
-                   <Mail size={18} /> Send Message
-                 </a>
+                   <UserPlus size={18} /> {loading ? 'Requesting...' : 'Request Connection'}
+                 </button>
               )}
            </div>
 

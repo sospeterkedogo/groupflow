@@ -67,7 +67,7 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
 
            <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '0.25rem', letterSpacing: '-0.02em' }}>{member.full_name || 'Anonymous'}</h2>
            <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-              <Mail size={14} /> {member.email}
+              <ShieldCheck size={14} /> Contact details are private
            </p>
 
            {/* Metrics Grid */}

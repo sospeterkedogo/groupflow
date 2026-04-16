@@ -58,8 +58,8 @@ export default function NetworkPage() {
     
     const term = queryStr || search
     if (term.trim()) {
-      // Fixed search: Search by name, email, or school ID
-      query = query.or(`full_name.ilike.%${term}%,email.ilike.%${term}%,school_id.ilike.%${term}%`)
+      // Fixed search: Search by name or school ID
+      query = query.or(`full_name.ilike.%${term}%,school_id.ilike.%${term}%`)
     }
     
     const { data } = await query
@@ -79,7 +79,7 @@ export default function NetworkPage() {
       const { data } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, school_id')
-        .or(`full_name.ilike.%${search}%,email.ilike.%${search}%,school_id.ilike.%${search}%`)
+        .or(`full_name.ilike.%${search}%,school_id.ilike.%${search}%`)
         .limit(5)
       
       if (data) {
@@ -138,7 +138,7 @@ export default function NetworkPage() {
               <input 
                 type="text" 
                 className="form-input search-input" 
-                placeholder="Search by Name, Email or School ID (e.g. 2024...)" 
+                placeholder="Search by Name or School ID (e.g. 2024...)" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
@@ -199,7 +199,7 @@ export default function NetworkPage() {
               <div style={{ textAlign: 'center', padding: '6rem 2rem', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)' }}>
                 <Search size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
                 <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No matching students found</h3>
-                <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>Try searching by enrollment ID or full email address.</p>
+                <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>Try searching by enrollment ID or student name.</p>
               </div>
             ) : (
               <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
