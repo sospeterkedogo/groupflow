@@ -2,7 +2,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { validateEmailRateLimit } from '@/utils/email-rate-limit'
 
 export async function login(formData: FormData) {
   const supabase = await createServerSupabaseClient()
@@ -32,6 +34,19 @@ export async function signup(formData: FormData) {
 
   if (!legal_accepted) {
     redirect(`/login?error=${encodeURIComponent('You must accept the legal policies to continue.')}`)
+  }
+
+  const requestHeaders = await headers()
+  const ip =
+    requestHeaders.get('x-forwarded-for')?.split(',')[0].trim() ||
+    requestHeaders.get('x-real-ip') ||
+    'unknown'
+
+  const limit = validateEmailRateLimit(email, ip)
+  if (!limit.allowed) {
+    redirect(
+      `/login?error=${encodeURIComponent(limit.message ?? 'Too many signup attempts. Please try again later.')}`
+    )
   }
 
   const { error } = await supabase.auth.signUp({
