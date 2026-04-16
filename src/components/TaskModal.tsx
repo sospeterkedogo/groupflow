@@ -137,53 +137,41 @@ export default function TaskModal({
     setError(null)
 
     const payload = {
-      title,
-      description,
-      status,
-      category,
-      is_coding_task: category === 'Implementation', // Legacy sync
-      group_id: groupId,
-      assignees, // Pass array payload!
-      due_date: dueDate ? new Date(dueDate).toISOString() : null
-    }
-
-    let err
-    if (isEditMode) {
-      const { error } = await supabase.from('tasks').update(payload).eq('id', task.id)
-      err = error
-    } else {
-      const { error } = await supabase.from('tasks').insert([payload])
-      err = error
-    }
-
-    setLoading(false)
-
-      if (err) {
-        setError(`Failed to save task: ${err.message}`)
-      } else {
-        // Sync to Liveblocks
-        if (isEditMode && task) {
-          updateTaskInLiveStorage({ ...task, ...payload } as Task)
-        } else {
-          // Note: In a real app, you'd get the inserted ID from Supabase
-          // For simplicity, we trigger a refresh or fetch the latest
-          await onRefresh()
-        }
-
-        // Verifiable Logging
-        if (currentUser) {
-          logActivity(
-            currentUser.id,
-            groupId,
-            isEditMode ? 'task_updated' : 'task_created',
-            isEditMode ? `Updated task: ${title}` : `Created task: ${title}`,
-            { task_id: task?.id || 'new' }
-          )
-        }
-        
-        onClose()
+      action: isEditMode ? 'update' : 'create',
+      task: {
+        id: task?.id,
+        title: title.trim(),
+        description,
+        status,
+        category,
+        assignees,
+        group_id: groupId,
+        due_date: dueDate ? new Date(dueDate).toISOString() : null
       }
     }
+
+    try {
+      const response = await fetch('/api/task/workflow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to save task via workflow.')
+      }
+
+      await onRefresh()
+      onClose()
+    } catch (err: any) {
+      setError(`Failed to save task: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleAIGenerate = async () => {
     if (!title.trim()) {

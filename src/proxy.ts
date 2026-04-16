@@ -40,7 +40,7 @@ export default async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Skip static assets and internals
-    '/((?!_next/static|_next/image|favicon.ico|assets|favicon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Skip static assets, workflow internals, and other internals
+    '/((?!_next/static|_next/image|favicon.ico|assets|favicon.png|\.well-known/workflow/|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

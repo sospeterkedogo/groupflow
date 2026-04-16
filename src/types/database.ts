@@ -69,3 +69,10 @@ export type Artifact = {
   endorsements_count: number;
   created_at: string;
 };
+
+export type AIUsage = {
+  id: string;
+  profile_id: string;
+  action: string;
+  created_at: string;
+};
