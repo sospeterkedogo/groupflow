@@ -7,10 +7,13 @@ export function createBrowserSupabaseClient() {
   // Security Guard: Detect if a service_role key is accidentally passed
   try {
     if (anonKey) {
-      // Decode JWT payload without a library (it's bas64)
       const parts = anonKey.split('.')
       if (parts.length === 3) {
-        const payload = JSON.parse(atob(parts[1]))
+        // Robust base64 decoding to handle missing padding
+        let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+        while (base64.length % 4) base64 += '='
+        const payload = JSON.parse(atob(base64))
+        
         if (payload.role === 'service_role') {
           const maskedKey = anonKey.substring(0, 10) + '...'
           console.error(`CRITICAL SECURITY ERROR: Browser client initialized with a SERVICE_ROLE key (starts with: ${maskedKey}). Access blocked.`)
@@ -20,7 +23,7 @@ export function createBrowserSupabaseClient() {
     }
   } catch (e) {
     if ((e as Error).message.includes("Forbidden")) throw e
-    console.warn("Failed to verify Supabase key format, proceeding with caution.")
+    console.warn("Supabase Security Check: JWT format unrecognized or custom role in use.")
   }
 
   return createSupabaseBrowserClient(url, anonKey)
