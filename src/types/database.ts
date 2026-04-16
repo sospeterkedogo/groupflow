@@ -20,6 +20,7 @@ export type Profile = {
   group_id: string | null;
   total_score: number;
   created_at: string;
+  last_seen?: string | null;
 };
 
 export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';
