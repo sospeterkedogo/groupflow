@@ -59,6 +59,78 @@ export const PALETTES: Palette[] = [
       '--warning': '#ffcc00',
       '--overlay': 'rgba(10, 0, 30, 0.7)',
     }
+  },
+  {
+    name: 'Nature',
+    colors: {
+      '--bg-main': '#eef5eb',
+      '--bg-sub': '#ffffff',
+      '--text-main': '#1f3d2f',
+      '--text-sub': '#5f7d68',
+      '--brand': '#2f7d54',
+      '--brand-hover': '#276843',
+      '--accent': '#76b79b',
+      '--border': '#d9e2d4',
+      '--surface': '#f8faf5',
+      '--error': '#c53030',
+      '--success': '#2d7d46',
+      '--warning': '#d69e2e',
+      '--overlay': 'rgba(47, 125, 84, 0.12)',
+    }
+  },
+  {
+    name: 'Boy',
+    colors: {
+      '--bg-main': '#f3f6ff',
+      '--bg-sub': '#ffffff',
+      '--text-main': '#1e2a50',
+      '--text-sub': '#5c6c98',
+      '--brand': '#3b5bdb',
+      '--brand-hover': '#2744b0',
+      '--accent': '#7aa7ff',
+      '--border': '#d4d9ef',
+      '--surface': '#f9fbff',
+      '--error': '#d32f2f',
+      '--success': '#2e7d32',
+      '--warning': '#f6b039',
+      '--overlay': 'rgba(59, 91, 219, 0.12)',
+    }
+  },
+  {
+    name: 'Girl',
+    colors: {
+      '--bg-main': '#fff0f8',
+      '--bg-sub': '#ffffff',
+      '--text-main': '#3d1f42',
+      '--text-sub': '#8e648a',
+      '--brand': '#d63384',
+      '--brand-hover': '#b22b71',
+      '--accent': '#f2aac9',
+      '--border': '#f1d7e4',
+      '--surface': '#fff6fb',
+      '--error': '#c53030',
+      '--success': '#2f855a',
+      '--warning': '#dd6b20',
+      '--overlay': 'rgba(214, 51, 132, 0.12)',
+    }
+  },
+  {
+    name: 'Enthusiast',
+    colors: {
+      '--bg-main': '#1d1f27',
+      '--bg-sub': '#252a38',
+      '--text-main': '#f5f7ff',
+      '--text-sub': '#a8b0d3',
+      '--brand': '#ff9f1c',
+      '--brand-hover': '#ff7c00',
+      '--accent': '#7c5cff',
+      '--border': '#38405a',
+      '--surface': '#2c3347',
+      '--error': '#ff4d6d',
+      '--success': '#4adb8b',
+      '--warning': '#ffd166',
+      '--overlay': 'rgba(255, 159, 28, 0.15)',
+    }
   }
 ]
 
