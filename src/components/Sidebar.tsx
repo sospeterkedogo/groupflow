@@ -195,7 +195,7 @@ export default function Sidebar({ user }: { user: { id: string } }) {
             const isActive = pathname === link.path
             return (
               <Link 
-                key={link.path}
+                key={link.name}
                 href={link.path}
                 className={`nav-bubble ${isActive ? 'active-project' : ''}`}
                 style={{

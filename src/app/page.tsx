@@ -221,8 +221,18 @@ export default function Home() {
                   <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
                      <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}> telemetry stream pulse</div>
                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '0.75rem' }}>
-                        {[...Array(12)].map((_, i) => (
-                           <div key={i} style={{ width: '4px', height: '16px', background: 'var(--brand)', borderRadius: '99px', opacity: Math.random(), animation: `spin ${Math.random() + 1}s infinite linear` }} />
+                        {[0.1, 0.4, 0.1, 0.7, 0.3, 0.9, 0.2, 0.5, 0.8, 0.4, 0.6, 0.5].map((opacity, i) => (
+                           <div 
+                             key={i} 
+                             style={{ 
+                               width: '4px', 
+                               height: '16px', 
+                               background: 'var(--brand)', 
+                               borderRadius: '99px', 
+                               opacity, 
+                               animation: `spin ${1 + (i % 5) * 0.2}s infinite linear` 
+                             }} 
+                           />
                         ))}
                      </div>
                   </div>

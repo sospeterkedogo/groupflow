@@ -256,13 +256,28 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
 
   if (!isOpen) {
      return (
-       <button 
-         onClick={() => setIsOpen(true)}
-         style={{
-           position: 'fixed', bottom: '2rem', right: '2rem', width: '60px', height: '60px', borderRadius: '50%', background: 'var(--brand)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: 'var(--shadow-xl)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, transition: 'all 0.3s'
-         }}
-         className="chat-toggle"
-       >
+        <button 
+          onClick={() => setIsOpen(true)}
+          style={{
+            position: 'fixed', 
+            bottom: 'calc(var(--h-mobile-bottom) + 1.25rem + env(safe-area-inset-bottom))', 
+            right: '1.25rem', 
+            width: '60px', 
+            height: '60px', 
+            borderRadius: '50%', 
+            background: 'var(--brand)', 
+            color: 'white', 
+            border: 'none', 
+            cursor: 'pointer', 
+            boxShadow: 'var(--shadow-xl)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 1000, 
+            transition: 'all 0.3s'
+          }}
+          className="chat-toggle"
+        >
           <MessageSquare size={24} />
           <div style={{ position: 'absolute', top: '2px', right: '2px', width: '12px', height: '12px', borderRadius: '50%', background: 'var(--success)', border: '2px solid white' }} />
        </button>
@@ -273,10 +288,10 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
     <div 
       style={{
         position: 'fixed', 
-        bottom: 'min(2rem, 1rem)', 
+        bottom: 'calc(var(--h-mobile-bottom) + 1rem + env(safe-area-inset-bottom))', 
         right: 'min(2rem, 0.5rem)', 
         width: 'min(400px, calc(100vw - 1rem))', 
-        height: 'min(650px, calc(100vh - 4rem))', 
+        height: 'min(650px, calc(100vh - (var(--h-mobile-bottom) + 5rem)))', 
         background: 'var(--surface)', 
         borderRadius: '24px', 
         boxShadow: '0 24px 48px rgba(0,0,0,0.2)', 
@@ -469,6 +484,18 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: any
           .msg-bubble:hover .delete-btn { opacity: 0.7 !important; }
           .icon-btn:hover { background: var(--border); }
           .chat-toggle:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); }
+
+          @media (min-width: 769px) {
+            .chat-toggle {
+              bottom: 2rem !important;
+              right: 2rem !important;
+            }
+            .responsive-chat {
+              bottom: 2rem !important;
+              right: 2rem !important;
+              height: min(650px, calc(100vh - 6rem)) !important;
+            }
+          }
        `}</style>
     </div>
   )
