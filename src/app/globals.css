@@ -658,8 +658,8 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
-  padding: 1rem;
+  z-index: 9999;
+  padding: 4rem 1rem;
 }
 
 .modal-content {
@@ -669,7 +669,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   width: 100%;
   max-width: 600px;
-  max-height: calc(100dvh - 3rem);
+  max-height: calc(100dvh - 8rem);
   display: flex;
   flex-direction: column;
   overflow: hidden;

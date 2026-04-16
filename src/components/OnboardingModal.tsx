@@ -74,8 +74,10 @@ export default function OnboardingModal({ user, onComplete }: { user: { id: stri
       <div className="onboarding-content" style={{
         maxWidth: '500px', width: '90%', background: 'var(--surface)',
         borderRadius: '32px', border: '1px solid var(--border)',
-        padding: '3rem', position: 'relative', overflow: 'hidden',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+        padding: '2rem 1.5rem', position: 'relative', overflowY: 'auto',
+        maxHeight: 'calc(100dvh - 8rem)',
+        boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+        display: 'flex', flexDirection: 'column'
       }}>
         
         {/* Progress Bar */}

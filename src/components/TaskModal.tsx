@@ -325,7 +325,7 @@ export default function TaskModal({
           width: '95%',
           maxWidth: '650px',
           height: 'auto',
-          maxHeight: 'calc(100dvh - 2.5rem)'
+          maxHeight: 'calc(100dvh - 8rem)'
         }}
       >
         
