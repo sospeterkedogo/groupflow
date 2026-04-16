@@ -115,7 +115,18 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         }
       })
 
+    // Establish a 5-minute heartbeat for DB-level 'last_seen' persistence
+    const heartbeat = setInterval(async () => {
+      if (userId) {
+        await supabase
+          .from('profiles')
+          .update({ last_seen: new Date().toISOString() })
+          .eq('id', userId)
+      }
+    }, 1000 * 60 * 5)
+
     return () => {
+      clearInterval(heartbeat)
       supabase.removeChannel(newChannel)
     }
   }, [userId, userName, supabase])

@@ -73,8 +73,8 @@ export default function CalendarView({ groupId }: { groupId: string }) {
   const handleNextMonth = () => setCurrentDate(new Date(year, month + 1))
 
   const getTasksForDay = (day: number) => {
-    const dayDate = new Date(year, month, day).toISOString().split('T')[0]
-    return tasks.filter(t => t.due_date.startsWith(dayDate))
+    const formatted = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return tasks.filter(t => t.due_date.startsWith(formatted))
   }
 
   return (
@@ -127,7 +127,7 @@ export default function CalendarView({ groupId }: { groupId: string }) {
               key={idx} 
               onClick={() => {
                 if (day) {
-                   const formatted = new Date(year, month, day).toISOString().split('T')[0]
+                   const formatted = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
                    setSelectedTask(null)
                    setPreselectedDate(formatted)
                    setIsModalOpen(true)

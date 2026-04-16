@@ -64,7 +64,28 @@ export default function ActivityLogView({
     void (async () => {
       await fetchLogs()
     })()
-  }, [fetchLogs])
+
+    // Real-time synchronization for the audit log
+    const channel = supabase.channel(`activity_log_${groupId || 'personal'}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'activity_log',
+          filter: groupId ? `group_id=eq.${groupId}` : userId ? `user_id=eq.${userId}` : undefined
+        },
+        () => {
+          // Re-fetch to get the profile join correctly, or we could optimistic insert
+          void fetchLogs()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchLogs, groupId, userId, supabase])
 
   const getActionIcon = (type: string) => {
     switch (type) {

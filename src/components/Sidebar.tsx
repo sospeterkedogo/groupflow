@@ -69,17 +69,20 @@ export default function Sidebar({ user }: { user: { id: string } }) {
   }, [supabase, user.id])
 
   useEffect(() => {
+    // Initial mobile state setup (only runs once)
+    if (window.innerWidth <= 768) {
+      setIsOpen(false)
+    }
+  }, []) // Empty dependency array ensures this ONLY runs on mount
+
+  useEffect(() => {
     let active = true
 
     const initialize = async () => {
       await fetchProfile()
       if (!active) return
 
-      if (window.innerWidth <= 768) {
-        setIsOpen(false)
-      }
-
-      // Body scroll lock logic
+      // Body scroll lock logic (runs when isOpen changes)
       const handleBodyLock = () => {
         if (window.innerWidth <= 768 && isOpen) {
           document.body.classList.add('body-lock')

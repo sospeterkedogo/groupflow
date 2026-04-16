@@ -168,7 +168,7 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
       `}} />
       
       <div 
-        className="theme-wrapper"
+        className={`theme-wrapper ${customBg ? 'has-custom-bg' : ''}`}
         style={customBg ? { 
           backgroundImage: `url(${customBg})`, 
           backgroundSize: 'cover', 
