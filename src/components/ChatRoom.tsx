@@ -13,6 +13,8 @@ import { LiveList } from '@liveblocks/client'
 import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare, Video } from 'lucide-react'
 import VideoCall from './VideoCall'
 
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+
 interface ChatRoomProps {
   roomId: string;
   currentUser: { id: string; name: string };
@@ -20,19 +22,48 @@ interface ChatRoomProps {
 
 function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
   const messages = useStorage((root) => root.messages);
+  const [history, setHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [text, setText] = useState("");
   const [showVideo, setShowVideo] = useState(false);
   const updateMyPresence = useUpdateMyPresence();
   const others = useOthers();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const supabase = createBrowserSupabaseClient();
 
   const isTyping = others.some((other) => other.presence.isTyping);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [roomId]);
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true })
+      .limit(50);
+    
+    if (data) {
+      setHistory(data.map(m => ({
+        id: m.id,
+        senderId: m.sender_id,
+        senderName: m.metadata?.sender_name || 'Researcher',
+        text: m.content,
+        timestamp: m.created_at,
+        isHistory: true
+      })));
+    }
+    setLoadingHistory(false);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, history]);
 
   const sendMessage = useMutation(({ storage }, text: string) => {
     const messages = storage.get("messages");
@@ -43,14 +74,28 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
       text,
       timestamp: new Date().toISOString(),
     });
-    // Record activity or something?
   }, [currentUser]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!text.trim()) return;
+    
+    // 1. Instant Real-time Broadcast via Liveblocks
     sendMessage(text);
+    const messageContent = text;
     setText("");
     updateMyPresence({ isTyping: false });
+
+    // 2. Permanent Archival via Supabase
+    const { error } = await supabase
+      .from('chat_messages')
+      .insert({
+        room_id: roomId,
+        sender_id: currentUser.id,
+        content: messageContent,
+        metadata: { sender_name: currentUser.name }
+      });
+    
+    if (error) console.error("Message backup failed:", error);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -103,6 +148,66 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
         ref={scrollRef}
         style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}
       >
+        {loadingHistory && (
+          <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-sub)', fontSize: '0.8rem' }}>
+            Restoring laboratory archives...
+          </div>
+        )}
+
+        {!loadingHistory && history.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Historical Logs</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+          </div>
+        )}
+
+        {/* Render History from Supabase */}
+        {history.map((msg) => {
+          const isMe = msg.senderId === currentUser.id;
+          return (
+            <div 
+              key={msg.id} 
+              style={{ 
+                alignSelf: isMe ? 'flex-end' : 'flex-start',
+                maxWidth: '80%',
+                display: 'flex',
+                gap: '0.75rem',
+                flexDirection: isMe ? 'row-reverse' : 'row'
+              }}
+            >
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: isMe ? 'var(--brand)' : 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <UserIcon size={16} color={isMe ? "white" : "var(--text-sub)"} />
+              </div>
+              <div style={{ 
+                padding: '0.75rem 1rem', 
+                borderRadius: isMe ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
+                background: isMe ? 'var(--brand)' : 'var(--bg-sub)',
+                color: isMe ? 'white' : 'var(--text-main)',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                boxShadow: 'var(--shadow-sm)',
+                opacity: 0.85
+              }}>
+                {msg.text}
+                <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '0.4rem', textAlign: isMe ? 'right' : 'left' }}>
+                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Separator if live messages exist */}
+        {(messages?.length || 0) > 0 && history.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)', opacity: 0.3 }} />
+            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase' }}>Live Bridge</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)', opacity: 0.3 }} />
+          </div>
+        )}
+
+        {/* Render Live Messages from Liveblocks */}
         {messages?.map((msg) => {
           const isMe = msg.senderId === currentUser.id;
           return (

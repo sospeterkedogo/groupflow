@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Search, MapPin, Clock, LayoutGrid, List, User, Users, GraduationCap, X, ChevronRight } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 import { Profile } from '@/types/database'
-import PublicProfileModal from '@/components/PublicProfileModal'
 import CollaboratorsList from '@/components/CollaboratorsList'
 
 type ViewMode = 'grid' | 'list'
@@ -18,8 +18,8 @@ export default function NetworkPage() {
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [currentUserGroup, setCurrentUserGroup] = useState<string | null>(null)
-  const [selectedStudent, setSelectedStudent] = useState<Profile | null>(null)
   const [connections, setConnections] = useState<Set<string>>(new Set())
+  const router = useRouter()
   
   const supabase = createBrowserSupabaseClient()
   const { onlineUsers } = usePresence()
@@ -154,7 +154,7 @@ export default function NetworkPage() {
                   {suggestions.map(s => (
                     <div 
                       key={s.id} 
-                      onClick={() => { setSelectedStudent(s); setSearch(''); setShowSuggestions(false); }}
+                      onClick={() => { router.push('/dashboard/network/profile/' + s.id); setSearch(''); setShowSuggestions(false); }}
                       style={{ 
                         display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
                         borderRadius: '12px', cursor: 'pointer', transition: 'background 0.2s' 
@@ -198,7 +198,7 @@ export default function NetworkPage() {
                     <div 
                       key={u.id} 
                       className="kanban-card card-interactive" 
-                      onClick={() => setSelectedStudent(u)}
+                      onClick={() => router.push('/dashboard/network/profile/' + u.id)}
                       style={{ 
                         padding: '1.5rem', cursor: 'pointer', borderRadius: '24px', position: 'relative',
                         display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
@@ -253,7 +253,7 @@ export default function NetworkPage() {
           <div style={{ position: 'sticky', top: '2rem' }}>
              <CollaboratorsList 
                 currentGroupId={currentUserGroup} 
-                onViewProfile={(profile) => setSelectedStudent(profile)} 
+                onViewProfile={(profile) => router.push('/dashboard/network/profile/' + profile.id)} 
              />
              
              <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'linear-gradient(135deg, var(--brand), #6366f1)', borderRadius: '24px', color: 'white', boxShadow: 'var(--shadow-xl)' }}>
@@ -269,15 +269,7 @@ export default function NetworkPage() {
           </div>
        </div>
 
-       {/* Modals */}
-       {selectedStudent && (
-         <PublicProfileModal 
-           member={selectedStudent} 
-           onClose={() => setSelectedStudent(null)} 
-           isConnected={connections.has(selectedStudent.id)}
-           onConnect={() => setConnections(prev => new Set([...Array.from(prev), selectedStudent.id]))}
-         />
-       )}
+       {/* Navigation and state driven UI components have been transitioned to dynamic routes */}
 
        <style jsx>{`
           .suggestion-item:hover { background: var(--bg-sub); }
