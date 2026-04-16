@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Bell, X, Info, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
@@ -18,6 +18,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioUnlockedRef = useRef(false)
 
   const addToast = (title: string, message: string, type: string = 'info') => {
     const id = Math.random().toString(36).substr(2, 9)
@@ -42,8 +44,38 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [supabase])
 
   useEffect(() => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
+    audio.preload = 'auto'
+    audioRef.current = audio
+
+    const unlockAudio = () => {
+      if (!audioRef.current || audioUnlockedRef.current) return
+      audioRef.current.currentTime = 0
+      audioRef.current.play().then(() => {
+        audioUnlockedRef.current = true
+      }).catch(() => {
+        audioUnlockedRef.current = false
+      })
+    }
+
+    window.addEventListener('pointerdown', unlockAudio, { once: true })
+    return () => window.removeEventListener('pointerdown', unlockAudio)
+  }, [])
+
+  useEffect(() => {
     let channel: RealtimeChannel | null = null
     let active = true
+
+    const playDing = async () => {
+      if (!audioRef.current) return
+      try {
+        audioRef.current.currentTime = 0
+        await audioRef.current.play()
+        audioUnlockedRef.current = true
+      } catch (err) {
+        console.warn('Notification sound blocked or unavailable:', err)
+      }
+    }
 
     const setupSubscription = async () => {
       await fetchNotifications()
@@ -51,23 +83,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       if (user && active) {
         channel = supabase
           .channel(`notifications_${user.id}`)
-          .on('postgres_changes', { 
-            event: 'INSERT', 
-            schema: 'public', 
-            table: 'notifications', 
-            filter: `user_id=eq.${user.id}` 
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
           }, (payload) => {
             const newNotif = payload.new as Notification
             setNotifications(prev => [newNotif, ...prev])
             addToast(newNotif.title, newNotif.message, newNotif.type)
-            
-            // Audio Ding Logic
-            try {
-              const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3') // High quality ding
-              audio.play().catch(e => console.warn('Audio play blocked:', e))
-            } catch (err) {
-              console.warn('Audio initialization failed:', err)
-            }
+            playDing()
           })
           .subscribe()
       }
@@ -79,7 +104,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       active = false
       if (channel) supabase.removeChannel(channel)
     }
-  }, [fetchNotifications])
+  }, [fetchNotifications, supabase])
 
   const markAsRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))

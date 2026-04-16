@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type CSSProperties } from 'react'
 import { Bell, Check, Clock, ExternalLink, Inbox } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
 
 export default function NotificationBell() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({})
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -18,6 +19,38 @@ export default function NotificationBell() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (!isOpen || !menuRef.current) return
+
+    const updatePosition = () => {
+      const rect = menuRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const width = Math.min(320, window.innerWidth - 24)
+      const left = Math.min(Math.max(12, rect.right - width), window.innerWidth - width - 12)
+      const top = Math.min(rect.bottom + 10, window.innerHeight - 12)
+      const maxHeight = Math.max(220, window.innerHeight - top - 18)
+
+      setDropdownStyle({
+        position: 'fixed',
+        top: `${top}px`,
+        left: `${left}px`,
+        width: `${width}px`,
+        maxHeight: `${maxHeight}px`,
+        overflow: 'hidden',
+        zIndex: 1000,
+      })
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [isOpen])
 
   return (
     <div style={{ position: 'relative' }} ref={menuRef}>
@@ -62,17 +95,12 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div style={{ 
-          position: 'absolute', 
-          top: '100%', 
-          right: '-10px', 
-          width: '320px', 
-          background: 'var(--surface)', 
-          border: '1px solid var(--border)', 
-          borderRadius: '16px', 
-          marginTop: '1rem', 
-          boxShadow: 'var(--shadow-lg)', 
-          zIndex: 1000,
+        <div style={{
+          ...dropdownStyle,
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          boxShadow: 'var(--shadow-lg)',
           animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           overflow: 'hidden'
         }}>
