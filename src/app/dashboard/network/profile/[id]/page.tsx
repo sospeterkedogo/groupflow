@@ -23,8 +23,20 @@ export default function StudentProfilePage() {
   const [me, setMe] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [isConnected, setIsConnected] = useState(false)
-  const [activeTab, setActiveTab] = useState<'info' | 'chat' | 'video' | 'accomplishments'>('info')
+  const [activeTab, setActiveTab] = useState<'info' | 'accomplishments'>('info')
   const { withLoading, showConfirmation } = useSmartLoading()
+
+  const formatRelativeTime = (date: string | null) => {
+    if (!date) return 'Unknown'
+    const now = new Date()
+    const diff = now.getTime() - new Date(date).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return 'Just now'
+    if (mins < 60) return `${mins}m ago`
+    const hours = Math.floor(mins / 60)
+    if (hours < 24) return `${hours}h ago`
+    return new Date(date).toLocaleDateString()
+  }
 
   useEffect(() => {
     fetchProfileData()
@@ -147,9 +159,20 @@ export default function StudentProfilePage() {
             </div>
 
             <h2 style={{ fontSize: '1.75rem', fontWeight: 950, marginBottom: '0.25rem', letterSpacing: '-0.02em' }}>{member.full_name}</h2>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '1.5rem' }}>
-               <ShieldCheck size={18} />
-               <span style={{ fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{member.rank || 'Active Student'}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--brand)' }}>
+                 <ShieldCheck size={16} />
+                 <span style={{ fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{member.rank || 'Active Student'}</span>
+              </div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)' }}>
+                Member since {new Date(member.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 800 }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isConnected ? 'var(--success)' : 'var(--text-sub)', boxShadow: isConnected ? '0 0 8px var(--success)' : 'none' }} />
+                <span style={{ color: isConnected ? 'var(--success)' : 'var(--text-sub)' }}>
+                  {isConnected ? 'Online' : `Last seen ${formatRelativeTime(member.last_seen || null)}`}
+                </span>
+              </div>
             </div>
 
             <button 
@@ -171,41 +194,41 @@ export default function StudentProfilePage() {
             </button>
           </div>
 
-          {/* New 2x2 Action Matrix (The "Real Buttons") */}
-          <div className="action-matrix-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          {/* Refactored 3-Tile Action Matrix */}
+          <div className="action-matrix-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
              {[
                { id: 'info', icon: Target, label: 'Stats', color: 'var(--brand)' },
-               { id: 'chat', icon: MessageSquare, label: 'Chat', color: 'var(--success)', disabled: !isConnected },
-               { id: 'video', icon: Video, label: 'Video', color: '#8b5cf6', disabled: !isConnected },
+               { id: 'chat', icon: MessageSquare, label: 'Message', color: 'var(--success)', disabled: !isConnected, nav: true },
                { id: 'accomplishments', icon: Award, label: 'Badges', color: '#f59e0b' }
              ].map((item) => (
                <button
                  key={item.id}
                  onClick={async () => {
                    if (item.disabled) return;
-                   if (item.id === 'chat' || item.id === 'video') {
+                   if (item.id === 'chat') {
                      await withLoading(async () => {
-                        await new Promise(r => setTimeout(r, 1200)); // Simulated initialization
-                        setActiveTab(item.id as any);
-                     }, item.id === 'chat' ? 'Initializing Secure Room...' : 'Launching Video Lab...');
+                        await new Promise(r => setTimeout(r, 800));
+                        router.push(`/dashboard/network/chat/${studentId}`);
+                     }, 'Connecting to Secure Line...');
                    } else {
                      setActiveTab(item.id as any);
                    }
                  }}
                  style={{ 
-                   aspectRatio: '1', borderRadius: '24px', border: activeTab === item.id ? `2px solid ${item.color}` : '1px solid var(--border)',
+                   borderRadius: '20px', border: activeTab === item.id ? `2px solid ${item.color}` : '1px solid var(--border)',
                    background: activeTab === item.id ? 'var(--surface)' : 'var(--surface)',
                    color: activeTab === item.id ? item.color : item.disabled ? 'var(--text-sub)' : 'var(--text-main)',
-                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                    cursor: item.disabled ? 'not-allowed' : 'pointer',
-                   fontWeight: 900, fontSize: '0.9rem', opacity: item.disabled ? 0.4 : 1,
+                   fontWeight: 900, fontSize: '0.75rem', opacity: item.disabled ? 0.4 : 1,
                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                   padding: '1rem 0',
                    boxShadow: activeTab === item.id ? `0 8px 20px -4px ${item.color}33` : 'var(--shadow-sm)'
                  }}
                  className="matrix-btn"
                >
-                 <div style={{ padding: '0.8rem', borderRadius: '16px', background: activeTab === item.id ? `${item.color}15` : 'var(--bg-sub)', color: item.color }}>
-                    <item.icon size={22} strokeWidth={activeTab === item.id ? 2.5 : 2} />
+                 <div style={{ padding: '0.6rem', borderRadius: '12px', background: activeTab === item.id ? `${item.color}15` : 'var(--bg-sub)', color: item.color }}>
+                    <item.icon size={18} strokeWidth={activeTab === item.id ? 2.5 : 2} />
                  </div>
                  {item.label}
                </button>
@@ -258,30 +281,6 @@ export default function StudentProfilePage() {
                          Send Direct Email →
                       </a>
                    </div>
-                </div>
-             )}
-
-             {activeTab === 'chat' && isConnected && (
-                <div style={{ animation: 'fadeIn 0.4s', height: '100%', minHeight: '500px' }}>
-                   <ChatRoom 
-                     roomId={sortedRoomId} 
-                     currentUser={{ id: me?.id || '', name: me?.user_metadata?.full_name || 'Me' }} 
-                   />
-                </div>
-             )}
-
-             {activeTab === 'video' && isConnected && (
-                <div style={{ animation: 'fadeIn 0.4s', textAlign: 'center', padding: '3rem 1rem' }}>
-                    <div style={{ width: '84px', height: '84px', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: 'var(--brand)' }}>
-                       <Video size={36} />
-                    </div>
-                    <h3 style={{ fontSize: '1.75rem', fontWeight: 950, marginBottom: '0.75rem', letterSpacing: '-0.02em' }}>Video Call</h3>
-                    <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', maxWidth: '340px', marginInline: 'auto', lineHeight: 1.5 }}>
-                       Connect face-to-face with this student in a private, high-speed call session.
-                    </p>
-                    <button className="btn btn-primary" style={{ width: 'auto', padding: '1.1rem 2.5rem', borderRadius: '18px' }}>
-                       Join Secure Call
-                    </button>
                 </div>
              )}
 

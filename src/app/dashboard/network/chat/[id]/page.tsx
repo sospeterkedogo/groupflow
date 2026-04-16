@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { ChevronLeft, Info, MoreVertical, MessageSquare, Video } from 'lucide-react'
+import { ChevronLeft, Info, MoreVertical, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import ChatRoom from '@/components/ChatRoom'
 import { Profile } from '@/types/database'
@@ -91,7 +91,7 @@ export default function ChatPage() {
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>{targetStudent.full_name}</h3>
-              <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--success)', fontWeight: 800 }}>SECURE LABORATORY LINE</p>
+              <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--success)', fontWeight: 800 }}>STUDENT NETWORK CHANNEL</p>
             </div>
           </div>
         </div>

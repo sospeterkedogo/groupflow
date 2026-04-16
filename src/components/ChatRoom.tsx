@@ -10,8 +10,7 @@ import {
   useUpdateMyPresence
 } from '@/liveblocks.config'
 import { LiveList } from '@liveblocks/client'
-import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare, Video } from 'lucide-react'
-import VideoCall from './VideoCall'
+import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare } from 'lucide-react'
 
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
@@ -26,7 +25,6 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
   const [history, setHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [text, setText] = useState("");
-  const [showVideo, setShowVideo] = useState(false);
   const updateMyPresence = useUpdateMyPresence();
   const others = useOthers();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -52,7 +50,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
       setHistory(data.map(m => ({
         id: m.id,
         senderId: m.sender_id,
-        senderName: m.metadata?.sender_name || 'Researcher',
+        senderName: m.metadata?.sender_name || 'Student',
         text: m.content,
         timestamp: m.created_at,
         isHistory: true
@@ -123,29 +121,11 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button 
-            onClick={() => setShowVideo(true)}
-            style={{ 
-              background: 'var(--bg-sub)', border: 'none', padding: '0.5rem 0.75rem', 
-              borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', 
-              gap: '0.5rem', color: 'var(--brand)', fontWeight: 800, fontSize: '0.8rem' 
-            }}
-          >
-            <Video size={18} /> Start Video
-          </button>
           <button style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer' }}>
             <MoreVertical size={20} />
           </button>
         </div>
       </div>
-
-      {showVideo && (
-        <VideoCall 
-          roomName={roomId} 
-          userName={currentUser.name} 
-          onClose={() => setShowVideo(false)} 
-        />
-      )}
 
       {/* Messages Area */}
       <div 

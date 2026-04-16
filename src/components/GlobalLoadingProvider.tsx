@@ -67,13 +67,6 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
     
     // Snap to 100% and close
     setLoading(prev => ({ ...prev, progress: 100 }))
-    
-    // Play subtle chime
-    try {
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
-      audio.volume = 0.2
-      audio.play().catch(() => {})
-    } catch (e) {}
 
     setTimeout(() => {
       setLoading({ isLoading: false, progress: 0, message: '' })
