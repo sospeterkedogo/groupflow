@@ -188,30 +188,33 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     const taskId = e.dataTransfer.getData('taskId')
     if (!taskId) return
 
-    // Multiplayer update
-    moveTask(taskId, newStatus);
-    handleDragEnd();
+    // Optimistically update the shared UI while persisting to DB.
+    moveTask(taskId, newStatus)
+    handleDragEnd()
 
-    // Update DB (Persistent Sync)
     const { error } = await supabase
       .from('tasks')
       .update({ status: newStatus })
       .eq('id', taskId)
 
     if (error) {
-      console.error("Failed to move task in DB", error)
+      console.error('Failed to move task in DB', error)
       setBoardError(`Persistence error: ${error.message}`)
       setTimeout(() => setBoardError(null), 5000)
-    } else if (newStatus === 'Done') {
-      // Fire secure anti-farming Score Node pipeline
+      await fetchTasksFromDB()
+      return
+    }
+
+    await fetchTasksFromDB()
+
+    if (newStatus === 'Done') {
       const targetTask = (tasks ? Array.from(tasks) : []).find((t: any) => t.id === taskId)
       if (targetTask && (targetTask as any).assignees) {
-        distributeTaskScore(taskId, (targetTask as any).assignees).catch(err => console.error("Score Distribution error", err))
+        distributeTaskScore(taskId, (targetTask as any).assignees).catch(err => console.error('Score Distribution error', err))
       }
     }
 
-    // Verifiable Logging
-    if (!error && (currentUserProfile || profile)) {
+    if (currentUserProfile || profile) {
       logActivity(
         (currentUserProfile?.id || profile?.id)!,
         groupId,

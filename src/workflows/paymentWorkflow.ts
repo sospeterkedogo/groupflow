@@ -77,13 +77,32 @@ async function resolveUserId(supabase: SupabaseAdminClient, payload: PaymentWork
     throw new Error(error.message)
   }
 
-  return data?.user_id ?? null
+  if (data?.user_id) {
+    return data.user_id
+  }
+
+  if (payload.stripeCustomerId) {
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('stripe_customer_id', payload.stripeCustomerId)
+      .maybeSingle()
+
+    if (profileError) {
+      throw new Error(profileError.message)
+    }
+
+    return profileData?.id ?? null
+  }
+
+  return null
 }
 
 async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
 
   const planLabel = payload.productLabel || (payload.plan === 'premium' ? 'Premium pre-registration' : 'Pro pre-registration')
+  const normalizedPlan = payload.plan || 'pro'
   const status = payload.status === 'paid' || payload.status === 'complete' ? 'paid' : payload.status || 'pending'
 
   const { error: paymentError } = await supabase.from('payments').upsert([
@@ -92,7 +111,7 @@ async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: st
       stripe_customer_id: payload.stripeCustomerId,
       stripe_subscription_id: payload.stripeSubscriptionId,
       stripe_session_id: payload.sessionId,
-      price_type: payload.plan || 'pro',
+      price_type: normalizedPlan,
       plan_label: planLabel,
       mode: payload.mode || 'payment',
       amount_total: payload.amountTotal,
@@ -110,7 +129,7 @@ async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: st
   }
 
   await supabase.from('profiles').update({
-    subscription_plan: payload.plan || 'pro',
+    subscription_plan: normalizedPlan,
     subscription_status: 'active',
     subscription_started_at: new Date().toISOString()
   }).eq('id', userId)
@@ -137,12 +156,21 @@ async function handleInvoiceSucceeded(supabase: SupabaseAdminClient, userId: str
   if (!payload.stripeSubscriptionId) {
     throw new FatalError('Missing subscription id for invoice payment success.')
   }
-  const { error: updateError } = await supabase.from('payments').update({
-    status: 'paid',
-    amount_total: payload.amountTotal,
-    currency: payload.currency,
-    metadata: { stripe_event: payload.eventType }
-  }).eq('stripe_subscription_id', payload.stripeSubscriptionId)
+
+  const { error: updateError } = await supabase.from('payments').upsert([
+    {
+      user_id: userId,
+      stripe_customer_id: payload.stripeCustomerId,
+      stripe_subscription_id: payload.stripeSubscriptionId,
+      price_type: payload.plan || 'subscription',
+      plan_label: payload.productLabel || 'Subscription billing',
+      mode: payload.mode || 'subscription',
+      amount_total: payload.amountTotal,
+      currency: payload.currency,
+      status: 'paid',
+      metadata: { stripe_event: payload.eventType }
+    }
+  ], { onConflict: 'stripe_subscription_id' })
 
   if (updateError) {
     throw new Error(updateError.message)
@@ -174,10 +202,22 @@ async function handleInvoiceFailed(supabase: SupabaseAdminClient, userId: string
     throw new FatalError('Missing subscription id for failed invoice event.')
   }
 
-  await supabase.from('payments').update({
-    status: 'failed',
-    metadata: { stripe_event: payload.eventType }
-  }).eq('stripe_subscription_id', payload.stripeSubscriptionId)
+  await supabase.from('payments').upsert([
+    {
+      user_id: userId,
+      stripe_customer_id: payload.stripeCustomerId,
+      stripe_subscription_id: payload.stripeSubscriptionId,
+      price_type: payload.plan || 'subscription',
+      plan_label: payload.productLabel || 'Subscription billing',
+      mode: payload.mode || 'subscription',
+      amount_total: payload.amountTotal,
+      currency: payload.currency,
+      status: 'failed',
+      metadata: { stripe_event: payload.eventType }
+    }
+  ], { onConflict: 'stripe_subscription_id' })
+
+  await supabase.from('profiles').update({ subscription_status: 'past_due' }).eq('id', userId)
 
   await supabase.from('activity_log').insert([{
     user_id: userId,
