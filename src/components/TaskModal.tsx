@@ -53,6 +53,8 @@ export default function TaskModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
 
   // Liveblocks hooks
   const others = useOthers();
@@ -182,6 +184,43 @@ export default function TaskModal({
         onClose()
       }
     }
+
+  const handleAIGenerate = async () => {
+    if (!title.trim()) {
+      setAiError('Give the task a title first so AI can generate a good description.')
+      return
+    }
+
+    setAiLoading(true)
+    setAiError(null)
+
+    try {
+      const response = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          dueDate,
+          existingDescription: description
+        })
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to generate AI description.')
+      }
+
+      setDescription(data.description)
+      setAiError(null)
+    } catch (err: any) {
+      setAiError(err?.message || 'Unable to generate AI description.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const handleDelete = async () => {
     if (!task) return
@@ -399,7 +438,24 @@ export default function TaskModal({
             </div>
             
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Description</label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>Description</label>
+                <button
+                  type="button"
+                  onClick={handleAIGenerate}
+                  disabled={aiLoading || !title.trim()}
+                  className="secondary-button"
+                  style={{
+                    padding: '0.55rem 0.85rem',
+                    fontSize: '0.85rem',
+                    borderRadius: '999px',
+                    minWidth: '124px',
+                    opacity: aiLoading || !title.trim() ? 0.7 : 1
+                  }}
+                >
+                  {aiLoading ? 'Generating…' : 'AI Assist'}
+                </button>
+              </div>
               <textarea 
                 className="form-input" 
                 value={description || ''} 
@@ -408,6 +464,14 @@ export default function TaskModal({
                 rows={3}
                 style={{ resize: 'vertical', fontSize: '0.95rem' }}
               />
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>
+                  Use AI Assist to generate a polished description from the task title.
+                </span>
+                {aiError && (
+                  <span style={{ color: 'var(--error)', fontSize: '0.8rem' }}>{aiError}</span>
+                )}
+              </div>
             </div>
 
              <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
