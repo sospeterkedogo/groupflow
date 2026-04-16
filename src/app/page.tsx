@@ -15,19 +15,19 @@ export default function Home() {
     { 
       icon: <Zap size={24} />, 
       title: "Visual progress", 
-      desc: "See how your project is moving. We help you track contributions instantly so everyone stays on the same page.",
+      desc: "See how your project is moving. I'll help you track contributions instantly so everyone stays on the same page.",
       color: "#0ea5e9"
     },
     { 
       icon: <Shield size={24} />, 
       title: "Fair recognition", 
-      desc: "Every contribution counts. Our system ensures every team member's hard work is noticed and valued.",
+      desc: "Every contribution counts. My system makes sure every team member's hard work is noticed and valued.",
       color: "#10b981"
     },
     { 
       icon: <Layers size={24} />, 
       title: "Reliable records", 
-      desc: "Turn your shared work into clear proof of achievement that you and your tutors can always trust.",
+      desc: "Turn your shared work into clear proof of achievement. It's the kind of evidence you and your tutors can always trust.",
       color: "#6366f1"
     }
   ]
@@ -35,19 +35,19 @@ export default function Home() {
   const faqs = [
     {
       q: "Is GroupFlow free to use?",
-      a: "Yes. During this 2026 research phase, every feature is completely free for students and tutors to help them work better together."
+      a: "Yes. During this 2026 research phase, everything is completely free for students and tutors. My goal is simple: to help you work better together."
     },
     {
       q: "How is my data protected?",
-      a: "Your privacy is our priority. We use secure encryption to keep your project work safe, and we never share your personal info with anyone else."
+      a: "Your privacy is my priority. I use secure encryption to keep your work safe, and I'll never share your personal info with anyone else."
     },
     {
       q: "Can I delete my account?",
-      a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click at any time."
+      a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
     },
     {
       q: "Who is behind GroupFlow?",
-      a: "GroupFlow was created by Sospeter as a dissertation project to help student teams feel more supported and recognized during group work."
+      a: "I created GroupFlow as a dissertation project to help student teams feel more supported and recognized during group work."
     }
   ]
 
@@ -71,18 +71,18 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
-               OUR MISSION
+               MY MISSION
              </div>
              <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Better teamwork for everyone</h2>
              
              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Why am I building this?</strong>
-                   I want to help bridge the gap in group projects by making every contribution visible and valued.
+                   I want to bridge the gap in group projects by making every contribution visible and valued.
                 </div>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>What's the goal?</strong>
-                   To create a fair system where your actual effort is recognized, helping everyone in the team succeed together.
+                   I'm creating a fair system where your actual effort is recognized, helping everyone in the team succeed together.
                 </div>
              </div>
 
@@ -152,7 +152,7 @@ export default function Home() {
            </h1>
            
            <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.4rem', lineHeight: 1.5 }}>
-              Group projects can be hard. We help student teams work better together by tracking contributions fairly, so everyone's hard work turns into the recognition it deserves.
+              Group projects can be hard. I help student teams work better together by tracking contributions fairly, so your hard work turns into the recognition it deserves.
            </p>
 
            <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -175,7 +175,7 @@ export default function Home() {
                   For a long time, group projects have felt a bit out of balance. Tutors often can't see who's doing what, and hard-working students often carry the load alone.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
-                  We're changing that. GroupFlow makes collaboration simple and transparent, so your team can focus on creating great work together.
+                  I'm changing that. GroupFlow makes collaboration simple and transparent, so your team can focus on creating great work together.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
@@ -186,7 +186,7 @@ export default function Home() {
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
                      <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><Zap size={24} /></div>
                      <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Work that matters</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>We help highlight the effort of every team member, from leaders to creators.</p>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>I'll help you highlight the effort of every team member, from leaders to creators.</p>
                   </div>
                </div>
             </div>
@@ -244,7 +244,7 @@ export default function Home() {
               <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Work your way</div>
               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Use the tools you love.</h2>
               <p style={{ fontSize: '1.3rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '4.5rem' }}>
-                 We work with the tools you already use every day. Collaborate where you feel most creative—whether it's Google Docs, Figma, or GitHub—and we'll help you keep everything organized.
+                 I work with the tools you already use every day. Collaborate where you feel most creative, whether it's Google Docs, Figma, or GitHub, and I'll help you keep everything organized.
               </p>
               
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4.5rem', flexWrap: 'wrap', opacity: 0.6, filter: 'grayscale(1)' }}>
@@ -269,12 +269,12 @@ export default function Home() {
            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
               <h2 style={{ fontSize: '2.75rem', fontWeight: 900, marginBottom: '4rem', textAlign: 'center', letterSpacing: '-0.03em' }}>Built for student success.</h2>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem' }}>
+              <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2.5rem' }}>
                  {[
-                    { title: 'Dissertations & Graduation', desc: 'Keep track of your research journey with a clear history of how your work has evolved.', icon: <Milestone /> },
-                    { title: 'Team Lab Reports', desc: 'Make sure every part of your analysis and writing is clearly noted and easy to share.', icon: <Activity /> },
+                    { title: 'Dissertations & Graduation', desc: 'Keep track of your research journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
+                    { title: 'Team Lab Reports', desc: 'I'll make sure every part of your analysis and writing is clearly noted and easy to share.', icon: <Activity /> },
                     { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
-                    { title: 'Project Case Studies', desc: 'Ensure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
+                    { title: 'Project Case Studies', desc: 'Make sure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
                  ].map((usecase, i) => (
                     <div key={i} className="hover-lift" style={{ padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '32px' }}>
                        <div style={{ width: '52px', height: '52px', borderRadius: '13px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', marginBottom: '1.5rem' }}>
@@ -291,14 +291,14 @@ export default function Home() {
         {/* HOW IT WORKS */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
            <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Simple, transparent, and fair.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>We help you focus on the work, while we take care of the organization.</p>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I'll help you focus on the work, while I take care of the organization.</p>
 
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
                 { step: '01', title: 'Connect your work', desc: 'Easily link your Google Docs, GitHub projects, or Figma designs in a few taps.' },
-                { step: '02', title: 'Focus on creating', desc: 'Work naturally with your team. We help keep track of progress as it happens.' },
+                { step: '02', title: 'Focus on creating', desc: 'Work naturally with your team. I'll help you keep track of progress as it happens.' },
                 { step: '03', title: 'Share your progress', desc: 'Every milestone is saved, creating a clear and reliable history of your achievement.' },
-                { step: '04', title: 'Succeed together', desc: 'Get a clear view of how everyone is contributing, helping your entire team thrive.' }
+                { step: '04', title: 'Succeed together', desc: 'Get a clear view of how everyone is contributing, so your entire team can thrive.' }
               ].map((s, i) => (
                 <div key={i} style={{ padding: '3.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '44px', textAlign: 'left', position: 'relative' }}>
                    <div style={{ fontSize: '4.5rem', fontWeight: 900, color: 'rgba(var(--brand-rgb), 0.05)', position: 'absolute', top: '1.5rem', right: '2rem', letterSpacing: '-0.05em' }}>{s.step}</div>
@@ -317,7 +317,7 @@ export default function Home() {
                     <HelpCircle size={32} />
                  </div>
                  <h2 style={{ fontSize: '3.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Always here to help.</h2>
-                 <p style={{ color: 'var(--text-sub)', fontSize: '1.15rem', marginTop: '1rem' }}>A few things you might want to know about our mission.</p>
+                 <p style={{ color: 'var(--text-sub)', fontSize: '1.15rem', marginTop: '1rem' }}>A few things you might want to know about my mission.</p>
               </div>
 
               <div style={{ display: 'grid', gap: '2rem' }}>
@@ -342,7 +342,7 @@ export default function Home() {
               <div style={{ position: 'relative', zIndex: 1 }}>
                  <h2 style={{ fontSize: '4.5rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Join the mission.</h2>
                  <p style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '750px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
-                    Help us build the future of group projects—totally free to use, and focused on your success.
+                    Help me build the future of group projects. It's totally free to use, and focused on your success.
                  </p>
                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link href="/login" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Create your account</Link>
@@ -351,7 +351,7 @@ export default function Home() {
                  
                  <div style={{ marginTop: '4.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', fontSize: '1rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
                     <Shield size={20} />
-                    <span>Your work is always yours. You can delete everything at any time.</span>
+                    <span>Your work is always yours, and you can delete everything at any time.</span>
                  </div>
               </div>
            </div>
