@@ -13,6 +13,11 @@ CREATE TABLE public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     email TEXT,
     full_name TEXT,
+    avatar_url TEXT,
+    course_name TEXT,
+    enrollment_year INTEGER,
+    completion_year INTEGER,
+    role TEXT DEFAULT 'collaborator',
     group_id UUID REFERENCES public.groups(id) ON DELETE SET NULL,
     total_score NUMERIC DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -81,8 +86,26 @@ CREATE POLICY "Users can update group tasks" ON public.tasks FOR UPDATE USING (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email)
-  VALUES (new.id, new.email);
+  INSERT INTO public.profiles (
+    id, 
+    email, 
+    full_name, 
+    school_id, 
+    role,
+    course_name,
+    enrollment_year,
+    completion_year
+  )
+  VALUES (
+    new.id, 
+    new.email, 
+    COALESCE(new.raw_user_meta_data->>'full_name', new.email),
+    new.raw_user_meta_data->>'school_id',
+    'collaborator',
+    'Independent Researcher',
+    extract(year from now())::int,
+    (extract(year from now()) + 3)::int
+  );
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
