@@ -132,7 +132,24 @@ export async function sendJoinRequest(groupId: string, senderName: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  // 2. Perform the insert using the ADMIN client to bypass member-only RLS
+  // 2. Avoid duplicate join request messages for the same group
+  const { data: existingRequest, error: fetchError } = await adminSupabase
+    .from('messages')
+    .select('id')
+    .eq('group_id', groupId)
+    .eq('user_id', user.id)
+    .ilike('content', '%[JOIN REQUEST]%')
+    .limit(1)
+    .maybeSingle()
+
+  if (fetchError) {
+    throw new Error(fetchError.message)
+  }
+
+  if (existingRequest) {
+    return { success: true, alreadySent: true }
+  }
+
   const { error } = await adminSupabase.from('messages').insert({
     group_id: groupId,
     user_id: user.id,

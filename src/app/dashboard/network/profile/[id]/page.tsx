@@ -6,7 +6,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   X, UserCircle, ShieldCheck, Mail, Target, Award, Hash, 
   GraduationCap, Calendar, UserPlus, Check, MessageSquare, 
-  Video, Info, ChevronLeft, ExternalLink, Activity
+  Video, Info, Clock, ChevronLeft, ExternalLink, Activity
 } from 'lucide-react'
 import Link from 'next/link'
 import { Profile } from '@/types/database'
@@ -22,7 +22,7 @@ export default function StudentProfilePage() {
   const [member, setMember] = useState<Profile | null>(null)
   const [me, setMe] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [isConnected, setIsConnected] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'pending' | 'connected'>('idle')
   const [activeTab, setActiveTab] = useState<'info' | 'accomplishments'>('info')
   const { withLoading, showConfirmation } = useSmartLoading()
 
@@ -62,17 +62,22 @@ export default function StudentProfilePage() {
           .eq('user_id', user.id)
           .eq('target_id', studentId)
           .single()
-        
-        if (conn && (conn.status === 'connected' || conn.status === 'accepted')) {
-          setIsConnected(true)
+
+        if (conn?.status === 'pending') {
+          setConnectionStatus('pending')
+        } else if (conn && (conn.status === 'connected' || conn.status === 'accepted')) {
+          setConnectionStatus('connected')
+        } else {
+          setConnectionStatus('idle')
         }
       }
     }
+
     setLoading(false)
   }
 
   const handleConnect = async () => {
-    if (!me || !member) return
+    if (!me || !member || connectionStatus !== 'idle') return
 
     await withLoading(async () => {
       // 1. Create a pending connection
@@ -91,7 +96,7 @@ export default function StudentProfilePage() {
         metadata: { sender_id: me.id }
       })
 
-      setIsConnected(true)
+      setConnectionStatus('pending')
       
       showConfirmation({
         title: 'Request Transmitted',
@@ -168,29 +173,29 @@ export default function StudentProfilePage() {
                 Member since {new Date(member.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 800 }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isConnected ? 'var(--success)' : 'var(--text-sub)', boxShadow: isConnected ? '0 0 8px var(--success)' : 'none' }} />
-                <span style={{ color: isConnected ? 'var(--success)' : 'var(--text-sub)' }}>
-                  {isConnected ? 'Online' : `Last seen ${formatRelativeTime(member.last_seen || null)}`}
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: connectionStatus === 'connected' ? 'var(--success)' : 'var(--text-sub)', boxShadow: connectionStatus === 'connected' ? '0 0 8px var(--success)' : 'none' }} />
+                <span style={{ color: connectionStatus === 'connected' ? 'var(--success)' : 'var(--text-sub)' }}>
+                  {connectionStatus === 'connected' ? 'Connection established' : `Last seen ${formatRelativeTime(member.last_seen || null)}`}
                 </span>
               </div>
             </div>
 
             <button 
               onClick={handleConnect}
-              disabled={isConnected}
+              disabled={connectionStatus !== 'idle'}
               style={{ 
                 width: '100%', padding: '1.1rem', borderRadius: '18px', border: 'none', 
-                background: isConnected ? 'var(--bg-sub)' : 'var(--brand)', 
-                color: isConnected ? 'var(--text-sub)' : 'white',
-                fontWeight: 900, fontSize: '1rem', cursor: isConnected ? 'default' : 'pointer',
+                background: connectionStatus === 'idle' ? 'var(--brand)' : 'var(--bg-sub)', 
+                color: connectionStatus === 'idle' ? 'white' : 'var(--text-sub)',
+                fontWeight: 900, fontSize: '1rem', cursor: connectionStatus === 'idle' ? 'pointer' : 'default',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-                boxShadow: isConnected ? 'none' : '0 10px 25px rgba(var(--brand-rgb), 0.25)',
+                boxShadow: connectionStatus === 'idle' ? '0 10px 25px rgba(var(--brand-rgb), 0.25)' : 'none',
                 transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)'
               }}
               className="action-button-main"
             >
-              {isConnected ? <Check size={20} /> : <UserPlus size={20} />}
-              {isConnected ? 'Connection Live' : 'Add to Network'}
+              {connectionStatus === 'connected' ? <Check size={20} /> : connectionStatus === 'pending' ? <Clock size={20} /> : <UserPlus size={20} />}
+              {connectionStatus === 'connected' ? 'Connection Live' : connectionStatus === 'pending' ? 'Awaiting approval' : 'Add to Network'}
             </button>
           </div>
 
@@ -198,7 +203,7 @@ export default function StudentProfilePage() {
           <div className="action-matrix-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
              {[
                { id: 'info', icon: Target, label: 'Stats', color: 'var(--brand)' },
-               { id: 'chat', icon: MessageSquare, label: 'Message', color: 'var(--success)', disabled: !isConnected, nav: true },
+               { id: 'chat', icon: MessageSquare, label: 'Message', color: 'var(--success)', disabled: connectionStatus !== 'connected', nav: true },
                { id: 'accomplishments', icon: Award, label: 'Badges', color: '#f59e0b' }
              ].map((item) => (
                <button

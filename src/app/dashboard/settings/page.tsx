@@ -5,7 +5,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import {
   Settings, Save, CheckCircle2, Shield, Download, Trash2,
-  Key, AlertTriangle, X, Camera, Palette as PaletteIcon,
+  Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
   Calendar
@@ -66,6 +66,18 @@ export default function SettingsPage() {
     if (data) setAvailableGroups(data)
   }
 
+  const fetchJoinRequests = async (userId: string) => {
+    const { data } = await supabase
+      .from('messages')
+      .select('group_id')
+      .eq('user_id', userId)
+      .ilike('content', '%[JOIN REQUEST]%')
+
+    if (data) {
+      setSentRequests(Array.from(new Set(data.map((row: any) => row.group_id))))
+    }
+  }
+
   const fetchUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
@@ -84,6 +96,10 @@ export default function SettingsPage() {
 
         if (data.role === 'admin' && data.group_id) {
           fetchTeam(data.group_id)
+        }
+
+        if (data.id) {
+          fetchJoinRequests(data.id)
         }
       }
     }
@@ -346,9 +362,9 @@ export default function SettingsPage() {
                     <User size={32} color="var(--text-sub)" />
                   )}
                 </div>
-                <label style={{ position: 'absolute', bottom: '0', right: '0', width: '30px', height: '30px', borderRadius: '50%', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '2px solid var(--surface)' }}>
-                  <Camera size={14} />
-                  <input type="file" accept="image/*" capture="user" onChange={e => handleFileUpload(e, 'avatar')} style={{ display: 'none' }} />
+                <label style={{ position: 'absolute', bottom: '0', right: '0', minWidth: '110px', padding: '0.6rem 0.9rem', borderRadius: '18px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '2px solid var(--surface)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.01em' }}>
+                  Upload Photo
+                  <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'avatar')} style={{ display: 'none' }} />
                 </label>
               </div>
               <div style={{ flex: '1 1 200px' }}>
@@ -487,7 +503,7 @@ export default function SettingsPage() {
                   try {
                     const { sendJoinRequest } = await import('../join/actions')
                     await sendJoinRequest(group.id, fullName || 'A student')
-                    setSentRequests(prev => [...prev, group.id])
+                    setSentRequests(prev => [...new Set([...prev, group.id])])
                   } catch (err: any) {
                     setError('Request failed: ' + err.message)
                   } finally {

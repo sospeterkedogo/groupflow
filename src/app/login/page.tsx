@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, use } from 'react'
+import { useState } from 'react'
 import { signup, login } from './actions'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
-import { BookOpen, User, Lock } from 'lucide-react'
+import { BookOpen, User, Lock, ExternalLink } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
 function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAccepted: boolean }) {
   const { pending } = useFormStatus()
@@ -37,6 +38,49 @@ function LoginContent() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [legalAccepted, setLegalAccepted] = useState(false)
   const [activePolicy, setActivePolicy] = useState<'privacy' | 'terms' | 'cookies' | null>(null)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [resetMessage, setResetMessage] = useState<string | null>(null)
+  const [isResetting, setIsResetting] = useState(false)
+
+  const handleGithubLogin = async () => {
+    setAuthError(null)
+    const supabase = createBrowserSupabaseClient()
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    })
+
+    if (error) {
+      setAuthError(error.message)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      setAuthError('Enter your email address to reset your password.')
+      return
+    }
+
+    setIsResetting(true)
+    setResetMessage(null)
+    setAuthError(null)
+
+    try {
+      const supabase = createBrowserSupabaseClient()
+      const { error } = await supabase.auth.resetPasswordForEmail(email)
+      if (error) {
+        setAuthError(error.message)
+      } else {
+        setResetMessage('If your email exists, a reset link has been sent.')
+      }
+    } finally {
+      setIsResetting(false)
+    }
+  }
 
   return (
     <div style={{
@@ -80,7 +124,9 @@ function LoginContent() {
           </p>
         </div>
 
-        {error && <TransientError message={error} />}
+        {(error || authError || resetMessage) && (
+          <TransientError message={error || authError || resetMessage || ''} />
+        )}
 
         <form action={isSignUp ? signup : login} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
@@ -92,6 +138,8 @@ function LoginContent() {
                 name="email"
                 type="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', paddingLeft: '3rem' }}
                 placeholder="school.email@edu.com"
               />
@@ -107,6 +155,8 @@ function LoginContent() {
                 name="password"
                 type="password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', paddingLeft: '3rem' }}
                 placeholder="••••••••"
               />
@@ -148,6 +198,27 @@ function LoginContent() {
 
           <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <SubmitButton isSignUp={isSignUp} legalAccepted={legalAccepted} />
+            {!isSignUp && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={handleResetPassword}
+                  className="btn btn-ghost"
+                  style={{ padding: '0.85rem 1rem', fontSize: '0.9rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.15)' }}
+                  disabled={isResetting}
+                >
+                  {isResetting ? 'Sending reset link...' : 'Forgot password?'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGithubLogin}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.85rem 1rem', fontSize: '0.9rem', borderRadius: '14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <ExternalLink size={18} /> Continue with GitHub
+                </button>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
