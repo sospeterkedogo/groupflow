@@ -159,6 +159,38 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
         </div>
       </div>
 
+      {!profile.subscription_plan && (
+        <div style={{ padding: '1rem 1.25rem', borderRadius: '22px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: '1rem' }}>Pre-registration is open</div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>Reserve your Pro or Premium access now through Stripe checkout.</div>
+          </div>
+          <button
+            className="btn-sm btn-primary"
+            style={{ padding: '0.8rem 1.2rem', borderRadius: '16px' }}
+            onClick={() => router.push('/dashboard/upgrade')}
+          >
+            Reserve access
+          </button>
+        </div>
+      )}
+
+      {profile.subscription_plan && (
+        <div style={{ padding: '1rem 1.25rem', borderRadius: '22px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: '1rem' }}>Active plan: {profile.subscription_plan}</div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>Your pre-registration is active and your access is secured.</div>
+          </div>
+          <button
+            className="btn-sm btn-secondary"
+            style={{ padding: '0.8rem 1.2rem', borderRadius: '16px' }}
+            onClick={() => router.push('/dashboard/upgrade')}
+          >
+            Manage plan
+          </button>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
          <div className="stat-pill" style={{ padding: '0.6rem 1rem', borderRadius: '14px', background: 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} data-tooltip="Team activity right now">
             <Activity size={16} color="var(--brand)" />

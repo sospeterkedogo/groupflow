@@ -18,6 +18,9 @@ export type Profile = {
   badges_count: number | null;
   school_id: string | null;
   group_id: string | null;
+  subscription_plan?: string | null;
+  subscription_status?: string | null;
+  subscription_started_at?: string | null;
   total_score: number;
   created_at: string;
   last_seen?: string | null;

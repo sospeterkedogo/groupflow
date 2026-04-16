@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Activity,
   Moon,
-  Sun
+  Sun,
+  TrendingUp
 } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 import { Profile } from '@/types/auth'
@@ -134,6 +135,7 @@ export default function Sidebar({ user }: SidebarProps) {
     { name: 'Task Board', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Student Network', path: '/dashboard/network', icon: Users },
     { name: 'Group Stats', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/network', icon: BarChart3 },
+    { name: 'Upgrade', path: '/dashboard/upgrade', icon: TrendingUp },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]

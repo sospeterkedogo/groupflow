@@ -125,7 +125,7 @@ function LoginContent() {
         </div>
 
         {(error || authError || resetMessage) && (
-          <TransientError message={error || authError || resetMessage || ''} />
+          <TransientError message={error || authError || resetMessage || ''} type={resetMessage ? 'success' : 'error'} />
         )}
 
         <form action={isSignUp ? signup : login} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

@@ -13,7 +13,9 @@ export type ActionType =
   | 'theme_changed' 
   | 'privacy_toggled'
   | 'member_kicked'
-  | 'artifact_uploaded';
+  | 'artifact_uploaded'
+  | 'payment_completed'
+  | 'payment_failed';
 
 export type LogEntry = {
   id: string;
