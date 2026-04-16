@@ -63,7 +63,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div 
-        className="glass"
+        className="glass no-scrollbar"
         style={{ 
           background: 'var(--surface)', 
           borderRadius: '28px', 
@@ -77,7 +77,6 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
           scrollbarWidth: 'none',
           msOverflowStyle: 'none'
         }}
-        className="no-scrollbar"
       >
         {/* Header Visual with Gradient */}
         <div style={{ height: '140px', background: 'linear-gradient(135deg, var(--brand), #6366f1, #a855f7)', position: 'relative' }}>
