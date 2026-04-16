@@ -80,7 +80,7 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
     }, 500)
   }, [])
 
-  const withLoading = useCallback(async <T>(task: () => Promise<T>, message: string): Promise<T> => {
+  const withLoading = useCallback(async <T,>(task: () => Promise<T>, message: string): Promise<T> => {
     startLoading(message)
     try {
       const result = await task()
