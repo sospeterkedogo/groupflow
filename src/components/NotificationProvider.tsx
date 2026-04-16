@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Bell, X, Info, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
@@ -17,9 +17,8 @@ export const useNotifications = () => {
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default')
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const audioUnlockedRef = useRef(false)
 
   const addToast = (title: string, message: string, type: string = 'info') => {
     const id = Math.random().toString(36).substr(2, 9)
@@ -44,37 +43,41 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [supabase])
 
   useEffect(() => {
-    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
-    audio.preload = 'auto'
-    audioRef.current = audio
-
-    const unlockAudio = () => {
-      if (!audioRef.current || audioUnlockedRef.current) return
-      audioRef.current.currentTime = 0
-      audioRef.current.play().then(() => {
-        audioUnlockedRef.current = true
-      }).catch(() => {
-        audioUnlockedRef.current = false
-      })
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(window.Notification.permission)
+      if (window.Notification.permission === 'default') {
+        window.Notification.requestPermission().then(permission => {
+          setNotificationPermission(permission)
+        })
+      }
     }
 
-    window.addEventListener('pointerdown', unlockAudio, { once: true })
-    return () => window.removeEventListener('pointerdown', unlockAudio)
-  }, [])
-
-  useEffect(() => {
     let channel: RealtimeChannel | null = null
     let active = true
 
-    const playDing = async () => {
-      if (!audioRef.current) return
-      try {
-        audioRef.current.currentTime = 0
-        await audioRef.current.play()
-        audioUnlockedRef.current = true
-      } catch (err) {
-        console.warn('Notification sound blocked or unavailable:', err)
-      }
+    const showBrowserAlert = (title: string, message: string) => {
+      if (typeof window === 'undefined') return
+      if (window.Notification?.permission !== 'granted') return
+      if (!document.hidden && document.hasFocus()) return
+
+      const notification = new window.Notification(title, {
+        body: message,
+        icon: '/favicon.ico',
+        silent: true
+      })
+      notification.onclick = () => window.focus()
+    }
+
+    const processNotification = (incoming: Notification) => {
+      setNotifications(prev => {
+        const exists = prev.some(n => n.id === incoming.id)
+        if (exists) {
+          return prev.map(n => n.id === incoming.id ? incoming : n)
+        }
+        return [incoming, ...prev]
+      })
+      addToast(incoming.title, incoming.message, incoming.type)
+      showBrowserAlert(incoming.title, incoming.message)
     }
 
     const setupSubscription = async () => {
@@ -84,15 +87,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         channel = supabase
           .channel(`notifications_${user.id}`)
           .on('postgres_changes', {
-            event: 'INSERT',
+            event: '*',
             schema: 'public',
             table: 'notifications',
             filter: `user_id=eq.${user.id}`,
           }, (payload) => {
-            const newNotif = payload.new as Notification
-            setNotifications(prev => [newNotif, ...prev])
-            addToast(newNotif.title, newNotif.message, newNotif.type)
-            playDing()
+            if (!payload.new) return
+            const incoming = payload.new as Notification
+            processNotification(incoming)
           })
           .subscribe()
       }

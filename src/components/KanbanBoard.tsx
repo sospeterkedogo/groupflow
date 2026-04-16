@@ -25,7 +25,7 @@ import { ClientSideSuspense } from "@liveblocks/react";
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
-export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
+export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   if (!groupId) return <div>Invalid Group</div>;
 
   return (
@@ -35,13 +35,13 @@ export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
       initialStorage={{ tasks: new LiveList<Task>([]), messages: new LiveList([]) }}
     >
       <ClientSideSuspense fallback={<KanbanBoardSkeleton />}>
-        {() => <KanbanBoardContent groupId={groupId} profile={profile} />}
+        {() => <KanbanBoardContent groupId={groupId} profile={profile} newTaskSignal={newTaskSignal} />}
       </ClientSideSuspense>
     </RoomProvider>
   )
 }
 
-function KanbanBoardContent({ groupId, profile }: KanbanBoardProps) {
+function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   const tasks = useStorage((root) => root.tasks);
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
@@ -124,6 +124,13 @@ function KanbanBoardContent({ groupId, profile }: KanbanBoardProps) {
     fetchGroupMembers()
     fetchCurrentUser()
   }, [fetchTasksFromDB, fetchGroupMembers, fetchCurrentUser])
+
+  useEffect(() => {
+    if (typeof newTaskSignal === 'number' && newTaskSignal > 0) {
+      setSelectedTask(null)
+      setIsModalOpen(true)
+    }
+  }, [newTaskSignal])
 
   // Collaborative Handlers (Liveblocks)
   const handleDragStart = (e: React.DragEvent, taskId: string) => {

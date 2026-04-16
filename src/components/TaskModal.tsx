@@ -165,7 +165,7 @@ export default function TaskModal({
         } else {
           // Note: In a real app, you'd get the inserted ID from Supabase
           // For simplicity, we trigger a refresh or fetch the latest
-          onRefresh() 
+          await onRefresh()
         }
 
         // Verifiable Logging

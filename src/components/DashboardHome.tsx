@@ -23,7 +23,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
   })
   const [personalTaskCount, setPersonalTaskCount] = useState(0)
   const [group, setGroup] = useState<Group | null>(null)
-  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false)
+  const [newTaskSignal, setNewTaskSignal] = useState(0)
   const [syncToken, setSyncToken] = useState(0)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
@@ -171,7 +171,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
                className="btn-sm btn-primary btn-inline" 
                style={{ padding: '0.5rem 1rem' }} 
                data-tooltip="Add a new task"
-               onClick={() => setIsNewTaskModalOpen(true)}
+               onClick={() => setNewTaskSignal(prev => prev + 1)}
             >+ New Task</button>
             <button 
                className="btn-sm btn-secondary btn-inline" 
@@ -237,19 +237,12 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
 
       <div style={{ position: 'relative' }}>
         {activeTab === 'board' 
-          ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} profile={profile} /> 
+          ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} profile={profile} newTaskSignal={newTaskSignal} /> 
           : <CalendarView groupId={groupId} key={`cal-${syncToken}`} />
         }
       </div>
 
-      {isNewTaskModalOpen && (
-        <TaskModal 
-          task={null} 
-          groupId={groupId} 
-          onClose={() => setIsNewTaskModalOpen(false)} 
-          onRefresh={() => fetchPersonalTaskCount()} 
-        />
-      )}
+      {/* Board task creation is handled inside the KanbanBoard room so the modal works reliably. */}
 
       <style jsx>{`
          .hud-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--brand); }

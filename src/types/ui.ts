@@ -33,6 +33,7 @@ export interface DashboardHomeProps {
 export interface KanbanBoardProps {
   groupId: string;
   profile: Profile;
+  newTaskSignal?: number;
 }
 
 export interface SidebarProps {
@@ -151,7 +152,7 @@ export type TaskModalProps = {
   task: import('./database').Task | null
   groupId: string
   onClose: () => void
-  onRefresh: () => void
+  onRefresh: () => Promise<void> | void
   initialDueDate?: string
 }
 
