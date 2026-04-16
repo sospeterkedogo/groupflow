@@ -314,24 +314,45 @@ export default function TaskModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: '650px' }}>
+      <div 
+        className="modal-content task-modal-responsive" 
+        onClick={(e) => e.stopPropagation()} 
+        style={{ 
+          padding: 0, 
+          overflow: 'hidden', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          width: '95%',
+          maxWidth: '650px',
+          height: 'auto',
+          maxHeight: '90vh'
+        }}
+      >
         
         {/* Sleek Google-style Header */}
-        <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-sub)' }}>
-          <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ 
+          padding: '1.25rem 1.5rem', 
+          borderBottom: '1px solid var(--border)', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          backgroundColor: 'var(--bg-sub)',
+          flexShrink: 0
+        }}>
+          <h2 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {isEditMode ? 'Edit Task' : 'New Task'}
             {isEditMode && assignees.length > 0 && (
-               <span className="badge" style={{ backgroundColor: 'var(--brand)', color: 'white', marginLeft: '0.5rem' }}>
-                 {assignees.length} Member{assignees.length !== 1 && 's'} assigned
+               <span className="badge hide-tiny" style={{ backgroundColor: 'var(--brand)', color: 'white', marginLeft: '0.5rem', fontSize: '0.7rem' }}>
+                 {assignees.length} Assigned
                </span>
             )}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
-             <X size={24} />
+             <X size={20} />
           </button>
         </div>
 
-        <div style={{ padding: '2rem', overflowY: 'auto' }}>
+        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, minHeight: 0 }}>
           {error && <div className="error-message" style={{ marginBottom: '1.5rem' }}>{error}</div>}
 
           {/* Form Fields */}
@@ -344,6 +365,7 @@ export default function TaskModal({
                 onChange={e => setTitle(e.target.value)} 
                 placeholder="What needs to be done?"
                 autoFocus
+                style={{ fontSize: '1rem' }} // Better for mobile zoom
               />
             </div>
             
@@ -355,26 +377,26 @@ export default function TaskModal({
                 onChange={e => setDescription(e.target.value)} 
                 placeholder="Add more details about this task..."
                 rows={3}
-                style={{ resize: 'vertical' }}
+                style={{ resize: 'vertical', fontSize: '0.95rem' }}
               />
             </div>
 
-             <div style={{ display: 'flex', gap: '1rem', width: '100%', alignItems: 'center' }}>
-               <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+             <div style={{ display: 'flex', gap: '1rem', width: '100%', flexWrap: 'wrap' }}>
+               <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
                  <label className="form-label">Status</label>
                  <select className="form-input" value={status} onChange={e => setStatus(e.target.value as TaskStatus)}>
                    {COLUMNS.map(c => <option key={c} value={c}>{c}</option>)}
                  </select>
                </div>
                
-               <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
-                  <label className="form-label">Track / Category</label>
+               <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
+                  <label className="form-label">Category</label>
                   <select className="form-input" value={category} onChange={e => setCategory(e.target.value as TaskCategory)}>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                
-               <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+               <div className="form-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
                  <label className="form-label" style={{ color: 'var(--error)' }}>Due Date</label>
                  <input 
                    type="date"
@@ -388,12 +410,12 @@ export default function TaskModal({
             
             {/* COLLABORATOR SELECTION GRID */}
             <div style={{ marginTop: '0.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <label className="form-label" style={{ margin: 0 }}>Assignments</label>
-                <div style={{ position: 'relative', width: '220px' }}>
+                <div style={{ position: 'relative', width: '100%', maxWidth: '220px' }}>
                   <input 
                     type="text" 
-                    placeholder="Search name or ID..."
+                    placeholder="Search collaborators..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     style={{ 
@@ -408,10 +430,10 @@ export default function TaskModal({
                 </div>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', maxHeight: '200px', overflowY: 'auto', padding: '0.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '0.75rem', maxHeight: '180px', overflowY: 'auto', padding: '0.25rem' }}>
                 {members.length === 0 ? (
-                  [1, 2, 3, 4].map(i => (
-                    <div key={i} className="skeleton" style={{ height: '48px', borderRadius: '12px' }} />
+                  [1, 2, 3].map(i => (
+                    <div key={i} className="skeleton" style={{ height: '40px', borderRadius: '12px' }} />
                   ))
                 ) : (
                   members
@@ -432,40 +454,38 @@ export default function TaskModal({
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.75rem',
-                          padding: '0.75rem',
-                          borderRadius: '12px',
-                          backgroundColor: isAssigned ? 'var(--bg-sub)' : 'transparent',
-                          border: isAssigned ? '1px solid var(--brand)' : '1px solid var(--border)',
+                          gap: '0.5rem',
+                          padding: '0.5rem',
+                          borderRadius: '10px',
+                          backgroundColor: isAssigned ? 'rgba(var(--brand-rgb), 0.05)' : 'transparent',
+                          border: isAssigned ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                           cursor: 'pointer',
                           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                          position: 'relative',
-                          boxShadow: isAssigned ? 'var(--shadow-sm)' : 'none'
+                          position: 'relative'
                         }}
                       >
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
                           {member.avatar_url ? (
                             <img 
                               src={member.avatar_url} 
-                              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }} 
-                              alt={member.full_name || 'Member avatar'}
+                              style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} 
+                              alt={member.full_name || 'Member'}
                             />
                           ) : (
-                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 700 }}>
+                            <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700 }}>
                               {initials}
                             </div>
                           )}
                           {isOnline && (
-                            <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)', boxShadow: '0 0 4px var(--success)' }} />
+                            <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '1.5px solid var(--surface)' }} />
                           )}
                         </div>
                         <div style={{ overflow: 'hidden' }}>
-                          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous'}</div>
-                          <div style={{ fontSize: '0.65rem', color: isOnline ? 'var(--success)' : 'var(--text-sub)', fontWeight: 500 }}>{isOnline ? 'Online Now' : 'Offline'}</div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{member.full_name?.split(' ')[0]}</div>
                         </div>
                         {isAssigned && (
-                          <div style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Check size={12} />
+                          <div style={{ position: 'absolute', top: '-4px', right: '-4px', width: '14px', height: '14px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Check size={10} />
                           </div>
                         )}
                       </div>
@@ -478,108 +498,119 @@ export default function TaskModal({
 
           {/* Peer Verification Sub-Panel (Only in Edit Mode) */}
           {isEditMode && (
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '1.5rem' }}>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                 <LinkIcon size={18} color="var(--brand)" />
-                 <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Attachments</h3>
+                 <LinkIcon size={16} color="var(--brand)" />
+                 <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 700 }}>Evidence & Links</h3>
                </div>
-               <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Add links or upload files to show the task is complete.</p>
+               <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem', marginBottom: '1.25rem' }}>Add verifiable work links or architectural proof.</p>
 
-               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+               <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
                  <input 
                    type="url" 
                    className="form-input" 
-                   placeholder="Add a link (Figma, Docs, etc.)"
+                   placeholder="Figma / Docs / GitHub URL"
                    value={newUrl}
                    onChange={(e) => setNewUrl(e.target.value)}
-                   style={{ flex: 1 }}
+                   style={{ flex: '1 1 200px' }}
                  />
-                 <button className="btn btn-primary" onClick={handleUploadEvidence} disabled={uploading || !newUrl} style={{ width: 'auto', whiteSpace: 'nowrap' }}>
-                    {uploading ? 'Adding...' : 'Add Link'}
-                 </button>
-                 
-                 <div style={{ position: 'relative', width: 'auto', display: 'flex' }}>
-                    <button className="btn" disabled={uploading} style={{ backgroundColor: 'var(--bg-sub)', border: '1px dashed var(--brand)', color: 'var(--brand)', width: 'auto', whiteSpace: 'nowrap' }}>
-                       <FileUp size={16} /> Upload
+                 <div style={{ display: 'flex', gap: '0.5rem', flex: '1 1 auto' }}>
+                    <button className="btn btn-primary btn-sm" onClick={handleUploadEvidence} disabled={uploading || !newUrl} style={{ flex: 1 }}>
+                        {uploading ? 'Adding...' : 'Attach'}
                     </button>
-                   <input 
-                      type="file" 
-                      onChange={handlePhysicalUpload} 
-                      disabled={uploading} 
-                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
-                   />
+                    
+                    <div style={{ position: 'relative', flex: 1 }}>
+                        <button className="btn btn-ghost btn-sm" disabled={uploading} style={{ width: '100%', borderColor: 'var(--brand)', color: 'var(--brand)' }}>
+                           <FileUp size={14} /> Upload
+                        </button>
+                        <input 
+                          type="file" 
+                          onChange={handlePhysicalUpload} 
+                          disabled={uploading} 
+                          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} 
+                        />
+                    </div>
                  </div>
                </div>
 
                 <div>
                    {evidenceLoading || uploading ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {[1, 2].map(i => (
-                          <div key={i} className="skeleton" style={{ height: '60px', borderRadius: '12px' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {[1].map(i => (
+                          <div key={i} className="skeleton" style={{ height: '50px', borderRadius: '12px' }} />
                         ))}
                       </div>
                    ) : artifacts.length === 0 ? (
-                      <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
-                         <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem' }}>No attachments found.</p>
+                      <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: 'var(--bg-sub)', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
+                         <p style={{ color: 'var(--text-sub)', fontSize: '0.75rem' }}>No verifiable evidence attached yet.</p>
                       </div>
                   ) : (
-                   artifacts.map(artifact => {
-                     const isOwner = currentUser?.id === artifact.uploaded_by;
-                                          return (
-                        <div key={artifact.id} className="artifact-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '0.5rem' }}>
+                    artifacts.map(artifact => {
+                      const isOwner = currentUser?.id === artifact.uploaded_by;
+                      return (
+                        <div key={artifact.id} className="artifact-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '0.5rem', background: 'var(--bg-main)' }}>
                            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
-                             <a href={artifact.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
-                               <ExternalLink size={14} />
-                               View Link
+                             <a href={artifact.file_url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600 }}>
+                               <ExternalLink size={12} />
+                               View Attachment
                              </a>
-                             <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginTop: '0.25rem' }}>
-                               Added at: {new Date(artifact.created_at).toLocaleString()}
-                             </div>
                            </div>
                           
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                              <button 
-                                title="Like"
-                                className="btn btn-secondary" 
+                                className="btn btn-secondary btn-sm" 
                                 onClick={() => handleEndorse(artifact.id, artifact.endorsements_count)}
-                                style={{ width: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.75rem', border: '1px solid var(--brand)', color: 'var(--brand)' }}
+                                style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}
                              >
-                                <ThumbsUp size={14} />
+                                <ThumbsUp size={12} />
                                 {artifact.endorsements_count}
                              </button>
                             
                              {isOwner && (
                                 <button 
-                                 title="Delete"
                                  onClick={() => handleDeleteArtifact(artifact.id)}
-                                 style={{ background: 'none', border: '1px solid var(--error)', color: 'var(--error)', padding: '0.35rem', borderRadius: 'var(--radius)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                 style={{ background: 'none', border: 'none', color: 'var(--error)', padding: '4px', cursor: 'pointer' }}
                                 >
                                    <Trash2 size={14} />
                                 </button>
                              )}
                           </div>
                        </div>
-                     )
-                   })
-                 )}
+                      )
+                    })
+                  )}
                </div>
             </div>
           )}
         </div>
 
         {/* Footer Actions */}
-        <div style={{ padding: '1.5rem 2.5rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '1rem', backgroundColor: 'var(--bg-sub)' }}>
+        <div style={{ 
+          padding: '1.25rem 1.5rem', 
+          borderTop: '1px solid var(--border)', 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          gap: '0.75rem', 
+          backgroundColor: 'var(--bg-sub)',
+          flexShrink: 0,
+          flexWrap: 'wrap'
+        }}>
            {isEditMode && (
-             <button className="btn" onClick={handleDelete} disabled={loading} style={{ width: 'auto', color: 'var(--error)', backgroundColor: 'transparent', border: '1px solid var(--error)', marginRight: 'auto' }}>
-               <Trash2 size={16} /> Delete
+             <button className="btn btn-sm btn-inline" onClick={handleDelete} disabled={loading} style={{ color: 'var(--error)', backgroundColor: 'transparent', marginRight: 'auto' }}>
+               <Trash2 size={14} /> Delete
              </button>
            )}
-           <button className="btn btn-secondary" onClick={onClose} style={{ width: 'auto' }}>Cancel</button>
-           <button className="btn btn-primary" onClick={handleSave} disabled={loading} style={{ width: 'auto' }}>
+           <button className="btn btn-secondary btn-sm btn-inline" onClick={onClose}>Cancel</button>
+           <button className="btn btn-primary btn-sm btn-inline" onClick={handleSave} disabled={loading}>
              {loading ? 'Saving...' : 'Save Task'}
            </button>
         </div>
 
+        <style jsx>{`
+          @media (max-width: 480px) {
+            .hide-tiny { display: none; }
+          }
+        `}</style>
       </div>
     </div>
   )
