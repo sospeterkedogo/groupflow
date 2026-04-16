@@ -18,13 +18,13 @@ import imageCompression from 'browser-image-compression'
 import { useTheme, PALETTES } from '@/context/ThemeContext'
 import { kickUser } from '../join/actions'
 import { logActivity } from '@/utils/logging'
-
-type Tab = 'identity' | 'pulse' | 'activity' | 'intercom' | 'security' | 'appearance' | 'workspace' | 'data' | 'team'
+import { TabName } from '@/types/ui'
+import { Profile } from '@/types/auth'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<Tab>('identity')
-  const [profile, setProfile] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState<TabName>('identity')
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [fullName, setFullName] = useState('')
   const [courseName, setCourseName] = useState('')
   const [enrollmentYear, setEnrollmentYear] = useState<number>(new Date().getFullYear())
@@ -79,7 +79,8 @@ export default function SettingsPage() {
         setRank(data.rank || 'Senior')
         setBadgesCount(data.badges_count || 14)
         setAvatarUrl(data.avatar_url || '')
-        setIsEncrypted(data.groups?.is_encrypted || false)
+        const mainGroup = Array.isArray(data.groups) ? data.groups[0] : data.groups
+        setIsEncrypted(mainGroup?.is_encrypted || false)
 
         if (data.role === 'admin' && data.group_id) {
           fetchTeam(data.group_id)
@@ -116,8 +117,9 @@ export default function SettingsPage() {
     if (updateError) setError("Failed to update profile settings.")
     else {
       // Verifiable Logging
-      logActivity(profile.id, profile.group_id, 'setting_updated', 'Updated personal profile details and academic journey')
-      window.dispatchEvent(new CustomEvent('PROFILE_UPDATED'))
+      if (profile.id) {
+        logActivity(profile.id, profile.group_id || '', 'setting_updated', 'Updated personal profile details and academic journey')
+      }
       router.refresh()
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
@@ -173,12 +175,14 @@ export default function SettingsPage() {
     if (updateError) setError(`Failed to update visibility: ${updateError.message}`)
     else {
       // Verifiable Logging
-      logActivity(
-        profile.id,
-        profile.group_id,
-        'privacy_toggled',
-        `Changed group visibility to ${nextValue ? 'Encrypted' : 'Public'}`
-      )
+      if (profile.id && profile.group_id) {
+        logActivity(
+          profile.id,
+          profile.group_id,
+          'privacy_toggled',
+          `Changed group visibility to ${nextValue ? 'Encrypted' : 'Public'}`
+        )
+      }
       setIsEncrypted(nextValue)
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
@@ -287,7 +291,7 @@ export default function SettingsPage() {
         ].filter(t => !t.hidden).map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as Tab)}
+            onClick={() => setActiveTab(tab.id as TabName)}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem',
               background: activeTab === tab.id ? 'var(--brand)' : 'var(--bg-sub)',
@@ -309,7 +313,7 @@ export default function SettingsPage() {
           <div className="auth-card" style={{ maxWidth: '100%' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Direct Intercom & Mail</h2>
             <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Management hub for automated reminders and verifiable PDF reports.</p>
-            <EmailCenter groupId={profile.group_id} profile={profile} teamMembers={teamMembers} />
+            <EmailCenter groupId={profile.group_id || ''} profile={profile} teamMembers={teamMembers} />
           </div>
         )}
 
@@ -433,7 +437,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {member.id !== profile.id && member.role !== 'admin' && (
+                  {member.id !== profile?.id && member.role !== 'admin' && (
                     <button
                       onClick={() => handleKickUser(member.id)}
                       style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', border: '1px solid var(--error)', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}
@@ -441,7 +445,7 @@ export default function SettingsPage() {
                       <UserMinus size={16} /> Kick
                     </button>
                   )}
-                  {member.id === profile.id && <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 700 }}>YOU</span>}
+                  {member.id === profile?.id && <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 700 }}>YOU</span>}
                 </div>
               ))}
             </div>
@@ -456,8 +460,8 @@ export default function SettingsPage() {
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Team</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{profile?.groups?.name || 'No team assigned'}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{profile?.groups?.module_code || 'Independent'}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{(Array.isArray(profile?.groups) ? profile?.groups[0] : profile?.groups)?.name || 'No team assigned'}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{(Array.isArray(profile?.groups) ? profile?.groups[0] : profile?.groups)?.module_code || 'Independent'}</div>
               </div>
               {profile?.group_id && (
                 <button
@@ -628,6 +632,7 @@ export default function SettingsPage() {
                     const isConnected = userAchievements.some((a: any) => a.name === tool)
                     
                     const toggleTool = async () => {
+                      if (!profile) return
                       const achievements = profile.achievements || []
                       let newAchievements
                       if (isConnected) {
@@ -642,7 +647,9 @@ export default function SettingsPage() {
                         setError("Synchronization failed.")
                         setProfile(profile)
                       } else {
-                        logActivity(profile.id, profile.group_id, isConnected ? 'setting_updated' : 'theme_changed', `${isConnected ? 'Disconnected' : 'Connected'} ${tool} to arsenal`)
+                        if (profile.id) {
+                          logActivity(profile.id, profile.group_id || '', isConnected ? 'setting_updated' : 'theme_changed', `${isConnected ? 'Disconnected' : 'Connected'} ${tool} to arsenal`)
+                        }
                         setSuccess(true)
                         setTimeout(() => setSuccess(false), 3000)
                       }
@@ -705,20 +712,22 @@ export default function SettingsPage() {
                         onKeyDown={async (e) => {
                           if (e.key === 'Enter' && customToolInput.trim()) {
                             const toolName = customToolInput.trim()
-                            const achievements = profile.achievements || []
+                            const achievements = profile?.achievements || []
                             if (achievements.some((a: any) => a.name.toLowerCase() === toolName.toLowerCase())) {
                               setError("This tool is already in your arsenal.")
                               return
                             }
                             const newAchievements = [...achievements, { name: toolName, date: new Date().toISOString() }]
-                            setProfile({ ...profile, achievements: newAchievements })
-                            const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
-                            if (error) {
-                              setError("Failed to add custom tool.")
-                            } else {
-                              setCustomToolInput('')
-                              setSuccess(true)
-                              setTimeout(() => setSuccess(false), 3000)
+                            if (profile) {
+                              setProfile({ ...profile, achievements: newAchievements })
+                              const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
+                              if (error) {
+                                setError("Failed to add custom tool.")
+                              } else {
+                                setCustomToolInput('')
+                                setSuccess(true)
+                                setTimeout(() => setSuccess(false), 3000)
+                              }
                             }
                           }
                         }}

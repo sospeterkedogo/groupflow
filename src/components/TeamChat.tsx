@@ -8,34 +8,10 @@ import {
 } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
+import { ChatMessage, ChatPayload } from '@/types/ui'
+import { Profile } from '@/types/auth'
 
-type ChatPayload = {
-  type: 'image' | 'file'
-  url: string
-  name?: string
-}
-
-interface ChatMessage {
-  id: string
-  group_id: string
-  user_id: string
-  content: string
-  created_at: string
-  is_deleted: boolean
-  profiles?: {
-    full_name: string
-    avatar_url: string
-    role: string
-  }
-  payload?: {
-    type: 'image' | 'file'
-    url: string
-    name?: string
-  }
-  pending?: boolean // For Optimistic UI
-}
-
-export default function TeamChat({ groupId, user }: { groupId: string, user: any }) {
+export default function TeamChat({ groupId, user }: { groupId: string, user: Profile }) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isOpen, setIsOpen] = useState(false)

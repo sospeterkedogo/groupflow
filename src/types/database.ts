@@ -9,6 +9,13 @@ export type Profile = {
   id: string; // matches auth.users UUID
   email: string | null;
   full_name: string | null;
+  avatar_url: string | null;
+  course_name: string | null;
+  enrollment_year: number | null;
+  completion_year: number | null;
+  role: string | null;
+  rank: string | null;
+  badges_count: number | null;
   school_id: string | null;
   group_id: string | null;
   total_score: number;

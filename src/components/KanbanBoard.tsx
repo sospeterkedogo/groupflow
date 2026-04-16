@@ -3,16 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
-import { Task, TaskStatus, Profile } from '@/types/database'
-
-type MemberProfileStats = {
-  id: string
-  full_name: string | null
-  email: string | null
-  avatar_url: string | null
-  total_score: number
-  role: string
-}
+import { Task, TaskStatus } from '@/types/database'
+import { Profile } from '@/types/auth'
+import { KanbanBoardProps } from '@/types/ui'
 import TaskModal from './TaskModal'
 import confetti from 'canvas-confetti'
 import { distributeTaskScore } from '@/app/dashboard/actions'
@@ -23,9 +16,9 @@ import MemberProfileModal from './MemberProfileModal'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
-export default function KanbanBoard({ groupId }: { groupId: string }) {
+export default function KanbanBoard({ groupId, profile }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [groupMembers, setGroupMembers] = useState<MemberProfileStats[]>([])
+  const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   
   const [loading, setLoading] = useState(true)
@@ -65,28 +58,22 @@ export default function KanbanBoard({ groupId }: { groupId: string }) {
   const fetchGroupMembers = useCallback(async () => {
      const { data } = await supabase
        .from('profiles')
-       .select('id, full_name, email, avatar_url, role, total_score')
+       .select('*')
        .eq('group_id', groupId)
        
      if (data) {
-       setGroupMembers(data.map(item => ({
-         id: item.id,
-         full_name: item.full_name ?? null,
-         email: item.email ?? null,
-         avatar_url: item.avatar_url ?? null,
-         role: item.role ?? 'Member',
-         total_score: typeof item.total_score === 'number' ? item.total_score : 0,
-       })))
+       setGroupMembers(data as Profile[])
      }
   }, [supabase, groupId])
 
   const fetchCurrentUser = useCallback(async () => {
+    if (profile) return
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       if (data) setCurrentUserProfile(data)
     }
-  }, [supabase])
+  }, [supabase, profile])
 
   useEffect(() => {
     fetchTasks()

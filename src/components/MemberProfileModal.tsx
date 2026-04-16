@@ -2,22 +2,7 @@
 
 import { X, UserCircle, ShieldCheck, Mail, Target } from 'lucide-react'
 import { Task } from '@/types/database'
-
-type ProfileStats = {
-  id: string
-  full_name: string | null
-  avatar_url: string | null
-  email: string | null
-  total_score: number
-  role: string
-}
-
-type MemberProfileModalProps = {
-  member: ProfileStats
-  groupMembers: ProfileStats[]
-  tasks: Task[]
-  onClose: () => void
-}
+import { MemberProfileModalProps } from '@/types/ui'
 
 export default function MemberProfileModal({ member, groupMembers, tasks, onClose }: MemberProfileModalProps) {
   // Calculate verified CURRENT PROJECT EFFORT contribution %

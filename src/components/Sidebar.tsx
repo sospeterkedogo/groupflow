@@ -18,23 +18,12 @@ import {
   Sun
 } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
+import { Profile } from '@/types/auth'
+import { SidebarProps } from '@/types/ui'
 
-type SidebarProfile = {
-  id: string
-  full_name?: string
-  avatar_url?: string
-  email?: string
-  school_id?: string
-  group_id?: string
-  role?: string
-  theme_config?: { palette?: string }
-  custom_bg_url?: string
-  groups?: Array<{ id: string; name?: string }>
-}
-
-export default function Sidebar({ user }: { user: { id: string } }) {
+export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const [profile, setProfile] = useState<SidebarProfile | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const pathname = usePathname()
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { currentPalette, setPalette } = useTheme()
@@ -53,7 +42,7 @@ export default function Sidebar({ user }: { user: { id: string } }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, theme_config, custom_bg_url, full_name, avatar_url, group_id')
+        .select('*')
         .eq('id', user.id)
         .single()
       

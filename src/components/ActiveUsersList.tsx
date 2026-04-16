@@ -5,14 +5,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { usePresence } from './PresenceProvider'
 import { User, Shield } from 'lucide-react'
-
-type Member = {
-  id: string
-  full_name?: string
-  avatar_url?: string
-  role?: string
-  last_seen?: string | null
-}
+import { ActiveUser } from '@/types/auth'
 
 export default function ActiveUsersList({
   groupId,
@@ -21,7 +14,7 @@ export default function ActiveUsersList({
   groupId: string
   currentUser: { id: string }
 }) {
-  const [members, setMembers] = useState<Member[]>([])
+  const [members, setMembers] = useState<ActiveUser[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { onlineUsers, typingUsers } = usePresence()
@@ -34,7 +27,7 @@ export default function ActiveUsersList({
       .eq('group_id', groupId)
       .order('last_seen', { ascending: false })
 
-    setMembers((data ?? []) as Member[])
+    setMembers((data ?? []) as ActiveUser[])
     setLoading(false)
   }, [groupId, supabase])
 

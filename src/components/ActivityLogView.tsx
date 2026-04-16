@@ -17,19 +17,7 @@ import {
   Clock,
   Calendar
 } from 'lucide-react'
-
-export type ActivityItem = {
-  id: string
-  action_type: string
-  description: string
-  metadata: Record<string, unknown> | null
-  created_at: string
-  user_id: string
-  profiles?: {
-    full_name?: string
-    avatar_url?: string
-  }
-}
+import { LogEntry } from '@/types/ui'
 
 export default function ActivityLogView({ 
   userId, 
@@ -40,7 +28,7 @@ export default function ActivityLogView({
   groupId?: string, 
   limit?: number 
 }) {
-  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [activities, setActivities] = useState<LogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
@@ -56,7 +44,7 @@ export default function ActivityLogView({
     if (groupId) query = query.eq('group_id', groupId)
 
     const { data } = await query
-    if (data) setActivities(data as ActivityItem[])
+    if (data) setActivities(data as LogEntry[])
     setLoading(false)
   }, [userId, groupId, limit, supabase])
 
@@ -103,8 +91,8 @@ export default function ActivityLogView({
     }
   }
 
-  const groupActivities = (items: ActivityItem[]) => {
-    const groups: { label: string; items: ActivityItem[] }[] = []
+  const groupActivities = (items: LogEntry[]) => {
+    const groups: { label: string; items: LogEntry[] }[] = []
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
     const yesterday = today - 86400000

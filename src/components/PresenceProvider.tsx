@@ -3,23 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-
-type UserPresence = {
-  user_id: string
-  full_name?: string
-  online_at: string
-  is_typing?: boolean
-}
-
-type PresenceState = {
-  [key: string]: UserPresence[]
-}
-
-type PresenceContextType = {
-  onlineUsers: Set<string>
-  typingUsers: Set<string>
-  setTypingStatus: (isTyping: boolean) => Promise<void>
-}
+import { PresenceContextType, PresenceState } from '@/types/ui'
 
 const PresenceContext = createContext<PresenceContextType>({
   onlineUsers: new Set(),

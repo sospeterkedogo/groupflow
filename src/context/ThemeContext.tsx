@@ -3,25 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { logActivity } from '@/utils/logging'
-
-export type Palette = {
-  name: string
-  colors: {
-    '--bg-main': string
-    '--bg-sub': string
-    '--text-main': string
-    '--text-sub': string
-    '--brand': string
-    '--brand-hover': string
-    '--accent': string
-    '--border': string
-    '--surface': string
-    '--error': string
-    '--success': string
-    '--warning': string
-    '--overlay': string
-  }
-}
+import { Palette, ThemeContextType } from '@/types/ui'
 
 export const PALETTES: Palette[] = [
   {
@@ -79,13 +61,6 @@ export const PALETTES: Palette[] = [
     }
   }
 ]
-
-type ThemeContextType = {
-  currentPalette: Palette
-  setPalette: (name: string) => void
-  customBg: string | null
-  setCustomBg: (url: string | null) => void
-}
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 

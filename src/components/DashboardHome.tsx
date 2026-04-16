@@ -8,25 +8,9 @@ import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
 import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Award, UserCircle } from 'lucide-react'
 import TaskModal from './TaskModal'
-
-type Profile = {
-  id: string
-  full_name?: string
-  avatar_url?: string
-  group_id?: string
-  total_score?: number
-}
-
-type Group = {
-  id?: string
-  name?: string
-  module_code?: string
-}
-
-type DashboardHomeProps = {
-  groupId: string
-  profile: Profile
-}
+import { Profile } from '@/types/auth'
+import { Group } from '@/types/database'
+import { DashboardHomeProps } from '@/types/ui'
 
 export default function DashboardHome({ groupId, profile }: DashboardHomeProps) {
   const router = useRouter()
@@ -141,8 +125,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
               </div>
             )}
           </div>
-          <div>
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <h2 className="fluid-h1" style={{ fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '8px' }}>
               {greeting}, {profile?.full_name?.split(' ')[0] || 'there'}
             </h2>
@@ -254,7 +237,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
 
       <div style={{ position: 'relative' }}>
         {activeTab === 'board' 
-          ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} /> 
+          ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} profile={profile} /> 
           : <CalendarView groupId={groupId} key={`cal-${syncToken}`} />
         }
       </div>

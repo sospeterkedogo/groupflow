@@ -1,16 +1,5 @@
 import { createBrowserSupabaseClient } from './supabase/client'
-
-export type ActionType = 
-  | 'task_created' 
-  | 'task_updated' 
-  | 'task_deleted' 
-  | 'message_sent' 
-  | 'message_deleted' 
-  | 'setting_updated' 
-  | 'theme_changed' 
-  | 'privacy_toggled'
-  | 'member_kicked'
-  | 'artifact_uploaded'
+import { ActionType } from '@/types/ui'
 
 export async function logActivity(
   userId: string, 

@@ -6,17 +6,9 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { Task } from '@/types/database'
 import TaskModal from './TaskModal'
 
-type CalendarTask = {
-  id: string
-  title: string
-  due_date: string
-  status: string
-  is_coding_task: boolean
-}
-
 export default function CalendarView({ groupId }: { groupId: string }) {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [tasks, setTasks] = useState<CalendarTask[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined)
@@ -31,7 +23,7 @@ export default function CalendarView({ groupId }: { groupId: string }) {
       .eq('group_id', groupId)
       .not('due_date', 'is', null)
 
-    setTasks((data ?? []) as CalendarTask[])
+    setTasks((data ?? []) as any)
     setLoading(false)
   }, [groupId, supabase])
 
@@ -74,7 +66,7 @@ export default function CalendarView({ groupId }: { groupId: string }) {
 
   const getTasksForDay = (day: number) => {
     const formatted = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    return tasks.filter(t => t.due_date.startsWith(formatted))
+    return tasks.filter(t => t.due_date && t.due_date.startsWith(formatted))
   }
 
   return (

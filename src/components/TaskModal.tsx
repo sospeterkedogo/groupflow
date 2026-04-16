@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { Task, TaskStatus, Artifact, TaskCategory, Profile } from '@/types/database'
+import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
@@ -22,19 +22,16 @@ const CATEGORIES: TaskCategory[] = [
   'Ethics & Legal'
 ]
 
+import { TaskModalProps } from '@/types/ui'
+import { Profile } from '@/types/auth'
+
 export default function TaskModal({ 
   task, 
   groupId, 
   onClose,
   onRefresh,
   initialDueDate
-}: { 
-  task: Task | null, 
-  groupId: string,
-  onClose: () => void,
-  onRefresh: () => void,
-  initialDueDate?: string
-}) {
+}: TaskModalProps) {
   const router = useRouter()
   const isEditMode = !!task
 
@@ -51,7 +48,7 @@ export default function TaskModal({
         : ''
   )
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [members, setMembers] = useState<Array<Profile & { avatar_url?: string; school_id?: string }>>([])
+  const [members, setMembers] = useState<Profile[]>([])
   const { onlineUsers } = usePresence()
   
   const [loading, setLoading] = useState(false)
@@ -71,7 +68,7 @@ export default function TaskModal({
       .from('profiles')
       .select('id, full_name, avatar_url, email, school_id')
       .eq('group_id', groupId)
-    if (data) setMembers(data as Array<Profile & { avatar_url?: string; school_id?: string }>)
+    if (data) setMembers(data as Profile[])
   }
 
   useEffect(() => {

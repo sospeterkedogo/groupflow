@@ -4,26 +4,8 @@ import { useCallback, useEffect, useState } from 'react'
 import jsPDF from 'jspdf'
 import { Mail, Download, FileText, Send, Inbox } from 'lucide-react'
 
-type VirtualEmail = {
-  id: string
-  subject: string
-  from: string
-  content: string
-  timestamp: string
-  hasAttachment: boolean
-  type: 'reminder' | 'report' | 'system'
-}
-
-type EmailProfile = {
-  full_name?: string
-  email?: string
-}
-
-type TeamMember = {
-  full_name: string
-  total_score?: number
-  achievements?: Array<{ name: string }>
-}
+import { VirtualEmail } from '@/types/ui'
+import { Profile } from '@/types/auth'
 
 export default function EmailCenter({
   groupId,
@@ -31,8 +13,8 @@ export default function EmailCenter({
   teamMembers
 }: {
   groupId: string
-  profile: EmailProfile
-  teamMembers: TeamMember[]
+  profile: Profile | null
+  teamMembers: Profile[]
 }) {
   const [emails, setEmails] = useState<VirtualEmail[]>([])
   const [loading, setLoading] = useState(false)
@@ -135,7 +117,7 @@ export default function EmailCenter({
       if (m.achievements && m.achievements.length > 0) {
         doc.setFontSize(8)
         doc.setTextColor(110, 110, 110)
-        const tools = m.achievements.map((a) => a.name).join(', ')
+        const tools = m.achievements.map((a: any) => a.name || a.title).join(', ')
         doc.text(`Arsenal: ${tools}`, 25, y + 6)
         y += 7
       }

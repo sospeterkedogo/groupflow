@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { User, MapPin, Activity, Award, Mail, Calendar, ShieldCheck } from 'lucide-react'
-
 import Link from 'next/link'
+import { Profile } from '@/types/auth'
 
 export default function ProfilePage() {
-   const [profile, setProfile] = useState<any>(null)
+   const [profile, setProfile] = useState<Profile | null>(null)
    const [loading, setLoading] = useState(true)
 
    const supabase = createBrowserSupabaseClient()
@@ -31,6 +31,7 @@ export default function ProfilePage() {
    }
 
    const handleSwitchGroup = async () => {
+      if (!profile) return
       const { error } = await supabase.from('profiles').update({ group_id: null }).eq('id', profile.id)
       if (!error) window.location.href = '/dashboard'
    }
@@ -70,14 +71,14 @@ export default function ProfilePage() {
                   <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{profile?.full_name}</h1>
                   <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: '0.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 600 }}>
                     <ShieldCheck size={16} color="var(--brand)" />
-                    {profile?.course_name || 'Independent Researcher'} • {profile?.groups?.name || 'Unassigned Workspace'}
+                    {profile?.course_name || 'Independent Researcher'} • {Array.isArray(profile?.groups) ? profile?.groups[0]?.name : profile?.groups?.name || 'Unassigned Workspace'}
                   </p>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.3rem 0.6rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 600 }}>
                         <Mail size={12} /> {profile?.email}
                      </span>
                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.3rem 0.6rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 600 }}>
-                        <Calendar size={12} /> Joined {new Date(profile?.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                        <Calendar size={12} /> Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'N/A'}
                      </span>
                   </div>
                </div>
@@ -107,8 +108,8 @@ export default function ProfilePage() {
                
                {(() => {
                  const currentYear = new Date().getFullYear();
-                 const start = parseInt(profile?.enrollment_year) || currentYear - 1;
-                 const end = parseInt(profile?.completion_year) || currentYear + 2;
+                 const start = parseInt(String(profile?.enrollment_year)) || currentYear - 1;
+                 const end = parseInt(String(profile?.completion_year)) || currentYear + 2;
                  const total = end - start;
                  const elapsed = currentYear - start;
                  const percentage = Math.max(0, Math.min(100, (elapsed / total) * 100));
@@ -176,7 +177,7 @@ export default function ProfilePage() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.6rem', borderBottom: '1px solid var(--border)' }}>
                      <span style={{ color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>Module Track</span>
-                     <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>{profile?.groups?.module_code || 'None'}</span>
+                     <span style={{ fontWeight: 800, fontSize: '0.85rem' }}>{(Array.isArray(profile?.groups) ? profile?.groups[0] : profile?.groups)?.module_code || 'None'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                      <span style={{ color: 'var(--text-sub)', fontSize: '0.85rem', fontWeight: 600 }}>Security Level</span>
@@ -266,8 +267,8 @@ export default function ProfilePage() {
                      <MapPin size={20} color="var(--brand)" />
                   </div>
                   <div style={{ flex: 1, minWidth: '150px' }}>
-                     <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>{profile.groups.name}</h4>
-                     <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>{profile.groups.module_code}</p>
+                     <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>{(Array.isArray(profile.groups) ? profile.groups[0] : profile.groups).name}</h4>
+                     <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>{(Array.isArray(profile.groups) ? profile.groups[0] : profile.groups).module_code}</p>
                   </div>
                   <button className="btn btn-secondary" onClick={handleSwitchGroup} style={{ width: 'auto', padding: '0.5rem 0.8rem', fontSize: '0.75rem', fontWeight: 700 }}>Switch Team</button>
                </div>

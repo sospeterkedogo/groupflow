@@ -4,24 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Bell, X, Info, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
-
-export type Notification = {
-  id: string
-  type: string
-  title: string
-  message: string
-  link?: string
-  read: boolean
-  created_at: string
-}
-
-type NotificationContextType = {
-  notifications: Notification[]
-  unreadCount: number
-  markAsRead: (id: string) => Promise<void>
-  markAllAsRead: () => Promise<void>
-  addToast: (title: string, message: string, type?: string) => void
-}
+import { Notification, NotificationContextType, Toast } from '@/types/ui'
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
@@ -29,13 +12,6 @@ export const useNotifications = () => {
   const context = useContext(NotificationContext)
   if (!context) throw new Error('useNotifications must be used within NotificationProvider')
   return context
-}
-
-type Toast = {
-  id: string
-  title: string
-  message: string
-  type: string
 }
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {

@@ -23,7 +23,9 @@ const PRESET_AVATARS = [
   'https://api.dicebear.com/7.x/shapes/svg?seed=Avatar8&backgroundColor=22c55e',
 ]
 
-export default function OnboardingModal({ user, onComplete }: { user: { id: string }, onComplete: () => void }) {
+import { OnboardingModalProps } from '@/types/ui'
+
+export default function OnboardingModal({ user, onComplete }: OnboardingModalProps) {
   const [step, setStep] = useState(1)
   const [fullName, setFullName] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState('')
