@@ -11,9 +11,11 @@ import TaskModal from './TaskModal'
 import { Profile } from '@/types/auth'
 import { Group } from '@/types/database'
 import { DashboardHomeProps } from '@/types/ui'
+import { useProfile } from '@/context/ProfileContext'
 
-export default function DashboardHome({ groupId, profile }: DashboardHomeProps) {
+export default function DashboardHome({ groupId }: { groupId: string }) {
   const router = useRouter()
+  const { profile } = useProfile()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
   const [greeting] = useState(() => {
     const hour = new Date().getHours()

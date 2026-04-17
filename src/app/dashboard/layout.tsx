@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/context/ThemeContext'
 
 import OnboardingWrapper from '@/components/OnboardingWrapper'
 import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
+import { ProfileProvider } from '@/context/ProfileContext'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,23 +38,25 @@ export default async function DashboardLayout({
   return (
     <ThemeProvider initialTheme={initialTheme}>
       <GlobalLoadingProvider>
-        <OnboardingWrapper profile={profile} user={user}>
-          <div className="dashboard-layout">
-            <PresenceProvider user={user}>
-              <NotificationProvider>
-                <Sidebar user={user} />
-                
-                <main className="main-content">
-                  {children}
-                  {/* Global Mobile Spacer to prevent overlap */}
-                  <div className="hide-desktop" style={{ height: 'calc(var(--h-mobile-bottom) + 1rem)' }} />
-                </main>
+        <ProfileProvider userId={user.id} initialProfile={profile as any}>
+          <OnboardingWrapper profile={profile as any} user={user}>
+            <div className="dashboard-layout">
+              <PresenceProvider user={user}>
+                <NotificationProvider>
+                  <Sidebar user={user} />
+                  
+                  <main className="main-content">
+                    {children}
+                    {/* Global Mobile Spacer to prevent overlap */}
+                    <div className="hide-desktop" style={{ height: 'calc(var(--h-mobile-bottom) + 1rem)' }} />
+                  </main>
 
-                <BottomNav />
-              </NotificationProvider>
-            </PresenceProvider>
-          </div>
-        </OnboardingWrapper>
+                  <BottomNav />
+                </NotificationProvider>
+              </PresenceProvider>
+            </div>
+          </OnboardingWrapper>
+        </ProfileProvider>
       </GlobalLoadingProvider>
     </ThemeProvider>
   )

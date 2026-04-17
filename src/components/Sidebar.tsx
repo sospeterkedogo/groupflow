@@ -24,10 +24,11 @@ import { SidebarProps } from '@/types/ui'
 import NotificationBell from './NotificationBell'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useRouter } from 'next/navigation'
+import { useProfile } from '@/context/ProfileContext'
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const { profile } = useProfile()
   const pathname = usePathname()
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { currentPalette, setPalette } = useTheme()
@@ -42,70 +43,27 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isDark = currentPalette.name !== 'Google Light'
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-      
-      if (error) {
-        console.error('Sidebar fetch error:', error.message)
-        return
-      }
-      
-      if (data) setProfile(data)
-    } catch (err) {
-      console.error('Sidebar unexpected error:', err)
-    }
-  }, [supabase, user.id])
-
   useEffect(() => {
     const initializeMobileState = () => {
       if (window.innerWidth <= 768) {
         setIsOpen(false)
       }
     }
+    initializeMobileState()
 
-    void Promise.resolve().then(initializeMobileState)
-  }, []) // Empty dependency array ensures this ONLY runs on mount
-
-  useEffect(() => {
-    let active = true
-
-    const initialize = async () => {
-      await fetchProfile()
-      if (!active) return
-
-      // Body scroll lock logic (runs when isOpen changes)
-      const handleBodyLock = () => {
-        if (window.innerWidth <= 768 && isOpen) {
-          document.body.classList.add('body-lock')
-        } else {
-          document.body.classList.remove('body-lock')
-        }
-      }
-
-      handleBodyLock()
-
-      // Synchronization for profile updates
-      const handleProfileUpdate = () => fetchProfile()
-      window.addEventListener('PROFILE_UPDATED', handleProfileUpdate)
-
-      return () => {
+    const handleBodyLock = () => {
+      if (window.innerWidth <= 768 && isOpen) {
+        document.body.classList.add('body-lock')
+      } else {
         document.body.classList.remove('body-lock')
-        window.removeEventListener('PROFILE_UPDATED', handleProfileUpdate)
       }
     }
+    handleBodyLock()
 
-    const cleanup = initialize()
     return () => {
-      active = false
-      cleanup.then(fn => fn && fn())
+      document.body.classList.remove('body-lock')
     }
-
-  }, [fetchProfile, isOpen])
+  }, [isOpen])
 
   const router = useRouter()
   const { withLoading, showConfirmation } = useSmartLoading()

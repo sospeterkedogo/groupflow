@@ -30,5 +30,5 @@ export default async function DashboardPage() {
     )
   }
 
-  return <DashboardHome groupId={profile.group_id} profile={profile} />
+  return <DashboardHome groupId={profile.group_id} />
 }

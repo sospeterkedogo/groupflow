@@ -20,6 +20,8 @@ import { kickUser } from '../join/actions'
 import { logActivity } from '@/utils/logging'
 import { TabName } from '@/types/ui'
 import { Profile } from '@/types/auth'
+import { useNotifications } from '@/components/NotificationProvider'
+import { useProfile } from '@/context/ProfileContext'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -42,6 +44,9 @@ export default function SettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [uploadingBg, setUploadingBg] = useState(false)
+
+  const { addToast } = useNotifications()
+  const { refreshProfile } = useProfile()
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
@@ -140,9 +145,9 @@ export default function SettingsPage() {
       if (profile.id) {
         logActivity(profile.id, profile.group_id || '', 'setting_updated', 'Updated personal profile details and academic journey')
       }
-      router.refresh()
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      }
+      refreshProfile()
+      addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
     }
   }
 
@@ -170,10 +175,8 @@ export default function SettingsPage() {
       } else {
         await setCustomBg(publicUrl)
       }
-      window.dispatchEvent(new CustomEvent('PROFILE_UPDATED'))
-      router.refresh()
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      refreshProfile()
+      addToast('Visuals Updated', 'Your appearance settings have been synchronized across all project hubs.', 'success')
     } catch (err: any) {
       setError("Upload failed: " + err.message)
     } finally {
@@ -204,8 +207,7 @@ export default function SettingsPage() {
         )
       }
       setIsEncrypted(nextValue)
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      addToast('Visibility Changed', `Group visibility is now set to ${nextValue ? 'Encrypted' : 'Public'}.`, 'success')
     }
     setUpdatingGroup(false)
   }
@@ -218,8 +220,7 @@ export default function SettingsPage() {
       setError(res.error)
     } else {
       setTeamMembers(prev => prev.filter(m => m.id !== userId))
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      addToast('Member Removed', 'The specialist has been safely removed from the group registry.', 'success')
     }
   }
 
@@ -238,8 +239,8 @@ export default function SettingsPage() {
     if (switchError) setError("Failed to switch team.")
     else {
       await fetchUserData()
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      refreshProfile()
+      addToast('Team Switched', 'You have been successfully re-assigned to the new project group.', 'success')
     }
     setSwitching(false)
   }
@@ -440,7 +441,6 @@ export default function SettingsPage() {
                 <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: 'auto', padding: '0.75rem 1.5rem' }}>
                   {saving ? 'Syncing...' : 'Update Settings'}
                 </button>
-                {success && <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: '0.85rem' }}>Saved!</span>}
               </div>
             </form>
           </div>
