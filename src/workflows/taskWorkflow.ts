@@ -98,7 +98,7 @@ async function logActivity(
   }
 }
 
-async function notifyAssignees(assignees: string[], title: string, taskId: string) {
+async function notifyAssignees(assignees: string[], title: string) {
   'use step'
 
   if (assignees.length === 0) {

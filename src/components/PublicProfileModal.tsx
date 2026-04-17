@@ -15,7 +15,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
   const [isConnected, setIsConnected] = useState(initialConnected)
   const [loading, setLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
-  const [me, setMe] = useState<any>(null)
+  const [me, setMe] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null)
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {

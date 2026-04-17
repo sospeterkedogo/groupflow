@@ -8,15 +8,20 @@ interface VideoCallProps {
   onClose: () => void;
 }
 
+interface JitsiExternalAPI {
+  addEventListener: (event: string, listener: () => void) => void
+  dispose: () => void
+}
+
 declare global {
   interface Window {
-    JitsiMeetExternalAPI: any;
+    JitsiMeetExternalAPI?: new (domain: string, options: Record<string, unknown>) => JitsiExternalAPI
   }
 }
 
 export default function VideoCall({ roomName, userName, onClose }: VideoCallProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const apiRef = useRef<any>(null)
+  const apiRef = useRef<JitsiExternalAPI | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

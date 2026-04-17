@@ -15,18 +15,16 @@ import {
 } from 'lucide-react'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { usePresence } from '@/components/PresenceProvider'
+import { Profile } from '@/types/auth'
+import { Task } from '@/types/database'
 
 export default function PublicProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: userId } = use(params)
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<any>(null)
-  const [tasks, setTasks] = useState<any[]>([])
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
   const { onlineUsers } = usePresence()
   const supabase = createBrowserSupabaseClient()
-
-  useEffect(() => {
-    fetchData()
-  }, [userId])
 
   const fetchData = async () => {
     setLoading(true)
@@ -35,10 +33,14 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
       supabase.from('tasks').select('*').contains('assignees', [userId]).order('created_at', { ascending: false }).limit(5)
     ])
 
-    if (profileData.data) setProfile(profileData.data)
-    if (tasksData.data) setTasks(tasksData.data)
+    if (profileData.data) setProfile(profileData.data as Profile)
+    if (tasksData.data) setTasks(tasksData.data as Task[])
     setLoading(false)
   }
+
+  useEffect(() => {
+    void fetchData()
+  }, [userId])
 
   const isOnline = onlineUsers.has(userId)
 

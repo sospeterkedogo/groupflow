@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Profile } from '@/types/database'
 import { Users, UserPlus, Check, ExternalLink, Shield } from 'lucide-react'
@@ -16,14 +16,7 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
   const [loading, setLoading] = useState(true)
   const supabase = createBrowserSupabaseClient()
 
-  useEffect(() => {
-    if (currentGroupId) {
-      fetchCollaborators()
-      fetchConnections()
-    }
-  }, [currentGroupId])
-
-  const fetchCollaborators = async () => {
+  const fetchCollaborators = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user || !currentGroupId) return
 
@@ -35,9 +28,9 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
 
     if (data) setCollaborators(data as Profile[])
     setLoading(false)
-  }
+  }, [supabase, currentGroupId])
 
-  const fetchConnections = async () => {
+  const fetchConnections = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -49,7 +42,23 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
     if (data) {
       setConnections(new Set(data.map(c => c.target_id)))
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    if (!currentGroupId) return
+
+    let active = true
+    const load = async () => {
+      await fetchCollaborators()
+      if (!active) return
+      await fetchConnections()
+    }
+
+    void load()
+    return () => {
+      active = false
+    }
+  }, [currentGroupId, fetchCollaborators, fetchConnections])
 
   const handleConnect = async (targetId: string) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -108,7 +117,7 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
               >
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-sub)', overflow: 'hidden', flexShrink: 0 }}>
                   {collab.avatar_url ? (
-                    <img src={collab.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={collab.avatar_url} alt={`${collab.full_name || 'Collaborator'} avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-sub)' }}>
                       {collab.full_name?.[0]}

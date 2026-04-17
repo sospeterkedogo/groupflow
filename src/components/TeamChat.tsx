@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, CheckCheck, Clock,
@@ -84,41 +85,55 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
     }
   }, [groupId, isOpen, user.id])
 
-  async function fetchMessages() {
-    setLoading(true)
+  const fetchMessages = useCallback(async () => {
     const { data } = await supabase
       .from('messages')
       .select('*, profiles(full_name, avatar_url, role)')
       .eq('group_id', groupId)
       .order('created_at', { ascending: true })
       .limit(50) // Strict 50 message limit
-    
+
     if (data) setMessages(data as ChatMessage[])
     setLoading(false)
     setTimeout(() => scrollToBottom('auto'), 50)
-  }
+  }, [supabase, groupId])
 
   useEffect(() => {
-    if (isOpen) {
-      fetchMessages()
+    if (!isOpen) return
+
+    let active = true
+    const load = async () => {
+      await fetchMessages()
+      if (!active) return
     }
-  }, [isOpen, groupId])
+
+    void load()
+    return () => {
+      active = false
+    }
+  }, [isOpen, fetchMessages])
 
   useEffect(() => {
     if (messages.length > 0 && isOpen) scrollToBottom('smooth')
   }, [messages, isOpen])
 
-  const fetchMembers = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('group_id', groupId)
-    
-    if (data) setGroupMembers(data as Profile[])
-  }
-
   useEffect(() => {
-    if (isOpen) fetchMembers()
+    if (!isOpen) return
+
+    let mounted = true
+    const loadMembers = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('group_id', groupId)
+
+      if (mounted && data) setGroupMembers(data as Profile[])
+    }
+
+    loadMembers()
+    return () => {
+      mounted = false
+    }
   }, [isOpen, groupId])
 
   const handleTyping = (text: string) => {
@@ -361,7 +376,14 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
                         color: 'white', fontWeight: 900
                       }}>
                         {member.avatar_url ? (
-                          <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <Image
+                            src={member.avatar_url}
+                            alt={`${member.full_name ?? 'Member'} avatar`}
+                            width={42}
+                            height={42}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            unoptimized
+                          />
                         ) : (
                           member.full_name?.charAt(0)
                         )}
@@ -444,7 +466,14 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
                              )}
                              
                              {!m.is_deleted && m.payload?.type === 'image' && (
-                               <img src={m.payload.url} style={{ width: '100%', borderRadius: '8px', marginBottom: '0.25rem' }} />
+                               <Image
+                                 src={m.payload.url}
+                                 alt={`${m.profiles?.full_name ?? 'Message'} attachment`}
+                                 width={320}
+                                 height={180}
+                                 style={{ width: '100%', borderRadius: '8px', marginBottom: '0.25rem', objectFit: 'cover' }}
+                                 unoptimized
+                               />
                              )}
                              {!m.is_deleted && m.payload?.type === 'file' && (
                                <a href={m.payload.url} target="_blank" className="file-attachment" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.08)', padding: '0.4rem 0.6rem', borderRadius: '8px', textDecoration: 'none', color: 'inherit', marginBottom: '0.25rem' }}>

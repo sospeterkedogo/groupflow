@@ -51,7 +51,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [selectedMember, setSelectedMember] = useState<any>(null)
+  const [selectedMember, setSelectedMember] = useState<Profile | { id: string; full_name?: string; avatar_url?: string } | null>(null)
 
   // Presence & Others
   const [{ draggingTaskId }, updateMyPresence] = useMyPresence();
@@ -125,29 +125,41 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   }, [supabase, profile])
 
   useEffect(() => {
-    fetchTasksFromDB()
-    fetchGroupMembers()
-    fetchCurrentUser()
+    let active = true
+    let channel = supabase.channel(`kanban_${groupId}`)
 
-    const channel = supabase.channel(`kanban_${groupId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
-        () => {
-          fetchTasksFromDB()
-        }
-      )
-      .subscribe()
+    const initialize = async () => {
+      await fetchTasksFromDB()
+      if (!active) return
+      await fetchGroupMembers()
+      if (!active) return
+      await fetchCurrentUser()
+
+      channel = supabase.channel(`kanban_${groupId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
+          () => {
+            fetchTasksFromDB()
+          }
+        )
+        .subscribe()
+    }
+
+    void initialize()
 
     return () => {
-      supabase.removeChannel(channel)
+      active = false
+      if (channel) supabase.removeChannel(channel)
     }
   }, [fetchTasksFromDB, fetchGroupMembers, fetchCurrentUser, groupId, supabase])
 
   useEffect(() => {
     if (typeof newTaskSignal === 'number' && newTaskSignal > 0) {
-      setSelectedTask(null)
-      setIsModalOpen(true)
+      void Promise.resolve().then(() => {
+        setSelectedTask(null)
+        setIsModalOpen(true)
+      })
     }
   }, [newTaskSignal])
 
@@ -208,9 +220,9 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     await fetchTasksFromDB()
 
     if (newStatus === 'Done') {
-      const targetTask = (tasks ? Array.from(tasks) : []).find((t: any) => t.id === taskId)
-      if (targetTask && (targetTask as any).assignees) {
-        distributeTaskScore(taskId, (targetTask as any).assignees).catch(err => console.error('Score Distribution error', err))
+      const targetTask = tasks ? Array.from(tasks).find((t: Task) => t.id === taskId) : undefined
+      if (targetTask && targetTask.assignees) {
+        distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error('Score Distribution error', err))
       }
     }
 
@@ -255,7 +267,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     ? Math.round(Array.from(tasks).reduce((acc, t) => acc + calculateProbability(t), 0) / tasks.length)
     : 0
 
-  const overdueCount = (tasks ? Array.from(tasks) : []).filter((t: any) => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
+  const overdueCount = (tasks ? Array.from(tasks) : []).filter((t: Task) => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
   const [hasCelebrated, setHasCelebrated] = useState(false)
 
   // Gamification
@@ -264,8 +276,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     const alreadyCelebrated = sessionStorage.getItem(sessionKey)
 
     if (tasks && tasks.length > 0 && globalProbability === 100 && !hasCelebrated && !alreadyCelebrated) {
-      setHasCelebrated(true)
-      sessionStorage.setItem(sessionKey, 'true')
+      void Promise.resolve().then(() => {
+        setHasCelebrated(true)
+        sessionStorage.setItem(sessionKey, 'true')
+      })
       const duration = 3000
       const end = Date.now() + duration
       const frame = () => {
@@ -275,7 +289,9 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       }
       frame()
     } else if (tasks && tasks.length > 0 && globalProbability < 100) {
-      setHasCelebrated(false)
+      void Promise.resolve().then(() => {
+        setHasCelebrated(false)
+      })
       sessionStorage.removeItem(sessionKey)
     }
   }, [globalProbability, tasks?.length, hasCelebrated, groupId])
@@ -302,7 +318,8 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent)' }}>
                 {others.map((other, idx) => {
-                  const user = groupMembers.find(m => m.id === other.id) || { full_name: (other.presence as any)?.userName || 'Someone', avatar_url: '' }
+                  const presence = other.presence as { userName?: string } | undefined
+                  const user = groupMembers.find(m => m.id === other.id) || { full_name: presence?.userName || 'Someone', avatar_url: '' }
                   return (
                     <div
                       key={other.connectionId}
@@ -316,13 +333,13 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                         zIndex: 10 - idx,
                         position: 'relative'
                       }}
-                      title={`${(user as any).full_name} is active`}
+                      title={`${user.full_name} is active`}
                     >
-                      {(user as any).avatar_url ? (
-                        <img src={(user as any).avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt={`${user.full_name} avatar`} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
-                          {((user as any).full_name || '?')[0]}
+                          {(user.full_name || '?')[0]}
                         </div>
                       )}
                     </div>
@@ -364,7 +381,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             <div className="kanban-column-header">
               {col}
               <span className="badge" style={{ backgroundColor: 'var(--bg-sub)', color: 'var(--text-sub)' }}>
-                {tasks ? Array.from(tasks).filter((t: any) => t.status === col).length : 0}
+                {tasks ? Array.from(tasks).filter((t: Task) => t.status === col).length : 0}
               </span>
             </div>
 
@@ -374,7 +391,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col)}
             >
-              {(tasks ? Array.from(tasks) : []).filter((t: any) => t.status === col).map((task: any) => {
+              {(tasks ? Array.from(tasks) : []).filter((t: Task) => t.status === col).map((task: Task) => {
                 const draggingOther = othersDragging.find(o => o.presence?.draggingTaskId === task.id)
 
                 return (
@@ -405,7 +422,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                         zIndex: 2,
                         animation: 'pulse 2s infinite'
                       }}>
-                        {(draggingOther.presence as any)?.userName} is moving this
+                        {((draggingOther.presence as { userName?: string })?.userName) || 'A teammate'} is moving this
                       </div>
                     )}
                     <div className="kanban-card-title">{task.title}</div>
@@ -527,23 +544,11 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           groupId={groupId}
           onRefresh={fetchTasksFromDB}
           onTaskSaved={fetchTasksFromDB}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
-
-      {isModalOpen && (
-        <TaskModal
-          task={selectedTask}
-          groupId={groupId}
-          onRefresh={() => {
-            fetchTasksFromDB();
-            // In multiplayer, TaskModal will also need to update Liveblocks storage
-            // This is a bridge for now
-          }}
           onClose={() => {
             setIsModalOpen(false)
             setSelectedTask(null)
           }}
+          onlineUserIds={new Set(others.map(o => o.connectionId.toString()))}
         />
       )}
 
@@ -551,7 +556,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         <MemberProfileModal
           member={selectedMember}
           groupMembers={groupMembers}
-          tasks={tasks ? Array.from(tasks) as any : []}
+          tasks={tasks ? Array.from(tasks) : []}
           onClose={() => setSelectedMember(null)}
         />
       )}

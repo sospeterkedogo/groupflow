@@ -46,8 +46,7 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
     
     // Smart Progress Simulation Logic
     if (progressInterval.current) clearInterval(progressInterval.current)
-    
-    let currentProgress = 0
+
     progressInterval.current = setInterval(() => {
       setLoading(prev => {
         if (!prev.isLoading) return prev

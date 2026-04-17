@@ -9,11 +9,9 @@ export default function TransientError({ message, type = 'error' }: { message: s
   useEffect(() => {
     if (!message) return
 
-    setVisible(true)
-    
-    const timer = setTimeout(() => {
+    const openToast = () => setVisible(true)
+    const timer = window.setTimeout(() => {
       setVisible(false)
-      
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href)
         if (url.searchParams.has('error')) {
@@ -23,7 +21,8 @@ export default function TransientError({ message, type = 'error' }: { message: s
       }
     }, 5000)
 
-    return () => clearTimeout(timer)
+    void Promise.resolve().then(openToast)
+    return () => window.clearTimeout(timer)
   }, [message])
 
   if (!visible || !message) return null

@@ -12,10 +12,6 @@ export default function ProfilePage() {
 
    const supabase = createBrowserSupabaseClient()
 
-   useEffect(() => {
-      fetchProfile()
-   }, [])
-
    const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -29,6 +25,10 @@ export default function ProfilePage() {
       }
       setLoading(false)
    }
+
+   useEffect(() => {
+      void fetchProfile()
+   }, [])
 
    const handleSwitchGroup = async () => {
       if (!profile) return
@@ -59,7 +59,7 @@ export default function ProfilePage() {
                <div style={{ position: 'relative' }}>
                   <div style={{ width: 'var(--avatar-size)', height: 'var(--avatar-size)', borderRadius: '50%', background: 'var(--bg-sub)', border: '4px solid var(--surface)', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={profile.avatar_url} alt={`${profile.full_name || 'User'} avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                      ) : (
                         <User size={40} color="var(--text-sub)" />
                      )}
@@ -309,9 +309,6 @@ export default function ProfilePage() {
             )}
          </div>
 
-         <style jsx>{`
-          }
-       `}</style>
       </div>
    )
 }

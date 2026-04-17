@@ -6,7 +6,7 @@ export async function logActivity(
   groupId: string | null, 
   actionType: ActionType, 
   description: string, 
-  metadata: any = {},
+  metadata: Record<string, unknown> = {},
   notifyUserId?: string // Optional: targeted notification
 ) {
   const supabase = createBrowserSupabaseClient()

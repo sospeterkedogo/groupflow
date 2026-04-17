@@ -142,7 +142,12 @@ export const useTheme = () => {
   return context
 }
 
-export const ThemeProvider = ({ children, initialTheme }: { children: React.ReactNode, initialTheme?: any }) => {
+export type ThemeInitialValues = {
+  palette?: string
+  bgUrl?: string
+}
+
+export const ThemeProvider = ({ children, initialTheme }: { children: React.ReactNode, initialTheme?: ThemeInitialValues }) => {
   // Use initialTheme for initial state to prevent flash during hydration
   const [currentPalette, setCurrentPalette] = useState<Palette>(() => {
     if (initialTheme?.palette) {
@@ -160,11 +165,21 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
-    if (initialTheme?.palette) {
-      const palette = PALETTES.find(p => p.name === initialTheme.palette)
-      if (palette) setCurrentPalette(palette)
+    let mounted = true
+    const restoreTheme = async () => {
+      if (!mounted) return
+
+      if (initialTheme?.palette) {
+        const palette = PALETTES.find(p => p.name === initialTheme.palette)
+        if (palette) setCurrentPalette(palette)
+      }
+      if (initialTheme?.bgUrl) setCustomBg(initialTheme.bgUrl)
     }
-    if (initialTheme?.bgUrl) setCustomBg(initialTheme?.bgUrl)
+
+    void restoreTheme()
+    return () => {
+      mounted = false
+    }
   }, [initialTheme])
 
 

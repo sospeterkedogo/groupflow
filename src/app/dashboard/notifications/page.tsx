@@ -3,15 +3,18 @@
 import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useNotifications } from '@/components/NotificationProvider'
+import type { Notification } from '@/types/ui'
 import { Bell, UserPlus, Check, X, Shield, Clock, Inbox, Mail, MessageSquare } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+
+type InboxNotification = Notification & { metadata?: { sender_id?: string } }
 
 export default function NotificationsPage() {
   const { notifications, markAsRead, markAllAsRead, addToast } = useNotifications()
   const [loading, setLoading] = useState(false)
   const supabase = createBrowserSupabaseClient()
 
-  const handleAcceptConnection = async (notification: any) => {
+  const handleAcceptConnection = async (notification: InboxNotification) => {
     setLoading(true)
     const { sender_id } = notification.metadata || {}
     if (!sender_id) return
@@ -44,7 +47,7 @@ export default function NotificationsPage() {
     setLoading(false)
   }
 
-  const handleDeclineConnection = async (notification: any) => {
+  const handleDeclineConnection = async (notification: InboxNotification) => {
     await markAsRead(notification.id)
     addToast('Success', 'Request ignored', 'info')
   }

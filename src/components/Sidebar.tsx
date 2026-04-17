@@ -62,10 +62,13 @@ export default function Sidebar({ user }: SidebarProps) {
   }, [supabase, user.id])
 
   useEffect(() => {
-    // Initial mobile state setup (only runs once)
-    if (window.innerWidth <= 768) {
-      setIsOpen(false)
+    const initializeMobileState = () => {
+      if (window.innerWidth <= 768) {
+        setIsOpen(false)
+      }
     }
+
+    void Promise.resolve().then(initializeMobileState)
   }, []) // Empty dependency array ensures this ONLY runs on mount
 
   useEffect(() => {

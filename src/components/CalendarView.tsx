@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
-import { Task } from '@/types/database'
+import { Task, TaskStatus } from '@/types/database'
 import TaskModal from './TaskModal'
+
+type CalendarTask = Pick<Task, 'id' | 'title' | 'due_date' | 'status' | 'is_coding_task'>
 
 export default function CalendarView({ groupId, onTaskSaved }: { groupId: string; onTaskSaved?: () => Promise<void> | void }) {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [tasks, setTasks] = useState<CalendarTask[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [preselectedDate, setPreselectedDate] = useState<string | undefined>(undefined)
@@ -23,7 +25,7 @@ export default function CalendarView({ groupId, onTaskSaved }: { groupId: string
       .eq('group_id', groupId)
       .not('due_date', 'is', null)
 
-    setTasks((data ?? []) as any)
+    setTasks((data ?? []) as CalendarTask[])
     setLoading(false)
   }, [groupId, supabase])
 

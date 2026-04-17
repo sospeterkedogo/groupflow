@@ -26,27 +26,16 @@ export default function NetworkPage() {
   const supabase = createBrowserSupabaseClient()
   const { onlineUsers } = usePresence()
 
-  useEffect(() => {
-    withLoading(async () => {
-      await Promise.all([
-        fetchCurrentGroupAndConnections(),
-        fetchUsers()
-      ])
-    }, 'Scanning Student Network...')
-  }, [])
-
-  const fetchCurrentGroupAndConnections = async () => {
+  const fetchCurrentGroupAndConnections = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      // Fetch group
       const { data: profile } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
       if (profile) setCurrentUserGroup(profile.group_id)
 
-      // Fetch connections
       const { data: conn } = await supabase.from('user_connections').select('target_id').eq('user_id', user.id)
-      if (conn) setConnections(new Set(conn.map(c => c.target_id)))
+      if (conn) setConnections(new Set(conn.map((c: { target_id: string }) => c.target_id)))
     }
-  }
+  }, [supabase])
 
   const fetchUsers = useCallback(async (queryStr?: string) => {
     setLoading(true)
@@ -58,14 +47,22 @@ export default function NetworkPage() {
     
     const term = queryStr || search
     if (term.trim()) {
-      // Fixed search: Search by name or school ID
       query = query.or(`full_name.ilike.%${term}%,school_id.ilike.%${term}%`)
     }
-    
-    const { data } = await query
-    if (data) setUsers(data as any[])
+
+    const response = await query as { data: Profile[] | null }
+    if (response.data) setUsers(response.data)
     setLoading(false)
   }, [supabase, search])
+
+  useEffect(() => {
+    withLoading(async () => {
+      await Promise.all([
+        fetchCurrentGroupAndConnections(),
+        fetchUsers()
+      ])
+    }, 'Scanning Student Network...')
+  }, [fetchCurrentGroupAndConnections, fetchUsers, withLoading])
 
   // Smart Suggestions Logic
   useEffect(() => {
@@ -76,14 +73,14 @@ export default function NetworkPage() {
     }
 
     const fetchSuggestions = async () => {
-      const { data } = await supabase
+      const response = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, school_id')
         .or(`full_name.ilike.%${search}%,school_id.ilike.%${search}%`)
-        .limit(5)
+        .limit(5) as { data: Profile[] | null }
       
-      if (data) {
-        setSuggestions(data as any[])
+      if (response.data) {
+        setSuggestions(response.data)
         setShowSuggestions(true)
       }
     }

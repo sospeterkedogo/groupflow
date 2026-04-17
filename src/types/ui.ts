@@ -22,7 +22,7 @@ export type LogEntry = {
   user_id: string;
   action_type: ActionType;
   description: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
   created_at: string;
   profiles?: { full_name: string | null; avatar_url: string | null };
 };
@@ -98,6 +98,7 @@ export type Notification = {
   link?: string
   read: boolean
   created_at: string
+  metadata?: Record<string, unknown>
 }
 
 export type NotificationContextType = {
@@ -157,6 +158,7 @@ export type TaskModalProps = {
   onRefresh: () => Promise<void> | void
   onTaskSaved?: () => Promise<void> | void
   initialDueDate?: string
+  onlineUserIds?: Set<string>
 }
 
 export type VirtualEmail = {

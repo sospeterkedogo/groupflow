@@ -7,7 +7,6 @@ import type { User } from '@supabase/supabase-js'
 import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
-import { useOthers } from '@/liveblocks.config'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
@@ -31,9 +30,12 @@ export default function TaskModal({
   onClose,
   onRefresh,
   onTaskSaved,
-  initialDueDate
+  initialDueDate,
+  onlineUserIds
 }: TaskModalProps) {
   const router = useRouter()
+
+  const onlineUsers = onlineUserIds || new Set<string>()
   const isEditMode = !!task
 
   const [title, setTitle] = useState(task?.title || '')
@@ -56,9 +58,6 @@ export default function TaskModal({
   const [searchQuery, setSearchQuery] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
-
-  const others = useOthers()
-  const onlineUserIds = new Set(others.map(o => o.connectionId.toString()))
 
   // Evidence Logic
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
@@ -152,8 +151,9 @@ export default function TaskModal({
       await onRefresh()
       await onTaskSaved?.()
       onClose()
-    } catch (err: any) {
-      setError(`Failed to save task: ${err.message}`)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown error'
+      setError(`Failed to save task: ${message}`)
     } finally {
       setLoading(false)
     }
@@ -189,8 +189,9 @@ export default function TaskModal({
 
       setDescription(data.description)
       setAiError(null)
-    } catch (err: any) {
-      setAiError(err?.message || 'Unable to generate AI description.')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unable to generate AI description.'
+      setAiError(message)
     } finally {
       setAiLoading(false)
     }
@@ -263,8 +264,8 @@ export default function TaskModal({
     }
     
     // Instant Optimistic Update
-    const optimisticArtifact = { id: Math.random().toString(), endorsements_count: 0, created_at: new Date().toISOString(), ...payload }
-    setArtifacts([optimisticArtifact as any, ...artifacts])
+    const optimisticArtifact: Artifact = { id: Math.random().toString(), endorsements_count: 0, created_at: new Date().toISOString(), ...payload }
+    setArtifacts([optimisticArtifact, ...artifacts])
     setNewUrl('')
 
     const { error: dbError } = await supabase.from('artifacts').insert([payload])
@@ -309,8 +310,9 @@ export default function TaskModal({
        if (dbError) throw dbError
        
        fetchArtifacts() // Re-sync network state explicitly
-     } catch (err: any) {
-       setError("File upload failed: " + err.message)
+     } catch (err: unknown) {
+       const message = err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown upload error'
+       setError(`File upload failed: ${message}`)
      } finally {
        setUploading(false)
      }
@@ -511,7 +513,7 @@ export default function TaskModal({
                     )
                     .map(member => {
                     const isAssigned = assignees.includes(member.id)
-                    const isOnline = onlineUserIds.has(member.id)
+                    const isOnline = onlineUsers.has(member.id)
                     const initials = member.full_name ? member.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : '?'
 
                     return (

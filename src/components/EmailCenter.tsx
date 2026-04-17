@@ -117,7 +117,10 @@ export default function EmailCenter({
       if (m.achievements && m.achievements.length > 0) {
         doc.setFontSize(8)
         doc.setTextColor(110, 110, 110)
-        const tools = m.achievements.map((a: any) => a.name || a.title).join(', ')
+        const tools = m.achievements
+          .map((a: { name?: string; title?: string }) => a.name || a.title)
+          .filter(Boolean)
+          .join(', ')
         doc.text(`Arsenal: ${tools}`, 25, y + 6)
         y += 7
       }

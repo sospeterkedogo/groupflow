@@ -15,19 +15,22 @@ import {
   Lock
 } from 'lucide-react'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { Profile } from '@/types/auth'
+import { Task, Group, Artifact } from '@/types/database'
+
+interface SharedArtifact {
+  id: string
+  tasks?: { group_id?: string }
+}
 
 export default function PublicSharePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: groupId } = use(params)
   const [loading, setLoading] = useState(true)
-  const [group, setGroup] = useState<any>(null)
-  const [tasks, setTasks] = useState<any[]>([])
-  const [members, setMembers] = useState<any[]>([])
-  const [artifacts, setArtifacts] = useState<any[]>([])
+  const [group, setGroup] = useState<Group | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [members, setMembers] = useState<Profile[]>([])
+  const [artifacts, setArtifacts] = useState<SharedArtifact[]>([])
   const supabase = createBrowserSupabaseClient()
-
-  useEffect(() => {
-    fetchData()
-  }, [groupId])
 
   const fetchData = async () => {
     setLoading(true)
@@ -38,15 +41,19 @@ export default function PublicSharePage({ params }: { params: Promise<{ id: stri
       supabase.from('artifacts').select('*, tasks(title, group_id)').filter('tasks.group_id', 'eq', groupId)
     ])
 
-    if (groupData.data) setGroup(groupData.data)
-    if (tasksData.data) setTasks(tasksData.data)
-    if (membersData.data) setMembers(membersData.data)
+    if (groupData.data) setGroup(groupData.data as Group)
+    if (tasksData.data) setTasks(tasksData.data as Task[])
+    if (membersData.data) setMembers(membersData.data as Profile[])
     
-    const relevantArtifacts = artifactsData.data?.filter(a => (a.tasks as any)?.group_id === groupId) || []
+    const relevantArtifacts = (artifactsData.data ?? []).filter((artifact: SharedArtifact) => artifact.tasks?.group_id === groupId)
     setArtifacts(relevantArtifacts)
     
     setLoading(false)
   }
+
+  useEffect(() => {
+    void fetchData()
+  }, [groupId])
 
   const isEncrypted = group?.is_encrypted
 

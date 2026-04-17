@@ -1,0 +1,3 @@
+src/app/dashboard/profile/page.tsx(328,1): error TS1128: Declaration or statement expected.
+src/components/ChatRoom.tsx(295,1): error TS1128: Declaration or statement expected.
+src/components/TeamChat.tsx(601,1): error TS1005: '}' expected.

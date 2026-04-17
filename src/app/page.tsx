@@ -15,7 +15,7 @@ export default function Home() {
     { 
       icon: <Zap size={24} />, 
       title: "Visual progress", 
-      desc: "See how your project is moving. I'll help you track contributions instantly so everyone stays on the same page.",
+      desc: "See how your project is moving. I&apos;ll help you track contributions instantly so everyone stays on the same page.",
       color: "#0ea5e9"
     },
     { 
@@ -27,7 +27,7 @@ export default function Home() {
     { 
       icon: <Layers size={24} />, 
       title: "Reliable records", 
-      desc: "Turn your shared work into clear proof of achievement. It's the kind of evidence you and your tutors can always trust.",
+      desc: "Turn your shared work into clear proof of achievement. It&apos;s the kind of evidence you and your tutors can always trust.",
       color: "#6366f1"
     }
   ]
@@ -39,11 +39,11 @@ export default function Home() {
     },
     {
       q: "How is my data protected?",
-      a: "Your privacy is my priority. I use secure encryption to keep your work safe, and I'll never share your personal info with anyone else."
+      a: "Your privacy is my priority. I use secure encryption to keep your work safe, and I&apos;ll never share your personal info with anyone else."
     },
     {
       q: "Can I delete my account?",
-      a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
+      a: "Of course. You&apos;re in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
     },
     {
       q: "Who is behind GroupFlow?",
@@ -172,10 +172,10 @@ export default function Home() {
                <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Bringing teams together</div>
                <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Group work, without the guesswork.</h2>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
-                  For a long time, group projects have felt a bit out of balance. Tutors often can't see who's doing what, and hard-working students often carry the load alone.
+                  For a long time, group projects have felt a bit out of balance. Tutors often can&apos;t see who&apos;s doing what, and hard-working students often carry the load alone.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
-                  I'm changing that. GroupFlow makes collaboration simple and transparent, so your team can focus on creating great work together.
+                  I&apos;m changing that. GroupFlow makes collaboration simple and transparent, so your team can focus on creating great work together.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
@@ -186,7 +186,7 @@ export default function Home() {
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
                      <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><Zap size={24} /></div>
                      <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Work that matters</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>I'll help you highlight the effort of every team member, from leaders to creators.</p>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>I&apos;ll help you highlight the effort of every team member, from leaders to creators.</p>
                   </div>
                </div>
             </div>
@@ -244,7 +244,7 @@ export default function Home() {
               <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Work your way</div>
               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Use the tools you love.</h2>
               <p style={{ fontSize: '1.3rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '4.5rem' }}>
-                 I work with the tools you already use every day. Collaborate where you feel most creative, whether it's Google Docs, Figma, or GitHub, and I'll help you keep everything organized.
+                 I work with the tools you already use every day. Collaborate where you feel most creative, whether it&apos;s Google Docs, Figma, or GitHub, and I&apos;ll help you keep everything organized.
               </p>
               
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4.5rem', flexWrap: 'wrap', opacity: 0.6, filter: 'grayscale(1)' }}>
@@ -272,7 +272,7 @@ export default function Home() {
               <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2.5rem' }}>
                  {[
                     { title: 'Dissertations & Graduation', desc: 'Keep track of your research journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
-                    { title: 'Team Lab Reports', desc: "I'll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
+                    { title: 'Team Lab Reports', desc: "I&apos;ll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
                     { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
                     { title: 'Project Case Studies', desc: 'Make sure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
                  ].map((usecase, i) => (
@@ -291,7 +291,7 @@ export default function Home() {
         {/* HOW IT WORKS */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
            <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Simple, transparent, and fair.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I'll help you focus on the work, while I take care of the organization.</p>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I&apos;ll help you focus on the work, while I take care of the organization.</p>
 
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
@@ -342,7 +342,7 @@ export default function Home() {
               <div style={{ position: 'relative', zIndex: 1 }}>
                  <h2 style={{ fontSize: '4.5rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Join the mission.</h2>
                  <p style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '750px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
-                    Help me build the future of group projects. It's totally free to use, and focused on your success.
+                    Help me build the future of group projects. It&apos;s totally free to use, and focused on your success.
                  </p>
                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link href="/login" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Create your account</Link>

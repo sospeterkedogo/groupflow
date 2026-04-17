@@ -1,12 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { ChevronLeft, Info, MoreVertical, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import ChatRoom from '@/components/ChatRoom'
 import { Profile } from '@/types/database'
+
+type CurrentUser = {
+  id: string
+  user_metadata?: { full_name?: string }
+}
 
 export default function ChatPage() {
   const params = useParams()
@@ -15,17 +20,15 @@ export default function ChatPage() {
   const supabase = createBrowserSupabaseClient()
 
   const [targetStudent, setTargetStudent] = useState<Profile | null>(null)
-  const [me, setMe] = useState<any>(null)
+  const [me, setMe] = useState<CurrentUser | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchData()
-  }, [targetId])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    setMe(user)
+    if (user) {
+      setMe({ id: user.id, user_metadata: user.user_metadata as { full_name?: string } })
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -33,9 +36,13 @@ export default function ChatPage() {
       .eq('id', targetId)
       .single()
     
-    if (profile) setTargetStudent(profile as any)
+    if (profile) setTargetStudent(profile as Profile)
     setLoading(false)
-  }
+  }, [supabase, targetId])
+
+  useEffect(() => {
+    void fetchData()
+  }, [fetchData])
 
   if (loading) {
     return (

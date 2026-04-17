@@ -5,7 +5,6 @@ import {
   RoomProvider, 
   useStorage, 
   useMutation, 
-  useMyPresence, 
   useOthers,
   useUpdateMyPresence
 } from '@/liveblocks.config'
@@ -15,6 +14,15 @@ import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare }
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
+type ChatHistoryMessage = {
+  id: string
+  senderId: string
+  senderName: string
+  text: string
+  timestamp: string
+  isHistory: boolean
+}
+
 interface ChatRoomProps {
   roomId: string;
   currentUser: { id: string; name: string };
@@ -22,7 +30,7 @@ interface ChatRoomProps {
 
 function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
   const messages = useStorage((root) => root.messages);
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<ChatHistoryMessage[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [text, setText] = useState("");
   const updateMyPresence = useUpdateMyPresence();
@@ -32,10 +40,6 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
   const { withLoading } = useSmartLoading();
 
   const isTyping = others.some((other) => other.presence.isTyping);
-
-  useEffect(() => {
-    fetchHistory();
-  }, [roomId]);
 
   const fetchHistory = async () => {
     setLoadingHistory(true);
@@ -58,6 +62,10 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
     }
     setLoadingHistory(false);
   };
+
+  useEffect(() => {
+    void fetchHistory();
+  }, [roomId]);
 
   useEffect(() => {
     if (scrollRef.current) {

@@ -52,7 +52,7 @@ export type Task = {
   is_coding_task: boolean; // Legacy
   due_date: string | null;
   created_at: string;
-  artifacts?: any[];
+  artifacts?: Artifact[];
 };
 
 export type Commit = {
