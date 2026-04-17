@@ -148,17 +148,21 @@ export default function Sidebar({ user }: SidebarProps) {
         </button>
       </div>
 
-      <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`} style={{ 
-        width: isOpen ? '280px' : '80px',
-        maxWidth: '85vw',
-        height: 'var(--vh-dynamic)',
-        backgroundColor: 'var(--bg-sub)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 4600
-      }}>
+      <div 
+        className={`sidebar-container ${isOpen ? 'open' : 'closed'}`} 
+        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing the sidebar via backdrop
+        style={{ 
+          width: isOpen ? '280px' : '80px',
+          maxWidth: '85vw',
+          height: 'var(--vh-dynamic)',
+          backgroundColor: 'var(--bg-sub)',
+          borderRight: '1px solid var(--border)',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          zIndex: 4600
+        }}
+      >
         {/* Header / Toggle */}
         <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (

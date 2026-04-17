@@ -1,10 +1,11 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { PresenceContextType, PresenceState } from '@/types/ui'
 import { useNotifications } from '@/components/NotificationProvider'
+import { useProfile } from '@/context/ProfileContext'
 
 const PresenceContext = createContext<PresenceContextType>({
   onlineUsers: new Set(),
@@ -25,8 +26,14 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { addToast } = useNotifications()
+  const { profile } = useProfile()
+  
   const userId = user?.id
   const userName = user?.full_name
+  const groupId = profile?.group_id
+
+  // Anti-spam notification cache: maps userId to timestamp
+  const lastNotified = useRef<Map<string, number>>(new Map())
 
   const setTypingStatus = useCallback(async (isTyping: boolean) => {
     if (!channel || !userId) return
@@ -34,10 +41,11 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
     await channel.track({
       user_id: userId,
       full_name: userName,
+      group_id: groupId,
       online_at: new Date().toISOString(),
       is_typing: isTyping
     })
-  }, [channel, userId, userName])
+  }, [channel, userId, userName, groupId])
 
   useEffect(() => {
     if (!userId) return
@@ -72,10 +80,19 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
           setTypingUsers((prev) => new Set(prev).add(key))
         }
 
-        // Accountability Toast
+        const newcomerGroupId = newPresences[0]?.group_id
         const name = newPresences[0]?.full_name || 'A teammate'
-        if (key !== userId) {
-          addToast('Teammate Online', `${name} is now online`, 'success')
+        
+        // Scope Check: Only notify for teammates in the same group
+        if (key !== userId && newcomerGroupId === groupId && groupId) {
+          const now = Date.now()
+          const lastTime = lastNotified.current.get(key) || 0
+          
+          // Interval check: Skip if we notified about this user recently (< 1 minute) to prevent flapping loops
+          if (now - lastTime > 60000) {
+            addToast('Teammate Online', `${name} is online now`, 'success')
+            lastNotified.current.set(key, now)
+          }
         }
       })
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
@@ -90,10 +107,19 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
           return next
         })
 
-        // Accountability Toast
+        const leaverGroupId = leftPresences[0]?.group_id
         const name = leftPresences[0]?.full_name || 'A teammate'
-        if (key !== userId) {
-          addToast('Teammate Offline', `${name} has logged out`, 'info')
+        
+        // Scope Check: Only notify for teammates in the same group
+        if (key !== userId && leaverGroupId === groupId && groupId) {
+          const now = Date.now()
+          const lastTime = lastNotified.current.get(key) || 0
+
+          // Interval check: Skip if we notified about this user recently
+          if (now - lastTime > 60000) {
+            addToast('Teammate Offline', `${name} is offline now`, 'info')
+            lastNotified.current.set(key, now)
+          }
         }
       })
       .subscribe(async (status) => {
@@ -102,6 +128,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
           await newChannel.track({
             user_id: userId,
             full_name: userName,
+            group_id: groupId,
             online_at: new Date().toISOString(),
             is_typing: false
           })
@@ -127,7 +154,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
       clearInterval(heartbeat)
       supabase.removeChannel(newChannel)
     }
-  }, [userId, userName, supabase, addToast])
+  }, [userId, userName, groupId, supabase, addToast])
 
   return (
     <PresenceContext.Provider value={{ onlineUsers, typingUsers, setTypingStatus }}>

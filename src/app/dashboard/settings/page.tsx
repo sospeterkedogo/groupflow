@@ -58,6 +58,8 @@ export default function SettingsPage() {
   const [isEncrypted, setIsEncrypted] = useState(false)
   const [updatingGroup, setUpdatingGroup] = useState(false)
   const [customToolInput, setCustomToolInput] = useState('')
+  const [pendingAchievements, setPendingAchievements] = useState<any[] | null>(null)
+  const [saveConfirmation, setSaveConfirmation] = useState(false)
 
   // Feedback State
   const [feedbackMessage, setFeedbackMessage] = useState('')
@@ -696,8 +698,8 @@ export default function SettingsPage() {
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Team</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{(Array.isArray(profile?.groups) ? profile?.groups[0] : profile?.groups)?.name || 'No team assigned'}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{(Array.isArray(profile?.groups) ? profile?.groups[0] : profile?.groups)?.module_code || 'Independent'}</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{(profile as any)?.groups?.name || 'No team assigned'}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{(profile as any)?.groups?.module_code || 'Independent'}</div>
               </div>
               {profile?.group_id && (
                 <button
@@ -922,121 +924,148 @@ export default function SettingsPage() {
                     'Figma', 'VS Code'
                    ]
                    
-                   // Combine defaults with any custom ones user has added
-                   const userAchievements = profile?.achievements || []
-                   const userCustomTools = userAchievements
+                   const currentAchievements = pendingAchievements || profile?.achievements || []
+                   const activeTools = currentAchievements.map((a: any) => a.name)
+                   
+                   const userCustomTools = currentAchievements
                     .filter((a: any) => !DEFAULT_TOOLS.includes(a.name))
                     .map((a: any) => a.name)
                    
-                   const allTools = [...DEFAULT_TOOLS, ...userCustomTools]
+                   const allDisplayTools = Array.from(new Set([...DEFAULT_TOOLS, ...userCustomTools]))
                    
-                   return allTools.map(tool => {
-                    const isConnected = userAchievements.some((a: any) => a.name === tool)
-                    
-                    const toggleTool = async () => {
-                      if (!profile) return
-                      const achievements = profile.achievements || []
-                      let newAchievements
-                      if (isConnected) {
-                        newAchievements = achievements.filter((a: any) => a.name !== tool)
-                      } else {
-                        newAchievements = [...achievements, { name: tool, date: new Date().toISOString() }]
-                      }
-                      
-                      setProfile({ ...profile, achievements: newAchievements })
-                      const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
-                      if (error) {
+                   const handleSyncArsenal = async () => {
+                     if (!profile || !pendingAchievements) return
+                     setSaving(true)
+                     const { error } = await supabase.from('profiles').update({ achievements: pendingAchievements }).eq('id', profile.id)
+                     if (error) {
                         setError("Synchronization failed.")
-                        setProfile(profile)
-                      } else {
-                        if (profile.id) {
-                          logActivity(profile.id, profile.group_id || '', isConnected ? 'setting_updated' : 'theme_changed', `${isConnected ? 'Disconnected' : 'Connected'} ${tool} to arsenal`)
-                        }
-                        setSuccess(true)
-                        setTimeout(() => setSuccess(false), 3000)
-                      }
-                    }
+                     } else {
+                        logActivity(profile.id, profile.group_id || 'system', 'setting_updated', "Overhauled technical arsenal")
+                        addToast('Arsenal Verified', 'Your updated toolkit has been saved to your academic record.', 'success')
+                        setPendingAchievements(null)
+                        setSaveConfirmation(false)
+                        refreshProfile()
+                     }
+                     setSaving(false)
+                   }
 
-                    return (
-                      <div 
-                        key={tool}
-                        onClick={toggleTool}
-                        style={{
-                          padding: '1.25rem',
-                          background: isConnected ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)',
-                          border: isConnected ? '2px solid var(--brand)' : '1px solid var(--border)',
-                          borderRadius: '16px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                          cursor: 'pointer'
-                        }}
-                      >
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isConnected ? 'var(--brand)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'white' : 'var(--text-sub)' }}>
-                               <Settings size={16} />
-                            </div>
-                            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isConnected ? 'var(--text-main)' : 'var(--text-sub)' }}>{tool}</span>
-                         </div>
-                         
-                         <div style={{ padding: '0.4rem', color: isConnected ? 'var(--error)' : 'var(--brand)' }}>
-                            {isConnected ? <Trash2 size={16} /> : <CheckCircle2 size={16} />}
-                         </div>
-                      </div>
-                    )
-                   })
-                })()}
-
-                {/* Custom Add Card */}
-                <div 
-                  style={{
-                    padding: '1.25rem',
-                    background: 'var(--bg-sub)',
-                    border: '1.5px dashed var(--border)',
-                    borderRadius: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.5rem'
-                  }}
-                >
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                      <Settings size={14} color="var(--brand)" />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Add Custom</span>
-                   </div>
-                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        placeholder="e.g. Docker" 
-                        value={customToolInput}
-                        onChange={e => setCustomToolInput(e.target.value)}
-                        onKeyDown={async (e) => {
-                          if (e.key === 'Enter' && customToolInput.trim()) {
-                            const toolName = customToolInput.trim()
-                            const achievements = profile?.achievements || []
-                            if (achievements.some((a: any) => a.name.toLowerCase() === toolName.toLowerCase())) {
-                              setError("This tool is already in your arsenal.")
-                              return
-                            }
-                            const newAchievements = [...achievements, { name: toolName, date: new Date().toISOString() }]
-                            if (profile) {
-                              setProfile({ ...profile, achievements: newAchievements })
-                              const { error } = await supabase.from('profiles').update({ achievements: newAchievements }).eq('id', profile.id)
-                              if (error) {
-                                setError("Failed to add custom tool.")
-                              } else {
-                                setCustomToolInput('')
-                                setSuccess(true)
-                                setTimeout(() => setSuccess(false), 3000)
-                              }
-                            }
+                   return (
+                     <>
+                       {allDisplayTools.map(tool => {
+                        const isConnected = activeTools.includes(tool)
+                        
+                        const toggleTool = () => {
+                          const achievements = [...currentAchievements]
+                          let next
+                          if (isConnected) {
+                            next = achievements.filter((a: any) => a.name !== tool)
+                          } else {
+                            next = [...achievements, { name: tool, date: new Date().toISOString() }]
                           }
-                        }}
-                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }} 
-                      />
-                   </div>
-                </div>
+                          setPendingAchievements(next)
+                        }
+
+                        return (
+                          <div 
+                            key={tool}
+                            onClick={toggleTool}
+                            style={{
+                              padding: '1.25rem',
+                              background: isConnected ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)',
+                              border: isConnected ? '2px solid var(--brand)' : '1px solid var(--border)',
+                              borderRadius: '16px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                              cursor: 'pointer',
+                              transform: isConnected ? 'scale(1.02)' : 'scale(1)'
+                            }}
+                          >
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: isConnected ? 'var(--brand)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isConnected ? 'white' : 'var(--text-sub)' }}>
+                                   <Settings size={16} />
+                                </div>
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isConnected ? 'var(--text-main)' : 'var(--text-sub)' }}>{tool}</span>
+                             </div>
+                             
+                             <div style={{ padding: '0.4rem', color: isConnected ? 'var(--error)' : 'var(--brand)' }}>
+                                {isConnected ? <Trash2 size={16} /> : <CheckCircle2 size={16} />}
+                             </div>
+                          </div>
+                        )
+                       })}
+
+                       <div 
+                         style={{
+                           padding: '1.25rem',
+                           background: 'var(--bg-sub)',
+                           border: '1.5px dashed var(--border)',
+                           borderRadius: '16px',
+                           display: 'flex',
+                           flexDirection: 'column',
+                           gap: '0.5rem'
+                         }}
+                       >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                             <Settings size={14} color="var(--brand)" />
+                             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Add Custom</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                             <input 
+                               type="text" 
+                               className="form-input" 
+                               placeholder="e.g. Docker" 
+                               value={customToolInput}
+                               onChange={e => setCustomToolInput(e.target.value)}
+                               onKeyDown={(e) => {
+                                 if (e.key === 'Enter' && customToolInput.trim()) {
+                                   const toolName = customToolInput.trim()
+                                   const achievements = currentAchievements
+                                   if (achievements.some((a: any) => a.name.toLowerCase() === toolName.toLowerCase())) {
+                                     setError("This tool is already in your arsenal.")
+                                     return
+                                   }
+                                   setPendingAchievements([...achievements, { name: toolName, date: new Date().toISOString() }])
+                                   setCustomToolInput('')
+                                 }
+                               }}
+                               style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem' }} 
+                             />
+                          </div>
+                       </div>
+                       
+                       {pendingAchievements !== null && (
+                         <div style={{ gridColumn: '1 / -1', marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', animation: 'fadeIn 0.3s ease-out' }}>
+                            <button 
+                              className="btn btn-primary" 
+                              onClick={() => setSaveConfirmation(true)}
+                              style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                            >
+                               <Save size={18} /> Synchronize Arsenal Changes
+                            </button>
+                         </div>
+                       )}
+
+                       {saveConfirmation && (
+                         <div className="modal-overlay" style={{ zIndex: 10000 }}>
+                            <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+                               <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1rem' }}>Commit Toolkit Update?</h3>
+                               <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                 This will update your public researcher profile with the selected technical arsenal.
+                               </p>
+                               <div style={{ display: 'flex', gap: '1rem' }}>
+                                  <button className="btn btn-secondary" onClick={() => setSaveConfirmation(false)}>Cancel</button>
+                                  <button className="btn btn-primary" onClick={handleSyncArsenal} disabled={saving}>
+                                    {saving ? 'Saving...' : 'Confirm Sync'}
+                                  </button>
+                               </div>
+                            </div>
+                         </div>
+                       )}
+                     </>
+                   )
+                })()}
             </div>
           </div>
         )}

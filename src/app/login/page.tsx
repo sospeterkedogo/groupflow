@@ -47,15 +47,19 @@ function LoginContent() {
   const handleGithubLogin = async () => {
     setAuthError(null)
     const supabase = createBrowserSupabaseClient()
+    
+    // Determine redirect URL: env-defined site URL is more reliable for OAuth whitening
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo: `${siteUrl}/dashboard`
       }
     })
 
     if (error) {
-      setAuthError(error.message)
+      console.error('GitHub Login Error:', error)
+      setAuthError(error.message || "Unable to initiate GitHub authentication.")
     }
   }
 

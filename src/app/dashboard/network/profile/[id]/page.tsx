@@ -272,8 +272,8 @@ export default function StudentProfilePage() {
 
                    <div style={{ marginBottom: '2rem' }}>
                       <h4 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>About {member.full_name?.split(' ')[0]}</h4>
-                      <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85 }}>
-                         An active member of the GroupFlow community. Specializing in {member.course_name} and contributing to peer-verified projects.
+                      <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85, whiteSpace: 'pre-wrap' }}>
+                        {member.biography || `An active scholar in the GroupFlow network, specializing in ${member.course_name || 'their academic field'} and contributing to collaborative research initiatives.`}
                       </p>
                    </div>
 

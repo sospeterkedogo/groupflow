@@ -29,7 +29,7 @@ export function ProfileProvider({
   const refreshProfile = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, groups(*)')
       .eq('id', userId)
       .single()
     if (data) setProfile(data)

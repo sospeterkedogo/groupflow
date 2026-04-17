@@ -163,46 +163,14 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         </div>
       </div>
 
-      {!profile.subscription_plan && (
-        <div style={{ padding: '1rem 1.25rem', borderRadius: '22px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem' }}>Support the project mission</div>
-            <div style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>Help bring GroupFlow to more schools by upgrading to Pro or Premium.</div>
-          </div>
-          <button
-            className="btn-sm btn-primary"
-            style={{ padding: '0.8rem 1.2rem', borderRadius: '16px' }}
-            onClick={() => router.push('/dashboard/upgrade')}
-          >
-            Access Tiers
-          </button>
-        </div>
-      )}
-
-      {profile.subscription_plan && (
-        <div style={{ padding: '1rem 1.25rem', borderRadius: '22px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem' }}>Active plan: {profile.subscription_plan}</div>
-            <div style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>Your pre-registration is active and your access is secured.</div>
-          </div>
-          <button
-            className="btn-sm btn-secondary"
-            style={{ padding: '0.8rem 1.2rem', borderRadius: '16px' }}
-            onClick={() => router.push('/dashboard/upgrade')}
-          >
-            Manage Plan
-          </button>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+      {/* Quick Action Pill Bar */}
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem', alignItems: 'center' }}>
          <div className="stat-pill" style={{ padding: '0.6rem 1rem', borderRadius: '14px', background: 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} data-tooltip="Team activity right now">
             <Activity size={16} color="var(--brand)" />
             <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>SYSTEM STATUS: <span style={{ color: 'var(--success)' }}>OPTIMAL SYNC</span></span>
          </div>
          <div style={{ flex: 1 }} />
-         {/* Quick Action Pill Bar */}
-         <div style={{ display: 'flex', gap: '0.5rem' }}>
+         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button 
                className="btn-sm btn-primary btn-inline" 
                style={{ padding: '0.5rem 1rem' }} 
@@ -221,8 +189,66 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                data-tooltip="Update the board"
                onClick={() => setSyncToken(prev => prev + 1)}
             >Sync Board</button>
+            <button 
+               className="btn-sm btn-inline shimmer-gold" 
+               style={{ padding: '0.5rem 1rem', background: 'var(--brand)', color: 'white', border: 'none', fontWeight: 900 }} 
+               data-tooltip="Support the project mission"
+               onClick={() => router.push('/dashboard/upgrade')}
+            >Support</button>
          </div>
       </div>
+
+      {/* Group Protocol & Mission */}
+      {group && (
+        <div 
+          className="hud-card" 
+          style={{ 
+            padding: '1.5rem', 
+            borderRadius: '24px', 
+            background: 'rgba(var(--brand-rgb), 0.03)', 
+            border: '1px dashed var(--border)',
+            marginTop: '0.5rem'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <Zap size={18} color="var(--brand)" /> Group Protocol
+            </h3>
+            {profile?.role === 'admin' && (
+              <button 
+                className="btn-sm btn-ghost" 
+                style={{ width: 'auto', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                onClick={() => {
+                  const desc = prompt("Enter Group Description:", group.description || "");
+                  const rules = prompt("Enter Group Rules:", group.rules || "");
+                  if (desc !== null || rules !== null) {
+                    supabase.from('groups').update({ 
+                      description: desc ?? group.description, 
+                      rules: rules ?? group.rules 
+                    }).eq('id', group.id).then(() => fetchGroupDetails());
+                  }
+                }}
+              >
+                Edit Protocol
+              </button>
+            )}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Mission Statement</div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
+                {group.description || "The group leader has not set a project mission description yet."}
+              </p>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Project Rules</div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
+                {group.rules || "Standard academic collaboration rules apply."}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1.5rem' }}>
         <div>
