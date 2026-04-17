@@ -96,15 +96,30 @@ export default function TaskModal({
     if (!isEditMode) return
     
     fetchArtifacts()
-    const channel = supabase
+    const channelAttr = supabase
       .channel(`task_${task.id}_artifacts`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'artifacts', filter: `task_id=eq.${task.id}` }, () => {
         fetchArtifacts()
       })
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => { 
+      supabase.removeChannel(channelAttr)
+    }
   }, [task?.id])
+
+  useEffect(() => {
+    const channelMembers = supabase
+      .channel(`task_members_${groupId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` }, () => {
+        fetchMembers()
+      })
+      .subscribe()
+
+    return () => { 
+      supabase.removeChannel(channelMembers)
+    }
+  }, [groupId])
 
   const handleSave = async () => {
     if (!title.trim()) {

@@ -147,6 +147,13 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             fetchTasksFromDB()
           }
         )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },
+          () => {
+            fetchGroupMembers()
+          }
+        )
         .subscribe()
     }
 
