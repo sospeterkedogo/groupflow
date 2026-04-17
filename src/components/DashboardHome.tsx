@@ -42,7 +42,7 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('group_id', groupId)
-      .filter('assignees', 'cs', `{"${profile.id}"}`)
+      .contains('assignees', [profile.id])
       .neq('status', 'Done')
 
     if (error) {

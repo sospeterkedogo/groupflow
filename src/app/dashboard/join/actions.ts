@@ -9,9 +9,9 @@ export async function createGroup(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return redirect('/login')
 
-  const groupName = formData.get('name') as string
-  const moduleCode = formData.get('module_code') as string
-  const joinPassword = formData.get('join_password') as string
+  const groupName = (formData.get('name') as string || '').trim()
+  const moduleCode = (formData.get('module_code') as string || '').trim().toUpperCase()
+  const joinPassword = (formData.get('join_password') as string || '').trim()
 
   // Create the group
   const { data: newGroup, error: groupError } = await supabase
@@ -42,8 +42,8 @@ export async function joinGroup(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return redirect('/login')
 
-  const moduleCode = formData.get('module_code') as string
-  const joinPassword = formData.get('join_password') as string
+  const moduleCode = (formData.get('module_code') as string || '').trim().toUpperCase()
+  const joinPassword = (formData.get('join_password') as string || '').trim()
 
   // Search for the group
   const { data: group } = await supabase

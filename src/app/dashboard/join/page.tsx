@@ -56,8 +56,8 @@ function JoinGroupContent() {
                    <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
                 </div>
                 <div className="form-group">
-                   <label className="form-label" htmlFor="join_password">Join Password:</label>
-                   <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Set a group password" required />
+                   <label className="form-label" htmlFor="create_join_password">Join Password:</label>
+                   <input className="form-input" id="create_join_password" name="join_password" type="password" placeholder="Set a group password" required />
                 </div>
                 <SubmitButton label="Create Team" />
              </form>
@@ -74,8 +74,8 @@ function JoinGroupContent() {
              </p>
              <form action={joinGroup}>
                 <div className="form-group">
-                   <label className="form-label" htmlFor="module_code">Module Code:</label>
-                   <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
+                   <label className="form-label" htmlFor="create_module_code">Module Code:</label>
+                   <input className="form-input" id="create_module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
                 </div>
                 <div className="form-group">
                    <label className="form-label" htmlFor="join_password">Join Password:</label>

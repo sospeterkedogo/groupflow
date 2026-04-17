@@ -144,6 +144,11 @@ export default function TaskModal({
         throw new Error(data?.error || 'Failed to save task via workflow.')
       }
 
+      // If the workflow is still running, give Supabase a brief window before fetching.
+      if (data?.status && ['running', 'pending'].includes(data.status)) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+
       await onRefresh()
       await onTaskSaved?.()
       onClose()

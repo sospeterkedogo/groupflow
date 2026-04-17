@@ -30,8 +30,7 @@ export async function POST(request: Request) {
 
     // Security: Only allow users to join their assigned group room
     if (room && profile?.group_id !== room) {
-       // Optional: Allow global rooms or different logic, but for Kanban it should match
-       // return new NextResponse("Forbidden: Not in this group", { status: 403 });
+      return new NextResponse("Forbidden: Not in this group", { status: 403 });
     }
 
     // Prepare session
