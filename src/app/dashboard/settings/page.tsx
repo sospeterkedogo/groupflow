@@ -8,7 +8,7 @@ import {
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
-  Calendar, CreditCard, ArrowUpRight
+  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock
 } from 'lucide-react'
 import ActiveUsersList from '@/components/ActiveUsersList'
 import ActivityLogView from '@/components/ActivityLogView'
@@ -150,6 +150,28 @@ export default function SettingsPage() {
       addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
     }
     setSaving(false)
+  }
+
+  const handleCheckout = async (plan: 'pro' | 'premium') => {
+    setError(null)
+    setSwitching(true) // Overload switching for checkout loading status
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan })
+      })
+
+      const result = await response.json()
+      if (!response.ok || !result.url) {
+        throw new Error(result?.error || 'Unable to start checkout.')
+      }
+
+      window.location.href = result.url
+    } catch (err: any) {
+      setError(err.message || 'Checkout initiation failed.')
+      setSwitching(false)
+    }
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'bg') => {
@@ -378,12 +400,33 @@ export default function SettingsPage() {
                     <ArrowUpRight size={16} />
                   </button>
                 ) : (
-                  <button onClick={() => router.push('/dashboard/upgrade')} className="btn btn-primary" style={{ width: 'auto' }}>
-                    View Upgrade Options
-                  </button>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={() => handleCheckout('pro')} disabled={switching} className="btn btn-primary" style={{ width: 'auto' }}>
+                      {switching ? 'Connecting...' : 'Try Pro'}
+                    </button>
+                    <button onClick={() => handleCheckout('premium')} disabled={switching} className="btn btn-secondary" style={{ width: 'auto' }}>
+                      {switching ? 'Connecting...' : 'Go Premium'}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
+
+            {!profile.subscription_plan && (
+              <div style={{ marginTop: '2.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div style={{ padding: '1.5rem', borderRadius: '24px', background: 'rgba(var(--brand-rgb), 0.05)', border: '1px solid var(--border)' }}>
+                  <h4 style={{ fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Shield size={18} color="var(--brand)" /> Pro Support</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-sub)', marginBottom: '1rem' }}>Unlock advanced team analytics and exclusive Pro themes for £2.99/mo.</p>
+                  <button onClick={() => handleCheckout('pro')} disabled={switching} className="btn btn-sm btn-primary">Select Pro</button>
+                </div>
+                <div style={{ padding: '1.5rem', borderRadius: '24px', background: 'rgba(212, 175, 55, 0.05)', border: '1px solid #d4af37' }}>
+                  <h4 style={{ fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#d4af37' }}><Sparkles size={18} /> Premium Partner</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-sub)', marginBottom: '1rem' }}>The ultimate mission experience with luxury themes and lifetime access.</p>
+                  <button onClick={() => handleCheckout('premium')} disabled={switching} className="btn btn-sm btn-primary shimmer-gold" style={{ background: '#d4af37' }}>Go Premium</button>
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
@@ -956,7 +999,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
           :root {
             --gap-sm: 2.5rem;
             --avatar-size: 120px;
@@ -969,7 +1012,7 @@ export default function SettingsPage() {
           }
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-       `}</style>
+       `}} />
     </div>
   )
 }
