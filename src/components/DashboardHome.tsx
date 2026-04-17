@@ -130,11 +130,20 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 className="fluid-h1" style={{ fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '8px' }}>
-              {greeting}, {profile?.full_name?.split(' ')[0] || 'there'}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <h2 className="fluid-h1" style={{ fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '4px' }}>
+                {greeting}, {profile?.full_name?.split(' ')[0] || 'there'}
+              </h2>
+              {profile?.tagline && (
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.08)', padding: '4px 12px', borderRadius: '10px', verticalAlign: 'middle' }}>
+                  {profile.tagline}
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-               <span style={{ color: 'var(--brand)', textTransform: 'uppercase' }}>{profile?.role || 'SCHOLAR'}</span>
+               <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{profile?.role || 'SCHOLAR'}</span>
+               <span style={{ opacity: 0.3 }} className="mobile-hide">•</span>
+               <span style={{ color: 'var(--brand)' }}>{profile?.course_name || 'INDEPENDENT RESEARCH'}</span>
                <span style={{ opacity: 0.3 }} className="mobile-hide">•</span>
                <span>{profile?.group_id ? `${personalTaskCount} RESEARCH OBJECTIVES` : 'NO ACTIVE PROJECT TRACK'}</span>
             </div>
@@ -165,10 +174,33 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
       {/* Quick Action Pill Bar */}
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem', alignItems: 'center' }}>
-         <div className="stat-pill" style={{ padding: '0.6rem 1rem', borderRadius: '14px', background: 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} data-tooltip="Team activity right now">
+      {/* Scholar Identity & Research Brief */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
+         <div 
+           className="hud-card" 
+           style={{ 
+             padding: '1.5rem', 
+             borderRadius: '24px', 
+             background: 'var(--surface)', 
+             border: '1px solid var(--border)',
+             display: 'flex',
+             flexDirection: 'column',
+             gap: '1rem'
+           }}
+         >
+           <h3 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <UserCircle size={16} color="var(--brand)" /> Scholar Identity
+           </h3>
+           <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, fontWeight: 500, fontStyle: profile?.biography ? 'normal' : 'italic', opacity: profile?.biography ? 1 : 0.6 }}>
+             {profile?.biography || "No research biography provided yet. Define your academic identity in settings."}
+           </p>
+         </div>
+
+         <div className="stat-pill" style={{ padding: '0.6rem 1rem', borderRadius: '14px', background: 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem', height: 'fit-content' }} data-tooltip="Team activity right now">
             <Activity size={16} color="var(--brand)" />
             <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>SYSTEM STATUS: <span style={{ color: 'var(--success)' }}>OPTIMAL SYNC</span></span>
          </div>
+      </div>
          <div style={{ flex: 1 }} />
          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button 
