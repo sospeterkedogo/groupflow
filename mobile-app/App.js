@@ -38,7 +38,6 @@ export default function App() {
       
     } catch (e) {
       // Network Failed -> Boot from Cache
-      console.log('Network failed, falling back to cache');
       setIsOffline(true);
       const cached = await AsyncStorage.getItem('OFFLINE_TASKS');
       if (cached) setTasks(JSON.parse(cached));

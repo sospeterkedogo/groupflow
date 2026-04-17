@@ -42,27 +42,27 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
   )
 }
 
+
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
-  const router = useRouter()
+  // All hooks must be called unconditionally before any early returns
   const storageTasks = useStorage((root) => root.tasks);
-  const [boardSearch, setBoardSearch] = useState('')
-  const [groupMembers, setGroupMembers] = useState<Profile[]>([])
-  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
+  const router = useRouter();
+  const [boardSearch, setBoardSearch] = useState('');
+  const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
+  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
+  const [boardError, setBoardError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
+  // ...existing code...
+  // Early return after all hooks
+  if (storageTasks == null) {
+    return <div>Loading board...</div>;
+  }
 
-  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set())
-  const [boardError, setBoardError] = useState<string | null>(null)
-  const [now, setNow] = useState(() => Date.now())
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [selectedMember, setSelectedMember] = useState<Profile | null>(null)
-
-  // Presence & Others
-  const [{ draggingTaskId }, updateMyPresence] = useMyPresence();
-  const others = useOthers();
-  const othersDragging = others.filter(o => o.presence?.draggingTaskId);
-
-  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
+  // ...existing code...
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 60000)

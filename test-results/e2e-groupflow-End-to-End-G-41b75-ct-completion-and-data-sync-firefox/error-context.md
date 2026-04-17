@@ -12,94 +12,110 @@
 # Error details
 
 ```
-Test timeout of 60000ms exceeded.
+Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+Call log:
+  - navigating to "http://localhost:3000/login", waiting until "load"
+
 ```
 
 # Page snapshot
 
 ```yaml
-- generic [ref=e1]:
-  - generic [active]:
-    - generic [ref=e4]:
-      - generic [ref=e5]:
-        - generic [ref=e6]:
-          - navigation [ref=e7]:
-            - button "previous" [disabled] [ref=e8]:
-              - img "previous" [ref=e9]
-            - generic [ref=e11]:
-              - generic [ref=e12]: 1/
-              - text: "1"
-            - button "next" [disabled] [ref=e13]:
-              - img "next" [ref=e14]
-          - img
-        - generic [ref=e16]:
-          - link "Next.js 16.2.3 (stale) Turbopack" [ref=e17] [cursor=pointer]:
-            - /url: https://nextjs.org/docs/messages/version-staleness
-            - img [ref=e18]
-            - generic "There is a newer version (16.2.4) available, upgrade recommended!" [ref=e20]: Next.js 16.2.3 (stale)
-            - generic [ref=e21]: Turbopack
-          - img
-      - dialog "Runtime ReferenceError" [ref=e23]:
-        - generic [ref=e26]:
-          - generic [ref=e27]:
-            - generic [ref=e28]:
-              - generic [ref=e29]:
-                - generic [ref=e30]: Runtime ReferenceError
-                - generic [ref=e31]: Server
-              - generic [ref=e32]:
-                - button "Copy Error Info" [ref=e33] [cursor=pointer]:
-                  - img [ref=e34]
-                - button "No related documentation found" [disabled] [ref=e36]:
-                  - img [ref=e37]
-                - button "Attach Node.js inspector" [ref=e39] [cursor=pointer]:
-                  - img [ref=e40]
-            - generic [ref=e49]: NotificationProvider is not defined
-          - generic [ref=e50]:
-            - generic [ref=e51]:
-              - paragraph [ref=e53]:
-                - img [ref=e55]
-                - generic [ref=e58]: src\app\layout.tsx (21:10) @ RootLayout
-                - button "Open in editor" [ref=e59] [cursor=pointer]:
-                  - img [ref=e61]
-              - generic [ref=e64]:
-                - generic [ref=e65]: 19 | <body suppressHydrationWarning>
-                - generic [ref=e66]: "20 | {/* Wrap all children in NotificationProvider for global access */}"
-                - generic [ref=e67]: "> 21 | <NotificationProvider>{children}</NotificationProvider>"
-                - generic [ref=e68]: "| ^"
-                - generic [ref=e69]: 22 | </body>
-                - generic [ref=e70]: 23 | </html>
-                - generic [ref=e71]: 24 | );
-            - generic [ref=e72]:
-              - generic [ref=e73]:
-                - paragraph [ref=e74]:
-                  - text: Call Stack
-                  - generic [ref=e75]: "31"
-                - button "Show 30 ignore-listed frame(s)" [ref=e76] [cursor=pointer]:
-                  - text: Show 30 ignore-listed frame(s)
-                  - img [ref=e77]
-              - generic [ref=e79]:
-                - generic [ref=e80]:
-                  - text: RootLayout
-                  - button "Open RootLayout in editor" [ref=e81] [cursor=pointer]:
-                    - img [ref=e82]
-                - text: src\app\layout.tsx (21:10)
-        - generic [ref=e84]: "1"
-        - generic [ref=e85]: "2"
-    - generic [ref=e90] [cursor=pointer]:
-      - button "Open Next.js Dev Tools" [ref=e91]:
-        - img [ref=e92]
-      - generic [ref=e96]:
-        - button "Open issues overlay" [ref=e97]:
-          - generic [ref=e98]:
-            - generic [ref=e99]: "0"
-            - generic [ref=e100]: "1"
-          - generic [ref=e101]: Issue
-        - button "Collapse issues badge" [ref=e102]:
-          - img [ref=e103]
-  - generic [ref=e106]:
-    - img [ref=e107]
-    - heading "This page couldn’t load" [level=1] [ref=e109]
-    - paragraph [ref=e110]: A server error occurred. Reload to try again.
-    - button "Reload" [ref=e113] [cursor=pointer]
-  - paragraph [ref=e114]: ERROR 3086279452
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Unable to connect" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Firefox can’t establish a connection to the server at localhost:3000.
+    - paragraph
+    - list [ref=e8]:
+      - listitem [ref=e9]: The site could be temporarily unavailable or too busy. Try again in a few moments.
+      - listitem [ref=e10]: If you are unable to load any pages, check your computer’s network connection.
+      - listitem [ref=e11]: If your computer or network is protected by a firewall or proxy, make sure that Nightly is permitted to access the web.
+  - button "Try Again" [active] [ref=e13]
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | 
+  3  | test.describe('End-to-End: Group Project Flow', () => {
+  4  |   test('Simulate 4 users: signup, group creation, project completion, and data sync', async ({ page, browser }) => {
+  5  |     // Simulate 4 users in parallel
+  6  |     const users = [
+  7  |       { email: 'user1@example.com', password: 'Test1234!' },
+  8  |       { email: 'user2@example.com', password: 'Test1234!' },
+  9  |       { email: 'user3@example.com', password: 'Test1234!' },
+  10 |       { email: 'user4@example.com', password: 'Test1234!' },
+  11 |     ];
+  12 |     const contexts = await Promise.all(users.map(() => browser.newContext()));
+  13 |     const pages = await Promise.all(contexts.map(ctx => ctx.newPage()));
+  14 | 
+  15 |     // 1. Each user signs up (on /login, toggle to signup mode)
+  16 |     for (let i = 0; i < users.length; i++) {
+> 17 |       await pages[i].goto('/login');
+     |                      ^ Error: page.goto: NS_ERROR_CONNECTION_REFUSED
+  18 |       // Toggle to signup mode if not already
+  19 |       const signupToggle = pages[i].locator('button', { hasText: "Sign up" });
+  20 |       if (await signupToggle.isVisible()) {
+  21 |         await signupToggle.click();
+  22 |       }
+  23 |       await pages[i].fill('input[name="email"]', users[i].email);
+  24 |       await pages[i].fill('input[name="password"]', users[i].password);
+  25 |       // Fill required ID field for signup
+  26 |       await pages[i].fill('input[name="school_id"]', `ID-00${i + 1}`);
+  27 |       // Accept legal terms
+  28 |       const legalCheckbox = pages[i].locator('input[name="legal_accepted"]');
+  29 |       if (await legalCheckbox.isVisible()) {
+  30 |         await legalCheckbox.check();
+  31 |       }
+  32 |       await pages[i].click('button[type="submit"]');
+  33 |       await expect(pages[i].locator('text=Dashboard')).toBeVisible();
+  34 |     }
+  35 | 
+  36 |     // 2. User 1 creates a group
+  37 |     await pages[0].click('button:has-text("Create Group")');
+  38 |     await pages[0].fill('input[name="groupName"]', 'Test Group');
+  39 |     await pages[0].click('button:has-text("Save")');
+  40 |     await expect(pages[0].locator('text=Test Group')).toBeVisible();
+  41 | 
+  42 |     // 3. User 1 invites others
+  43 |     for (let i = 1; i < users.length; i++) {
+  44 |       await pages[0].click('button:has-text("Invite Members")');
+  45 |       await pages[0].fill('input[name="inviteEmail"]', users[i].email);
+  46 |       await pages[0].click('button:has-text("Send Invite")');
+  47 |       await expect(pages[0].locator(`text=Invitation sent to ${users[i].email}`)).toBeVisible();
+  48 |     }
+  49 | 
+  50 |     // 4. Other users accept invite
+  51 |     for (let i = 1; i < users.length; i++) {
+  52 |       await pages[i].goto('/groups');
+  53 |       await pages[i].click('button:has-text("Accept Invite")');
+  54 |       await expect(pages[i].locator('text=Test Group')).toBeVisible();
+  55 |     }
+  56 | 
+  57 |     // 5. All users add tasks and complete project
+  58 |     for (let i = 0; i < users.length; i++) {
+  59 |       await pages[i].goto('/groups/test-group');
+  60 |       await pages[i].click('button:has-text("Add Task")');
+  61 |       await pages[i].fill('input[name="taskName"]', `Task for ${users[i].email}`);
+  62 |       await pages[i].click('button:has-text("Save Task")');
+  63 |       await expect(pages[i].locator(`text=Task for ${users[i].email}`)).toBeVisible();
+  64 |       await pages[i].click(`button:has-text("Complete")`);
+  65 |       await expect(pages[i].locator('text=Completed')).toBeVisible();
+  66 |     }
+  67 | 
+  68 |     // 6. Validate all data is synced and visible to all users
+  69 |     for (let i = 0; i < users.length; i++) {
+  70 |       await pages[i].goto('/groups/test-group');
+  71 |       for (let j = 0; j < users.length; j++) {
+  72 |         await expect(pages[i].locator(`text=Task for ${users[j].email}`)).toBeVisible();
+  73 |         await expect(pages[i].locator('text=Completed')).toBeVisible();
+  74 |       }
+  75 |     }
+  76 | 
+  77 |     // Cleanup: close all contexts
+  78 |     await Promise.all(contexts.map(ctx => ctx.close()));
+  79 |   });
+  80 | });
+  81 | 
 ```

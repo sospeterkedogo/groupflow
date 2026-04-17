@@ -29,7 +29,6 @@ export async function distributeTaskScore(taskId: string, assignees: string[]) {
 
   if (taskErr || !taskStr) throw new Error('Task node validation failed')
   if (taskStr.score_awarded) {
-    console.log('Anti-Farming Lock Active: Score already extracted from this node.')
     return { success: false, reason: 'Already awarded' }
   }
 

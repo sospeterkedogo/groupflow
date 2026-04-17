@@ -12,11 +12,23 @@ test.describe('End-to-End: Group Project Flow', () => {
     const contexts = await Promise.all(users.map(() => browser.newContext()));
     const pages = await Promise.all(contexts.map(ctx => ctx.newPage()));
 
-    // 1. Each user signs up
+    // 1. Each user signs up (on /login, toggle to signup mode)
     for (let i = 0; i < users.length; i++) {
-      await pages[i].goto('/signup');
+      await pages[i].goto('/login');
+      // Toggle to signup mode if not already
+      const signupToggle = pages[i].locator('button', { hasText: "Sign up" });
+      if (await signupToggle.isVisible()) {
+        await signupToggle.click();
+      }
       await pages[i].fill('input[name="email"]', users[i].email);
       await pages[i].fill('input[name="password"]', users[i].password);
+      // Fill required ID field for signup
+      await pages[i].fill('input[name="school_id"]', `ID-00${i + 1}`);
+      // Accept legal terms
+      const legalCheckbox = pages[i].locator('input[name="legal_accepted"]');
+      if (await legalCheckbox.isVisible()) {
+        await legalCheckbox.check();
+      }
       await pages[i].click('button[type="submit"]');
       await expect(pages[i].locator('text=Dashboard')).toBeVisible();
     }

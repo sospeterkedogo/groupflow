@@ -55,7 +55,6 @@ export function ProfileProvider({
           filter: `id=eq.${userId}`
         },
         (payload) => {
-          console.log('Profile Realtime Update:', payload)
           if (payload.new) {
             setProfile(payload.new as Profile)
           }

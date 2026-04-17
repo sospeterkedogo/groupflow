@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { Bell, X, Info, CheckCircle, AlertTriangle, UserPlus } from 'lucide-react'
+import { X, Info, UserPlus } from 'lucide-react'
 import { Notification, NotificationContextType, Toast } from '@/types/ui'
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
@@ -17,7 +17,7 @@ export const useNotifications = () => {
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [toasts, setToasts] = useState<Toast[]>([])
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default')
+  // Removed unused notificationPermission state
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const addToast = (title: string, message: string, type: string = 'info') => {
@@ -43,70 +43,77 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [supabase])
 
   useEffect(() => {
+    // Only request permission if needed; do not attempt to set Notification.permission (read-only)
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationPermission(window.Notification.permission)
       if (window.Notification.permission === 'default') {
-        window.Notification.requestPermission().then(permission => {
-          setNotificationPermission(permission)
-        })
+        window.Notification.requestPermission();
       }
     }
 
-    let channel: RealtimeChannel | null = null
-    let active = true
+    let channel: RealtimeChannel | null = null;
+    let active = true;
 
     const showBrowserAlert = (title: string, message: string) => {
-      if (typeof window === 'undefined') return
-      if (window.Notification?.permission !== 'granted') return
-      if (!document.hidden && document.hasFocus()) return
+      if (typeof window === 'undefined') return;
+      if (window.Notification?.permission !== 'granted') return;
+      if (!document.hidden && document.hasFocus()) return;
 
       const notification = new window.Notification(title, {
         body: message,
         icon: '/favicon.ico',
         silent: true
-      })
-      notification.onclick = () => window.focus()
-    }
+      });
+      notification.onclick = () => window.focus();
+    };
 
     const processNotification = (incoming: Notification) => {
       setNotifications(prev => {
-        const exists = prev.some(n => n.id === incoming.id)
+        const exists = prev.some(n => n.id === incoming.id);
         if (exists) {
-          return prev.map(n => n.id === incoming.id ? incoming : n)
+          return prev.map(n => n.id === incoming.id ? incoming : n);
         }
-        return [incoming, ...prev]
-      })
-      addToast(incoming.title, incoming.message, incoming.type)
-      showBrowserAlert(incoming.title, incoming.message)
-    }
+        return [incoming, ...prev];
+      });
+      addToast(incoming.title, incoming.message, incoming.type);
+      showBrowserAlert(incoming.title, incoming.message);
+    };
 
     const setupSubscription = async () => {
-      await fetchNotifications()
-      const { data: { user } } = await supabase.auth.getUser()
+      // Always clean up previous channel before creating a new one
+      if (channel) {
+        supabase.removeChannel(channel);
+        channel = null;
+      }
+      await fetchNotifications();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user && active) {
-        channel = supabase
-          .channel(`notifications_${user.id}`)
+        // Use a unique channel name to avoid Supabase callback errors
+        const uniqueId = Math.random().toString(36).slice(2) + Date.now();
+        const channelName = `notifications_${user.id}_${uniqueId}`;
+        const newChannel = supabase
+          .channel(channelName)
           .on('postgres_changes', {
             event: '*',
             schema: 'public',
             table: 'notifications',
             filter: `user_id=eq.${user.id}`,
           }, (payload) => {
-            if (!payload.new) return
-            const incoming = payload.new as Notification
-            processNotification(incoming)
-          })
-          .subscribe()
+            if (!payload.new) return;
+            const incoming = payload.new as Notification;
+            processNotification(incoming);
+          });
+        await newChannel.subscribe();
+        channel = newChannel;
       }
-    }
+    };
 
-    setupSubscription()
+    setupSubscription();
 
     return () => {
-      active = false
-      if (channel) supabase.removeChannel(channel)
-    }
-  }, [fetchNotifications, supabase])
+      active = false;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [fetchNotifications, supabase]);
 
   const markAsRead = async (id: string) => {
     const original = notifications.find(n => n.id === id)
@@ -200,3 +207,5 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     </NotificationContext.Provider>
   )
 }
+
+
