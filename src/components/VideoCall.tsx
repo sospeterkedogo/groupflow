@@ -65,12 +65,14 @@ export default function VideoCall({ roomName, userName, onClose }: VideoCallProp
           }
         }
 
-        apiRef.current = new window.JitsiMeetExternalAPI(domain, options)
-        
-        // Listen for hangup
-        apiRef.current.addEventListener('videoConferenceLeft', () => {
-          onClose()
-        })
+        if (window.JitsiMeetExternalAPI) {
+          apiRef.current = new window.JitsiMeetExternalAPI(domain, options)
+          
+          // Listen for hangup
+          apiRef.current.addEventListener('videoConferenceLeft', () => {
+            onClose()
+          })
+        }
       }
     }
 

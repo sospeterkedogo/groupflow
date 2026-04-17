@@ -96,7 +96,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '1.5rem', color: 'var(--text-sub)', fontSize: '1.1rem' }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <MapPin size={18} />
-                    <span>{profile.groups?.name || 'Independent Specialist'}</span>
+                    <span>{(Array.isArray(profile.groups) ? profile.groups[0]?.name : profile.groups?.name) || 'Independent Specialist'}</span>
                  </div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <TrendingUp size={18} />

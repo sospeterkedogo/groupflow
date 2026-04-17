@@ -2,8 +2,10 @@ export type Group = {
   id: string;
   name: string;
   module_code: string | null;
+  is_encrypted: boolean;
   created_at: string;
 };
+
 
 export type Profile = {
   id: string; // matches auth.users UUID

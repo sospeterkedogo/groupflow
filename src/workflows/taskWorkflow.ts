@@ -98,7 +98,7 @@ async function logActivity(
   }
 }
 
-async function notifyAssignees(assignees: string[], title: string) {
+async function notifyAssignees(assignees: string[], title: string, taskId: string) {
   'use step'
 
   if (assignees.length === 0) {
@@ -111,7 +111,7 @@ async function notifyAssignees(assignees: string[], title: string) {
     type: 'task_created',
     title: 'New task assigned',
     message: `You were assigned to ${title}`,
-    link: `/dashboard`
+    link: `/dashboard?taskId=${taskId}`
   }))
 
   const { error } = await supabase.from('notifications').insert(notifications)

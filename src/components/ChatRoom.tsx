@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { 
-  RoomProvider, 
-  useStorage, 
-  useMutation, 
+import {
+  RoomProvider,
+  useStorage,
+  useMutation,
   useOthers,
   useUpdateMyPresence
-} from '@/liveblocks.config'
+} from '@/liveblocks.config' A
 import { LiveList } from '@liveblocks/client'
 import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare } from 'lucide-react'
 
@@ -49,7 +49,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
       .eq('room_id', roomId)
       .order('created_at', { ascending: true })
       .limit(50);
-    
+
     if (data) {
       setHistory(data.map(m => ({
         id: m.id,
@@ -86,7 +86,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
 
   const handleSend = async () => {
     if (!text.trim()) return;
-    
+
     // 1. Instant Real-time Broadcast via Liveblocks
     sendMessage(text);
     const messageContent = text;
@@ -103,7 +103,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
           content: messageContent,
           metadata: { sender_name: currentUser.name }
         });
-      
+
       if (error) console.error("Message backup failed:", error);
     }, 'Synchronizing Archive...')
   };
@@ -136,7 +136,7 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
       </div>
 
       {/* Messages Area */}
-      <div 
+      <div
         ref={scrollRef}
         style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}
       >
@@ -158,9 +158,9 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
         {history.map((msg) => {
           const isMe = msg.senderId === currentUser.id;
           return (
-            <div 
-              key={msg.id} 
-              style={{ 
+            <div
+              key={msg.id}
+              style={{
                 alignSelf: isMe ? 'flex-end' : 'flex-start',
                 maxWidth: '80%',
                 display: 'flex',
@@ -171,8 +171,8 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
               <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: isMe ? 'var(--brand)' : 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <UserIcon size={16} color={isMe ? "white" : "var(--text-sub)"} />
               </div>
-              <div style={{ 
-                padding: '0.75rem 1rem', 
+              <div style={{
+                padding: '0.75rem 1rem',
                 borderRadius: isMe ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
                 background: isMe ? 'var(--brand)' : 'var(--bg-sub)',
                 color: isMe ? 'white' : 'var(--text-main)',
@@ -203,9 +203,9 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
         {messages?.map((msg) => {
           const isMe = msg.senderId === currentUser.id;
           return (
-            <div 
-              key={msg.id} 
-              style={{ 
+            <div
+              key={msg.id}
+              style={{
                 alignSelf: isMe ? 'flex-end' : 'flex-start',
                 maxWidth: '80%',
                 display: 'flex',
@@ -216,8 +216,8 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
               <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: isMe ? 'var(--brand)' : 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <UserIcon size={16} color={isMe ? "white" : "var(--text-sub)"} />
               </div>
-              <div style={{ 
-                padding: '0.75rem 1rem', 
+              <div style={{
+                padding: '0.75rem 1rem',
                 borderRadius: isMe ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
                 background: isMe ? 'var(--brand)' : 'var(--bg-sub)',
                 color: isMe ? 'white' : 'var(--text-main)',
@@ -244,10 +244,10 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
       <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border)', background: 'var(--bg-sub)' }}>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', color: 'var(--text-sub)' }}>
-             <Paperclip size={20} style={{ cursor: 'pointer' }} />
-             <Smile size={20} style={{ cursor: 'pointer' }} />
+            <Paperclip size={20} style={{ cursor: 'pointer' }} />
+            <Smile size={20} style={{ cursor: 'pointer' }} />
           </div>
-          <input 
+          <input
             type="text"
             className="form-input"
             placeholder="Type a message..."
@@ -259,12 +259,12 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
             onKeyDown={handleKeyDown}
             style={{ flex: 1, height: '3rem', borderRadius: '16px', paddingLeft: '1rem', border: '1px solid var(--border)', background: 'var(--surface)' }}
           />
-          <button 
+          <button
             onClick={handleSend}
-            style={{ 
-              width: '3rem', height: '3rem', borderRadius: '16px', background: 'var(--brand)', 
-              color: 'white', border: 'none', display: 'flex', alignItems: 'center', 
-              justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.3)' 
+            style={{
+              width: '3rem', height: '3rem', borderRadius: '16px', background: 'var(--brand)',
+              color: 'white', border: 'none', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.3)'
             }}
           >
             <Send size={18} />
@@ -277,10 +277,10 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
 
 export default function ChatRoom({ roomId, currentUser }: ChatRoomProps) {
   return (
-    <RoomProvider 
-       id={roomId} 
-       initialPresence={{ draggingTaskId: null, userName: currentUser.name, isTyping: false }}
-       initialStorage={{ tasks: new LiveList([]), messages: new LiveList([]) }}
+    <RoomProvider
+      id={roomId}
+      initialPresence={{ draggingTaskId: null, userName: currentUser.name, isTyping: false }}
+      initialStorage={{ tasks: new LiveList([]), messages: new LiveList([]) }}
     >
       <ChatContent currentUser={currentUser} roomId={roomId} />
     </RoomProvider>

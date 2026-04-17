@@ -51,7 +51,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [selectedMember, setSelectedMember] = useState<Profile | { id: string; full_name?: string; avatar_url?: string } | null>(null)
+  const [selectedMember, setSelectedMember] = useState<Profile | null>(null)
 
   // Presence & Others
   const [{ draggingTaskId }, updateMyPresence] = useMyPresence();
@@ -492,7 +492,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                             return (
                               <button
                                 key={userId}
-                                onClick={(e) => { e.stopPropagation(); setSelectedMember(user); }}
+                                onClick={(e) => { e.stopPropagation(); setSelectedMember(user || null); }}
                                 style={{
                                   position: 'relative', padding: 0, background: 'none', border: 'none', cursor: 'pointer',
                                   transition: 'transform 0.2s'
