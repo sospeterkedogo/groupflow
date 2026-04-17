@@ -66,18 +66,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       notification.onclick = () => window.focus();
     };
 
-    const processNotification = (incoming: Notification) => {
-      setNotifications(prev => {
-        const exists = prev.some(n => n.id === incoming.id);
-        if (exists) {
-          return prev.map(n => n.id === incoming.id ? incoming : n);
-        }
-        return [incoming, ...prev];
-      });
-      addToast(incoming.title, incoming.message, incoming.type);
-      showBrowserAlert(incoming.title, incoming.message);
-    };
-
     const setupSubscription = async () => {
       // Always clean up previous channel before creating a new one
       if (channel) {
@@ -100,7 +88,22 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           }, (payload) => {
             if (!payload.new) return;
             const incoming = payload.new as Notification;
-            processNotification(incoming);
+            
+            // Update local state for all events (INSERT, UPDATE) to keep tabs in sync
+            setNotifications(prev => {
+              const exists = prev.some(n => n.id === incoming.id);
+              if (exists) {
+                return prev.map(n => n.id === incoming.id ? incoming : n);
+              }
+              return [incoming, ...prev];
+            });
+
+            // ONLY trigger active alerts/toasts on NEW notifications
+            // This prevents "Clear All" (which triggers multiple UPDATEs) from spamming the user
+            if (payload.eventType === 'INSERT') {
+              addToast(incoming.title, incoming.message, incoming.type);
+              showBrowserAlert(incoming.title, incoming.message);
+            }
           });
         await newChannel.subscribe();
         channel = newChannel;
