@@ -80,12 +80,19 @@ export default function StudentProfilePage() {
     if (!me || !member || connectionStatus !== 'idle') return
 
     await withLoading(async () => {
-      // 1. Create a pending connection
+      // 1. Create a pending connection row
       const { error: connError } = await supabase
         .from('user_connections')
-        .upsert({ user_id: me.id, target_id: member.id, status: 'pending' })
+        .upsert({ 
+          user_id: me.id, 
+          target_id: member.id, 
+          status: 'pending' 
+        }, { onConflict: 'user_id,target_id' })
 
-      if (connError) throw connError
+      if (connError) {
+        console.error('Connection Request Failure:', connError)
+        throw connError
+      }
 
       // 2. Insert notification
       await supabase.from('notifications').insert({

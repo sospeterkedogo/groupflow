@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type CSSProperties } from 'react'
 import { Bell, Check, Clock, ExternalLink, Inbox } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
 export default function NotificationBell() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
@@ -146,6 +147,72 @@ export default function NotificationBell() {
                             </span>
                          </div>
                          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{notif.message}</p>
+                         
+                         {notif.type === 'connection_request' && !notif.read && (
+                           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
+                             <button 
+                               className="btn-sm btn-primary" 
+                               style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem' }}
+                               onClick={async () => {
+                                 const supabase = createBrowserSupabaseClient();
+                                 const senderId = notif.metadata?.sender_id;
+                                 if (!senderId) return;
+
+                                 // Accept connection
+                                 const { error } = await supabase
+                                   .from('user_connections')
+                                   .update({ status: 'connected' })
+                                   .eq('user_id', senderId)
+                                   .eq('target_id', (await supabase.auth.getUser()).data.user?.id);
+
+                                 if (!error) {
+                                   markAsRead(notif.id);
+                                   // Notify sender back
+                                   await supabase.from('notifications').insert({
+                                     user_id: senderId,
+                                     type: 'connection_accepted',
+                                     title: 'Request Accepted',
+                                     message: `You are now connected.`,
+                                     link: `/dashboard/network/profile/${(await supabase.auth.getUser()).data.user?.id}`
+                                   });
+                                 }
+                               }}
+                             >
+                               Accept
+                             </button>
+                             <button 
+                               className="btn-sm btn-ghost" 
+                               style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem', border: '1px solid var(--border)' }}
+                               onClick={async () => {
+                                 const supabase = createBrowserSupabaseClient();
+                                 const senderId = notif.metadata?.sender_id;
+                                 if (!senderId) return;
+
+                                 const { error } = await supabase
+                                   .from('user_connections')
+                                   .delete()
+                                   .eq('user_id', senderId)
+                                   .eq('target_id', (await supabase.auth.getUser()).data.user?.id);
+
+                                 if (!error) markAsRead(notif.id);
+                               }}
+                             >
+                               Decline
+                             </button>
+                             <button 
+                               className="btn-sm btn-ghost" 
+                               style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
+                               onClick={() => {
+                                 const senderId = notif.metadata?.sender_id;
+                                 if (senderId) {
+                                   window.location.href = `/dashboard/network/profile/${senderId}`;
+                                 }
+                               }}
+                             >
+                               <ExternalLink size={12} /> Profile
+                             </button>
+                           </div>
+                         )}
                       </div>
                    </div>
                 </div>

@@ -138,8 +138,8 @@ export default function SettingsPage() {
       .update({
         full_name: fullName,
         course_name: courseName,
-        enrollment_year: enrollmentYear,
-        completion_year: completionYear,
+        enrollment_year: enrollmentYear ? Number(enrollmentYear) : null,
+        completion_year: completionYear ? Number(completionYear) : null,
         rank: rank,
         tagline: tagline,
         biography: biography
@@ -147,8 +147,8 @@ export default function SettingsPage() {
       .eq('id', profile.id)
 
     if (updateError) {
-      console.error('Update Error:', updateError)
-      setError(`Sync failed: ${updateError.message || 'Unknown database error'}`)
+      console.error('Profile Identity Update Failure:', JSON.stringify(updateError, null, 2))
+      setError(`Identity Sync Error: ${updateError.message || 'Verification failed'}`)
     }
     else {
       // Verifiable Logging

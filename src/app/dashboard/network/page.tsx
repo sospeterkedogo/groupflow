@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { Search, MapPin, Clock, LayoutGrid, List, User, Users, GraduationCap, X, ChevronRight } from 'lucide-react'
+import { Search, MapPin, Clock, LayoutGrid, List, User, Users, GraduationCap, X, ChevronRight, Check } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 import { Profile } from '@/types/database'
 import CollaboratorsList from '@/components/CollaboratorsList'
@@ -32,8 +32,16 @@ export default function NetworkPage() {
       const { data: profile } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
       if (profile) setCurrentUserGroup(profile.group_id)
 
-      const { data: conn } = await supabase.from('user_connections').select('target_id').eq('user_id', user.id)
-      if (conn) setConnections(new Set(conn.map((c: { target_id: string }) => c.target_id)))
+      const { data: conn } = await supabase
+        .from('user_connections')
+        .select('user_id, target_id')
+        .or(`user_id.eq.${user.id},target_id.eq.${user.id}`)
+        .eq('status', 'connected')
+      
+      if (conn) {
+        const ids = conn.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
+        setConnections(new Set(ids))
+      }
     }
   }, [supabase])
 
@@ -233,6 +241,11 @@ export default function NetworkPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
                             <GraduationCap size={14} />
                             <span>{u.course_name || 'Software Engineering'}</span>
+                            {connections.has(u.id) && (
+                               <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.2rem', color: 'var(--success)', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                 <Check size={12} /> Connected
+                               </span>
+                             )}
                           </div>
                         </div>
                       </div>
