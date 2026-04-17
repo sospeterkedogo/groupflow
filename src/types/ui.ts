@@ -1,7 +1,7 @@
 import { Task, TaskStatus, TaskCategory } from './database'
 import { Profile } from './auth'
 
-export type TabName = 'identity' | 'pulse' | 'activity' | 'intercom' | 'security' | 'appearance' | 'workspace' | 'data' | 'team' | 'billing';
+export type TabName = 'identity' | 'pulse' | 'activity' | 'intercom' | 'security' | 'appearance' | 'workspace' | 'data' | 'team' | 'billing' | 'support';
 
 export type ActionType = 
   | 'task_created' 

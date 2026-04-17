@@ -61,7 +61,7 @@ export default function NetworkPage() {
         fetchCurrentGroupAndConnections(),
         fetchUsers()
       ])
-    }, 'Scanning Student Network...')
+    }, 'Looking for people...')
   }, [fetchCurrentGroupAndConnections, fetchUsers, withLoading])
 
   // Smart Suggestions Logic
@@ -116,8 +116,8 @@ export default function NetworkPage() {
           <div>
             <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
               <div>
-                <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Student Network</h1>
-                <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Find researchers, collaborators, and verify academic ranks.</p>
+                <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>People</h1>
+                <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Find friends, helpers, and teammates.</p>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
                 <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}>
@@ -135,7 +135,7 @@ export default function NetworkPage() {
               <input 
                 type="text" 
                 className="form-input search-input" 
-                placeholder="Search by Name or School ID (e.g. 2024...)" 
+                placeholder="Search by name or ID number..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
@@ -243,7 +243,7 @@ export default function NetworkPage() {
                           <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Current Team</span>
+                          <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Position</span>
                           <div style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
                             <MapPin size={14} color="var(--accent)" />
                             <span>{isPrivate ? 'Restricted' : ((u as any).groups?.module_code || 'Unassigned')}</span>

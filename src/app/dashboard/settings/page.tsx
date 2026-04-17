@@ -8,7 +8,7 @@ import {
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
-  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search
+  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search, MessageSquare
 } from 'lucide-react'
 import ActiveUsersList from '@/components/ActiveUsersList'
 import ActivityLogView from '@/components/ActivityLogView'
@@ -58,6 +58,12 @@ export default function SettingsPage() {
   const [isEncrypted, setIsEncrypted] = useState(false)
   const [updatingGroup, setUpdatingGroup] = useState(false)
   const [customToolInput, setCustomToolInput] = useState('')
+
+  // Feedback State
+  const [feedbackMessage, setFeedbackMessage] = useState('')
+  const [feedbackCategory, setFeedbackCategory] = useState('Suggestion')
+  const [submittingFeedback, setSubmittingFeedback] = useState(false)
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false)
   const [loadingPortal, setLoadingPortal] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<string[]>([])
   const [sentRequests, setSentRequests] = useState<string[]>([])
@@ -145,7 +151,7 @@ export default function SettingsPage() {
     else {
       // Verifiable Logging
       if (profile.id) {
-        logActivity(profile.id, profile.group_id || '', 'setting_updated', 'Updated personal profile details and academic journey')
+        logActivity(profile.id, profile.group_id || '', 'setting_updated', 'Updated profile and school info')
       }
       refreshProfile()
       addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
@@ -338,16 +344,17 @@ export default function SettingsPage() {
         scrollbarWidth: 'none'
       }}>
         {[
-          { id: 'identity', label: 'Profile', icon: User },
+          { id: 'identity', label: 'Personal Identity', icon: User },
           { id: 'pulse', label: 'Presence', icon: PulseIcon },
-          { id: 'activity', label: 'History', icon: History },
+          { id: 'activity', label: 'Activity Log', icon: History },
           { id: 'intercom', label: 'Mail', icon: Mail },
           { id: 'team', label: 'Admin', icon: Shield, hidden: !isAdmin },
-          { id: 'workspace', label: 'My Team', icon: MapPin },
-          { id: 'appearance', label: 'Look', icon: PaletteIcon },
+          { id: 'workspace', label: 'Workspace', icon: MapPin },
+          { id: 'appearance', label: 'Design', icon: PaletteIcon },
           { id: 'security', label: 'Security', icon: Shield },
-          { id: 'billing', label: 'Subscription', icon: CreditCard },
+          { id: 'billing', label: 'Go Pro', icon: CreditCard },
           { id: 'data', label: 'Privacy', icon: AlertTriangle },
+          { id: 'support', label: 'Feedback', icon: MessageSquare },
         ].filter(t => !t.hidden).map(tab => (
           <button
             key={tab.id}
@@ -368,6 +375,89 @@ export default function SettingsPage() {
 
       {/* Content Panels */}
       <div style={{ minHeight: '400px' }}>
+      
+        {activeTab === 'support' && (
+          <div className="auth-card" style={{ maxWidth: '100%' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Send Feedback</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Tell us how we can make GroupFlow better for your team.</p>
+            
+            {feedbackSuccess ? (
+              <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '24px', border: '1px dashed var(--brand)' }}>
+                <div style={{ width: '60px', height: '60px', background: 'var(--brand)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <CheckCircle2 size={32} />
+                </div>
+                <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem' }}>Thank you!</h3>
+                <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>Your feedback has been received and will be reviewed by our team.</p>
+                <button 
+                  onClick={() => { setFeedbackSuccess(false); setFeedbackMessage(''); }} 
+                  className="btn btn-secondary" 
+                  style={{ marginTop: '1.5rem', width: 'auto' }}
+                >
+                  Send more feedback
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Category</label>
+                  <select 
+                    className="form-input" 
+                    value={feedbackCategory} 
+                    onChange={(e) => setFeedbackCategory(e.target.value)}
+                    style={{ background: 'var(--bg-sub)' }}
+                  >
+                    <option>Suggestion</option>
+                    <option>Bug Report</option>
+                    <option>General Comment</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Message</label>
+                  <textarea 
+                    className="form-input" 
+                    style={{ minHeight: '150px', background: 'var(--bg-sub)', resize: 'vertical' }}
+                    placeholder="What's on your mind?"
+                    value={feedbackMessage}
+                    onChange={(e) => setFeedbackMessage(e.target.value)}
+                  />
+                </div>
+                
+                <button 
+                  className="btn btn-primary" 
+                  disabled={submittingFeedback || !feedbackMessage.trim()}
+                  onClick={async () => {
+                    setSubmittingFeedback(true)
+                    try {
+                      const supabase = createBrowserSupabaseClient()
+                      const { error: fErr } = await supabase.from('user_feedback').insert({
+                        user_id: profile?.id,
+                        message: feedbackMessage,
+                        category: feedbackCategory
+                      })
+                      
+                      if (fErr) throw fErr
+                      
+                      setFeedbackSuccess(true)
+                      addToast('Feedback Received', 'Thank you for your input!', 'success')
+                      
+                      if (profile) {
+                        logActivity(profile.id, profile.group_id || 'system', 'setting_updated', `Submitted feedback: ${feedbackCategory}`, { category: feedbackCategory })
+                      }
+                    } catch (err: any) {
+                      addToast('Submission Failed', err.message || 'Something went wrong', 'error')
+                    } finally {
+                      setSubmittingFeedback(false)
+                    }
+                  }}
+                >
+                  {submittingFeedback ? 'Sending...' : 'Submit Feedback'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       
         {activeTab === 'billing' && profile && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -441,8 +531,8 @@ export default function SettingsPage() {
 
         {activeTab === 'activity' && profile && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Personal Audit Log</h2>
-            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>A verifiable history of your actions, contributions, and customizations.</p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Activity Log</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>A complete history of your account actions and project updates.</p>
             <ActivityLogView userId={profile.id} />
           </div>
         )}
@@ -457,7 +547,7 @@ export default function SettingsPage() {
 
         {activeTab === 'identity' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Personal Profile</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Profile Identity</h2>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-sm)', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
               <div style={{ position: 'relative', width: 'var(--avatar-size)', height: 'var(--avatar-size)' }}>
@@ -524,7 +614,7 @@ export default function SettingsPage() {
               <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
                 <h4 style={{ fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
                   <Calendar size={14} color="var(--brand)" />
-                  Academic Roadmap
+                  My School
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.25rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
@@ -600,8 +690,8 @@ export default function SettingsPage() {
 
         {activeTab === 'workspace' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Team Management</h2>
-            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Switch to a different project team or module.</p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Workspace Management</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Switch between project teams or manage your group affiliation.</p>
 
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>

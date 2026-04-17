@@ -97,14 +97,12 @@ export default function GlobalSearch() {
 
     if (result.type === 'profile') {
       path = `/dashboard/network/profile/${result.id}`
-      label = `Opening ${result.title}'s profile...`
+      label = `Opening ${result.title}...`
     } else if (result.type === 'task') {
-      // For tasks, we navigate to the dashboard but might need to signal to open the modal
-      // We'll pass a hash or state if needed, but for now just go to dashboard
       path = `/dashboard?taskId=${result.id}`
       label = `Opening Task: ${result.title}...`
     } else if (result.type === 'group') {
-      path = `/dashboard/network` // Discovery page
+      path = `/dashboard/network` 
       label = `Finding Team: ${result.title}...`
     }
 
@@ -149,7 +147,7 @@ export default function GlobalSearch() {
           <input 
             ref={inputRef}
             type="text" 
-            placeholder="Type at least 2 characters to search..." 
+            placeholder="Search students, tasks, or teams..." 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{ flex: 1, background: 'none', border: 'none', color: 'var(--text-main)', fontSize: '1.25rem', fontWeight: 600, outline: 'none' }}
@@ -162,7 +160,7 @@ export default function GlobalSearch() {
           {query.length < 2 ? (
             <div style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-sub)' }}>
                <Search size={40} style={{ opacity: 0.1, marginBottom: '1rem' }} />
-               <p style={{ margin: 0 }}>Start typing to find tasks, teammates, or teams.</p>
+               <p style={{ margin: 0 }}>Find students, tasks, or teams across the network.</p>
                <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
                   <div className="search-pill">⌘K to search</div>
                   <div className="search-pill">ESC to close</div>
@@ -197,7 +195,9 @@ export default function GlobalSearch() {
                    </div>
                    <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1rem' }}>{r.title}</div>
-                      <div style={{ color: 'var(--text-sub)', fontSize: '0.8rem', textTransform: 'capitalize' }}>{r.subtitle || r.type}</div>
+                      <div style={{ color: 'var(--text-sub)', fontSize: '0.8rem', textTransform: 'capitalize' }}>
+                        {r.type === 'profile' ? 'Teammate' : r.type === 'group' ? 'Group' : 'Task'} • {r.subtitle}
+                      </div>
                    </div>
                    <ArrowRight size={16} color="var(--text-sub)" className="search-arrow" />
                  </div>

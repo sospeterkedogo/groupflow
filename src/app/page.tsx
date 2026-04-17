@@ -142,7 +142,7 @@ export default function Home() {
            </div>
            
            <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', maxWidth: '1200px', margin: '0 auto 2rem', fontWeight: 900, letterSpacing: '-0.05em' }}>
-             Group projects, <br />
+             Group work, <br />
              <span style={{ 
                 background: 'linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)',
                 WebkitBackgroundClip: 'text',

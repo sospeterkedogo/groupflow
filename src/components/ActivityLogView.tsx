@@ -31,6 +31,7 @@ export default function ActivityLogView({
   limit?: number 
 }) {
   const [activities, setActivities] = useState<LogEntry[]>([])
+  const [logSearch, setLogSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
@@ -140,15 +141,43 @@ export default function ActivityLogView({
   if (activities.length === 0) return (
     <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-sub)', background: 'var(--bg-main)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
       <History size={32} style={{ marginBottom: '1rem', opacity: 0.5 }} />
-      <p>No verifiable actions recorded yet.</p>
+      <p>No recent activity recorded.</p>
     </div>
   )
 
-  const grouped = groupActivities(activities)
+  const filteredLogs = useMemo(() => {
+    if (!logSearch.trim()) return activities
+    const term = logSearch.toLowerCase()
+    return activities.filter(a => 
+      a.description.toLowerCase().includes(term) || 
+      a.action_type.toLowerCase().includes(term) ||
+      a.profiles?.full_name?.toLowerCase().includes(term)
+    )
+  }, [activities, logSearch])
+
+  const grouped = useMemo(() => groupActivities(filteredLogs), [filteredLogs])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {grouped.map(group => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+       <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+          <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+          <input 
+            type="text" 
+            placeholder="Search activity history..." 
+            value={logSearch}
+            onChange={(e) => setLogSearch(e.target.value)}
+            style={{ width: '100%', padding: '0.5rem 0.75rem 0.5rem 2.25rem', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', fontSize: '0.8rem' }}
+          />
+          {logSearch && (
+            <button onClick={() => setLogSearch('')} style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex' }}><X size={12} /></button>
+          )}
+       </div>
+
+       {filteredLogs.length === 0 ? (
+         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-sub)', border: '1px dashed var(--border)', borderRadius: '12px' }}>No logs match "{logSearch}"</div>
+       ) : (
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+           {grouped.map(group => (
         <div key={group.label}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
              <Calendar size={14} color="var(--brand)" />
@@ -190,6 +219,8 @@ export default function ActivityLogView({
           </div>
         </div>
       ))}
+      </div>
+    )}
     </div>
   )
 }

@@ -97,10 +97,10 @@ export default function Sidebar({ user }: SidebarProps) {
   }
 
   const navLinks = [
-    { name: 'Task Board', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Student Network', path: '/dashboard/network', icon: Users },
-    { name: 'Group Stats', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/network', icon: BarChart3 },
-    { name: 'Upgrade', path: '/dashboard/upgrade', icon: TrendingUp },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Network', path: '/dashboard/network', icon: Users },
+    { name: 'Analytics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/network', icon: BarChart3 },
+    { name: 'Go Pro', path: '/dashboard/upgrade', icon: TrendingUp },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]

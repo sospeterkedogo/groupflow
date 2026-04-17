@@ -40,6 +40,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [isMember, setIsMember] = useState(false)
   const [group, setGroup] = useState<any>(null)
   const [tasks, setTasks] = useState<any[]>([])
+  const [taskSearch, setTaskSearch] = useState('')
   const [members, setMembers] = useState<any[]>([])
   const [artifacts, setArtifacts] = useState<any[]>([])
   const { onlineUsers } = usePresence()
@@ -155,7 +156,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--text-sub)' }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ width: '40px', height: '40px', border: '4px solid var(--border)', borderTopColor: 'var(--brand)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1.5rem' }} />
-        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Loading project data...</p>
+        <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Retrieving project intelligence...</p>
       </div>
     </div>
   )
@@ -169,7 +170,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
            </div>
            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>{group?.name || 'Private Team'}</h1>
            <p style={{ color: 'var(--text-sub)', fontSize: '1.2rem', marginBottom: '2.5rem' }}>
-             This team is private. You must be a member to view their tasks, artifacts, and activity history.
+             This team is private. You must be a member to see their work and news.
            </p>
 
            <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3rem' }}>
@@ -209,7 +210,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            <BarChart3 size={14} /><span>Project Analytics</span>
+            <BarChart3 size={14} /><span>Analytics Summary</span>
           </div>
           <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{group?.name || 'Project'}</h1>
           <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>
@@ -234,12 +235,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         marginBottom: '1.5rem' 
       }}>
         {[
-          { icon: <Zap size={18} />, label: 'Completion', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
-          { icon: <CheckCircle2 size={18} />, label: 'Tasks Done', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Users size={18} />, label: 'Team Size', value: members.length, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
-          { icon: <AlertCircle size={18} />, label: 'Overdue Risk', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
-          { icon: <ShieldCheck size={18} />, label: 'Density', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Timer size={18} />, label: 'Overdue', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
+          { icon: <Zap size={18} />, label: 'Project Progress', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { icon: <CheckCircle2 size={18} />, label: 'Completed Tasks', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { icon: <Users size={18} />, label: 'Team Members', value: members.length, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { icon: <AlertCircle size={18} />, label: 'Risk Assessment', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
+          { icon: <ShieldCheck size={18} />, label: 'Evidence Density', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+          { icon: <Timer size={18} />, label: 'Overdue Tasks', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
         ].map(kpi => (
           <div key={kpi.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'var(--kpi-p)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ padding: '0.5rem', background: kpi.bg, color: kpi.color, borderRadius: '10px', flexShrink: 0 }}>{kpi.icon}</div>
@@ -427,14 +428,30 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
           {/* Recently Completed */}
           <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 900, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Clock size={16} color="var(--brand)" /> Success Log
-            </h3>
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+             <h3 style={{ fontSize: '0.95rem', fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+               <Clock size={16} color="var(--brand)" /> Success Log
+             </h3>
+             <div style={{ position: 'relative', width: '180px' }}>
+                <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+                <input 
+                  type="text" 
+                  placeholder="Filter tasks..." 
+                  value={taskSearch}
+                  onChange={(e) => setTaskSearch(e.target.value)}
+                  style={{ width: '100%', padding: '0.4rem 0.5rem 0.4rem 2rem', borderRadius: '8px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', fontSize: '0.75rem' }}
+                />
+             </div>
+           </div>
             {tasks.filter(t => t.status === 'Done').length === 0 ? (
               <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem' }}>Check back later</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {tasks.filter(t => t.status === 'Done').slice(0, 4).map(t => (
+                {tasks
+                  .filter(t => t.status === 'Done')
+                  .filter(t => t.title.toLowerCase().includes(taskSearch.toLowerCase()))
+                  .slice(0, 10)
+                  .map(t => (
                   <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem', background: 'var(--bg-main)', borderRadius: '10px' }}>
                     <FileCheck size={14} color="#10b981" style={{ flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>

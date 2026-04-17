@@ -61,7 +61,7 @@ function LoginContent() {
 
   const handleResetPassword = async () => {
     if (!email) {
-      setAuthError('Enter your email address to reset your password.')
+      setAuthError('Put your email here to get a new password.')
       return
     }
 
@@ -120,7 +120,7 @@ function LoginContent() {
             {isSignUp ? 'Create an account' : 'Welcome back'}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem', fontWeight: 500 }}>
-            {isSignUp ? 'Set up your GroupFlow account to get started.' : 'Sign in to your GroupFlow workspace.'}
+            {isSignUp ? "Create an account to join your project team." : "Welcome back! Sign in to your workspace."}
           </p>
         </div>
 
@@ -165,7 +165,7 @@ function LoginContent() {
 
           {isSignUp && (
             <div className="form-group" style={{ marginBottom: 0, animation: 'slideIn 0.3s ease-out' }}>
-              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Student ID</label>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>ID Number</label>
               <input
                 className="form-input"
                 name="school_id"

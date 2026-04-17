@@ -320,7 +320,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     const sessionKey = `celebrated_${groupId}`
     const alreadyCelebrated = sessionStorage.getItem(sessionKey)
 
-    if (tasks && tasks.length > 0 && globalProbability === 100 && !hasCelebrated && !alreadyCelebrated) {
+    if (storageTasks && storageTasks.length > 0 && globalProbability === 100 && !hasCelebrated && !alreadyCelebrated) {
       void Promise.resolve().then(() => {
         setHasCelebrated(true)
         sessionStorage.setItem(sessionKey, 'true')
@@ -333,13 +333,13 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         if (Date.now() < end) requestAnimationFrame(frame)
       }
       frame()
-    } else if (tasks && tasks.length > 0 && globalProbability < 100) {
+    } else if (storageTasks && storageTasks.length > 0 && globalProbability < 100) {
       void Promise.resolve().then(() => {
         setHasCelebrated(false)
       })
       sessionStorage.removeItem(sessionKey)
     }
-  }, [globalProbability, tasks?.length, hasCelebrated, groupId])
+  }, [globalProbability, storageTasks?.length, hasCelebrated, groupId])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
@@ -409,7 +409,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
           <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>Overall Progress: <span style={{ color: 'var(--text-main)' }}>{globalProbability}%</span></span>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>{tasks?.length || 0} Tasks</span>
+          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>{storageTasks?.length || 0} Tasks</span>
         </div>
       </div>
 
@@ -438,7 +438,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           )}
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }} className="hide-mobile">Multiplayer active. Drag and drop to collaborate.</p>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }} className="hide-mobile">Multiplayer active. Drag and drop to collaborate.</p>
           <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
             + New Task
           </button>
@@ -621,7 +621,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             setIsModalOpen(false)
             setSelectedTask(null)
           }}
-          onlineUserIds={new Set(others.map(o => o.connectionId.toString()))}
+          onlineUserIds={new Set([...others.map(o => o.id), profile?.id].filter(Boolean) as string[])}
         />
       )}
 

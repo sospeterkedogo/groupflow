@@ -24,7 +24,7 @@
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
     "stripe": "^12.18.0",
-    "workflow": "^4.2.2"
+    "workflow": "^4.2.4"
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",
