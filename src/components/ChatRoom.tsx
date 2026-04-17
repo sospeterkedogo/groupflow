@@ -7,7 +7,7 @@ import {
   useMutation,
   useOthers,
   useUpdateMyPresence
-} from '@/liveblocks.config' A
+} from '@/liveblocks.config'
 import { LiveList } from '@liveblocks/client'
 import { Send, User as UserIcon, Smile, Paperclip, MoreVertical, MessageSquare } from 'lucide-react'
 
