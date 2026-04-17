@@ -47,8 +47,6 @@ export default async function DashboardLayout({
                   
                   <main className="main-content">
                     {children}
-                    {/* Global Mobile Spacer to prevent overlap */}
-                    <div className="hide-desktop" style={{ height: 'calc(var(--h-mobile-bottom) + 1rem)' }} />
                   </main>
 
                   <BottomNav />

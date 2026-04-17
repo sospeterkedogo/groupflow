@@ -47,16 +47,30 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isDark = currentPalette.name !== 'Google Light'
 
+  // 1. Manage mobile state with resize listener
   useEffect(() => {
-    const initializeMobileState = () => {
-      if (window.innerWidth <= 768) {
-        setIsOpen(false)
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      // If we cross the threshold, sync the state
+      if (isMobile && isOpen) {
+        // Optional: keep it open if the user explicitly opened it? 
+        // Usually safer to close it when switching to mobile to avoid unexpected overlays
       }
+    };
+    
+    // Initial check
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setIsOpen(false);
     }
-    initializeMobileState()
 
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); 
+
+  // 2. Manage body locking for mobile interactions
+  useEffect(() => {
     const handleBodyLock = () => {
-      if (window.innerWidth <= 768 && isOpen) {
+      if (typeof window !== 'undefined' && window.innerWidth <= 768 && isOpen) {
         document.body.classList.add('body-lock')
       } else {
         document.body.classList.remove('body-lock')
@@ -65,7 +79,9 @@ export default function Sidebar({ user }: SidebarProps) {
     handleBodyLock()
 
     return () => {
-      document.body.classList.remove('body-lock')
+      if (typeof window !== 'undefined') {
+        document.body.classList.remove('body-lock')
+      }
     }
   }, [isOpen])
 
@@ -73,11 +89,14 @@ export default function Sidebar({ user }: SidebarProps) {
   const { withLoading, showConfirmation } = useSmartLoading()
 
   const handleNav = async (path: string, name: string) => {
-    if (pathname === path) return;
+    if (pathname === path) {
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) setIsOpen(false);
+      return;
+    }
     await withLoading(async () => {
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 400));
       router.push(path);
-      if (window.innerWidth <= 768) setIsOpen(false);
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) setIsOpen(false);
     }, `Syncing ${name}...`);
   }
 
@@ -129,28 +148,36 @@ export default function Sidebar({ user }: SidebarProps) {
         boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-               <Activity size={20} />
+          <button 
+            onClick={() => setIsOpen(true)} 
+            aria-label="Toggle Menu"
+            style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>
+               <Activity size={22} />
             </div>
           </button>
-          <span style={{ fontWeight: 900, color: 'var(--brand)', fontSize: '1.1rem', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>GroupFlow</span>
+          <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.25rem', letterSpacing: '-0.03em', fontFamily: 'Inter, sans-serif' }}>
+            Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+          </span>
         </div>
-        <button 
-          onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
-          style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
-        >
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <UserCircle size={20} color="var(--text-sub)" />
-          )}
-        </button>
+          <button 
+            onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
+            aria-label="View Profile"
+            style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
+          >
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
+            ) : (
+              <UserCircle size={22} color="var(--text-sub)" />
+            )}
+          </button>
       </div>
 
-      <div 
+      <aside 
         className={`sidebar-container ${isOpen ? 'open' : 'closed'}`} 
-        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing the sidebar via backdrop
+        aria-hidden={!isOpen}
+        onClick={(e) => e.stopPropagation()} 
         style={{ 
           width: isOpen ? '280px' : '80px',
           maxWidth: '85vw',
@@ -160,15 +187,18 @@ export default function Sidebar({ user }: SidebarProps) {
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          zIndex: 4600
+          zIndex: 4600,
+          boxShadow: isOpen ? '20px 0 50px rgba(0,0,0,0.1)' : 'none'
         }}
       >
         {/* Header / Toggle */}
         <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-              <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '20px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+              <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.03em' }}>
+                Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+              </button>
+              <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '20px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
                 <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)' }}>{onlineCount} Online</span>
               </div>
@@ -182,13 +212,22 @@ export default function Sidebar({ user }: SidebarProps) {
                <NotificationBell />
             </div>
           )}
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', padding: '4px' }}
-            className="hover-card hide-mobile"
-          >
-            {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-          </button>
+            <button 
+              onClick={() => setIsOpen(!isOpen)}
+              style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', padding: '8px' }}
+              className="hover-card hide-mobile"
+              aria-label={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+            >
+              {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            </button>
+            <button 
+              onClick={() => setIsOpen(false)}
+              className="hide-desktop"
+              style={{ background: 'rgba(var(--text-main-rgb), 0.05)', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', padding: '8px', borderRadius: '10px' }}
+              aria-label="Close Sidebar"
+            >
+              <ChevronLeft size={20} />
+            </button>
         </div>
 
         {/* Global Search Interface */}
@@ -309,22 +348,45 @@ export default function Sidebar({ user }: SidebarProps) {
         .nav-bubble:active, .theme-bubble:active, .logout-bubble:active { transform: scale(0.95); }
         .identity-pill:hover { border-color: var(--brand) !important; }
         
+        .sidebar-backdrop {
+          display: none;
+        }
+
         @media (max-width: 768px) {
+          .sidebar-backdrop {
+            display: block;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            inset: 0;
+            z-index: 4500;
+          }
+          .sidebar-backdrop.visible {
+            pointer-events: auto;
+            opacity: 1;
+            visibility: visible;
+          }
+
           .mobile-header { display: flex !important; }
           .sidebar-container { 
             position: fixed !important;
             left: 0 !important;
             top: 0 !important;
             bottom: 0 !important;
-            z-index: 4600 !important;
+            z-index: 5100 !important; /* Above mobile header */
             background: var(--bg-main) !important;
             box-shadow: 20px 0 50px rgba(0,0,0,0.4) !important;
             transform: translateX(-100%);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            width: 280px !important;
+            width: 85vw !important;
+            max-width: 320px !important;
           }
-          .sidebar-container.open { transform: translateX(0); }
-          .sidebar-container.closed { transform: translateX(-100%); }
+          .sidebar-container.open { transform: translateX(0) !important; }
+          .sidebar-container.closed { transform: translateX(-100%) !important; }
         }
 
         .active-project {
