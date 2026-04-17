@@ -25,6 +25,7 @@ import NotificationBell from './NotificationBell'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useRouter } from 'next/navigation'
 import { useProfile } from '@/context/ProfileContext'
+import { usePresence } from '@/components/PresenceProvider'
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
@@ -32,7 +33,9 @@ export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { currentPalette, setPalette } = useTheme()
+  const { onlineUsers } = usePresence()
   const isOnline = Boolean(profile)
+  const onlineCount = onlineUsers.size
 
   const toggleTheme = () => {
     const paletteNames = ['Google Light', 'Deep Oceanic', 'Cyberpunk']
@@ -160,7 +163,10 @@ export default function Sidebar({ user }: SidebarProps) {
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
               <button onClick={() => handleNav('/dashboard', 'Home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</button>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '20px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)' }}>{onlineCount} Online</span>
+              </div>
               <div style={{ flex: 1 }} />
               <div className="hide-mobile" style={{ marginRight: '0.5rem' }}>
                 <NotificationBell />
@@ -328,6 +334,14 @@ export default function Sidebar({ user }: SidebarProps) {
           0% { transform: scale(1); opacity: 0.2; }
           50% { transform: scale(1.02); opacity: 0.1; }
           100% { transform: scale(1); opacity: 0.2; }
+        }
+        .pulse-pill {
+          animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.2); }
+          100% { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>

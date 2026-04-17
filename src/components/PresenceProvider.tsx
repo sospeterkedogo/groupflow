@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { PresenceContextType, PresenceState } from '@/types/ui'
+import { useNotifications } from '@/components/NotificationProvider'
 
 const PresenceContext = createContext<PresenceContextType>({
   onlineUsers: new Set(),
@@ -23,6 +24,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
+  const { addToast } = useNotifications()
   const userId = user?.id
   const userName = user?.full_name
 
@@ -69,8 +71,14 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         if (newPresences[0]?.is_typing) {
           setTypingUsers((prev) => new Set(prev).add(key))
         }
+
+        // Accountability Toast
+        const name = newPresences[0]?.full_name || 'A teammate'
+        if (key !== userId) {
+          addToast('Teammate Online', `${name} is now online`, 'success')
+        }
       })
-      .on('presence', { event: 'leave' }, ({ key }) => {
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
         setOnlineUsers((prev) => {
           const next = new Set(prev)
           next.delete(key)
@@ -81,6 +89,12 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
           next.delete(key)
           return next
         })
+
+        // Accountability Toast
+        const name = leftPresences[0]?.full_name || 'A teammate'
+        if (key !== userId) {
+          addToast('Teammate Offline', `${name} has logged out`, 'info')
+        }
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
@@ -113,7 +127,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
       clearInterval(heartbeat)
       supabase.removeChannel(newChannel)
     }
-  }, [userId, userName, supabase])
+  }, [userId, userName, supabase, addToast])
 
   return (
     <PresenceContext.Provider value={{ onlineUsers, typingUsers, setTypingStatus }}>

@@ -77,6 +77,8 @@ export type Palette = {
     '--border': string
     '--surface': string
     '--error': string
+    '--success': string
+    '--warning': string
     '--overlay': string
   }
   tier?: 'free' | 'pro' | 'premium'
