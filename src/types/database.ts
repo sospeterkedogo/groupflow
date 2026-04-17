@@ -3,6 +3,8 @@ export type Group = {
   name: string;
   module_code: string | null;
   is_encrypted: boolean;
+  description: string | null;
+  rules: string | null;
   created_at: string;
 };
 

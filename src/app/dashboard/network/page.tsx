@@ -254,7 +254,7 @@ export default function NetworkPage() {
                       {viewMode === 'grid' && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
                           <Clock size={14} />
-                          <span>{isOnline ? <b style={{ color: 'var(--success)' }}>Active Now</b> : `Seen ${formatLastSeen(u.last_seen)}`}</span>
+                          <span>{isOnline ? <b style={{ color: 'var(--success)' }}>Active Now</b> : `Seen ${formatLastSeen(u.last_seen ?? null)}`}</span>
                         </div>
                       )}
                     </div>
