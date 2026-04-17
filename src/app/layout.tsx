@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { NotificationProvider } from '../components/NotificationProvider';
 
 export const metadata: Metadata = {
   title: 'GroupFlow - Automating Accountability',
