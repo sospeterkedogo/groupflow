@@ -8,7 +8,7 @@ import {
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
-  Calendar
+  Calendar, CreditCard, ArrowUpRight
 } from 'lucide-react'
 import ActiveUsersList from '@/components/ActiveUsersList'
 import ActivityLogView from '@/components/ActivityLogView'
@@ -26,7 +26,7 @@ import { useProfile } from '@/context/ProfileContext'
 export default function SettingsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabName>('identity')
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const { profile, refreshProfile } = useProfile()
   const [fullName, setFullName] = useState('')
   const [courseName, setCourseName] = useState('')
   const [enrollmentYear, setEnrollmentYear] = useState<number>(new Date().getFullYear())
@@ -46,7 +46,6 @@ export default function SettingsPage() {
   const [uploadingBg, setUploadingBg] = useState(false)
 
   const { addToast } = useNotifications()
-  const { refreshProfile } = useProfile()
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
@@ -58,6 +57,7 @@ export default function SettingsPage() {
   const [isEncrypted, setIsEncrypted] = useState(false)
   const [updatingGroup, setUpdatingGroup] = useState(false)
   const [customToolInput, setCustomToolInput] = useState('')
+  const [loadingPortal, setLoadingPortal] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<string[]>([])
   const [sentRequests, setSentRequests] = useState<string[]>([])
 
@@ -90,15 +90,14 @@ export default function SettingsPage() {
     if (user) {
       const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
       if (data) {
-        setProfile(data)
         setFullName(data.full_name || '')
         setCourseName(data.course_name || '')
         setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
         setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
         setRank(data.rank || 'Senior')
         setBadgesCount(data.badges_count ?? 0)
-          setTagline(data.tagline || '')
-          setBiography(data.biography || '')
+        setTagline(data.tagline || '')
+        setBiography(data.biography || '')
         if (data.id) {
           fetchJoinRequests(data.id)
         }
@@ -138,8 +137,10 @@ export default function SettingsPage() {
       })
       .eq('id', profile.id)
 
-    setSaving(false)
-    if (updateError) setError("Failed to update profile settings.")
+    if (updateError) {
+      console.error('Update Error:', updateError)
+      setError(`Sync failed: ${updateError.message || 'Unknown database error'}`)
+    }
     else {
       // Verifiable Logging
       if (profile.id) {
@@ -148,6 +149,7 @@ export default function SettingsPage() {
       refreshProfile()
       addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
     }
+    setSaving(false)
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'bg') => {
@@ -235,7 +237,7 @@ export default function SettingsPage() {
       .update({ group_id: newGroupId, role: 'collaborator' })
       .eq('id', profile.id)
 
-    if (switchError) setError("Failed to switch team.")
+    if (switchError) setError(`Sync failed: ${switchError.message}`)
     else {
       await fetchUserData()
       refreshProfile()
@@ -256,6 +258,20 @@ export default function SettingsPage() {
       setError(err.message)
       setIsDeleting(false)
       setIsDeleteModalOpen(false)
+    }
+  }
+
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/stripe/portal', { method: 'POST' })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Portal creation failed')
+      window.location.href = result.url
+    } catch (err: any) {
+      setError(err.message)
+      setLoadingPortal(false)
     }
   }
 
@@ -307,6 +323,7 @@ export default function SettingsPage() {
           { id: 'workspace', label: 'My Team', icon: MapPin },
           { id: 'appearance', label: 'Look', icon: PaletteIcon },
           { id: 'security', label: 'Security', icon: Shield },
+          { id: 'billing', label: 'Subscription', icon: CreditCard },
           { id: 'data', label: 'Privacy', icon: AlertTriangle },
         ].filter(t => !t.hidden).map(tab => (
           <button
@@ -328,6 +345,47 @@ export default function SettingsPage() {
 
       {/* Content Panels */}
       <div style={{ minHeight: '400px' }}>
+      
+        {activeTab === 'billing' && profile && (
+          <div className="auth-card" style={{ maxWidth: '100%' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Subscription & Billing</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Manage your project support plan and billing details.</p>
+            
+            <div style={{ padding: '2rem', borderRadius: '24px', background: 'rgba(var(--brand-rgb), 0.03)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                   <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '10px', color: 'white' }}>
+                      <CreditCard size={20} />
+                   </div>
+                   <h3 style={{ margin: 0, fontWeight: 900 }}>{profile.subscription_plan === 'premium' ? 'Premium Lifetime' : profile.subscription_plan === 'pro' ? 'Pro Monthly' : 'Standard Free'}</h3>
+                </div>
+                <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
+                  {profile.subscription_plan 
+                    ? `Active since ${new Date(profile.subscription_started_at || Date.now()).toLocaleDateString()}` 
+                    : 'Unlock professional project features.'}
+                </p>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                {profile.subscription_plan ? (
+                  <button 
+                    onClick={handleManageSubscription}
+                    disabled={loadingPortal}
+                    className="btn btn-primary" 
+                    style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  >
+                    {loadingPortal ? 'Opening...' : 'Manage Billing'}
+                    <ArrowUpRight size={16} />
+                  </button>
+                ) : (
+                  <button onClick={() => router.push('/dashboard/upgrade')} className="btn btn-primary" style={{ width: 'auto' }}>
+                    View Upgrade Options
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {activeTab === 'intercom' && profile && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
@@ -427,11 +485,11 @@ export default function SettingsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.25rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Enrollment</label>
-                    <input type="number" className="form-input" value={enrollmentYear} onChange={e => setEnrollmentYear(parseInt(e.target.value))} />
+                    <input type="number" className="form-input" value={enrollmentYear} onChange={e => setEnrollmentYear(parseInt(e.target.value) || new Date().getFullYear())} />
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Completion</label>
-                    <input type="number" className="form-input" value={completionYear} onChange={e => setCompletionYear(parseInt(e.target.value))} />
+                    <input type="number" className="form-input" value={completionYear} onChange={e => setCompletionYear(parseInt(e.target.value) || (new Date().getFullYear() + 3))} />
                   </div>
                 </div>
               </div>

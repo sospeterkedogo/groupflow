@@ -35,7 +35,7 @@ export default function Home() {
   const faqs = [
     {
       q: "How can I support GroupFlow?",
-      a: "You can support this dissertation project by upgrading to Pro (£2.99/mo) or Premium (£99 Lifetime). Your contribution directly helps me bring this tool to many more schools and support learning worldwide."
+      a: "You can support this project by upgrading to Pro (£2.99/mo) or Premium (£99 Lifetime). Your contribution directly helps me bring this tool to many more schools and support learning worldwide."
     },
     {
       q: "How is my data protected?",
@@ -47,7 +47,7 @@ export default function Home() {
     },
     {
       q: "Who is behind GroupFlow?",
-      a: "I created GroupFlow as a dissertation project to help student teams feel more supported and recognized during group work."
+      a: "I created GroupFlow to help student teams feel more supported and recognized during group work."
     }
   ]
 
@@ -58,7 +58,7 @@ export default function Home() {
       <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(var(--brand-rgb), 0.05) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
 
-      {/* Dissertation Project Modal */}
+      {/* Mission Project Modal */}
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--overlay)', backdropFilter: 'blur(12px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div 
@@ -71,14 +71,14 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
-               THE DISSERTATION MISSION
+               THE GROUPFLOW MISSION
              </div>
              <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Transforming collaboration in schools</h2>
              
              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Solving a Real Problem</strong>
-                   I built GroupFlow for my dissertation project to solve the unfair group dynamics that many students face daily. 
+                   I built GroupFlow to solve the unfair group dynamics that many students face daily. <a>Please support this project to go into many schools and support learning.</a>
                 </div>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
@@ -172,7 +172,7 @@ export default function Home() {
                <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Support the Mission</div>
                <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Solving the real problems in our schools.</h2>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
-                  This isn&apos;t just another app—it&apos;s my dissertation project. I built GroupFlow because I&apos;ve seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
+                  This isn't just another app—it's a mission to transform how students work together. I built GroupFlow because I've seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
                   I&apos;m on a mission to bring this tool into many more schools to truly support learning. By joining the mission, you aren&apos;t just getting a tool; you&apos;re helping bridge the gap for students everywhere.
@@ -271,7 +271,7 @@ export default function Home() {
               
               <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2.5rem' }}>
                  {[
-                    { title: 'Dissertations & Graduation', desc: 'Keep track of your research journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
+                    { title: 'Project History & Growth', desc: 'Keep track of your academic journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
                     { title: 'Team Lab Reports', desc: "I&apos;ll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
                     { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
                     { title: 'Project Case Studies', desc: 'Make sure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
@@ -342,7 +342,7 @@ export default function Home() {
               <div style={{ position: 'relative', zIndex: 1 }}>
                  <h2 style={{ fontSize: '4.25rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Believe in better learning.</h2>
                  <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '800px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
-                    Support my dissertation project to help reach students in schools worldwide. Get access to advanced features for just £2.99/mo or £99 for a lifetime.
+                    Support this mission to help reach students in schools worldwide. Get access to advanced features for just £2.99/mo or £99 for a lifetime.
                  </p>
                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link href="/login" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Create your account</Link>
@@ -363,7 +363,7 @@ export default function Home() {
          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '2rem', fontWeight: 900, justifyContent: 'center', marginBottom: '2rem', letterSpacing: '-0.04em' }}>
             <Activity size={36} color="var(--brand)" /> GroupFlow
          </div>
-         <p style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.75rem' }}>Built by Sospeter • Dissertation 2026</p>
+         <p style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.75rem' }}>Built by Sospeter • Mission 2026</p>
          <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto 4rem', lineHeight: 1.6 }}>
             Dedicated to helping student teams work better together through transparency, recognition, and fair teamwork.
          </p>

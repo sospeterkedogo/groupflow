@@ -44,7 +44,7 @@ export default function UpgradePage() {
             <Sparkles size={18} /> THE MISSION IS GROWING
           </div>
           <h1 style={{ fontSize: '3rem', lineHeight: 1.05, fontWeight: 900 }}>Support this project to reach more schools</h1>
-          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.75)', fontSize: '1.1rem', fontWeight: 500 }}>This is my dissertation project and I am building it to solve a real problem for students. Help me bring it into schools everywhere by upgrading your account.</p>
+          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.75)', fontSize: '1.1rem', fontWeight: 500 }}>I am building GroupFlow to solve a real problem for student teams. Help me bring this tool to schools everywhere by upgrading your account.</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1.5rem' }}>
@@ -107,7 +107,7 @@ export default function UpgradePage() {
                 {[
                   'Everything in Pro, forever',
                   'School-wide Integration Support',
-                  'Multi-Dissertation Project Hub',
+                  'Multi-Project Enterprise Hub',
                   'Dedicated 1-on-1 Setup Session',
                   'Early Review Lab Access'
                 ].map((f, i) => (

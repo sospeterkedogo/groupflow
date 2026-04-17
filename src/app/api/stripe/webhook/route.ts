@@ -68,7 +68,8 @@ function buildWebhookPayload(event: Stripe.Event) {
       amountTotal: invoice.amount_paid ?? invoice.amount_due ?? null,
       currency: invoice.currency ?? null,
       mode: invoice.billing_reason === 'subscription_cycle' ? 'subscription' : 'payment',
-      status: invoice.status ?? 'unknown'
+      status: invoice.status ?? 'unknown',
+      invoiceId: invoice.id
     } as PaymentWorkflowPayload
   }
 

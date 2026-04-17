@@ -183,7 +183,17 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Nav Links */}
         <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           {navLinks.map((link) => {
-            const isActive = pathname === link.path
+            let isActive = link.path === '/dashboard' 
+              ? pathname === '/dashboard' 
+              : pathname.startsWith(link.path)
+            
+            // Special case for Group Stats to avoid dual-highlighting when it points to /network
+            if (link.name === 'Group Stats') {
+              isActive = pathname.startsWith('/dashboard/analytics')
+            }
+            if (link.name === 'Student Network' && pathname.startsWith('/dashboard/analytics')) {
+              isActive = false
+            }
             return (
               <button 
                 key={link.name}

@@ -13,6 +13,7 @@ export type PaymentWorkflowPayload = {
   currency: string | null
   mode: string | null
   status: string | null
+  invoiceId?: string | null
 }
 
 export async function paymentWorkflow(payload: PaymentWorkflowPayload) {
@@ -59,7 +60,8 @@ async function resolveUserId(supabase: SupabaseAdminClient, payload: PaymentWork
   const filters = [
     payload.stripeSubscriptionId ? `stripe_subscription_id.eq.${payload.stripeSubscriptionId}` : null,
     payload.sessionId ? `stripe_session_id.eq.${payload.sessionId}` : null,
-    payload.stripeCustomerId ? `stripe_customer_id.eq.${payload.stripeCustomerId}` : null
+    payload.stripeCustomerId ? `stripe_customer_id.eq.${payload.stripeCustomerId}` : null,
+    payload.invoiceId ? `stripe_invoice_id.eq.${payload.invoiceId}` : null
   ].filter(Boolean) as string[]
 
   if (filters.length === 0) {
@@ -168,9 +170,10 @@ async function handleInvoiceSucceeded(supabase: SupabaseAdminClient, userId: str
       amount_total: payload.amountTotal,
       currency: payload.currency,
       status: 'paid',
+      stripe_invoice_id: payload.invoiceId,
       metadata: { stripe_event: payload.eventType }
     }
-  ], { onConflict: 'stripe_subscription_id' })
+  ], { onConflict: 'stripe_invoice_id' })
 
   if (updateError) {
     throw new Error(updateError.message)
@@ -213,9 +216,10 @@ async function handleInvoiceFailed(supabase: SupabaseAdminClient, userId: string
       amount_total: payload.amountTotal,
       currency: payload.currency,
       status: 'failed',
+      stripe_invoice_id: payload.invoiceId,
       metadata: { stripe_event: payload.eventType }
     }
-  ], { onConflict: 'stripe_subscription_id' })
+  ], { onConflict: 'stripe_invoice_id' })
 
   await supabase.from('profiles').update({ subscription_status: 'past_due' }).eq('id', userId)
 

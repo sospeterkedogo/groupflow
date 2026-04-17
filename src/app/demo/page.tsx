@@ -19,7 +19,7 @@ export default function DemoPage() {
     { id: '1', title: 'Design System Implementation', status: 'In Progress', category: 'UX/UI Design', assignees: ['demo-user'] },
     { id: '2', title: 'Database Schema Audit', status: 'Done', category: 'Architecture', assignees: ['demo-user'] },
     { id: '3', title: 'API Security Protocol v3', status: 'To Do', category: 'Implementation', assignees: ['demo-user'] },
-    { id: '4', title: 'Dissertation Abstract Drafting', status: 'In Review', category: 'Documentation', assignees: ['demo-user'] },
+    { id: '4', title: 'Research Abstract Drafting', status: 'In Review', category: 'Documentation', assignees: ['demo-user'] },
   ]
 
   return (
@@ -126,11 +126,11 @@ export default function DemoPage() {
         <div style={{ padding: '2rem', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '24px', border: '1px dashed var(--brand)', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
            <Info size={32} color="var(--brand)" />
            <div>
-              <h3 style={{ margin: '0 0 0.5rem', fontWeight: 800 }}>About this Dissertation Sandbox</h3>
+              <h3 style={{ margin: '0 0 0.5rem', fontWeight: 800 }}>About this Academic Sandbox</h3>
               <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: 0, lineHeight: 1.6 }}>
-                GroupFlow is part of a 2026 research module focusing on <strong>Distributed Team Accountability</strong>. 
+                GroupFlow is part of a 2026 research module focusing on <strong>Fair Group Work</strong>. 
                 In this demo environment, database writes are disabled. Full features like real-time activity tracking, 
-                Score Extraction, and Artifact Ledgers are available in the authenticated platform.
+                Score Extraction, and Work History are available in the authenticated platform.
               </p>
            </div>
         </div>
