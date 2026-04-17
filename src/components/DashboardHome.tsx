@@ -134,18 +134,18 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               {greeting}, {profile?.full_name?.split(' ')[0] || 'there'}
             </h2>
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-               <span style={{ color: 'var(--brand)', textTransform: 'uppercase' }}>{profile?.role || 'COLLABORATOR'}</span>
+               <span style={{ color: 'var(--brand)', textTransform: 'uppercase' }}>{profile?.role || 'SCHOLAR'}</span>
                <span style={{ opacity: 0.3 }} className="mobile-hide">•</span>
-               <span>{profile?.group_id ? `${personalTaskCount} ACTIVE TASKS TO DO` : 'NO ACTIVE PROJECT'}</span>
+               <span>{profile?.group_id ? `${personalTaskCount} RESEARCH OBJECTIVES` : 'NO ACTIVE PROJECT TRACK'}</span>
             </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
           {[
-            { icon: <Zap size={16} />, label: 'Points', value: profile?.total_score || 0, color: 'var(--brand)', badge: 'TOP 5%', tip: 'Total points from your work' },
-            { icon: <TrendingUp size={16} />, label: 'Rank', value: profile?.rank || 'Senior', color: 'var(--success)', tip: 'Based on your recent work speed' },
-            { icon: <Award size={16} />, label: 'Badges', value: profile?.badges_count ?? 0, color: '#f59e0b', tip: 'Badges earned for helping and quality' }
+            { icon: <Zap size={16} />, label: 'Impact Index', value: profile?.total_score || 0, color: 'var(--brand)', badge: 'TOP 5%', tip: 'Cumulative contribution score' },
+            { icon: <TrendingUp size={16} />, label: 'Standing', value: profile?.rank || 'Senior Scholar', color: 'var(--success)', tip: 'Based on verified academic output' },
+            { icon: <Award size={16} />, label: 'Credentials', value: profile?.badges_count ?? 0, color: '#f59e0b', tip: 'Verified milestones and project honors' }
           ].map((stat, i) => (
             <div key={i} className="stat-pill" data-tooltip={stat.tip} style={{
               padding: '0.75rem 1rem', borderRadius: '18px', background: 'var(--bg-main)', border: '1px solid var(--border)', flex: '1 1 120px',
@@ -174,7 +174,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             style={{ padding: '0.8rem 1.2rem', borderRadius: '16px' }}
             onClick={() => router.push('/dashboard/upgrade')}
           >
-            Reserve access
+            Access Tiers
           </button>
         </div>
       )}
@@ -190,7 +190,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             style={{ padding: '0.8rem 1.2rem', borderRadius: '16px' }}
             onClick={() => router.push('/dashboard/upgrade')}
           >
-            Manage plan
+            Manage Plan
           </button>
         </div>
       )}
@@ -198,7 +198,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
          <div className="stat-pill" style={{ padding: '0.6rem 1rem', borderRadius: '14px', background: 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} data-tooltip="Team activity right now">
             <Activity size={16} color="var(--brand)" />
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>LIVE STATUS: <span style={{ color: 'var(--success)' }}>VERY ACTIVE</span></span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>SYSTEM STATUS: <span style={{ color: 'var(--success)' }}>OPTIMAL SYNC</span></span>
          </div>
          <div style={{ flex: 1 }} />
          {/* Quick Action Pill Bar */}
@@ -228,18 +228,18 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
              <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0, lineHeight: 1 }}>
-               {activeTab === 'board' ? 'Task Board' : 'Timeline'}
+               {activeTab === 'board' ? 'Research Canvas' : 'Project Timeline'}
              </h1>
              {group && (
                <div className="badge badge-code" style={{ padding: '0.4rem 0.8rem', background: 'var(--bg-sub)', color: 'var(--brand)', border: '1px solid var(--brand)', fontSize: '0.8rem' }}>
-                 ACTIVE TEAM: {(group.name || 'Unknown').toUpperCase()} ({group.module_code || 'LAB'})
+                 ACADEMIC TRACK: {(group.name || 'Unknown').toUpperCase()} ({group.module_code || 'UNIT'})
                </div>
              )}
           </div>
           <p style={{ color: 'var(--text-sub)', marginTop: '0.6rem', fontWeight: 600, fontSize: '1rem' }}>
             {activeTab === 'board'
-              ? 'Organize your team work'
-              : 'Keep track of important dates'}
+              ? 'Coordinate collaborative research and task distribution'
+              : 'Monitor institutional deadlines and project phases'}
           </p>
         </div>
 

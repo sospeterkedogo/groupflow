@@ -98,9 +98,9 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Network', path: '/dashboard/network', icon: Users },
-    { name: 'Analytics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/network', icon: BarChart3 },
-    { name: 'Go Pro', path: '/dashboard/upgrade', icon: TrendingUp },
+    { name: 'Peer Network', path: '/dashboard/network', icon: Users },
+    { name: 'Group Statistics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics', icon: BarChart3 },
+    { name: 'Advanced Access', path: '/dashboard/upgrade', icon: TrendingUp },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]
@@ -137,7 +137,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <span style={{ fontWeight: 900, color: 'var(--brand)', fontSize: '1.1rem', letterSpacing: '-0.02em', textTransform: 'uppercase' }}>GroupFlow</span>
         </div>
         <button 
-          onClick={() => handleNav('/dashboard/profile', 'Profile')} 
+          onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
           style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
         >
           {profile?.avatar_url ? (
@@ -163,7 +163,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-              <button onClick={() => handleNav('/dashboard', 'Home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</button>
+              <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.2rem', color: 'var(--brand)', letterSpacing: '-0.02em' }}>GroupFlow</button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '20px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
                 <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)' }}>{onlineCount} Online</span>
@@ -201,11 +201,11 @@ export default function Sidebar({ user }: SidebarProps) {
               ? pathname === '/dashboard' 
               : pathname.startsWith(link.path)
             
-            // Special case for Group Stats to avoid dual-highlighting when it points to /network
-            if (link.name === 'Group Stats') {
+            // Special case for Group Statistics to avoid dual-highlighting when Analytics points to /network as fallback
+            if (link.name === 'Group Statistics') {
               isActive = pathname.startsWith('/dashboard/analytics')
             }
-            if (link.name === 'Student Network' && pathname.startsWith('/dashboard/analytics')) {
+            if (link.name === 'Peer Network' && pathname.startsWith('/dashboard/analytics')) {
               isActive = false
             }
             return (

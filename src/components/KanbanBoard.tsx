@@ -98,6 +98,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   }, []);
 
   const fetchTasksFromDB = useCallback(async () => {
+    if (storageTasks == null) return;
     const { data } = await supabase
       .from('tasks')
       .select('*')
@@ -107,7 +108,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     if (data) {
       reconcileTasks(data as Task[]);
     }
-  }, [supabase, groupId, reconcileTasks])
+  }, [supabase, groupId, reconcileTasks, storageTasks])
 
   const fetchGroupMembers = useCallback(async () => {
     const { data } = await supabase

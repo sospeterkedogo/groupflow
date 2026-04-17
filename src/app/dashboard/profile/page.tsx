@@ -67,12 +67,17 @@ export default function ProfilePage() {
                   <div style={{ position: 'absolute', bottom: '5px', right: '5px', width: '20px', height: '20px', borderRadius: '50%', background: 'var(--success)', border: '3px solid var(--surface)', boxShadow: 'var(--shadow-sm)' }} />
                </div>
 
-               <div style={{ flex: '1 1 280px' }}>
-                  <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{profile?.full_name}</h1>
-                  <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: '0.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 600 }}>
-                    <ShieldCheck size={16} color="var(--brand)" />
-                    {profile?.course_name || 'Independent Researcher'} • {Array.isArray(profile?.groups) ? profile?.groups[0]?.name : profile?.groups?.name || 'Unassigned Workspace'}
-                  </p>
+                <div style={{ flex: '1 1 280px' }}>
+                   <h1 className="fluid-h1" style={{ fontWeight: 900, margin: 0 }}>{profile?.full_name}</h1>
+                   {profile?.tagline && (
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', fontStyle: 'italic', margin: '0.25rem 0 0.5rem', fontWeight: 600 }}>
+                         "{profile.tagline}"
+                      </p>
+                   )}
+                   <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: '0.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 600 }}>
+                     <ShieldCheck size={16} color="var(--brand)" />
+                     {profile?.course_name || 'Academic Scholar'} • {Array.isArray(profile?.groups) ? profile?.groups[0]?.name : profile?.groups?.name || 'Unassigned Workspace'}
+                   </p>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.3rem 0.6rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 600 }}>
                         <Mail size={12} /> {profile?.email}
@@ -90,23 +95,23 @@ export default function ProfilePage() {
          {/* Profile Stats Grid */}
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div style={{ background: 'var(--brand)', color: 'white', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '140px' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.5rem' }}>
-                  <Award size={16} />
-                  <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Validity Score</span>
-               </div>
-               <div style={{ fontSize: '2.5rem', fontWeight: 950, lineHeight: 1, letterSpacing: '-0.04em' }}>{profile?.total_score || 0}</div>
-               <p style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.5rem', fontWeight: 600 }}>Peer Verified Impact</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.5rem' }}>
+                   <Award size={16} />
+                   <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Peer Verification Index</span>
+                </div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 950, lineHeight: 1, letterSpacing: '-0.04em' }}>{profile?.total_score || 0}</div>
+                <p style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '0.5rem', fontWeight: 600 }}>Institutional Contribution Score</p>
             </div>
 
             <div style={{ background: 'var(--surface)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>STANDING</span>
-                  <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--success)' }}>#{profile?.rank || 'Senior'}</span>
-               </div>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>GUILD ID</span>
-                  <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{profile?.school_id || 'N/A'}</span>
-               </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <span style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>ACADEMIC STANDING</span>
+                   <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--success)' }}>#{profile?.rank || 'Senior Scholar'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <span style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 700 }}>INSTITUTIONAL ID</span>
+                   <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{profile?.school_id || 'N/A'}</span>
+                </div>
             </div>
          </div>
 
@@ -114,10 +119,10 @@ export default function ProfilePage() {
          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
             <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '24px', padding: '1.5rem', border: '1px solid var(--border)' }}>
                <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
-                  Researcher Biography
+                  Researcher Narrative
                </h3>
                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.8 }}>
-                  Active contributor in the GroupFlow network. Specialized in {profile?.course_name || 'Independent Research'}. Maintaining high standards of peer-verified output and project execution.
+                  {profile?.biography || `Active participant in institutionalized research within the GroupFlow environment. Specializing in ${profile?.course_name || 'Academic Disciplines'}, maintaining a high index of verified collaborative output.`}
                </p>
             </div>
 
@@ -169,13 +174,13 @@ export default function ProfilePage() {
          {/* Achievement Wall */}
          <div className="card-item" style={{ maxWidth: '100%', marginTop: '1.5rem', background: 'var(--surface)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-               <h3 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
-                  <Award size={22} color="var(--brand)" />
-                  Achievement Wall
-               </h3>
-               <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', padding: '0.3rem 0.8rem', borderRadius: '50px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
-                  {profile?.badges_count || 0} EARNED
-               </div>
+                <h3 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
+                   <Award size={22} color="var(--brand)" />
+                   Credential Repository
+                </h3>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', padding: '0.3rem 0.8rem', borderRadius: '50px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+                   {profile?.badges_count || 0} VERIFIED
+                </div>
             </div>
             <div style={{ color: 'var(--text-sub)', fontSize: '0.95rem', lineHeight: '1.75', marginBottom: '1rem' }}>
                This wall shows the verified achievements and badges you’ve earned through GroupFlow activity. Each card represents a credential tied to your verified work, teamwork, or milestone progress.
@@ -214,12 +219,12 @@ export default function ProfilePage() {
                            <Award size={20} />
                         </div>
                         <div>
-                           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                              {achievement.name || `Credential #${i + 1}`}
-                           </div>
-                           <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>
-                              {achievement.date ? new Date(achievement.date).toLocaleDateString() : 'VERIFIED'}
-                           </div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                               Research Milestone #{i + 1}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.2rem', fontWeight: 600 }}>
+                               ACADEMICALLY VERIFIED
+                            </div>
                         </div>
                      </div>
                   ))}

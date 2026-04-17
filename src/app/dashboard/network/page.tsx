@@ -61,7 +61,7 @@ export default function NetworkPage() {
         fetchCurrentGroupAndConnections(),
         fetchUsers()
       ])
-    }, 'Looking for people...')
+    }, 'Searching Academic Network...')
   }, [fetchCurrentGroupAndConnections, fetchUsers, withLoading])
 
   // Smart Suggestions Logic
@@ -116,8 +116,8 @@ export default function NetworkPage() {
           <div>
             <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
               <div>
-                <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>People</h1>
-                <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Find friends, helpers, and teammates.</p>
+                <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Peer Network</h1>
+                <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Identify collaborators, subject matter experts, and research peers.</p>
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
                 <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}>
@@ -195,8 +195,8 @@ export default function NetworkPage() {
             ) : users.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '6rem 2rem', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)' }}>
                 <Search size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No matching students found</h3>
-                <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>Try searching by enrollment ID or student name.</p>
+                <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No scholars identified</h3>
+                <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>Refine your search parameters by name or institutional identifier.</p>
               </div>
             ) : (
               <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -212,7 +212,7 @@ export default function NetworkPage() {
                         withLoading(async () => {
                           await new Promise(r => setTimeout(r, 600));
                           router.push('/dashboard/network/profile/' + u.id);
-                        }, 'Syncing Student Profile...');
+                        }, 'Accessing Scholar Profile...');
                       }}
                       style={{ 
                         padding: '1.5rem', cursor: 'pointer', borderRadius: '24px', position: 'relative',
@@ -277,9 +277,9 @@ export default function NetworkPage() {
              />
              
              <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'linear-gradient(135deg, var(--brand), #6366f1)', borderRadius: '24px', color: 'white', boxShadow: 'var(--shadow-xl)' }}>
-                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Expand your Network</h4>
+                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Expand your Academic Reach</h4>
                 <p style={{ margin: '1rem 0 1.5rem', fontSize: '0.9rem', opacity: 0.9, lineHeight: 1.5 }}>
-                  Collaborating with students from other courses? Search by their institutional ID to invite them to your next project.
+                  Collaborating with scholars across academic disciplines? Utilize institutional identifiers to integrate collaborators into your current research track.
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 700 }}>
                    <Users size={16} />

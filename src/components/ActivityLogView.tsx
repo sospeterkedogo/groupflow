@@ -34,6 +34,18 @@ export default function ActivityLogView({
   const [loading, setLoading] = useState(true)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
+  const filteredLogs = useMemo(() => {
+    if (!logSearch.trim()) return activities
+    const term = logSearch.toLowerCase()
+    return activities.filter(a => 
+      a.description.toLowerCase().includes(term) || 
+      a.action_type.toLowerCase().includes(term) ||
+      a.profiles?.full_name?.toLowerCase().includes(term)
+    )
+  }, [activities, logSearch])
+
+  const grouped = useMemo(() => groupActivities(filteredLogs), [filteredLogs])
+
   const fetchLogs = useCallback(async () => {
     setLoading(true)
     let query = supabase
@@ -143,18 +155,6 @@ export default function ActivityLogView({
       <p>No recent activity recorded.</p>
     </div>
   )
-
-  const filteredLogs = useMemo(() => {
-    if (!logSearch.trim()) return activities
-    const term = logSearch.toLowerCase()
-    return activities.filter(a => 
-      a.description.toLowerCase().includes(term) || 
-      a.action_type.toLowerCase().includes(term) ||
-      a.profiles?.full_name?.toLowerCase().includes(term)
-    )
-  }, [activities, logSearch])
-
-  const grouped = useMemo(() => groupActivities(filteredLogs), [filteredLogs])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

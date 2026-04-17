@@ -11,12 +11,22 @@ export async function logActivity(
 ) {
   const supabase = createBrowserSupabaseClient()
   
+  // 1. Validation & Hardening
+  // Ensure group_id is a valid UUID (standard format) or null.
+  // This prevents 'system' or other non-UUID strings from triggering database errors.
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const validatedGroupId = (groupId && uuidRegex.test(groupId)) ? groupId : null
+
+  // Ensure we are logging as the current authenticated user to satisfy RLS auth.uid() = user_id
+  const { data: { user } } = await supabase.auth.getUser()
+  const validatedUserId = user?.id || userId
+
   // 1. Audit Log Entry
   const { error: logError } = await supabase
     .from('activity_log')
     .insert({
-      user_id: userId,
-      group_id: groupId || null, // Ensure empty string becomes null for valid UUID columns
+      user_id: validatedUserId,
+      group_id: validatedGroupId,
       action_type: actionType,
       description,
       metadata
