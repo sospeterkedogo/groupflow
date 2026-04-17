@@ -165,8 +165,8 @@ export default function DashboardHome({ groupId, profile }: DashboardHomeProps) 
       {!profile.subscription_plan && (
         <div style={{ padding: '1rem 1.25rem', borderRadius: '22px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem' }}>Pre-registration is open</div>
-            <div style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>Reserve your Pro or Premium access now through Stripe checkout.</div>
+            <div style={{ fontWeight: 800, fontSize: '1rem' }}>Support the dissertation mission</div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>Help bring GroupFlow to more schools by upgrading to Pro or Premium.</div>
           </div>
           <button
             className="btn-sm btn-primary"

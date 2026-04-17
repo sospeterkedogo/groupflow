@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       metadata: {
         user_id: user.id,
         plan: selectedPlan,
-        product_label: isSubscription ? 'Pro pre-registration' : 'Premium pre-registration'
+        product_label: isSubscription ? 'Pro Mission Support' : 'Premium Mission Support'
       }
     })
 

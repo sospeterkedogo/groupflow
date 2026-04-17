@@ -34,8 +34,8 @@ export default function Home() {
 
   const faqs = [
     {
-      q: "Is GroupFlow free to use?",
-      a: "Yes. During this 2026 research phase, everything is completely free for students and tutors. My goal is simple: to help you work better together."
+      q: "How can I support GroupFlow?",
+      a: "You can support this dissertation project by upgrading to Pro (£2.99/mo) or Premium (£99 Lifetime). Your contribution directly helps me bring this tool to many more schools and support learning worldwide."
     },
     {
       q: "How is my data protected?",
@@ -71,23 +71,23 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
-               MY MISSION
+               THE DISSERTATION MISSION
              </div>
-             <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Better teamwork for everyone</h2>
+             <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Transforming collaboration in schools</h2>
              
              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
                 <div>
-                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Why am I building this?</strong>
-                   I want to bridge the gap in group projects by making every contribution visible and valued.
+                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Solving a Real Problem</strong>
+                   I built GroupFlow for my dissertation project to solve the unfair group dynamics that many students face daily. 
                 </div>
                 <div>
-                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>What's the goal?</strong>
-                   I'm creating a fair system where your actual effort is recognized, helping everyone in the team succeed together.
+                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
+                   I&apos;m on a mission to bring this tool into many more schools to truly support learning by making every contribution visible and valued.
                 </div>
              </div>
 
              <button className="btn btn-primary" style={{ marginTop: '2rem', width: '100%' }} onClick={() => setIsModalOpen(false)}>
-               Sounds good
+               Support the Project
              </button>
           </div>
         </div>
@@ -165,17 +165,17 @@ export default function Home() {
            </div>
         </section>
 
-        {/* THE MANIFESTO */}
-        <section style={{ padding: '10rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+        {/* SUPPORT THE MISSION */}
+        <section id="mission" style={{ padding: '10rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '6rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ flex: '1 1 500px' }}>
-               <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Bringing teams together</div>
-               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Group work, without the guesswork.</h2>
+               <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Support the Mission</div>
+               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Solving the real problems in our schools.</h2>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
-                  For a long time, group projects have felt a bit out of balance. Tutors often can&apos;t see who&apos;s doing what, and hard-working students often carry the load alone.
+                  This isn&apos;t just another app—it&apos;s my dissertation project. I built GroupFlow because I&apos;ve seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
-                  I&apos;m changing that. GroupFlow makes collaboration simple and transparent, so your team can focus on creating great work together.
+                  I&apos;m on a mission to bring this tool into many more schools to truly support learning. By joining the mission, you aren&apos;t just getting a tool; you&apos;re helping bridge the gap for students everywhere.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
@@ -340,9 +340,9 @@ export default function Home() {
               <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: '40%', height: '80%', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)', filter: 'blur(40px)', transform: 'rotate(15deg)' }} />
               
               <div style={{ position: 'relative', zIndex: 1 }}>
-                 <h2 style={{ fontSize: '4.5rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Join the mission.</h2>
-                 <p style={{ fontSize: '1.5rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '750px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
-                    Help me build the future of group projects. It&apos;s totally free to use, and focused on your success.
+                 <h2 style={{ fontSize: '4.25rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Believe in better learning.</h2>
+                 <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '800px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
+                    Support my dissertation project to help reach students in schools worldwide. Get access to advanced features for just £2.99/mo or £99 for a lifetime.
                  </p>
                  <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <Link href="/login" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Create your account</Link>

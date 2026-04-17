@@ -109,15 +109,38 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [fetchNotifications, supabase])
 
   const markAsRead = async (id: string) => {
+    const original = notifications.find(n => n.id === id)
+    if (!original || original.read) return
+
+    // Optimistic Update
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
-    await supabase.from('notifications').update({ read: true }).eq('id', id)
+
+    try {
+      const { error } = await supabase.from('notifications').update({ read: true }).eq('id', id)
+      if (error) throw error
+    } catch (err) {
+      console.error('Persistence error (markAsRead):', err)
+      // Rollback
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
+      addToast('Sync Failed', 'Could not update notification status.', 'error')
+    }
   }
 
   const markAllAsRead = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+
+    const original = [...notifications]
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    await supabase.from('notifications').update({ read: true }).eq('user_id', user.id)
+
+    try {
+      const { error } = await supabase.from('notifications').update({ read: true }).eq('user_id', user.id)
+      if (error) throw error
+    } catch (err) {
+      console.error('Persistence error (markAllAsRead):', err)
+      setNotifications(original)
+      addToast('Sync Failed', 'Could not clear all notifications.', 'error')
+    }
   }
 
   const unreadCount = notifications.filter(n => !n.read).length

@@ -46,6 +46,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
 
+  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set())
   const [boardError, setBoardError] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
 
@@ -71,6 +72,9 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
     // 1. Add missing tasks and update existing ones
     dbTasks.forEach(dbTask => {
+      // SKIP reconciliation if the task is currently being updated locally
+      if (pendingUpdates.has(dbTask.id)) return;
+
       const index = liveTasks.findIndex(t => t.id === dbTask.id);
       if (index === -1) {
         liveTasks.push(dbTask);
@@ -200,6 +204,9 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     const taskId = e.dataTransfer.getData('taskId')
     if (!taskId) return
 
+    // Track this update as pending to avoid "snap-back" during reconciliation
+    setPendingUpdates(prev => new Set(prev).add(taskId))
+
     // Optimistically update the shared UI while persisting to DB.
     moveTask(taskId, newStatus)
     handleDragEnd()
@@ -213,9 +220,25 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       console.error('Failed to move task in DB', error)
       setBoardError(`Persistence error: ${error.message}`)
       setTimeout(() => setBoardError(null), 5000)
+      
+      // Remove from pending and force a refresh to revert optimism
+      setPendingUpdates(prev => {
+        const next = new Set(prev)
+        next.delete(taskId)
+        return next
+      })
       await fetchTasksFromDB()
       return
     }
+
+    // Give some time for the realtime event to propagate before clearing "pending"
+    setTimeout(() => {
+      setPendingUpdates(prev => {
+        const next = new Set(prev)
+        next.delete(taskId)
+        return next
+      })
+    }, 1500)
 
     await fetchTasksFromDB()
 
