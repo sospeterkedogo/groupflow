@@ -43,10 +43,14 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [taskSearch, setTaskSearch] = useState('')
   const [members, setMembers] = useState<any[]>([])
   const [artifacts, setArtifacts] = useState<any[]>([])
+  const [mounted, setMounted] = useState(false)
   const { onlineUsers } = usePresence()
   const supabase = createBrowserSupabaseClient()
 
-  useEffect(() => { fetchData() }, [groupId])
+  useEffect(() => { 
+    setMounted(true)
+    fetchData() 
+  }, [groupId])
 
   const fetchData = async () => {
     setLoading(true)
@@ -55,35 +59,41 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     const { data: { user: authUser } } = await supabase.auth.getUser()
     if (!authUser) return
 
-    const [profileData, groupData, tasksData, membersData, artifactsData] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', authUser.id).single(),
-      supabase.from('groups').select('*').eq('id', groupId).single(),
-      supabase.from('tasks').select('*').eq('group_id', groupId),
-      supabase.from('profiles').select('*').eq('group_id', groupId).order('total_score', { ascending: false }),
-      supabase.from('artifacts').select('*, tasks(title, group_id)').filter('tasks.group_id', 'eq', groupId)
-    ])
+    try {
+      const [profileData, groupData, tasksData, membersData, artifactsData] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', authUser.id).single(),
+        supabase.from('groups').select('*').eq('id', groupId).single(),
+        supabase.from('tasks').select('*').eq('group_id', groupId),
+        supabase.from('profiles').select('*').eq('group_id', groupId).order('total_score', { ascending: false }),
+        supabase.from('artifacts').select('*, tasks!inner(title, group_id)').eq('tasks.group_id', groupId)
+      ])
 
-    const userProfile = profileData.data
-    setCurrentUser(userProfile)
-    
-    // Check membership (using profile.group_id vs current page's groupId)
-    const memberCheck = userProfile?.group_id === groupId
-    setIsMember(memberCheck)
+      if (profileData.error && profileData.error.code !== 'PGRST116') throw profileData.error
+      if (groupData.error) throw groupData.error
 
-    if (groupData.data) setGroup(groupData.data)
-    
-    // Only set full data if user is a member or admin (security layer in UI)
-    if (memberCheck) {
-      if (tasksData.data) setTasks(tasksData.data)
-      if (membersData.data) setMembers(membersData.data)
-      const relevant = artifactsData.data?.filter(a => (a.tasks as any)?.group_id === groupId) || []
-      setArtifacts(relevant)
-    } else {
-      // Restricted view: still show member count but hide task details
-      if (membersData.data) setMembers(membersData.data)
+      const userProfile = profileData.data
+      setCurrentUser(userProfile)
+      
+      // Check membership (using profile.group_id vs current page's groupId)
+      const memberCheck = userProfile?.group_id === groupId
+      setIsMember(memberCheck)
+
+      if (groupData.data) setGroup(groupData.data)
+      
+      // Only set full data if user is a member or admin (security layer in UI)
+      if (memberCheck) {
+        if (tasksData.data) setTasks(tasksData.data)
+        if (membersData.data) setMembers(membersData.data)
+        setArtifacts(artifactsData.data || [])
+      } else {
+        // Restricted view: still show member count but hide task details
+        if (membersData.data) setMembers(membersData.data)
+      }
+    } catch (err: any) {
+      console.error('Analytics Fetch Error:', err)
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   const [hasSentRequest, setHasSentRequest] = useState(false)
@@ -263,8 +273,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         {/* Task Status Donut */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1rem' }}>
           <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>Task Status</h3>
-          {tasks.length === 0 ? (
-            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>No tasks yet</div>
+          {!mounted || tasks.length === 0 ? (
+            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>{!mounted ? 'Calibrating...' : 'No tasks yet'}</div>
           ) : (
             <>
               <ResponsiveContainer width="100%" height={160}>
@@ -290,8 +300,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         {/* Task Categories Bar */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1rem' }}>
           <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>By Category</h3>
-          {categoryBarData.length === 0 ? (
-            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>No tasks</div>
+          {!mounted || categoryBarData.length === 0 ? (
+            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>{!mounted ? 'Calibrating...' : 'No tasks'}</div>
           ) : (
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={categoryBarData} layout="vertical" margin={{ left: -20, right: 10, top: 0, bottom: 0 }}>
@@ -309,8 +319,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         {/* Member Contribution */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1rem' }}>
           <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>Contribution</h3>
-          {members.length === 0 ? (
-            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>No members</div>
+          {!mounted || members.length === 0 ? (
+            <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', fontSize: '0.85rem' }}>{!mounted ? 'Calibrating...' : 'No members'}</div>
           ) : (
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={memberBarData} margin={{ left: -25, right: 10, top: 0, bottom: 10 }}>
