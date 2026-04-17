@@ -145,7 +145,6 @@ export default function SettingsPage() {
       if (profile.id) {
         logActivity(profile.id, profile.group_id || '', 'setting_updated', 'Updated personal profile details and academic journey')
       }
-      }
       refreshProfile()
       addToast('Profile Synchronized', 'Your academic journey and identity details have been successfully updated.', 'success')
     }
