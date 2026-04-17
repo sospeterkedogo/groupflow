@@ -848,3 +848,68 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
 }
+
+/* ── Control Panel & Tool Station Utilities ────────────────── */
+.control-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.control-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--brand) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.pulse-pill {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { transform: scale(1.2); opacity: 0.7; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.control-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.75rem;
+  border-radius: 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-sub);
+  font-weight: 850;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.01em;
+}
+
+.control-tab.active {
+  background: var(--surface);
+  color: var(--brand);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.02);
+}
+
+.panel-tool {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.panel-tool:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.15);
+}

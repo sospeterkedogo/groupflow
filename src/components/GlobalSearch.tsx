@@ -14,7 +14,11 @@ interface SearchResult {
   image_url?: string
 }
 
-export default function GlobalSearch() {
+interface GlobalSearchProps {
+  collapsed?: boolean
+}
+
+export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -107,7 +111,6 @@ export default function GlobalSearch() {
     }
 
     withLoading(async () => {
-      await new Promise(r => setTimeout(r, 800))
       router.push(path)
     }, label)
   }
@@ -117,15 +120,31 @@ export default function GlobalSearch() {
       <button 
         onClick={() => setIsOpen(true)}
         style={{
-          width: '100%', padding: '0.75rem 1rem', borderRadius: '14px', background: 'var(--bg-main)',
-          border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem',
-          color: 'var(--text-sub)', cursor: 'pointer', transition: 'all 0.2s', marginBottom: '1rem'
+          width: '100%', 
+          padding: collapsed ? '0.75rem' : '0.75rem 1rem', 
+          borderRadius: '14px', 
+          background: 'var(--bg-main)',
+          border: '1px solid var(--border)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: collapsed ? '0' : '0.75rem',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          color: 'var(--text-sub)', 
+          cursor: 'pointer', 
+          transition: 'all 0.2s', 
+          marginBottom: '1rem',
+          minHeight: '44px'
         }}
+        title="Search workspace (⌘K)"
         className="search-trigger"
       >
         <Search size={18} />
-        <span style={{ fontSize: '0.85rem', flex: 1, textAlign: 'left' }}>Search workspace...</span>
-        <span style={{ fontSize: '0.7rem', opacity: 0.5, border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '6px' }}>⌘K</span>
+        {!collapsed && (
+          <>
+            <span style={{ fontSize: '0.85rem', flex: 1, textAlign: 'left' }}>Search workspace...</span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.5, border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '6px' }}>⌘K</span>
+          </>
+        )}
       </button>
     )
   }

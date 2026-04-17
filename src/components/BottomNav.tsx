@@ -31,7 +31,6 @@ export default function BottomNav() {
   const handleNav = async (path: string, name: string) => {
     if (pathname === path) return;
     await withLoading(async () => {
-      await new Promise(r => setTimeout(r, 600));
       router.push(path);
     }, `Navigating to ${name}...`);
   }

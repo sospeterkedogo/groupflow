@@ -5,30 +5,38 @@ import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
-import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Award, UserCircle } from 'lucide-react'
-import TaskModal from './TaskModal'
-import { Profile } from '@/types/auth'
+import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, UserCircle } from 'lucide-react'
 import { Group } from '@/types/database'
-import { DashboardHomeProps } from '@/types/ui'
 import { useProfile } from '@/context/ProfileContext'
 
 export default function DashboardHome({ groupId }: { groupId: string }) {
   const router = useRouter()
   const { profile } = useProfile()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
+  const [currentTime, setCurrentTime] = useState(new Date())
+  
   const [greeting] = useState(() => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Good Morning'
     if (hour < 18) return 'Good Afternoon'
     return 'Good Evening'
   })
+
+  // 1. Sync local time display
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
+    return () => clearInterval(timer)
+  }, [])
+
   const [personalTaskCount, setPersonalTaskCount] = useState(0)
   const [group, setGroup] = useState<Group | null>(null)
   const [newTaskSignal, setNewTaskSignal] = useState(0)
   const [syncToken, setSyncToken] = useState(0)
+  
   const handleCalendarTaskSaved = useCallback(async () => {
     setSyncToken(prev => prev + 1)
   }, [])
+
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   const fetchGroupDetails = useCallback(async () => {
@@ -99,253 +107,190 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   }
 
   return (
-    <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
-      {/* Personalized Ownership HUD */}
-      <div className="hud-card" style={{
-        padding: '1.5rem 2rem',
-        borderRadius: '24px',
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '2rem',
-        boxShadow: 'var(--shadow-md)',
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Decorative glow */}
-        <div style={{ position: 'absolute', top: -50, right: -50, width: '150px', height: '150px', background: 'var(--brand)', filter: 'blur(80px)', opacity: 0.05, pointerEvents: 'none' }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '24px', border: '2px solid var(--border)', background: 'var(--bg-sub)', padding: '2px', overflow: 'hidden', boxShadow: 'var(--shadow-sm)', transform: 'rotate(-3deg)' }}>
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.full_name ? `${profile.full_name} profile picture` : 'Profile avatar'} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px' }} />
-            ) : (
-              <div style={{ width: '100%', height: '100%', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '20px' }}>
-                <UserCircle size={40} color="var(--text-sub)" />
-              </div>
-            )}
+    <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1400px', margin: '0 auto', paddingBottom: '4rem' }}>
+      
+      {/* ── CONTROL PANEL HEADER ─────────────────────────────────────────── */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '2rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: '300px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+            <div className="pulse-pill" style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 10px var(--success)' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              System Operational &middot; {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <h2 className="fluid-h1" style={{ fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '4px' }}>
-                {greeting}, {profile?.full_name?.split(' ')[0] || 'there'}
-              </h2>
-              {profile?.tagline && (
-                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.08)', padding: '4px 12px', borderRadius: '10px', verticalAlign: 'middle' }}>
-                  {profile.tagline}
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-               <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{profile?.role || 'SCHOLAR'}</span>
-               <span style={{ opacity: 0.3 }} className="mobile-hide">•</span>
-               <span style={{ color: 'var(--brand)' }}>{profile?.course_name || 'INDEPENDENT RESEARCH'}</span>
-               <span style={{ opacity: 0.3 }} className="mobile-hide">•</span>
-               <span>{profile?.group_id ? `${personalTaskCount} RESEARCH OBJECTIVES` : 'NO ACTIVE PROJECT TRACK'}</span>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
-          {[
-            { icon: <Zap size={16} />, label: 'Impact Index', value: profile?.total_score || 0, color: 'var(--brand)', badge: 'TOP 5%', tip: 'Cumulative contribution score' },
-            { icon: <TrendingUp size={16} />, label: 'Standing', value: profile?.rank || 'Senior Scholar', color: 'var(--success)', tip: 'Based on verified academic output' },
-            { icon: <Award size={16} />, label: 'Credentials', value: profile?.badges_count ?? 0, color: '#f59e0b', tip: 'Verified milestones and project honors' }
-          ].map((stat, i) => (
-            <div key={i} className="stat-pill" data-tooltip={stat.tip} style={{
-              padding: '0.75rem 1rem', borderRadius: '18px', background: 'var(--bg-main)', border: '1px solid var(--border)', flex: '1 1 120px',
-              transition: 'transform 0.3s ease', minWidth: '100px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-sub)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.4rem' }}>
-                <span style={{ color: stat.color, filter: 'drop-shadow(0 0 5px currentColor)' }}>{stat.icon}</span> {stat.label}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-main)' }}>{stat.value}</div>
-                {stat.badge && <span className="mobile-hide" style={{ fontSize: '0.55rem', color: stat.color, fontWeight: 900, padding: '2px 6px', background: 'rgba(56, 189, 248, 0.1)', borderRadius: '6px' }}>{stat.badge}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Action Pill Bar */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem', alignItems: 'center' }}>
-      {/* Scholar Identity & Research Brief */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
-         <div 
-           className="hud-card" 
-           style={{ 
-             padding: '1.5rem', 
-             borderRadius: '24px', 
-             background: 'var(--surface)', 
-             border: '1px solid var(--border)',
-             display: 'flex',
-             flexDirection: 'column',
-             gap: '1rem'
-           }}
-         >
-           <h3 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             <UserCircle size={16} color="var(--brand)" /> Scholar Identity
-           </h3>
-           <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, fontWeight: 500, fontStyle: profile?.biography ? 'normal' : 'italic', opacity: profile?.biography ? 1 : 0.6 }}>
-             {profile?.biography || "No research biography provided yet. Define your academic identity in settings."}
-           </p>
-         </div>
-
-         <div className="stat-pill" style={{ padding: '0.6rem 1rem', borderRadius: '14px', background: 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem', height: 'fit-content' }} data-tooltip="Team activity right now">
-            <Activity size={16} color="var(--brand)" />
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>SYSTEM STATUS: <span style={{ color: 'var(--success)' }}>OPTIMAL SYNC</span></span>
-         </div>
-      </div>
-         <div style={{ flex: 1 }} />
-         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button 
-               className="btn-sm btn-primary btn-inline" 
-               style={{ padding: '0.5rem 1rem' }} 
-               data-tooltip="Add a new task"
-               onClick={() => setNewTaskSignal(prev => prev + 1)}
-            >+ New Task</button>
-            <button 
-               className="btn-sm btn-secondary btn-inline" 
-               style={{ padding: '0.5rem 1rem' }} 
-               data-tooltip="View activity and files"
-               onClick={() => router.push(`/dashboard/analytics/${groupId}`)}
-            >Activity</button>
-            <button 
-               className="btn-sm btn-ghost btn-inline" 
-               style={{ padding: '0.5rem 1rem', background: 'var(--bg-sub)' }} 
-               data-tooltip="Update the board"
-               onClick={() => setSyncToken(prev => prev + 1)}
-            >Sync Board</button>
-            <button 
-               className="btn-sm btn-inline shimmer-gold" 
-               style={{ padding: '0.5rem 1rem', background: 'var(--brand)', color: 'white', border: 'none', fontWeight: 900 }} 
-               data-tooltip="Support the project mission"
-               onClick={() => router.push('/dashboard/upgrade')}
-            >Support</button>
-         </div>
-      </div>
-
-      {/* Group Protocol & Mission */}
-      {group && (
-        <div 
-          className="hud-card" 
-          style={{ 
-            padding: '1.5rem', 
-            borderRadius: '24px', 
-            background: 'rgba(var(--brand-rgb), 0.03)', 
-            border: '1px dashed var(--border)',
-            marginTop: '0.5rem'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Zap size={18} color="var(--brand)" /> Group Protocol
-            </h3>
-            {profile?.role === 'admin' && (
-              <button 
-                className="btn-sm btn-ghost" 
-                style={{ width: 'auto', padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
-                onClick={() => {
-                  const desc = prompt("Enter Group Description:", group.description || "");
-                  const rules = prompt("Enter Group Rules:", group.rules || "");
-                  if (desc !== null || rules !== null) {
-                    supabase.from('groups').update({ 
-                      description: desc ?? group.description, 
-                      rules: rules ?? group.rules 
-                    }).eq('id', group.id).then(() => fetchGroupDetails());
-                  }
-                }}
-              >
-                Edit Protocol
-              </button>
-            )}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Mission Statement</div>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
-                {group.description || "The group leader has not set a project mission description yet."}
-              </p>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Project Rules</div>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
-                {group.rules || "Standard academic collaboration rules apply."}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', marginTop: '1.5rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0, lineHeight: 1 }}>
-               {activeTab === 'board' ? 'Research Canvas' : 'Project Timeline'}
-             </h1>
-             {group && (
-               <div className="badge badge-code" style={{ padding: '0.4rem 0.8rem', background: 'var(--bg-sub)', color: 'var(--brand)', border: '1px solid var(--brand)', fontSize: '0.8rem' }}>
-                 ACADEMIC TRACK: {(group.name || 'Unknown').toUpperCase()} ({group.module_code || 'UNIT'})
-               </div>
-             )}
-          </div>
-          <p style={{ color: 'var(--text-sub)', marginTop: '0.6rem', fontWeight: 600, fontSize: '1rem' }}>
-            {activeTab === 'board'
-              ? 'Coordinate collaborative research and task distribution'
-              : 'Monitor institutional deadlines and project phases'}
+          <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.05em', color: 'var(--text-main)', margin: 0, lineHeight: 1 }}>
+            {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
+          </h1>
+          <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.75rem', opacity: 0.8 }}>
+             Active Session: <span style={{ color: 'var(--brand)', fontWeight: 800 }}>{group?.name || 'Loading Project...'}</span>
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-          <button
-            onClick={() => setActiveTab('board')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.65rem 1.5rem', borderRadius: '12px',
-              background: activeTab === 'board' ? 'var(--brand)' : 'transparent',
-              color: activeTab === 'board' ? 'white' : 'var(--text-sub)',
-              border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: activeTab === 'board' ? '0 8px 20px -6px var(--brand)' : 'none'
-            }}
-          >
-            <LayoutDashboard size={18} /> Board
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+           <button 
+             onClick={() => setNewTaskSignal(prev => prev + 1)}
+             className="btn btn-primary btn-inline" 
+             style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 900 }}
+           >
+             <Zap size={18} fill="currentColor" /> Initiate Task
+           </button>
+           <button 
+             onClick={() => router.push(`/dashboard/analytics/${groupId}`)}
+             className="btn btn-secondary btn-inline" 
+             style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 800 }}
+           >
+             Activity Log
+           </button>
+        </div>
+      </header>
+
+      {/* ── METRICS MODULES ────────────────────────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+        {[
+          { icon: <Activity size={20} />, label: 'Action Items', value: personalTaskCount, sub: 'Assigned pending', color: 'var(--brand)' },
+          { icon: <TrendingUp size={20} />, label: 'Group Momentum', value: profile?.total_score || 0, sub: 'Engagement yield', color: 'var(--success)' },
+          { icon: <Calendar size={20} />, label: 'Phase Status', value: 'Active', sub: 'Current project sprint', color: '#f59e0b' },
+          { icon: <Zap size={20} />, label: 'Sync Integrity', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
+        ].map((stat, i) => (
+          <div key={i} className="control-card" style={{
+            padding: '1.75rem',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '24px',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: 'var(--shadow-sm)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}>
+            <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '70px', height: '70px', background: stat.color, filter: 'blur(45px)', opacity: 0.12, pointerEvents: 'none' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: stat.color, marginBottom: '1.25rem' }}>
+               {stat.icon}
+               <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-sub)' }}>{stat.label}</span>
+            </div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--text-main)', lineHeight: 0.9 }}>{stat.value}</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '0.6rem' }}>{stat.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── COMMAND CENTER CONTROLS ─────────────────────────────────────── */}
+      <div style={{ 
+        marginTop: '0.5rem',
+        padding: '0.6rem',
+        background: 'rgba(var(--bg-sub-rgb), 0.5)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '24px',
+        border: '1px solid var(--border)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ display: 'flex', gap: '0.4rem' }}>
+          {[
+            { id: 'board', label: 'Central Board', icon: <LayoutDashboard size={18} /> },
+            { id: 'calendar', label: 'Timeline Stream', icon: <Calendar size={18} /> }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`control-tab ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', paddingRight: '0.5rem' }}>
+          <button className="panel-tool" data-tooltip="Refresh System" onClick={() => setSyncToken(v => v + 1)}>
+            <Activity size={16} />
           </button>
-          <button
-            onClick={() => setActiveTab('calendar')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.65rem 1.5rem', borderRadius: '12px',
-              background: activeTab === 'calendar' ? 'var(--brand)' : 'transparent',
-              color: activeTab === 'calendar' ? 'white' : 'var(--text-sub)',
-              border: 'none', fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: activeTab === 'calendar' ? '0 8px 20px -6px var(--brand)' : 'none'
-            }}
-          >
-            <Calendar size={18} /> Calendar
+          <button className="panel-tool" data-tooltip="Grid Settings" onClick={() => router.push('/dashboard/settings')}>
+            <TrendingUp size={16} />
           </button>
         </div>
       </div>
 
-      <div style={{ position: 'relative' }}>
+      {/* ── PRIMARY WORKSTATION ────────────────────────────────────────── */}
+      <div style={{ 
+        minHeight: '65vh',
+        background: 'var(--surface)',
+        borderRadius: '32px',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-xl)',
+        overflow: 'hidden',
+        position: 'relative',
+        transition: 'all 0.4s ease'
+      }}>
+        <div style={{ 
+          position: 'absolute', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          height: '4px', 
+          background: 'linear-gradient(90deg, var(--brand), var(--accent), var(--brand))',
+          backgroundSize: '200% 100%',
+          animation: 'shimmer-sweep 3s infinite linear',
+          zIndex: 10
+        }} />
         {activeTab === 'board' 
           ? <KanbanBoard groupId={groupId} key={`board-${syncToken}`} profile={profile} newTaskSignal={newTaskSignal} /> 
           : <CalendarView groupId={groupId} key={`cal-${syncToken}`} onTaskSaved={handleCalendarTaskSaved} />
         }
       </div>
 
-      {/* Board task creation is handled inside the KanbanBoard room so the modal works reliably. */}
+      {/* ── SYSTEM STATUS FOOTER ───────────────────────────────────────── */}
+      {group && (
+        <footer style={{ 
+          marginTop: '0.5rem', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          padding: '1.25rem 2rem',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '24px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Protocol</span>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                  {group.name} <span style={{ color: 'var(--text-sub)', fontWeight: 600 }}>&middot; {group.module_code || 'UNIT-X'}</span>
+                </span>
+              </div>
+           </div>
+           
+           <div style={{ display: 'flex', gap: '2rem' }} className="mobile-hide">
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Encryption</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--success)' }}>Active AES-256</span>
+              </div>
+              <div 
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', cursor: 'pointer' }}
+                onClick={() => router.push('/dashboard/network')}
+              >
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Connectivity</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>Node Optimized</span>
+                </div>
+              </div>
+           </div>
+        </footer>
+      )}
 
       <style jsx>{`
-         .hud-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--brand); }
-         .stat-pill:hover { transform: scale(1.03); background: var(--surface); border-color: var(--brand); }
-         @media (max-width: 768px) {
-           .mobile-hide { display: none !important; }
-           .hud-card { padding: 1.25rem !important; }
-         }
-       `}</style>
+        @keyframes shimmer-sweep {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @media (max-width: 768px) {
+          .mobile-hide { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }

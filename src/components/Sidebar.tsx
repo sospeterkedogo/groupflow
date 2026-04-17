@@ -30,6 +30,8 @@ import GlobalSearch from './GlobalSearch'
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { profile } = useProfile()
   const pathname = usePathname()
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
@@ -47,56 +49,44 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isDark = currentPalette.name !== 'Google Light'
 
-  // 1. Manage mobile state with resize listener
+  // 1. Manage mobile state with robust resize listener & hydration fix
   useEffect(() => {
+    setMounted(true)
     const handleResize = () => {
-      const isMobile = window.innerWidth <= 768;
-      // If we cross the threshold, sync the state
-      if (isMobile && isOpen) {
-        // Optional: keep it open if the user explicitly opened it? 
-        // Usually safer to close it when switching to mobile to avoid unexpected overlays
-      }
-    };
-    
-    // Initial check
-    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-      setIsOpen(false);
+      const mobile = typeof window !== 'undefined' && window.innerWidth <= 768
+      setIsMobile(mobile)
+      if (mobile) setIsOpen(false)
+      else setIsOpen(true)
     }
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); 
+    
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // 2. Manage body locking for mobile interactions
   useEffect(() => {
-    const handleBodyLock = () => {
-      if (typeof window !== 'undefined' && window.innerWidth <= 768 && isOpen) {
-        document.body.classList.add('body-lock')
-      } else {
-        document.body.classList.remove('body-lock')
-      }
+    if (isMobile && isOpen) {
+      document.body.classList.add('body-lock')
+    } else {
+      document.body.classList.remove('body-lock')
     }
-    handleBodyLock()
-
     return () => {
-      if (typeof window !== 'undefined') {
-        document.body.classList.remove('body-lock')
-      }
+      if (typeof document !== 'undefined') document.body.classList.remove('body-lock')
     }
-  }, [isOpen])
+  }, [isOpen, isMobile])
 
   const router = useRouter()
   const { withLoading, showConfirmation } = useSmartLoading()
 
   const handleNav = async (path: string, name: string) => {
     if (pathname === path) {
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) setIsOpen(false);
+      if (isMobile) setIsOpen(false);
       return;
     }
     await withLoading(async () => {
-      await new Promise(r => setTimeout(r, 400));
       router.push(path);
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) setIsOpen(false);
+      if (isMobile) setIsOpen(false);
     }, `Syncing ${name}...`);
   }
 
@@ -124,6 +114,9 @@ export default function Sidebar({ user }: SidebarProps) {
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]
 
+  // Prevent flash by not rendering structural overrides until mounted
+  if (!mounted) return null;
+
   return (
     <div style={{ display: 'contents' }}>
       {/* Mobile Backdrop */}
@@ -143,43 +136,43 @@ export default function Sidebar({ user }: SidebarProps) {
         zIndex: 5000,
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1rem',
+        padding: '0 1.25rem',
         borderBottom: '1px solid var(--border)',
         boxShadow: 'var(--shadow-sm)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
             onClick={() => setIsOpen(true)} 
             aria-label="Toggle Menu"
-            style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>
                <Activity size={22} />
             </div>
           </button>
-          <span style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.25rem', letterSpacing: '-0.03em', fontFamily: 'Inter, sans-serif' }}>
+          <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.3rem', letterSpacing: '-0.04em' }}>
             Group<span style={{ color: 'var(--brand)' }}>Flow</span>
           </span>
         </div>
-          <button 
-            onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
-            aria-label="View Profile"
-            style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
-          >
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
-            ) : (
-              <UserCircle size={22} color="var(--text-sub)" />
-            )}
-          </button>
+        <button 
+          onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
+          aria-label="View Profile"
+          style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
+        >
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
+          ) : (
+            <UserCircle size={22} color="var(--text-sub)" />
+          )}
+        </button>
       </div>
 
       <aside 
         className={`sidebar-container ${isOpen ? 'open' : 'closed'}`} 
-        aria-hidden={!isOpen}
+        aria-hidden={!isOpen && isMobile}
         onClick={(e) => e.stopPropagation()} 
         style={{ 
-          width: isOpen ? '280px' : '80px',
+          width: isOpen ? '280px' : '84px',
           maxWidth: '85vw',
           height: 'var(--vh-dynamic)',
           backgroundColor: 'var(--bg-sub)',
@@ -187,15 +180,15 @@ export default function Sidebar({ user }: SidebarProps) {
           display: 'flex',
           flexDirection: 'column',
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          zIndex: 4600,
-          boxShadow: isOpen ? '20px 0 50px rgba(0,0,0,0.1)' : 'none'
+          zIndex: isMobile ? 5100 : 4600,
+          boxShadow: isOpen && isMobile ? '20px 0 50px rgba(0,0,0,0.2)' : 'none'
         }}
       >
         {/* Header / Toggle */}
-        <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
+        <div style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-              <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 900, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.03em' }}>
+              <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.3rem', color: 'var(--text-main)', letterSpacing: '-0.04em' }}>
                 Group<span style={{ color: 'var(--brand)' }}>Flow</span>
               </button>
               <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '20px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
@@ -208,49 +201,49 @@ export default function Sidebar({ user }: SidebarProps) {
               </div>
             </div>
           ) : (
-            <div className="hide-mobile" style={{ marginBottom: '0.5rem' }}>
+            <div className="hide-mobile" style={{ width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '0.25rem' }}>
                <NotificationBell />
             </div>
           )}
-            <button 
-              onClick={() => setIsOpen(!isOpen)}
-              style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', padding: '8px' }}
-              className="hover-card hide-mobile"
-              aria-label={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-            >
-              {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-            </button>
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="hide-desktop"
-              style={{ background: 'rgba(var(--text-main-rgb), 0.05)', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', padding: '8px', borderRadius: '10px' }}
-              aria-label="Close Sidebar"
-            >
-              <ChevronLeft size={20} />
-            </button>
+          
+          <button 
+            onClick={() => setIsOpen(!isOpen)}
+            style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', padding: '8px' }}
+            className="hover-card hide-mobile"
+            aria-label={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+          >
+            {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          </button>
+          
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="hide-desktop"
+            style={{ background: 'rgba(var(--text-main-rgb), 0.05)', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', padding: '8px', borderRadius: '10px' }}
+            aria-label="Close Sidebar"
+          >
+            <ChevronLeft size={20} />
+          </button>
         </div>
 
         {/* Global Search Interface */}
-        {isOpen && (
-          <div style={{ padding: '1.25rem 1rem 0' }}>
-            <GlobalSearch />
-          </div>
-        )}
+        <div style={{ padding: isOpen ? '1.25rem 1rem 0' : '1rem 0.75rem 0' }}>
+            <GlobalSearch collapsed={!isOpen} />
+        </div>
 
         {/* Nav Links */}
-        <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           {navLinks.map((link) => {
             let isActive = link.path === '/dashboard' 
               ? pathname === '/dashboard' 
               : pathname.startsWith(link.path)
             
-            // Special case for Group Statistics to avoid dual-highlighting when Analytics points to /network as fallback
             if (link.name === 'Group Statistics') {
               isActive = pathname.startsWith('/dashboard/analytics')
             }
             if (link.name === 'Peer Network' && pathname.startsWith('/dashboard/analytics')) {
               isActive = false
             }
+
             return (
               <button 
                 key={link.name}
@@ -259,27 +252,28 @@ export default function Sidebar({ user }: SidebarProps) {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
-                  padding: '0.8rem 1.5rem',
+                  gap: '1.25rem',
+                  padding: isOpen ? '0.85rem 1.5rem' : '0.85rem 0',
                   color: isActive ? 'var(--brand)' : 'var(--text-sub)',
                   backgroundColor: isActive ? 'rgba(var(--brand-rgb), 0.06)' : 'transparent',
-                  fontWeight: isActive ? 800 : 600,
-                  fontSize: '0.875rem',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  fontWeight: isActive ? 900 : 700,
+                  fontSize: '0.9rem',
+                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                   justifyContent: isOpen ? 'flex-start' : 'center',
-                  borderRadius: '0 50px 50px 0',
-                  marginRight: '1rem',
+                  borderRadius: isOpen ? '0 50px 50px 0' : '16px',
+                  marginRight: isOpen ? '1rem' : '0.75rem',
+                  marginLeft: isOpen ? '0' : '0.75rem',
                   position: 'relative',
                   border: 'none',
                   cursor: 'pointer',
-                  width: 'calc(100% - 1rem)'
+                  width: isOpen ? 'calc(100% - 1rem)' : 'calc(100% - 1.5rem)'
                 }}
                 title={!isOpen ? link.name : ''}
               >
-                <link.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                {isOpen && <span>{link.name}</span>}
+                <link.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                {isOpen && <span style={{ letterSpacing: '-0.01em' }}>{link.name}</span>}
                 {isActive && (
-                  <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: '4px', background: 'var(--brand)', borderRadius: '0 4px 4px 0' }} />
+                  <div style={{ position: 'absolute', left: 0, top: '15%', bottom: '15%', width: '4px', background: 'var(--brand)', borderRadius: '0 4px 4px 0' }} />
                 )}
               </button>
             )
@@ -287,66 +281,70 @@ export default function Sidebar({ user }: SidebarProps) {
         </nav>
 
         {/* Footer / User Profile */}
-        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
            <div style={{ 
              display: 'flex', 
              alignItems: 'center', 
              gap: '0.75rem', 
-             padding: isOpen ? '0.6rem' : '0', 
+             padding: isOpen ? '0.75rem' : '0', 
              backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent',
              borderRadius: '16px',
              border: isOpen ? '1px solid var(--border)' : 'none',
              justifyContent: isOpen ? 'flex-start' : 'center',
-             cursor: 'pointer'
+             cursor: 'pointer',
+             transition: 'all 0.2s ease',
+             minHeight: '48px'
            }}
            className="identity-pill"
            onClick={() => window.location.href = '/dashboard/profile'}
            >
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 900, flexShrink: 0, overflow: 'hidden' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 950, flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 8px rgba(var(--brand-rgb), 0.15)' }}>
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="User avatar" />
                 ) : (
                   profile?.full_name?.charAt(0) || 'U'
                 )}
               </div>
              {isOpen && (
                <div style={{ flex: 1, overflow: 'hidden' }}>
-                 <div style={{ color: 'var(--text-main)', fontWeight: 800, fontSize: '0.8rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                 <div style={{ color: 'var(--text-main)', fontWeight: 900, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', letterSpacing: '-0.02em' }}>
                    {profile?.full_name || 'Anonymous'}
                  </div>
-                 <div style={{ color: 'var(--success)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                   Online
+                 <div style={{ color: 'var(--success)', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                   Session Active
                  </div>
                </div>
              )}
            </div>
 
-           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.5rem' }}>
+           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.6rem' }}>
              <button 
                onClick={toggleTheme}
-               style={{ flex: 1, height: '40px', borderRadius: '12px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-               title="Theme"
+               style={{ flex: 1, height: '42px', borderRadius: '14px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+               title="Toggle Interface Aesthetics"
+               className="panel-tool"
              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
              </button>
              <button 
                onClick={handleSignOut}
-               style={{ flex: 1, height: '40px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-               title="Sign Out"
+               style={{ flex: 1, height: '42px', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+               title="Terminate Session"
+               className="panel-tool"
              >
-               <LogOut size={18} />
+               <LogOut size={20} />
              </button>
            </div>
         </div>
-      </div>
+      </aside>
 
       <style jsx>{`
-        .nav-bubble:hover, .project-bubble:hover, .logout-bubble:hover, .theme-bubble:hover {
-          transform: scale(1.08);
-          filter: brightness(1.1);
+        .nav-bubble:hover {
+          transform: translateX(4px);
+          color: var(--brand) !important;
         }
-        .nav-bubble:active, .theme-bubble:active, .logout-bubble:active { transform: scale(0.95); }
-        .identity-pill:hover { border-color: var(--brand) !important; }
+        .nav-bubble:active { transform: scale(0.98); }
+        .identity-pill:hover { border-color: var(--brand) !important; background: var(--bg-sub); }
         
         .sidebar-backdrop {
           display: none;
@@ -377,37 +375,31 @@ export default function Sidebar({ user }: SidebarProps) {
             left: 0 !important;
             top: 0 !important;
             bottom: 0 !important;
-            z-index: 5100 !important; /* Above mobile header */
-            background: var(--bg-main) !important;
+            z-index: 5100 !important;
+            background: var(--surface) !important;
             box-shadow: 20px 0 50px rgba(0,0,0,0.4) !important;
             transform: translateX(-100%);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             width: 85vw !important;
-            max-width: 320px !important;
+            max-width: 340px !important;
           }
           .sidebar-container.open { transform: translateX(0) !important; }
           .sidebar-container.closed { transform: translateX(-100%) !important; }
         }
 
-        .active-project {
-          position: relative;
-        }
         .active-project::after {
           content: '';
           position: absolute;
-          left: 0;
-          top: 0;
-          right: 0;
-          bottom: 0;
+          inset: 0;
           border-radius: inherit;
           box-shadow: 0 0 0 2px var(--brand);
-          opacity: 0.15;
+          opacity: 0.1;
           animation: pulse-border 2s infinite;
         }
         @keyframes pulse-border {
-          0% { transform: scale(1); opacity: 0.2; }
-          50% { transform: scale(1.02); opacity: 0.1; }
-          100% { transform: scale(1); opacity: 0.2; }
+          0% { opacity: 0.1; }
+          50% { opacity: 0.2; }
+          100% { opacity: 0.1; }
         }
         .pulse-pill {
           animation: pulse-glow 2s infinite;

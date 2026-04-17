@@ -40,36 +40,46 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
   })
   
   const progressInterval = useRef<NodeJS.Timeout | null>(null)
+  const appearanceTimeout = useRef<NodeJS.Timeout | null>(null)
 
   const startLoading = useCallback((message: string) => {
-    setLoading({ isLoading: true, progress: 0, message })
-    
-    // Smart Progress Simulation Logic
+    // Clear any existing timeouts or intervals
+    if (appearanceTimeout.current) clearTimeout(appearanceTimeout.current)
     if (progressInterval.current) clearInterval(progressInterval.current)
 
-    progressInterval.current = setInterval(() => {
-      setLoading(prev => {
-        if (!prev.isLoading) return prev
-        
-        let next = prev.progress
-        if (next < 40) next += Math.random() * 15 // Rapid start
-        else if (next < 85) next += Math.random() * 2 // Steady crawl
-        else if (next < 98) next += 0.1 // Precision hold
-        
-        return { ...prev, progress: Math.min(next, 98) }
-      })
-    }, 150)
+    // Wait 250ms before showing the loader to prevent flashes for fast tasks
+    appearanceTimeout.current = setTimeout(() => {
+      setLoading({ isLoading: true, progress: 0, message })
+
+      progressInterval.current = setInterval(() => {
+        setLoading(prev => {
+          if (!prev.isLoading) return prev
+          
+          let next = prev.progress
+          if (next < 40) next += Math.random() * 15 // Rapid start
+          else if (next < 85) next += Math.random() * 2 // Steady crawl
+          else if (next < 98) next += 0.1 // Precision hold
+          
+          return { ...prev, progress: Math.min(next, 98) }
+        })
+      }, 150)
+    }, 250)
   }, [])
 
   const finishLoading = useCallback(() => {
+    if (appearanceTimeout.current) clearTimeout(appearanceTimeout.current)
     if (progressInterval.current) clearInterval(progressInterval.current)
     
     // Snap to 100% and close
-    setLoading(prev => ({ ...prev, progress: 100 }))
+    setLoading(prev => {
+      if (!prev.isLoading) return { isLoading: false, progress: 0, message: '' }
+      return { ...prev, progress: 100 }
+    })
 
+    // Reduce delay for a more responsive exit
     setTimeout(() => {
       setLoading({ isLoading: false, progress: 0, message: '' })
-    }, 500)
+    }, 200)
   }, [])
 
   const withLoading = useCallback(async <T,>(task: () => Promise<T>, message: string): Promise<T> => {
