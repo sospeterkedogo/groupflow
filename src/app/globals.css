@@ -119,6 +119,59 @@ body {
 .skeleton-avatar { border-radius: 50% !important; }
 .skeleton-card  { height: 80px; border-radius: 16px !important; }
 
+/* ── Shiny & Premium Effects ───────────────────────────── */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+.shimmer-gold {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-gold::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.4),
+    transparent
+  );
+  animation: shimmer-sweep 3s infinite ease-in-out;
+}
+
+.premium-glow {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.1);
+  transition: all 0.3s ease;
+}
+.premium-glow:hover {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.5), 0 0 50px rgba(212, 175, 55, 0.2);
+}
+
+.glass-lock {
+  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 1rem;
+  border-radius: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-lock:hover {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+}
+
 /* ── Spinners ───────────────────────────── */
 .spinner-mini {
   width: 1rem;

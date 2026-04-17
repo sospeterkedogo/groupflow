@@ -80,7 +80,8 @@ export type Palette = {
     '--success': string
     '--warning': string
     '--overlay': string
-  }
+    tier?: 'free' | 'pro' | 'premium'
+}
 }
 
 export type ThemeContextType = {

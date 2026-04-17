@@ -634,60 +634,108 @@ export default function SettingsPage() {
 
         {activeTab === 'appearance' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Appearance Settings</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>Look & Feel</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Customize your workspace with high-end, professionally curated themes.</p>
 
-            <div style={{ marginBottom: '3rem' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <PaletteIcon size={20} color="var(--brand)" /> Color Themes
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                {PALETTES.map(p => (
-                  <button
-                    key={p.name}
-                    onClick={() => setPalette(p.name)}
-                    style={{
-                      padding: '1.25rem', background: 'var(--bg-sub)', border: currentPalette.name === p.name ? '2px solid var(--brand)' : '1px solid var(--border)',
-                      borderRadius: 'var(--radius)', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                      <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{p.name}</span>
-                      {currentPalette.name === p.name && <CheckCircle2 size={16} color="var(--brand)" />}
-                    </div>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      {Object.values(p.colors).slice(0, 5).map((c, i) => (
-                        <div key={i} style={{ width: '20px', height: '20px', borderRadius: '4px', background: c, border: '1px solid rgba(0,0,0,0.1)' }} />
-                      ))}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Render themes grouped by tier */}
+            {(['free', 'pro', 'premium'] as const).map(tier => {
+              const tierThemes = PALETTES.filter(p => (p.tier || 'free') === tier);
+              const isLocked = tier !== 'free' && profile?.subscription_plan !== 'premium' && (tier !== 'pro' || profile?.subscription_plan !== 'pro');
+              const canAccess = !isLocked;
 
-            <div>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <ImageIcon size={20} color="var(--brand)" /> Background Image
+              return (
+                <div key={tier} style={{ marginBottom: '3.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: tier === 'premium' ? '#d4af37' : tier === 'pro' ? 'var(--brand)' : 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      {tier === 'premium' ? <Award size={20} /> : tier === 'pro' ? <Shield size={20} /> : <PaletteIcon size={20} />}
+                      {tier} Collection
+                    </h3>
+                    {isLocked && (
+                      <button 
+                        onClick={() => setActiveTab('billing')}
+                        className="btn btn-sm btn-primary shimmer-gold" 
+                        style={{ width: 'auto', background: tier === 'premium' ? 'linear-gradient(135deg, #d4af37 0%, #ffdf00 100%)' : 'var(--brand)' }}
+                      >
+                        Unlock {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
+                    {tierThemes.map(p => (
+                      <div 
+                        key={p.name}
+                        style={{ position: 'relative', borderRadius: '24px', overflow: 'hidden', boxShadow: 'var(--shadow-md)', transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}
+                        className={p.name === 'Gold Luxury' ? 'shimmer-gold premium-glow' : ''}
+                      >
+                        <button
+                          disabled={!canAccess}
+                          onClick={() => setPalette(p.name)}
+                          style={{
+                            width: '100%', padding: '1.25rem', background: p.colors['--bg-sub'], border: currentPalette.name === p.name ? `3px solid ${p.colors['--brand']}` : '1px solid var(--border)',
+                            borderRadius: 'inherit', textAlign: 'left', cursor: canAccess ? 'pointer' : 'default', transition: 'all 0.2s',
+                            display: 'flex', flexDirection: 'column', gap: '1rem'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 850, color: p.colors['--text-main'], fontSize: '0.95rem' }}>{p.name}</span>
+                            {currentPalette.name === p.name && (
+                              <div style={{ background: p.colors['--brand'], color: 'white', borderRadius: '50%', padding: '4px' }}>
+                                <CheckCircle2 size={14} />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            {[p.colors['--brand'], p.colors['--accent'], p.colors['--bg-main'], p.colors['--text-main']].map((c, i) => (
+                              <div key={i} style={{ width: '24px', height: '24px', borderRadius: '8px', background: c, border: '1px solid rgba(0,0,0,0.1)' }} />
+                            ))}
+                          </div>
+                        </button>
+
+                        {isLocked && (
+                          <div 
+                            className="glass-lock"
+                            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+                          >
+                            <div style={{ background: 'rgba(255,255,255,0.15)', padding: '0.75rem', borderRadius: '50%', marginBottom: '0.5rem', boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }}>
+                              <Lock size={20} color="white" />
+                            </div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{tier} Only</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900 }}>
+                <ImageIcon size={20} color="var(--brand)" /> Custom Canvas
               </h3>
-              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', textAlign: 'center' }}>
+              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '32px', padding: '3rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
                 {customBg ? (
-                  <div style={{ position: 'relative', width: '200px', height: '100px', borderRadius: 'var(--radius)', overflow: 'hidden', margin: '0 auto 1.5rem', border: '2px solid var(--brand)' }}>
+                  <div style={{ position: 'relative', width: '240px', height: '120px', borderRadius: '24px', overflow: 'hidden', margin: '0 auto 1.5rem', border: '3px solid var(--brand)', boxShadow: 'var(--shadow-lg)' }}>
                     <img src={customBg} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
                       onClick={() => setCustomBg(null)}
-                      style={{ position: 'absolute', top: '5px', right: '5px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)' }}
                     >
-                      <X size={14} />
+                      <X size={16} />
                     </button>
                   </div>
                 ) : (
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', border: '1px dashed var(--border)' }}>
-                    <ImageIcon size={30} color="var(--text-sub)" />
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', border: '2px dashed var(--border)', color: 'var(--text-sub)' }}>
+                    <ImageIcon size={40} />
                   </div>
                 )}
-                <label className="btn btn-secondary" style={{ width: 'auto', cursor: 'pointer' }}>
-                  {uploadingBg ? 'Saving...' : customBg ? 'Change Image' : 'Upload Image'}
+                <label className="btn btn-primary shimmer-gold" style={{ width: 'auto', cursor: 'pointer', padding: '0.8rem 2rem' }}>
+                  {uploadingBg ? 'Syncing...' : customBg ? 'Swap Artwork' : 'Upload Custom Backdrop'}
                   <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'bg')} style={{ display: 'none' }} />
                 </label>
+                <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>Immersive glassmorphism will adapt to your custom imagery.</p>
               </div>
             </div>
           </div>
