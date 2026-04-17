@@ -20,6 +20,44 @@ import {
 } from 'lucide-react'
 import { LogEntry } from '@/types/ui'
 
+const getActionIcon = (type: string) => {
+  switch (type) {
+    case 'message_sent': return <MessageSquare size={16} color="var(--brand)" />
+    case 'task_created': return <PlusCircle size={16} color="var(--success)" />
+    case 'task_updated': return <CheckCircle size={16} color="var(--brand)" />
+    case 'task_deleted': return <Trash2 size={16} color="var(--error)" />
+    case 'message_deleted': return <Trash2 size={16} color="var(--text-sub)" />
+    case 'setting_updated': return <Settings size={16} color="var(--text-main)" />
+    case 'theme_changed': return <Palette size={16} color="#e900ff" />
+    case 'privacy_toggled': return <Shield size={16} color="var(--warning)" />
+    case 'member_kicked': return <UserMinus size={16} color="var(--error)" />
+    case 'artifact_uploaded': return <FileUp size={16} color="var(--success)" />
+    default: return <History size={16} color="var(--text-sub)" />
+  }
+}
+
+const groupActivities = (items: LogEntry[]) => {
+  const groups: { label: string; items: LogEntry[] }[] = []
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const yesterday = today - 86400000
+  const weekAgo = today - (86400000 * 7)
+
+  items.forEach(item => {
+    const time = new Date(item.created_at).getTime()
+    let label = 'Older'
+    if (time >= today) label = 'Today'
+    else if (time >= yesterday) label = 'Yesterday'
+    else if (time >= weekAgo) label = 'Past Week'
+
+    const existing = groups.find(g => g.label === label)
+    if (existing) existing.items.push(item)
+    else groups.push({ label, items: [item] })
+  })
+
+  return groups
+}
+
 export default function ActivityLogView({ 
   userId, 
   groupId, 
@@ -88,44 +126,6 @@ export default function ActivityLogView({
       supabase.removeChannel(channel)
     }
   }, [fetchLogs, groupId, userId, supabase])
-
-  const getActionIcon = (type: string) => {
-    switch (type) {
-      case 'message_sent': return <MessageSquare size={16} color="var(--brand)" />
-      case 'task_created': return <PlusCircle size={16} color="var(--success)" />
-      case 'task_updated': return <CheckCircle size={16} color="var(--brand)" />
-      case 'task_deleted': return <Trash2 size={16} color="var(--error)" />
-      case 'message_deleted': return <Trash2 size={16} color="var(--text-sub)" />
-      case 'setting_updated': return <Settings size={16} color="var(--text-main)" />
-      case 'theme_changed': return <Palette size={16} color="#e900ff" />
-      case 'privacy_toggled': return <Shield size={16} color="var(--warning)" />
-      case 'member_kicked': return <UserMinus size={16} color="var(--error)" />
-      case 'artifact_uploaded': return <FileUp size={16} color="var(--success)" />
-      default: return <History size={16} color="var(--text-sub)" />
-    }
-  }
-
-  const groupActivities = (items: LogEntry[]) => {
-    const groups: { label: string; items: LogEntry[] }[] = []
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
-    const yesterday = today - 86400000
-    const weekAgo = today - (86400000 * 7)
-
-    items.forEach(item => {
-      const time = new Date(item.created_at).getTime()
-      let label = 'Older'
-      if (time >= today) label = 'Today'
-      else if (time >= yesterday) label = 'Yesterday'
-      else if (time >= weekAgo) label = 'Past Week'
-
-      const existing = groups.find(g => g.label === label)
-      if (existing) existing.items.push(item)
-      else groups.push({ label, items: [item] })
-    })
-
-    return groups
-  }
 
   if (loading) {
     return (
