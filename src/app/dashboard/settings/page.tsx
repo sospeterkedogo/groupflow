@@ -26,7 +26,7 @@ import { useProfile } from '@/context/ProfileContext'
 export default function SettingsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabName>('identity')
-  const { profile, refreshProfile } = useProfile()
+  const { profile, refreshProfile, setProfile } = useProfile()
   const [fullName, setFullName] = useState('')
   const [courseName, setCourseName] = useState('')
   const [enrollmentYear, setEnrollmentYear] = useState<number>(new Date().getFullYear())

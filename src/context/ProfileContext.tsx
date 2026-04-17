@@ -8,6 +8,7 @@ type ProfileContextType = {
   profile: Profile | null
   loading: boolean
   refreshProfile: () => Promise<void>
+  setProfile: React.Dispatch<React.SetStateAction<Profile | null>>
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
@@ -68,7 +69,7 @@ export function ProfileProvider({
   }, [userId])
 
   return (
-    <ProfileContext.Provider value={{ profile, loading, refreshProfile }}>
+    <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile }}>
       {children}
     </ProfileContext.Provider>
   )
