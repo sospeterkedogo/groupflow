@@ -44,8 +44,12 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 
 
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
-  // All hooks must be called unconditionally before any early returns
+  // Early return before any hooks to satisfy Rules of Hooks
   const storageTasks = useStorage((root) => root.tasks);
+  if (storageTasks == null) {
+    return <div>Loading board...</div>;
+  }
+  // All hooks must be called unconditionally after early return
   const router = useRouter();
   const [boardSearch, setBoardSearch] = useState('');
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
@@ -57,10 +61,6 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
   // ...existing code...
-  // Early return after all hooks
-  if (storageTasks == null) {
-    return <div>Loading board...</div>;
-  }
 
   // ...existing code...
 
