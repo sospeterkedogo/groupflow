@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
 import { Task, TaskStatus } from '@/types/database'
@@ -42,6 +43,7 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 }
 
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
+  const router = useRouter()
   const tasks = useStorage((root) => root.tasks);
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
@@ -522,7 +524,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                             return (
                               <button
                                 key={userId}
-                                onClick={(e) => { e.stopPropagation(); setSelectedMember(user || null); }}
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  router.push(`/dashboard/network/profile/${userId}`);
+                                }}
                                 style={{
                                   position: 'relative', padding: 0, background: 'none', border: 'none', cursor: 'pointer',
                                   transition: 'transform 0.2s'

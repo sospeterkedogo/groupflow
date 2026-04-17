@@ -401,9 +401,42 @@ export default function TaskModal({
           <h2 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {isEditMode ? 'Edit Task' : 'New Task'}
             {isEditMode && assignees.length > 0 && (
-               <span className="badge hide-tiny" style={{ backgroundColor: 'var(--brand)', color: 'white', marginLeft: '0.5rem', fontSize: '0.7rem' }}>
-                 {assignees.length} Assigned
-               </span>
+               <div style={{ display: 'flex', alignItems: 'center', marginLeft: '0.5rem' }}>
+                 <div style={{ display: 'flex', marginRight: '0.5rem' }}>
+                   {assignees.slice(0, 3).map((userId, i) => {
+                     const m = members.find(p => p.id === userId);
+                     return (
+                       <div 
+                         key={userId} 
+                         onClick={() => router.push(`/dashboard/network/profile/${userId}`)}
+                         style={{ 
+                           width: '24px', height: '24px', borderRadius: '50%', 
+                           border: '2px solid var(--bg-sub)', marginLeft: i === 0 ? 0 : '-8px',
+                           backgroundColor: 'var(--brand)', cursor: 'pointer', overflow: 'hidden',
+                           zIndex: 10 - i
+                         }}
+                         title={m?.full_name || 'Assigned User'}
+                       >
+                         {m?.avatar_url ? (
+                           <img src={m.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                         ) : (
+                           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
+                             {(m?.full_name || '?')[0]}
+                           </div>
+                         )}
+                       </div>
+                     )
+                   })}
+                   {assignees.length > 3 && (
+                     <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid var(--bg-sub)', marginLeft: '-8px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800, zIndex: 0 }}>
+                       +{assignees.length - 3}
+                     </div>
+                   )}
+                 </div>
+                 <span className="badge hide-tiny" style={{ backgroundColor: 'var(--brand)', color: 'white', fontSize: '0.7rem' }}>
+                   {assignees.length} Assigned
+                 </span>
+               </div>
             )}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}>
