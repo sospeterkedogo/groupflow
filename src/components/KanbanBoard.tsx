@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { FileUp, GitCommit, AlertCircle } from 'lucide-react'
+import { FileUp, GitCommit, AlertCircle, Search, X } from 'lucide-react'
 import { Task, TaskStatus } from '@/types/database'
 import { Profile } from '@/types/auth'
 import { KanbanBoardProps } from '@/types/ui'
@@ -44,7 +44,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   const router = useRouter()
-  const tasks = useStorage((root) => root.tasks);
+  const storageTasks = useStorage((root) => root.tasks);
+  const [boardSearch, setBoardSearch] = useState('')
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
 
@@ -281,7 +282,19 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     }
   }, []);
 
-  // ALGORITHMIC COMPLETION ENGINE
+  // FILTERED TASKS
+  const filteredTasks = useMemo(() => {
+    if (!storageTasks) return []
+    const raw = Array.from(storageTasks)
+    if (!boardSearch.trim()) return raw
+    const term = boardSearch.toLowerCase()
+    return raw.filter(t => 
+      t.title.toLowerCase().includes(term) || 
+      t.description?.toLowerCase().includes(term) ||
+      t.category?.toLowerCase().includes(term)
+    )
+  }, [storageTasks, boardSearch])
+
   const calculateProbability = (task: Task) => {
     if (task.status === 'Done') return 100
     let base = task.status === 'In Review' ? 85 : task.status === 'In Progress' ? 50 : 10
@@ -295,11 +308,11 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     return Math.min(base, 99)
   }
 
-  const globalProbability = (tasks && tasks.length > 0)
-    ? Math.round(Array.from(tasks).reduce((acc, t) => acc + calculateProbability(t), 0) / tasks.length)
+  const globalProbability = (filteredTasks && filteredTasks.length > 0)
+    ? Math.round(filteredTasks.reduce((acc, t) => acc + calculateProbability(t), 0) / filteredTasks.length)
     : 0
 
-  const overdueCount = (tasks ? Array.from(tasks) : []).filter((t: Task) => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
+  const overdueCount = filteredTasks.filter((t: Task) => t.due_date && new Date(t.due_date).getTime() < now && t.status !== 'Done').length
   const [hasCelebrated, setHasCelebrated] = useState(false)
 
   // Gamification
@@ -400,11 +413,36 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }}>Multiplayer active. Drag and drop tasks to collaborate in real-time.</p>
-        <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
-          + New Task
-        </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '1.5rem' }}>
+        <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+          <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+          <input 
+            type="text" 
+            placeholder="Filter tasks by title, category, or keyword..." 
+            value={boardSearch}
+            onChange={(e) => setBoardSearch(e.target.value)}
+            style={{ 
+              width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '14px', 
+              background: 'var(--bg-sub)', border: '1px solid var(--border)', color: 'var(--text-main)', 
+              fontSize: '0.875rem', outline: 'none', transition: 'all 0.2s' 
+            }}
+            className="search-focus"
+          />
+          {boardSearch && (
+            <button 
+              onClick={() => setBoardSearch('')}
+              style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex' }}
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }} className="hide-mobile">Multiplayer active. Drag and drop to collaborate.</p>
+          <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
+            + New Task
+          </button>
+        </div>
       </div>
 
       <div className="kanban-board scroll-x-allowed">
@@ -413,7 +451,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             <div className="kanban-column-header">
               {col}
               <span className="badge" style={{ backgroundColor: 'var(--bg-sub)', color: 'var(--text-sub)' }}>
-                {tasks ? Array.from(tasks).filter((t: Task) => t.status === col).length : 0}
+                {filteredTasks.filter((t: Task) => t.status === col).length}
               </span>
             </div>
 
@@ -423,7 +461,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col)}
             >
-              {(tasks ? Array.from(tasks) : []).filter((t: Task) => t.status === col).map((task: Task) => {
+              {filteredTasks.filter((t: Task) => t.status === col).map((task: Task) => {
                 const draggingOther = othersDragging.find(o => o.presence?.draggingTaskId === task.id)
 
                 return (
@@ -591,7 +629,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         <MemberProfileModal
           member={selectedMember}
           groupMembers={groupMembers}
-          tasks={tasks ? Array.from(tasks) : []}
+          tasks={filteredTasks}
           onClose={() => setSelectedMember(null)}
         />
       )}

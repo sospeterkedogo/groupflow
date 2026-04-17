@@ -26,6 +26,7 @@ import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useRouter } from 'next/navigation'
 import { useProfile } from '@/context/ProfileContext'
 import { usePresence } from '@/components/PresenceProvider'
+import GlobalSearch from './GlobalSearch'
 
 export default function Sidebar({ user }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true)
@@ -185,6 +186,13 @@ export default function Sidebar({ user }: SidebarProps) {
             {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
           </button>
         </div>
+
+        {/* Global Search Interface */}
+        {isOpen && (
+          <div style={{ padding: '1.25rem 1rem 0' }}>
+            <GlobalSearch />
+          </div>
+        )}
 
         {/* Nav Links */}
         <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>

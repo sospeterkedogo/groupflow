@@ -8,7 +8,7 @@ import {
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
-  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock
+  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search
 } from 'lucide-react'
 import ActiveUsersList from '@/components/ActiveUsersList'
 import ActivityLogView from '@/components/ActivityLogView'
@@ -51,6 +51,7 @@ export default function SettingsPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [availableGroups, setAvailableGroups] = useState<any[]>([])
+  const [groupSearch, setGroupSearch] = useState('')
   const [switching, setSwitching] = useState(false)
 
   const [teamMembers, setTeamMembers] = useState<any[]>([])
@@ -620,9 +621,27 @@ export default function SettingsPage() {
               )}
             </div>
 
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', fontWeight: 700 }}>Other Teams</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+               <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700 }}>Other Teams</h3>
+               <div style={{ position: 'relative', width: '250px' }}>
+                 <Search size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+                 <input 
+                   type="text" 
+                   placeholder="Filter teams..." 
+                   value={groupSearch}
+                   onChange={(e) => setGroupSearch(e.target.value)}
+                   style={{ width: '100%', padding: '0.5rem 0.75rem 0.5rem 2.25rem', borderRadius: '10px', background: 'var(--bg-sub)', border: '1px solid var(--border)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                 />
+                 {groupSearch && (
+                   <button onClick={() => setGroupSearch('')} style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex' }}><X size={14} /></button>
+                 )}
+               </div>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
-              {availableGroups.filter(g => g.id !== profile?.group_id).map(group => {
+              {availableGroups
+                .filter(g => g.id !== profile?.group_id)
+                .filter(g => g.name.toLowerCase().includes(groupSearch.toLowerCase()) || g.module_code.toLowerCase().includes(groupSearch.toLowerCase()))
+                .map(group => {
                 const isPending = pendingRequests.includes(group.id)
                 const isSent = sentRequests.includes(group.id)
 
