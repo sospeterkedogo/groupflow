@@ -6,7 +6,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, CheckCheck, Clock,
   Trash2, Shield, LayoutGrid, UserCircle, ChevronRight,
-  ExternalLink
+  ExternalLink, Search
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { usePresence } from './PresenceProvider'
@@ -22,6 +22,8 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
   const [uploading, setUploading] = useState(false)
   const [showLobby, setShowLobby] = useState(false)
   const [groupMembers, setGroupMembers] = useState<Profile[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [chatSearch, setChatSearch] = useState('')
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   const router = useRouter()
@@ -244,9 +246,18 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
      setUploading(false)
   }
 
+  const filteredMessages = useMemo(() => {
+     if (!chatSearch.trim()) return messages
+     const term = chatSearch.toLowerCase()
+     return messages.filter(m => 
+        m.content.toLowerCase().includes(term) || 
+        m.profiles?.full_name?.toLowerCase().includes(term)
+     )
+  }, [messages, chatSearch])
+
   const groupedMessages = useMemo(() => {
      const groups: { date: string, msgs: ChatMessage[] }[] = []
-     messages.forEach(m => {
+     filteredMessages.forEach(m => {
         const date = new Date(m.created_at).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
         const today = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
         const label = date === today ? 'Today' : date
@@ -259,7 +270,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
         }
      })
      return groups
-  }, [messages])
+  }, [filteredMessages])
 
   const othersTyping = Array.from(typingUsers).filter(id => id !== user.id)
 
@@ -314,38 +325,58 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
       className="responsive-chat"
     >
        {/* Chat Header */}
-       <div style={{ padding: '0.75rem 1rem', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-             <MessageSquare size={20} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-             <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Team Chat</h3>
-             <div style={{ fontSize: '0.68rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                {othersTyping.length > 0 ? (
-                  <span style={{ fontStyle: 'italic', fontWeight: 600 }}>typing...</span>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
-                      {onlineUsers.size} online
-                    </div>
-                  </>
-                )}
-                <button 
-                  onClick={() => setShowLobby(!showLobby)}
-                  style={{ 
-                    background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '6px', 
-                    padding: '2px 6px', color: 'white', fontSize: '0.6rem', fontWeight: 900,
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px',
-                    transition: 'all 0.2s'
-                  }}
-                  title="Team Lobby"
-                >
-                  <LayoutGrid size={10} /> {showLobby ? 'EXIT LOBBY' : 'LOBBY'}
-                </button>
+       <div style={{ padding: '0.75rem 1rem', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
+          {isSearching ? (
+             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', animation: 'fadeIn 0.2s' }}>
+                <Search size={16} />
+                <input 
+                  type="text" 
+                  value={chatSearch} 
+                  onChange={(e) => setChatSearch(e.target.value)}
+                  placeholder="Search messages..."
+                  autoFocus
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px', padding: '0.4rem 0.75rem', color: 'white', fontSize: '0.85rem', outline: 'none' }}
+                />
+                <button onClick={() => { setIsSearching(false); setChatSearch(''); }} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={18} /></button>
              </div>
-          </div>
-          <button onClick={() => setIsOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.3rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}><X size={18} /></button>
+          ) : (
+            <>
+              <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                 <MessageSquare size={20} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                 <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Team Chat</h3>
+                 <div style={{ fontSize: '0.68rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                    {othersTyping.length > 0 ? (
+                      <span style={{ fontStyle: 'italic', fontWeight: 600 }}>typing...</span>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
+                          {onlineUsers.size} online
+                        </div>
+                      </>
+                    )}
+                    <button 
+                      onClick={() => setShowLobby(!showLobby)}
+                      style={{ 
+                        background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '6px', 
+                        padding: '2px 6px', color: 'white', fontSize: '0.6rem', fontWeight: 900,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px',
+                        transition: 'all 0.2s'
+                      }}
+                      title="Team Lobby"
+                    >
+                      <LayoutGrid size={10} /> {showLobby ? 'EXIT LOBBY' : 'LOBBY'}
+                    </button>
+                 </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <button onClick={() => setIsSearching(true)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Search size={16} /></button>
+                <button onClick={() => setIsOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}><X size={16} /></button>
+              </div>
+            </>
+          )}
        </div>
 
         {/* Group Lobby Panel */}

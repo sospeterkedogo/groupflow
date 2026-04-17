@@ -253,7 +253,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     await fetchTasksFromDB()
 
     if (newStatus === 'Done') {
-      const targetTask = tasks ? Array.from(tasks).find((t: Task) => t.id === taskId) : undefined
+      const targetTask = storageTasks ? Array.from(storageTasks).find((t: Task) => t.id === taskId) : undefined
       if (targetTask && targetTask.assignees) {
         distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error('Score Distribution error', err))
       }

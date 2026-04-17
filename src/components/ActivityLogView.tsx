@@ -15,7 +15,9 @@ import {
   FileUp,
   History,
   Clock,
-  Calendar
+  Calendar,
+  Search,
+  X
 } from 'lucide-react'
 import { LogEntry } from '@/types/ui'
 
