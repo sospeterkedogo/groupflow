@@ -61,9 +61,6 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
 
-  if (storageTasks == null) {
-    return <div>Loading board...</div>;
-  }
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 60000)
@@ -341,6 +338,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       sessionStorage.removeItem(sessionKey)
     }
   }, [globalProbability, storageTasks?.length, hasCelebrated, groupId])
+  if (storageTasks == null) {
+    return <div>Loading board...</div>;
+  }
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
