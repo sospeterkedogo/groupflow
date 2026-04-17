@@ -44,13 +44,13 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 
 
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
-  // Early return before any hooks to satisfy Rules of Hooks
-  const storageTasks = useStorage((root) => root.tasks);
-  if (storageTasks == null) {
-    return <div>Loading board...</div>;
-  }
-  // All hooks must be called unconditionally after early return
   const router = useRouter();
+  const supabase = createBrowserSupabaseClient();
+  const others = useOthers();
+  const updateMyPresence = useUpdateMyPresence();
+  const othersDragging = useOthers((others) => others.filter(other => other.presence.draggingTaskId !== null));
+  const storageTasks = useStorage((root) => root.tasks);
+
   const [boardSearch, setBoardSearch] = useState('');
   const [groupMembers, setGroupMembers] = useState<Profile[]>([]);
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
@@ -60,9 +60,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
-  // ...existing code...
 
-  // ...existing code...
+  if (storageTasks == null) {
+    return <div>Loading board...</div>;
+  }
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(Date.now()), 60000)
