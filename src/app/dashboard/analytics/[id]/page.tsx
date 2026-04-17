@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import {
   BarChart3, Users, FileCheck, AlertCircle, Download, Printer,
-  ChevronRight, TrendingUp, ShieldCheck, Zap, Clock, UserCircle, CheckCircle2, Circle, Timer
+  ChevronRight, TrendingUp, ShieldCheck, Zap, Clock, UserCircle, CheckCircle2, Circle, Timer, Search
 } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 import ActivityLogView from '@/components/ActivityLogView'
