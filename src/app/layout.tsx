@@ -16,7 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        {/* Wrap all children in NotificationProvider for global access */}
+        <NotificationProvider>{children}</NotificationProvider>
+      </body>
     </html>
   );
 }
