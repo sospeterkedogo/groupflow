@@ -912,18 +912,56 @@ export default function SettingsPage() {
 
         {activeTab === 'security' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Identity & Integrations</h2>
-            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Configure your technical provenance and project toolkit connections.</p>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Identity Protocol & Integrations</h2>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Configure your technical credentials and project toolkit connections.</p>
 
-            <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 0 15px rgba(0,0,0,0.2)' }}>
-                <Key size={24} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                    <Key size={20} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>Primary Identity</h3>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.75rem' }}>{profile?.email}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                   <span className="badge" style={{ background: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)', fontSize: '0.7rem', fontWeight: 800, border: 'none' }}>ACTIVE_NODE</span>
+                   <button className="btn btn-sm btn-ghost" style={{ width: 'auto', padding: '0.4rem 0.8rem', fontSize: '0.7rem' }}>Secure Registry</button>
+                </div>
               </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Primary Identity: GitHub</h3>
-                <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.875rem' }}>{profile?.email}</p>
+
+              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                    <PulseIcon size={20} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>GitHub Connection</h3>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.75rem' }}>One-click technical login</p>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    setSaving(true)
+                    const { error } = await supabase.auth.signInWithOAuth({
+                      provider: 'github',
+                      options: {
+                        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`
+                      }
+                    })
+                    if (error) {
+                      setError("Connection failed: " + error.message)
+                    }
+                    setSaving(false)
+                  }}
+                  className="btn btn-sm btn-primary"
+                  style={{ marginTop: '0.5rem', borderRadius: '10px' }}
+                >
+                  {saving ? 'Connecting...' : 'Link GitHub Identity'}
+                </button>
               </div>
-              <span className="badge badge-code" style={{ marginLeft: 'auto', padding: '0.4rem 0.8rem', background: 'var(--success)', color: 'white', border: 'none' }}>Verified Connection</span>
             </div>
 
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

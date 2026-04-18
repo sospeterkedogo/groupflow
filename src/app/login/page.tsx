@@ -133,6 +133,11 @@ function LoginContent() {
         )}
 
         <form action={isSignUp ? signup : login} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Anti-bot Honeypot Field */}
+          <div style={{ display: 'none' }} aria-hidden="true">
+            <input type="text" name="hp_field" tabIndex={-1} autoComplete="off" />
+          </div>
+
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Email</label>
             <div style={{ position: 'relative' }}>

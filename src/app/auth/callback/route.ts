@@ -11,8 +11,12 @@ export async function GET(request: Request) {
     const supabase = await createServerSupabaseClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      // Ensure we use a clean redirect
-      const redirectUrl = new URL(next, origin).toString()
+      // Check if this is a password recovery flow
+      const { data: { user } } = await supabase.auth.getUser()
+      const isRecovery = searchParams.get('type') === 'recovery' || !user?.last_sign_in_at
+      
+      const redirectPath = isRecovery ? '/auth/reset-password' : next
+      const redirectUrl = new URL(redirectPath, origin).toString()
       return NextResponse.redirect(redirectUrl)
     }
   }

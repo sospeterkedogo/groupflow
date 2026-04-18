@@ -9,6 +9,11 @@ import { validateEmailRateLimit } from '@/utils/email-rate-limit'
 export async function login(formData: FormData) {
   const supabase = await createServerSupabaseClient()
 
+  const honeypot = formData.get('hp_field') as string;
+  if (honeypot) {
+    redirect(`/login?error=${encodeURIComponent('Security protocol triggered: Automated access denied.')}`)
+  }
+
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -26,6 +31,11 @@ export async function login(formData: FormData) {
 
 export async function signup(formData: FormData) {
   const supabase = await createServerSupabaseClient()
+
+  const honeypot = formData.get('hp_field') as string;
+  if (honeypot) {
+    redirect(`/login?error=${encodeURIComponent('Security protocol triggered: Automated access denied.')}`)
+  }
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
