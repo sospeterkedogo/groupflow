@@ -70,6 +70,8 @@ export default function SettingsPage() {
   const [loadingPortal, setLoadingPortal] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<string[]>([])
   const [sentRequests, setSentRequests] = useState<string[]>([])
+  const [isGithubLinked, setIsGithubLinked] = useState(false)
+  const [isGoogleLinked, setIsGoogleLinked] = useState(false)
 
   const supabase = createBrowserSupabaseClient()
 
@@ -98,6 +100,11 @@ export default function SettingsPage() {
   const fetchUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
+      // Check for linked identities
+      const identities = user.identities || []
+      setIsGithubLinked(identities.some(id => id.provider === 'github'))
+      setIsGoogleLinked(identities.some(id => id.provider === 'google'))
+
       const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
       if (data) {
         setFullName(data.full_name || '')
@@ -253,6 +260,23 @@ export default function SettingsPage() {
       addToast('Visibility Changed', `Group visibility is now set to ${nextValue ? 'Encrypted' : 'Public'}.`, 'success')
     }
     setUpdatingGroup(false)
+  }
+
+  const handleLinkIdentity = async (provider: 'github' | 'google') => {
+    setSaving(true)
+    setError(null)
+    try {
+      const { error } = await supabase.auth.linkIdentity({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`
+        }
+      })
+      if (error) throw error
+    } catch (err: any) {
+      setError(`Identity Linkage Failure: ${err.message}`)
+      setSaving(false)
+    }
   }
 
   const handleKickUser = async (userId: string) => {
@@ -947,28 +971,49 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>GitHub Connection</h3>
-                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.75rem' }}>One-click technical login</p>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.75rem' }}>{isGithubLinked ? 'Identity Protocol Active' : 'One-click technical login'}</p>
                   </div>
                 </div>
-                <button
-                  onClick={async () => {
-                    setSaving(true)
-                    const { error } = await supabase.auth.signInWithOAuth({
-                      provider: 'github',
-                      options: {
-                        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard/settings`
-                      }
-                    })
-                    if (error) {
-                      setError("Connection failed: " + error.message)
-                    }
-                    setSaving(false)
-                  }}
-                  className="btn btn-sm btn-primary"
-                  style={{ marginTop: '0.5rem', borderRadius: '10px' }}
-                >
-                  {saving ? 'Connecting...' : 'Link GitHub Identity'}
-                </button>
+                {isGithubLinked ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem 0.75rem', background: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>
+                    <CheckCircle2 size={16} /> CONNECTED
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleLinkIdentity('github')}
+                    disabled={saving}
+                    className="btn btn-sm btn-primary"
+                    style={{ marginTop: '0.5rem', borderRadius: '10px' }}
+                  >
+                    {saving ? 'Syncing...' : 'Link GitHub Identity'}
+                  </button>
+                )}
+              </div>
+
+              <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '20px', height: '20px' }} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>Google Identity</h3>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.75rem' }}>{isGoogleLinked ? 'Identity Protocol Active' : 'Credential synchronization'}</p>
+                  </div>
+                </div>
+                {isGoogleLinked ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.5rem 0.75rem', background: 'rgba(34, 197, 94, 0.1)', color: 'var(--success)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>
+                    <CheckCircle2 size={16} /> CONNECTED
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleLinkIdentity('google')}
+                    disabled={saving}
+                    className="btn btn-sm btn-secondary"
+                    style={{ marginTop: '0.5rem', borderRadius: '10px', background: 'white', color: 'black', border: '1px solid var(--border)' }}
+                  >
+                    {saving ? 'Syncing...' : 'Link Google Identity'}
+                  </button>
+                )}
               </div>
             </div>
 
