@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'GroupFlow - Automating Accountability',
@@ -23,6 +24,7 @@ export default function RootLayout({
         <NotificationProvider>
           {children}
           <Analytics />
+          <SpeedInsights />
         </NotificationProvider>
       </body>
     </html>
