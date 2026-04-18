@@ -32,11 +32,7 @@ export async function createCheckoutSession({
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     // PRIORITIZE Apple Pay / Google Pay via automatic detection
-    payment_method_options: {
-      card: {
-         request_three_d_secure: 'any'
-      }
-    },
+    // Stripe handles SCA (3D Secure) automatically by default.
     mode: isSubscription ? 'subscription' : 'payment',
     customer_email: email,
     line_items: [
