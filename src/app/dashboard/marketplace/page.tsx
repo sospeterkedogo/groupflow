@@ -21,6 +21,8 @@ import {
 import { useProfile } from '@/context/ProfileContext'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 import { useNotifications } from '@/components/NotificationProvider'
+import Image from 'next/image'
+import { listingSchema } from '@/utils/validation'
 
 interface Listing {
   id: string
@@ -57,6 +59,17 @@ export default function MarketplacePage() {
       setShowWalkthrough(true)
       localStorage.setItem('gf_marketplace_onboarding', 'true')
     }
+
+    // LOAD CACHE FOR BLAZING SPEED
+    const cached = localStorage.getItem('gf_marketplace_cache')
+    if (cached) {
+      try {
+        setListings(JSON.parse(cached))
+        setLoading(false) // Instant load from cache
+      } catch (e) {
+        console.error("Marketplace cache corrupted", e)
+      }
+    }
   }, [])
 
   const fetchListings = useCallback(async () => {
@@ -70,6 +83,7 @@ export default function MarketplacePage() {
       console.error('Fetch error:', error.message)
     } else {
       setListings(data || [])
+      localStorage.setItem('gf_marketplace_cache', JSON.stringify(data || []))
     }
     setLoading(false)
   }, [supabase])
@@ -182,10 +196,13 @@ export default function MarketplacePage() {
             >
               <div style={{ height: '200px', background: 'var(--bg-sub)', position: 'relative', overflow: 'hidden' }}>
                 {item.images?.[0] ? (
-                  <img 
+                  <Image 
                     src={supabase.storage.from('marketplace').getPublicUrl(item.images[0]).data.publicUrl} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                     alt={item.title} 
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover"
+                    loading="lazy"
                   />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', background: 'var(--bg-main)' }}>
@@ -336,6 +353,17 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
     setUploading(true)
     
     try {
+      // 1. INDUSTRY GRADE VALIDATION
+      listingSchema.parse({
+        title,
+        description,
+        price: parseFloat(price),
+        meetup_zone: meetupZone,
+        meetup_details: meetupDetails,
+        duration_days: duration,
+        payment_method: paymentMethod,
+      })
+
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Auth required')
 

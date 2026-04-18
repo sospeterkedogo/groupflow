@@ -36,6 +36,22 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
   const [showMembers, setShowMembers] = useState(false)
 
+  // 0. BLAZING SPEED CACHE: Perceptive hydration
+  useEffect(() => {
+    if (!groupId) return
+    const cachedGroup = localStorage.getItem(`gf_cache_group_${groupId}`)
+    const cachedStats = localStorage.getItem(`gf_cache_stats_${groupId}`)
+    
+    if (cachedGroup) setGroup(JSON.parse(cachedGroup))
+    if (cachedStats) {
+      const stats = JSON.parse(cachedStats)
+      setPersonalTaskCount(stats.personal || 0)
+      setTotalBacklog(stats.backlog || 0)
+      setProjectProgress(stats.progress || 0)
+      setProgressLabel(stats.label || 'Synchronizing...')
+    }
+  }, [groupId])
+
   const handleCalendarTaskSaved = useCallback(async () => {
     setSyncToken(prev => prev + 1)
   }, [])
@@ -44,7 +60,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
   const fetchGroupDetails = useCallback(async () => {
     const { data } = await supabase.from('groups').select('*').eq('id', groupId).single()
-    if (data) setGroup(data)
+    if (data) {
+      setGroup(data)
+      localStorage.setItem(`gf_cache_group_${groupId}`, JSON.stringify(data))
+    }
   }, [groupId, supabase])
 
   const fetchMembers = useCallback(async () => {
@@ -134,11 +153,21 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     setProjectProgress(progress)
 
     // Better logic for labels
-    if (progress <= 30) setProgressLabel('Initial Sprint')
-    else if (progress <= 50) setProgressLabel('Core Development')
-    else if (progress <= 80) setProgressLabel('Refining Protocol')
-    else setProgressLabel('Ready for Release')
-  }, [groupId, supabase])
+    let label = 'Ready for Release'
+    if (progress <= 30) label = 'Initial Sprint'
+    else if (progress <= 50) label = 'Core Development'
+    else if (progress <= 80) label = 'Refining Protocol'
+    
+    setProgressLabel(label)
+    
+    // PERSIST STATS for PERCEPTIVE SPEED
+    localStorage.setItem(`gf_cache_stats_${groupId}`, JSON.stringify({
+      personal: personalTaskCount,
+      backlog: pending,
+      progress: progress,
+      label: label
+    }))
+  }, [groupId, supabase, personalTaskCount])
 
   useEffect(() => {
     if (groupId) {

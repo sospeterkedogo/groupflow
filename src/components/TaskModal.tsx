@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js'
 import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
+import { taskSchema } from '@/utils/validation'
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 const CATEGORIES: TaskCategory[] = [
@@ -128,19 +129,29 @@ export default function TaskModal({
     }
 
     setLoading(true)
-    setError(null)
+    const payloadTask = {
+      title: title.trim(),
+      description,
+      status,
+      category,
+      assignees,
+      group_id: groupId,
+      due_date: dueDate ? new Date(dueDate).toISOString() : null
+    }
+
+    // 1. INDUSTRY GRADE VALIDATION
+    const validation = taskSchema.safeParse(payloadTask)
+    if (!validation.success) {
+      setError(validation.error.errors[0].message)
+      setLoading(false)
+      return
+    }
 
     const payload = {
       action: isEditMode ? 'update' : 'create',
       task: {
         id: task?.id,
-        title: title.trim(),
-        description,
-        status,
-        category,
-        assignees,
-        group_id: groupId,
-        due_date: dueDate ? new Date(dueDate).toISOString() : null
+        ...payloadTask
       }
     }
 

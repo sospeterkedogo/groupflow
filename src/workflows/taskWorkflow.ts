@@ -1,6 +1,7 @@
 import { FatalError } from 'workflow'
 import { createAdminClient } from '@/utils/supabase/server'
 import type { TaskCategory, TaskStatus } from '@/types/database'
+import { taskSchema } from '@/utils/validation'
 
 export type TaskPayload = {
   id?: string
@@ -22,8 +23,11 @@ export type TaskWorkflowPayload = {
 export async function taskWorkflow(payload: TaskWorkflowPayload) {
   'use workflow'
 
-  if (!payload.task.title?.trim()) {
-    throw new FatalError('Task title is required.')
+  // 1. INDUSTRY GRADE VALIDATION
+  try {
+    taskSchema.parse(payload.task)
+  } catch (err: any) {
+    throw new FatalError(`Validation Breach: ${err.message}`)
   }
 
   if (payload.action === 'create') {

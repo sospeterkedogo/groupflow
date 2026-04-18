@@ -57,9 +57,28 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
   const [boardError, setBoardError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
+
+  // 0. BLAZING SPEED CACHE: Load from LocalStorage for instant perception
+  useEffect(() => {
+    const cached = localStorage.getItem(`gf_kanban_cache_${groupId}`);
+    if (cached && !storageTasks?.length) {
+      try {
+        const parsed = JSON.parse(cached);
+        reconcileTasks(parsed);
+      } catch (e) {
+        console.error("Cache Hydration Failed", e);
+      }
+    }
+  }, [groupId]); // Run once on mount
+
+  // Persistence Sync
+  useEffect(() => {
+    if (storageTasks?.length) {
+      localStorage.setItem(`gf_kanban_cache_${groupId}`, JSON.stringify(Array.from(storageTasks)));
+    }
+  }, [storageTasks, groupId]);
 
 
   useEffect(() => {
@@ -240,16 +259,15 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       return
     }
 
-    // Give some time for the realtime event to propagate before clearing "pending"
-    setTimeout(() => {
-      setPendingUpdates(prev => {
-        const next = new Set(prev)
-        next.delete(taskId)
-        return next
-      })
-    }, 1500)
+    // Clear pending update
+    setPendingUpdates(prev => {
+      const next = new Set(prev)
+      next.delete(taskId)
+      return next
+    })
 
-    await fetchTasksFromDB()
+    // Debounced sync for consistency without flicker
+    void fetchTasksFromDB()
 
     if (newStatus === 'Done') {
       const targetTask = storageTasks ? Array.from(storageTasks).find((t: Task) => t.id === taskId) : undefined
