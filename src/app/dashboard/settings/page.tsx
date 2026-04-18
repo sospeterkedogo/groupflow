@@ -125,8 +125,16 @@ export default function SettingsPage() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
     const biographyWords = biography.trim() ? biography.trim().split(/\s+/).filter(Boolean).length : 0
+
+    if (!fullName.trim()) {
+      setError('Identity Verification Blocked: Full Name is mandatory for node assignment.')
+      setSaving(false)
+      return
+    }
+
     if (biographyWords > 500) {
-      setError('Biography must be 500 words or fewer.')
+      setError('Identity Protocol Failure: Performance Summary exceeds the 500-word limit.')
+      setSaving(false)
       return
     }
 

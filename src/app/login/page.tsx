@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { signup, login } from './actions'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
@@ -10,7 +10,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
 function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAccepted: boolean }) {
   const { pending } = useFormStatus()
-  
+
   return (
     <button
       className="btn btn-primary"
@@ -44,16 +44,33 @@ function LoginContent() {
   const [resetMessage, setResetMessage] = useState<string | null>(null)
   const [isResetting, setIsResetting] = useState(false)
 
-  const handleGithubLogin = async () => {
+  // Real-time password strength evaluation
+  const passwordStrength = useMemo(() => {
+    if (!password) return null;
+    let score = 0;
+    if (password.length > 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    if (score <= 1) return { label: 'Weak', color: '#ef4444' };
+    if (score === 2) return { label: 'Fair', color: '#f59e0b' };
+    if (score === 3) return { label: 'Strong', color: '#10b981' };
+    return { label: 'Secure', color: '#06b6d4' };
+  }, [password]);
+
+  const handleGithubLogin = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Explicitly prevent any form side-effects
     setAuthError(null)
     const supabase = createBrowserSupabaseClient()
-    
-    // Determine redirect URL: env-defined site URL is more reliable for OAuth whitening
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+
+    // Ensure accurate absolute URL for OAuth callback
+    const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || '');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${siteUrl}/auth/callback?next=/dashboard`
+        redirectTo: `${origin}/auth/callback?next=/dashboard`,
+        skipBrowserRedirect: false
       }
     })
 
@@ -64,8 +81,8 @@ function LoginContent() {
   }
 
   const handleResetPassword = async () => {
-    if (!email) {
-      setAuthError('Put your email here to get a new password.')
+    if (!email || !email.includes('@')) {
+      setAuthError('Please provide a valid terminal email to receive a recovery link.')
       return
     }
 
@@ -156,7 +173,14 @@ function LoginContent() {
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Password</label>
+            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)', display: 'flex', justifyContent: 'space-between' }}>
+              Password
+              {isSignUp && passwordStrength && (
+                <span style={{ fontSize: '0.7rem', color: passwordStrength.color, fontWeight: 900, textTransform: 'uppercase' }}>
+                  Strength: {passwordStrength.label}
+                </span>
+              )}
+            </label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
               <input
@@ -166,7 +190,7 @@ function LoginContent() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', paddingLeft: '3rem' }}
+                style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${passwordStrength && isSignUp ? passwordStrength.color : 'rgba(255,255,255,0.1)'}`, color: 'white', paddingLeft: '3rem', transition: 'border-color 0.3s' }}
                 placeholder="••••••••"
               />
             </div>
@@ -220,9 +244,9 @@ function LoginContent() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleGithubLogin}
+                  onClick={(e) => handleGithubLogin(e)}
                   className="btn btn-secondary"
-                  style={{ padding: '0.85rem 1rem', fontSize: '0.9rem', borderRadius: '14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                  style={{ padding: '0.85rem 1rem', fontSize: '0.9rem', borderRadius: '14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 auto', minWidth: '160px', justifyContent: 'center' }}
                 >
                   <ExternalLink size={18} /> Continue with GitHub
                 </button>
