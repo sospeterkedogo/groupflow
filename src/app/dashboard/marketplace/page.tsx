@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { useNotifications } from '@/components/NotificationProvider'
 
 interface Listing {
   id: string
@@ -46,7 +47,8 @@ export default function MarketplacePage() {
   const [showWalkthrough, setShowWalkthrough] = useState(false)
   
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
-  const { withLoading, showToast } = useSmartLoading()
+  const { withLoading } = useSmartLoading()
+  const { addToast } = useNotifications()
 
   // 1. Check for first-time visitor
   useEffect(() => {
@@ -317,7 +319,7 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
   const [agreed, setAgreed] = useState(false)
 
   const supabase = createBrowserSupabaseClient()
-  const { showToast } = useSmartLoading()
+  const { addToast } = useNotifications()
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -360,9 +362,10 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
       })
 
       if (error) throw error
+      addToast('Listing Created', 'Your resource is now visible to the institutional graph.', 'success')
       onSuccess()
     } catch (err: any) {
-      alert(err.message)
+      addToast('Upload Failed', err.message, 'error')
     } finally {
       setUploading(false)
     }
