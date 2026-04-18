@@ -106,8 +106,11 @@ async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: st
   const planLabel = payload.productLabel || (payload.plan === 'premium' ? 'Premium pre-registration' : 'Pro pre-registration')
   const normalizedPlan = payload.plan || 'pro'
   const status = payload.status === 'paid' || payload.status === 'complete' ? 'paid' : payload.status || 'pending'
+  
+  // Generate a professional invoice number for the "High End" experience
+  const invoiceNumber = `GF-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`
 
-  const { error: paymentError } = await supabase.from('payments').upsert([
+  const { data: payData, error: paymentError } = await supabase.from('payments').upsert([
     {
       user_id: userId,
       stripe_customer_id: payload.stripeCustomerId,
@@ -119,12 +122,13 @@ async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: st
       amount_total: payload.amountTotal,
       currency: payload.currency,
       status,
+      invoice_number: invoiceNumber,
       metadata: {
         raw_status: payload.status,
         stripe_event: payload.eventType
       }
     }
-  ], { onConflict: 'stripe_session_id' })
+  ], { onConflict: 'stripe_session_id' }).select('id').single()
 
   if (paymentError) {
     throw new Error(paymentError.message)
@@ -147,9 +151,9 @@ async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: st
   await supabase.from('notifications').insert([{
     user_id: userId,
     type: 'payment_completed',
-    title: 'Payment confirmed',
-    message: `Thank you! Your ${planLabel} has been received and your access is now secured.`,
-    link: '/dashboard'
+    title: 'Protocol Authorization Secured',
+    message: `Thank you, Scholar. Your institutional clearance for ${planLabel} is now active. You have been authenticated as a Protocol Architect.`,
+    link: payData ? `/dashboard/invoice/${payData.id}` : '/dashboard'
   }])
 }
 

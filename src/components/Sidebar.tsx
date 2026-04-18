@@ -92,6 +92,13 @@ export default function Sidebar({ user }: SidebarProps) {
       type: 'warning',
       onConfirm: async () => {
         await withLoading(async () => {
+          // Final presence synchronization before destroying session
+          if (user?.id) {
+            await supabase
+              .from('profiles')
+              .update({ last_seen: new Date().toISOString() })
+              .eq('id', user.id)
+          }
           await supabase.auth.signOut();
           window.location.href = '/login';
         }, 'Securing Environment...');

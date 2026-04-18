@@ -1,17 +1,29 @@
 -- Migration: v25_payment_history_hardening
--- Description: Hardens the payments table to support recurring billing history and invoice tracking.
+-- Description: Add invoice numbers AND ensures last_seen tracking is active.
 
--- 1. Add stripe_invoice_id for tracking individual renewal events
-ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS stripe_invoice_id TEXT;
+-- 1. Ensure last_seen column exists for the WhatsApp experience
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS last_seen TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now());
 
--- 2. Modify unique constraints to support history
--- We want to allow multiple records for the same subscription (renewals), 
--- but ensure each invoice or session is only processed once.
-DROP INDEX IF EXISTS payments_stripe_subscription_id_idx;
-CREATE INDEX IF NOT EXISTS payments_stripe_subscription_id_idx ON public.payments (stripe_subscription_id);
+-- 2. Add invoice number to payments
+ALTER TABLE public.payments ADD COLUMN IF NOT EXISTS invoice_number TEXT UNIQUE;
 
-CREATE UNIQUE INDEX IF NOT EXISTS payments_stripe_invoice_id_idx ON public.payments (stripe_invoice_id);
+-- 3. Create function to generate professional invoice numbers (e.g., GF-2026-XXXX)
+CREATE OR REPLACE FUNCTION generate_invoice_number() 
+RETURNS TEXT AS $$
+DECLARE
+    new_num TEXT;
+    done BOOL := false;
+BEGIN
+    WHILE NOT done LOOP
+        new_num := 'GF-' || to_char(now(), 'YYYY') || '-' || LPAD(floor(random() * 1000000)::text, 6, '0');
+        done := NOT EXISTS (SELECT 1 FROM public.payments WHERE invoice_number = new_num);
+    END LOOP;
+    RETURN new_num;
+END;
+$$ LANGUAGE plpgsql;
 
--- 3. Verification Comments
-COMMENT ON COLUMN public.payments.stripe_invoice_id IS 'Unique identifier for the Stripe invoice (used for renewals)';
-COMMENT ON TABLE public.payments IS 'History of all payments and subscription events handled via Stripe.';
+-- 4. Update existing payments with invoice numbers
+UPDATE public.payments SET invoice_number = generate_invoice_number() WHERE invoice_number IS NULL;
+
+-- 5. Final verification comment 
+COMMENT ON COLUMN public.profiles.last_seen IS 'Used for real-time WhatsApp-style presence tracking.';

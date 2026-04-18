@@ -140,18 +140,31 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         }
       })
 
-    // Establish a 5-minute heartbeat for DB-level 'last_seen' persistence
-    const heartbeat = setInterval(async () => {
-      if (userId) {
-        await supabase
-          .from('profiles')
-          .update({ last_seen: new Date().toISOString() })
-          .eq('id', userId)
+    // 1-minute heartbeat for reliable 'last_seen' persistence (WhatsApp style)
+    const updateLastSeen = async () => {
+      if (!userId) return
+      await supabase
+        .from('profiles')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', userId)
+    }
+
+    const heartbeat = setInterval(updateLastSeen, 1000 * 60)
+
+    // Capture tab closures or visibility changes for immediate DB update
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        void updateLastSeen()
       }
-    }, 1000 * 60 * 5)
+    }
+
+    window.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('beforeunload', updateLastSeen)
 
     return () => {
       clearInterval(heartbeat)
+      window.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('beforeunload', updateLastSeen)
       supabase.removeChannel(newChannel)
     }
   }, [userId, userName, groupId, supabase, addToast])

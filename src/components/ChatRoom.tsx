@@ -28,7 +28,7 @@ interface ChatRoomProps {
   currentUser: { id: string; name: string };
 }
 
-function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
+export default function ChatRoom({ currentUser, roomId }: { currentUser: { id: string; name: string }, roomId: string }) {
   const messages = useStorage((root) => root.messages);
   const [history, setHistory] = useState<ChatHistoryMessage[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -93,18 +93,32 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
     setText("");
     updateMyPresence({ isTyping: false });
 
-    // 2. Permanent Archival via Supabase
+    // 2. Permanent Archival via Supabase + Notification Trigger for Pop-Ups
     await withLoading(async () => {
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({
-          room_id: roomId,
-          sender_id: currentUser.id,
-          content: messageContent,
-          metadata: { sender_name: currentUser.name }
-        });
+      // Find recipient Id from roomId (slug: id1_id2)
+      const recipientId = roomId.split('_').find(id => id !== currentUser.id);
 
-      if (error) console.error("Message backup failed:", error);
+      const [msgResult, notifyResult] = await Promise.all([
+        supabase
+          .from('chat_messages')
+          .insert({
+            room_id: roomId,
+            sender_id: currentUser.id,
+            content: messageContent,
+            metadata: { sender_name: currentUser.name }
+          }),
+        recipientId ? supabase
+          .from('notifications')
+          .insert({
+            user_id: recipientId,
+            type: 'new_message',
+            title: currentUser.name,
+            message: messageContent.length > 60 ? messageContent.substring(0, 57) + '...' : messageContent,
+            link: `/dashboard/network/chat/${currentUser.id}`
+          }) : Promise.resolve({ error: null })
+      ]);
+
+      if (msgResult.error) console.error("Message backup failed:", msgResult.error);
     }, 'Synchronizing Archive...')
   };
 
@@ -117,24 +131,6 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--surface)', borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-      {/* Header */}
-      <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(var(--brand-rgb), 0.03)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '0.6rem', background: 'var(--brand)', borderRadius: '12px' }}>
-            <MessageSquare size={20} color="white" />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>Secure Messaging</h3>
-            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--success)', fontWeight: 800 }}>VERIFIED STUDENT CONNECTION</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <button style={{ background: 'none', border: 'none', color: 'var(--text-sub)', cursor: 'pointer' }}>
-            <MoreVertical size={20} />
-          </button>
-        </div>
-      </div>
-
       {/* Messages Area */}
       <div
         ref={scrollRef}
@@ -275,14 +271,3 @@ function ChatContent({ currentUser, roomId }: { currentUser: { id: string; name:
   );
 }
 
-export default function ChatRoom({ roomId, currentUser }: ChatRoomProps) {
-  return (
-    <RoomProvider
-      id={roomId}
-      initialPresence={{ draggingTaskId: null, userName: currentUser.name, isTyping: false }}
-      initialStorage={{ tasks: new LiveList([]), messages: new LiveList([]) }}
-    >
-      <ChatContent currentUser={currentUser} roomId={roomId} />
-    </RoomProvider>
-  );
-}
