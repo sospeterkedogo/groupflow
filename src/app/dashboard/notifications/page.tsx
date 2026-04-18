@@ -75,6 +75,17 @@ export default function NotificationsPage() {
   }
 
   const handleDeclineConnection = async (notification: InboxNotification) => {
+    const senderId = notification.metadata?.sender_id
+    if (senderId) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase
+          .from('user_connections')
+          .delete()
+          .eq('user_id', senderId)
+          .eq('target_id', user.id)
+      }
+    }
     await markAsRead(notification.id)
     addToast('Success', 'Request ignored', 'info')
   }

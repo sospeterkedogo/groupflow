@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/context/ThemeContext'
 import OnboardingWrapper from '@/components/OnboardingWrapper'
 import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
 import { ProfileProvider } from '@/context/ProfileContext'
+import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +47,7 @@ export default async function DashboardLayout({
                   <Sidebar user={user} />
                   
                   <main className="main-content">
+                    <ConnectionAlertTray />
                     {children}
                   </main>
 

@@ -170,14 +170,14 @@ export default function NotificationBell() {
                                  const senderId = notif.metadata?.sender_id;
                                  if (!senderId) return;
 
-                                 // Accept connection
-                                 const { error } = await supabase
+                                 const myId = (await supabase.auth.getUser()).data.user?.id;
+                                 const { error: updErr } = await supabase
                                    .from('user_connections')
                                    .update({ status: 'connected' })
                                    .eq('user_id', senderId)
-                                   .eq('target_id', (await supabase.auth.getUser()).data.user?.id);
+                                   .eq('target_id', myId);
 
-                                 if (!error) {
+                                 if (!updErr) {
                                    markAsRead(notif.id);
                                    // Notify sender back
                                    await supabase.from('notifications').insert({
@@ -185,7 +185,7 @@ export default function NotificationBell() {
                                      type: 'connection_accepted',
                                      title: 'Request Accepted',
                                      message: `You are now connected.`,
-                                     link: `/dashboard/network/profile/${(await supabase.auth.getUser()).data.user?.id}`
+                                     link: `/dashboard/network/profile/${myId}`
                                    });
                                  }
                                }}
@@ -199,12 +199,13 @@ export default function NotificationBell() {
                                  const supabase = createBrowserSupabaseClient();
                                  const senderId = notif.metadata?.sender_id;
                                  if (!senderId) return;
+                                 const myId = (await supabase.auth.getUser()).data.user?.id;
 
                                  const { error } = await supabase
                                    .from('user_connections')
                                    .delete()
                                    .eq('user_id', senderId)
-                                   .eq('target_id', (await supabase.auth.getUser()).data.user?.id);
+                                   .eq('target_id', myId);
 
                                  if (!error) markAsRead(notif.id);
                                }}
