@@ -139,7 +139,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             <div style={{ padding: '0.6rem 1.25rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '12px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                <Zap size={14} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
                <span style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  Mission Protocol: <span style={{ color: 'var(--brand)' }}>{group?.name || 'INITIALIZING...'}</span>
+                  CURRENT TEAM: <span style={{ color: 'var(--brand)' }}>{group?.name || 'SYNCING...'}</span>
                </span>
             </div>
             
@@ -160,7 +160,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               }}
             >
               <UserCircle size={16} />
-              ROSTER
+              TEAM MEMBERS
               <span style={{ 
                 background: showMembers ? 'white' : 'var(--brand)', 
                 color: showMembers ? 'var(--brand)' : 'white', 
@@ -169,7 +169,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                 fontSize: '0.65rem',
                 marginLeft: '0.25rem'
               }}>
-                {members.length}
+                {members.length || 0}
               </span>
             </button>
           </div>

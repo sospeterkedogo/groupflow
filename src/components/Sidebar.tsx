@@ -125,8 +125,8 @@ export default function Sidebar({ user }: SidebarProps) {
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Mobile Top Header */}
-      <div className="mobile-header glass" style={{
+      {/* Mobile Top Header (High Contrast) */}
+      <div className="mobile-header" style={{
         display: 'none',
         position: 'fixed',
         top: 0,
@@ -136,35 +136,45 @@ export default function Sidebar({ user }: SidebarProps) {
         zIndex: 5000,
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1.25rem',
-        borderBottom: '1px solid var(--border)',
-        boxShadow: 'var(--shadow-sm)'
+        padding: '0 1rem',
+        background: 'var(--surface)',
+        borderBottom: '2px solid var(--border)',
+        boxShadow: 'var(--shadow-md)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <button 
             onClick={() => setIsOpen(true)} 
             aria-label="Toggle Menu"
-            style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>
-               <Activity size={22} />
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
+               <Activity size={20} />
             </div>
           </button>
-          <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.3rem', letterSpacing: '-0.04em' }}>
-            Group<span style={{ color: 'var(--brand)' }}>Flow</span>
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.2rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 6px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
+              <span style={{ fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE</span>
+            </div>
+          </div>
         </div>
-        <button 
-          onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
-          aria-label="View Profile"
-          style={{ width: '38px', height: '38px', borderRadius: '50%', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
-        >
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
-          ) : (
-            <UserCircle size={22} color="var(--text-sub)" />
-          )}
-        </button>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <NotificationBell />
+          <button 
+            onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
+            style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid var(--brand)', overflow: 'hidden', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
+          >
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
+            ) : (
+              <UserCircle size={22} color="var(--text-sub)" />
+            )}
+          </button>
+        </div>
       </div>
 
       <aside 
@@ -191,9 +201,9 @@ export default function Sidebar({ user }: SidebarProps) {
               <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.3rem', color: 'var(--text-main)', letterSpacing: '-0.04em' }}>
                 Group<span style={{ color: 'var(--brand)' }}>Flow</span>
               </button>
-              <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '20px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 12px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)' }}>{onlineCount} Online</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.05em' }}>{onlineCount} ONLINE</span>
               </div>
               <div style={{ flex: 1 }} />
               <div className="hide-mobile" style={{ marginRight: '0.5rem' }}>
@@ -370,6 +380,10 @@ export default function Sidebar({ user }: SidebarProps) {
           }
 
           .mobile-header { display: flex !important; }
+          .mobile-header {
+             background: var(--surface) !important;
+          }
+          .main-content { margin-left: 0 !important; padding-top: calc(var(--h-nav) + 1rem) !important; }
           .sidebar-container { 
             position: fixed !important;
             left: 0 !important;
