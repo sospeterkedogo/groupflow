@@ -295,7 +295,7 @@ export const PALETTES: Palette[] = [
       '--warning': '#ffff00',
       '--overlay': 'rgba(0, 0, 0, 0.95)',
     }
-  }
+  },
   {
     name: 'Obsidian Gold',
     tier: 'premium',
