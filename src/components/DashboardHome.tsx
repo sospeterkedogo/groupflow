@@ -170,15 +170,15 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               System Operational &middot; {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
-          <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.05em', color: 'var(--text-main)', margin: 0, lineHeight: 1 }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1 }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
           </h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.25rem' }}>
-            <div style={{ padding: '0.65rem 1.4rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '14px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: 'var(--shadow-sm)' }}>
-               <Zap size={14} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
-               <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                  ACTIVE SESSION: <span style={{ color: 'var(--brand)' }}>{group?.name || 'INITIALIZING...'}</span>
+            <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '10px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-sm)' }}>
+               <Zap size={12} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
+               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  SESSION: <span style={{ color: 'var(--brand)' }}>{group?.name || 'INITIALIZING...'}</span>
                </span>
             </div>
             
@@ -297,13 +297,13 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-           <button 
-             onClick={() => setNewTaskSignal(prev => prev + 1)}
-             className="btn btn-primary btn-inline" 
-             style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 900 }}
-           >
-             <Zap size={18} fill="currentColor" /> Initiate Task
-           </button>
+            <button 
+              onClick={() => setNewTaskSignal(prev => prev + 1)}
+              className="btn btn-primary btn-inline" 
+              style={{ padding: '0.6rem 1rem', borderRadius: '10px', fontWeight: 900 }}
+            >
+              <Zap size={16} fill="currentColor" /> Initiate Task
+            </button>
            <button 
              onClick={() => router.push(`/dashboard/analytics/${groupId}`)}
              className="btn btn-secondary btn-inline" 
@@ -323,7 +323,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           { icon: <Zap size={20} />, label: 'Sync Integrity', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
         ].map((stat, i) => (
           <div key={i} className="control-card" style={{
-            padding: '1.75rem',
+            padding: '1rem',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius)',
@@ -333,12 +333,12 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}>
             <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '70px', height: '70px', background: stat.color, filter: 'blur(45px)', opacity: 0.12, pointerEvents: 'none' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: stat.color, marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: stat.color, marginBottom: '0.5rem' }}>
                {stat.icon}
-               <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-sub)' }}>{stat.label}</span>
+               <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-sub)' }}>{stat.label}</span>
             </div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--text-main)', lineHeight: 0.9 }}>{stat.value}</div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '0.6rem' }}>{stat.sub}</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 950, color: 'var(--text-main)', lineHeight: 0.9 }}>{stat.value}</div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '0.4rem' }}>{stat.sub}</div>
           </div>
         ))}
       </div>

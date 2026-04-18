@@ -84,31 +84,31 @@ export default function NotificationsPage() {
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '10px', background: 'var(--brand)', borderRadius: '14px', boxShadow: '0 8px 16px rgba(var(--brand-rgb), 0.2)' }}>
-            <Bell size={28} color="white" />
+          <div style={{ padding: '8px', background: 'var(--brand)', borderRadius: '10px', boxShadow: '0 4px 8px rgba(var(--brand-rgb), 0.15)' }}>
+            <Bell size={20} color="white" />
           </div>
-          <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 950 }}>Notification Center</h1>
+          <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 900, fontSize: '1.5rem' }}>Inbox</h1>
         </div>
       </div>
 
       {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
          <button 
            onClick={() => setView('inbox')}
-           style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, color: view === 'inbox' ? 'var(--brand)' : 'var(--text-sub)', borderBottom: view === 'inbox' ? '2px solid var(--brand)' : 'none' }}
+           style={{ background: 'none', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', color: view === 'inbox' ? 'var(--brand)' : 'var(--text-sub)', borderBottom: view === 'inbox' ? '2px solid var(--brand)' : 'none' }}
          >
            Inbox ({notifications.filter(n => !n.read).length})
          </button>
          <button 
            onClick={() => setView('settings')}
-           style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, color: view === 'settings' ? 'var(--brand)' : 'var(--text-sub)', borderBottom: view === 'settings' ? '2px solid var(--brand)' : 'none' }}
+           style={{ background: 'none', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', color: view === 'settings' ? 'var(--brand)' : 'var(--text-sub)', borderBottom: view === 'settings' ? '2px solid var(--brand)' : 'none' }}
          >
-           Preferences
+           Settings
          </button>
       </div>
 
       {view === 'inbox' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {notifications.length === 0 ? (
             <div style={{ 
               textAlign: 'center', padding: '5rem 2rem', background: 'var(--surface)', 
@@ -126,54 +126,53 @@ export default function NotificationsPage() {
               {notifications.map(n => (
                 <div 
                   key={n.id}
-                  className="glass"
                   onClick={() => !n.read && markAsRead(n.id)}
                   style={{ 
-                    padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', 
-                    background: n.read ? 'var(--surface)' : 'rgba(var(--brand-rgb), 0.03)',
-                    boxShadow: n.read ? 'none' : '0 4px 20px rgba(0,0,0,0.1)',
-                    transition: 'all 0.3s ease',
+                    padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', 
+                    background: n.read ? 'var(--surface)' : 'rgba(var(--brand-rgb), 0.04)',
+                    transition: 'all 0.2s ease',
                     position: 'relative',
                     display: 'flex',
-                    gap: '1.25rem',
-                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    alignItems: 'center',
                     cursor: n.read ? 'default' : 'pointer'
                   }}
                 >
-                  {!n.read && <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)' }} />}
+                  {!n.read && <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand)' }} />}
                   
                   <div style={{ 
-                    width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
+                    width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
                     background: n.type === 'connection_request' ? 'rgba(var(--brand-rgb), 0.1)' : 'var(--bg-sub)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', color: n.type === 'connection_request' ? 'var(--brand)' : 'var(--text-sub)'
                   }}>
-                    {n.type === 'connection_request' ? <UserPlus size={24} /> : n.type === 'message' ? <MessageSquare size={24} /> : <Mail size={24} />}
+                    {n.type === 'connection_request' ? <UserPlus size={16} /> : n.type === 'message' ? <MessageSquare size={16} /> : <Mail size={16} />}
                   </div>
 
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 850 }}>{n.title}</h4>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>{formatDistanceToNow(new Date(n.created_at))} ago</span>
-                    </div>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-sub)', lineHeight: 1.5, marginBottom: '1rem' }}>{n.message}</p>
-                    
-                    {n.type === 'connection_request' && !n.read && (
-                      <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        <button 
-                          onClick={() => handleAcceptConnection(n)}
-                          disabled={loading}
-                          style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                          {loading ? 'Processing...' : 'Accept'}
-                        </button>
-                        <button 
-                          onClick={() => handleDeclineConnection(n)}
-                          style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'var(--bg-sub)', color: 'var(--text-sub)', border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.85rem' }}
-                        >
-                          Ignore
-                        </button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.title}</h4>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600 }}>{formatDistanceToNow(new Date(n.created_at))} ago</span>
+                        {n.type === 'connection_request' && !n.read && (
+                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleAcceptConnection(n); }}
+                              disabled={loading}
+                              style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'var(--brand)', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '0.7rem' }}
+                            >
+                              {loading ? '...' : 'Accept'}
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleDeclineConnection(n); }}
+                              style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'var(--bg-sub)', color: 'var(--text-sub)', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '0.7rem' }}
+                            >
+                              Ignore
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.message}</p>
                   </div>
                 </div>
               ))}
@@ -181,19 +180,19 @@ export default function NotificationsPage() {
           )}
         </div>
       ) : (
-        <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-           <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 850 }}>Communication Preferences</h3>
+        <div style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+           <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900 }}>Alert Preferences</h3>
            
            {[
              { key: 'email_notifications', label: 'Email Alerts', desc: 'Receive project updates and connection requests via email.' },
              { key: 'push_notifications', label: 'Push Notifications', desc: 'Real-time browser notifications for chat and system signals.' },
              { key: 'marketing_emails', label: 'Academic Insights', desc: 'Periodic summaries of your project progress and network growth.' }
            ].map((item) => (
-             <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem' }}>
-                <div style={{ flex: 1 }}>
-                   <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem' }}>{item.label}</div>
-                   <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{item.desc}</div>
-                </div>
+              <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                 <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.9rem', marginBottom: '0.15rem' }}>{item.label}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.3 }}>{item.desc}</div>
+                 </div>
                 <button 
                   onClick={() => updateSetting(item.key as any, !settings[item.key as keyof typeof settings])}
                   style={{ 

@@ -359,10 +359,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       )}
 
       {/* Master Milestone HUD */}
-      <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem', marginBottom: '0.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+      <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '0.75rem', marginBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Project Progress</h3>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent)' }}>
                 {others.map((other, idx) => {
@@ -409,16 +409,16 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             </span>
           )}
         </div>
-        <div style={{ width: '100%', backgroundColor: 'var(--surface)', height: '12px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <div style={{ width: '100%', backgroundColor: 'var(--surface)', height: '8px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border)' }}>
           <div style={{ width: `${globalProbability}%`, height: '100%', backgroundColor: globalProbability < 30 ? 'var(--error)' : 'var(--brand)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 700 }}>Project Velocity: <span style={{ color: 'var(--text-main)', fontWeight: 900 }}>{globalProbability}%</span></span>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 700 }}>{storageTasks?.length || 0} Registered Tasks</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.4rem' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 700 }}>Velocity: <span style={{ color: 'var(--text-main)', fontWeight: 900 }}>{globalProbability}%</span></span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 700 }}>{storageTasks?.length || 0} Tasks</span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', gap: '1.5rem' }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
           <input 
@@ -427,9 +427,9 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
             value={boardSearch}
             onChange={(e) => setBoardSearch(e.target.value)}
             style={{ 
-              width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '14px', 
+              width: '100%', padding: '0.5rem 0.75rem 0.5rem 2.25rem', borderRadius: '8px', 
               background: 'var(--bg-sub)', border: '1px solid var(--border)', color: 'var(--text-main)', 
-              fontSize: '0.875rem', outline: 'none', transition: 'all 0.2s', fontWeight: 600
+              fontSize: '0.8rem', outline: 'none', transition: 'all 0.2s', fontWeight: 600
             }}
             className="search-focus"
           />
@@ -447,7 +447,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
               <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
               Node Verified
             </div>
-          <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto', fontWeight: 900, padding: '0.75rem 1.5rem', borderRadius: '14px' }}>
+          <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto', fontWeight: 900, padding: '0.6rem 1rem', borderRadius: '8px', fontSize: '0.8rem' }}>
             + Create Task
           </button>
         </div>
@@ -480,11 +480,12 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                     onDragStart={(e) => handleDragStart(e, task.id)}
                     onDragEnd={handleDragEnd}
                     onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
-                    style={{
-                      position: 'relative',
-                      border: draggingOther ? '2px solid var(--brand)' : '1px solid var(--border)'
-                    }}
-                  >
+                     style={{
+                       position: 'relative',
+                       border: draggingOther ? '2px solid var(--brand)' : '1px solid var(--border)',
+                       padding: '0.5rem'
+                     }}
+                   >
                     {draggingOther && (
                       <div style={{
                         position: 'absolute',
@@ -503,19 +504,18 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                         {((draggingOther.presence as { userName?: string })?.userName) || 'A teammate'} is moving this
                       </div>
                     )}
-                    <div className="kanban-card-title">{task.title}</div>
+                     <div className="kanban-card-title" style={{ fontSize: '0.85rem', marginBottom: '0.4rem' }}>{task.title}</div>
 
-                    {/* DYNAMIC PROGRESS BAR */}
-                    <div style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                        <span>Completion Chance</span>
+                    {/* COMPACT PROGRESS BAR */}
+                    <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', fontWeight: 700, color: 'var(--text-sub)', marginBottom: '0.15rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <span>Completion</span>
                         <span style={{ color: calculateProbability(task) < 30 ? 'var(--error)' : 'var(--text-sub)' }}>
                           {calculateProbability(task)}%
-                          {(task.artifacts?.length ?? 0) > 0 && <span style={{ color: 'var(--success)', marginLeft: '0.25rem', fontSize: '0.6rem' }}>(+{Math.min((task.artifacts?.length ?? 0) * 5, 15)}% Boost)</span>}
                         </span>
                       </div>
-                      <div style={{ width: '100%', backgroundColor: 'var(--bg-sub)', height: '4px', borderRadius: '4px' }}>
-                        <div style={{ width: `${calculateProbability(task)}%`, height: '100%', backgroundColor: calculateProbability(task) < 30 ? 'var(--error)' : calculateProbability(task) === 100 ? 'var(--success)' : 'var(--brand)', borderRadius: '4px', transition: 'width 0.4s ease' }}></div>
+                      <div style={{ width: '100%', backgroundColor: 'var(--bg-sub)', height: '2px', borderRadius: '2px' }}>
+                        <div style={{ width: `${calculateProbability(task)}%`, height: '100%', backgroundColor: calculateProbability(task) < 30 ? 'var(--error)' : calculateProbability(task) === 100 ? 'var(--success)' : 'var(--brand)', borderRadius: '2px', transition: 'width 0.4s ease' }}></div>
                       </div>
                     </div>
 
@@ -530,7 +530,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                             background: task.category === 'Implementation' ? 'rgba(var(--brand-rgb), 0.1)' :
                               task.category === 'Architecture' ? 'rgba(139, 92, 246, 0.1)' :
                                 task.category === 'UX/UI Design' ? 'rgba(236, 72, 153, 0.1)' :
-                                  task.category === 'Quality Assurance' ? 'rgba(16, 185, 129, 0.1)' :
+                                  task.category === 'Quality Assurance' ? 'rgba(10, 185, 129, 0.1)' :
                                     task.category === 'Research' ? 'rgba(245, 158, 11, 0.1)' :
                                       task.category === 'Mentorship' ? 'rgba(99, 102, 241, 0.1)' :
                                         task.category === 'Documentation' ? 'rgba(100, 116, 139, 0.1)' :
@@ -585,17 +585,17 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                                     src={user.avatar_url}
                                     title={user.full_name || 'View Profile'}
                                     style={{
-                                      width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover',
-                                      border: '1.5px solid var(--surface)', boxShadow: 'var(--shadow-sm)'
+                                      width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover',
+                                      border: '1px solid var(--surface)', boxShadow: 'var(--shadow-sm)'
                                     }}
                                   />
                                 ) : (
                                   <div
                                     title={user?.full_name || 'View Profile'}
                                     style={{
-                                      width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white',
-                                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 'bold',
-                                      border: '1.5px solid var(--surface)', boxShadow: 'var(--shadow-sm)'
+                                      width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--brand)', color: 'white',
+                                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold',
+                                      border: '1px solid var(--surface)', boxShadow: 'var(--shadow-sm)'
                                     }}
                                   >
                                     {initial}
@@ -643,18 +643,18 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       )}
 
       <style jsx>{`
-        .avatar-bubble:hover { transform: scale(1.15) translateY(-2px); z-index: 10; filter: brightness(1.1); }
+        .avatar-bubble:hover { transform: scale(1.1) translateY(-1px); z-index: 10; filter: brightness(1.1); }
         .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); min-height: 70vh; }
         @media (max-width: 1024px) {
-          .kanban-board { display: flex; overflow-x: auto; padding-bottom: 2rem; }
-          .kanban-column { flex: 0 0 calc(100vw - 3rem); }
+          .kanban-board { display: flex; overflow-x: auto; padding-bottom: 1rem; }
+          .kanban-column { flex: 0 0 calc(90vw); }
         }
-        .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: var(--card-p); display: flex; flex-direction: column; gap: var(--gap-md); border: 1px solid var(--border); }
-        .kanban-column-header { font-weight: 800; font-size: 0.875rem; text-transform: uppercase; color: var(--text-sub); display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 0.5rem; }
-        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: var(--gap-md); min-height: 200px; }
-        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--card-p); cursor: grab; transition: all 0.3s; box-shadow: var(--shadow-sm); }
-        .kanban-card:hover { transform: translateY(-4px); border-color: var(--brand); }
-        .kanban-card-title { font-weight: 700; font-size: 1rem; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.4; }
+        .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: 0.5rem; display: flex; flex-direction: column; gap: var(--gap-md); border: 1px solid var(--border); }
+        .kanban-column-header { font-weight: 850; font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); display: flex; justify-content: space-between; padding: 0.4rem; border-bottom: 2px solid var(--border); margin-bottom: 0.25rem; }
+        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; min-height: 150px; }
+        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem; cursor: grab; transition: all 0.2s; box-shadow: var(--shadow-sm); }
+        .kanban-card:hover { transform: translateY(-2px); border-color: var(--brand); }
+        .kanban-card-title { font-weight: 700; font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.25rem; line-height: 1.3; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
         .remote-dragging { pointer-events: none; opacity: 0.7; filter: grayscale(0.5); }
       `}</style>

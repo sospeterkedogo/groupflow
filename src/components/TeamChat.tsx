@@ -329,34 +329,34 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
       className="responsive-chat"
     >
        {/* Chat Header */}
-       <div style={{ padding: '0.75rem 1rem', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
+       <div style={{ padding: '0.5rem 0.75rem', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
           {isSearching ? (
-             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', animation: 'fadeIn 0.2s' }}>
-                <Search size={16} />
+             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.4rem', animation: 'fadeIn 0.2s' }}>
+                <Search size={14} />
                 <input 
-                  type="text" 
-                  value={chatSearch} 
-                  onChange={(e) => setChatSearch(e.target.value)}
-                  placeholder="Search messages..."
-                  autoFocus
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px', padding: '0.4rem 0.75rem', color: 'white', fontSize: '0.85rem', outline: 'none' }}
+                   type="text" 
+                   value={chatSearch} 
+                   onChange={(e) => handleTyping(e.target.value)}
+                   placeholder="Search..."
+                   autoFocus
+                   style={{ flex: 1, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '6px', padding: '0.3rem 0.6rem', color: 'white', fontSize: '0.8rem', outline: 'none' }}
                 />
-                <button onClick={() => { setIsSearching(false); setChatSearch(''); }} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={18} /></button>
+                <button onClick={() => { setIsSearching(false); setChatSearch(''); }} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}><X size={16} /></button>
              </div>
           ) : (
             <>
-              <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                 <MessageSquare size={20} />
+              <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                 <MessageSquare size={16} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                 <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700 }}>Team Chat</h3>
-                 <div style={{ fontSize: '0.68rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                 <h3 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800 }}>Team Chat</h3>
+                 <div style={{ fontSize: '0.65rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     {othersTyping.length > 0 ? (
-                      <span style={{ fontStyle: 'italic', fontWeight: 600 }}>typing...</span>
+                       <span style={{ fontStyle: 'italic', fontWeight: 600 }}>typing...</span>
                     ) : (
                       <>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#4ade80' }} />
                           {teamOnlineCount} online
                         </div>
                       </>
@@ -364,20 +364,19 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
                     <button 
                       onClick={() => setShowLobby(!showLobby)}
                       style={{ 
-                        background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '6px', 
-                        padding: '2px 6px', color: 'white', fontSize: '0.6rem', fontWeight: 900,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '3px',
-                        transition: 'all 0.2s'
+                        background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '4px', 
+                        padding: '1px 4px', color: 'white', fontSize: '0.55rem', fontWeight: 900,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px'
                       }}
                       title="Team Lobby"
                     >
-                      <LayoutGrid size={10} /> {showLobby ? 'EXIT LOBBY' : 'LOBBY'}
+                      <LayoutGrid size={8} /> {showLobby ? 'EXIT' : 'LOBBY'}
                     </button>
                  </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
-                <button onClick={() => setIsSearching(true)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Search size={16} /></button>
-                <button onClick={() => setIsOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '8px', padding: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}><X size={16} /></button>
+              <div style={{ display: 'flex', gap: '0.3rem' }}>
+                <button onClick={() => setIsSearching(true)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '6px', padding: '0.25rem' }}><Search size={14} /></button>
+                <button onClick={() => setIsOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', color: 'white', borderRadius: '6px', padding: '0.25rem' }}><X size={14} /></button>
               </div>
             </>
           )}
@@ -447,7 +446,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
 
        {/* Messages */}
        <div className="chat-viewport" style={{ 
-          flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
+          flex: 1, overflowY: 'auto', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem',
           background: 'var(--bg-sub)',
        }}>
           {loading ? (
@@ -481,13 +480,13 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
                           <div 
                             className={`msg-bubble ${isOwn ? 'own' : 'other'} ${m.pending ? 'pending' : ''} ${m.is_deleted ? 'deleted' : ''}`}
                             style={{
-                              padding: '0.45rem 0.75rem', borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                              maxWidth: '82%', fontSize: '0.875rem', lineHeight: 1.45,
+                              padding: '0.3rem 0.5rem', borderRadius: isOwn ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
+                              maxWidth: '85%', fontSize: '0.825rem', lineHeight: 1.35,
                               position: 'relative', boxShadow: 'var(--shadow-sm)',
                               background: isOwn ? 'var(--brand)' : 'var(--surface)',
                               color: isOwn ? 'white' : 'var(--text-main)',
                               border: isOwn ? 'none' : '1px solid var(--border)',
-                              minWidth: '60px',
+                              minWidth: '40px',
                               fontStyle: m.is_deleted ? 'italic' : 'normal',
                               opacity: m.is_deleted ? 0.6 : 1,
                               transition: 'opacity 0.2s',
@@ -556,20 +555,20 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
        </div>
 
        {/* Input Bar */}
-       <div style={{ padding: '0.6rem 0.75rem', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <div style={{ display: 'flex', gap: '0.35rem', color: 'var(--text-sub)' }}>
-             <label style={{ cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center', padding: '0.3rem', borderRadius: '8px', transition: 'background 0.2s' }} className="icon-btn">
-                <Paperclip size={20} />
+       <div style={{ padding: '0.4rem 0.5rem', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', gap: '0.25rem', color: 'var(--text-sub)' }}>
+             <label style={{ cursor: 'pointer', color: 'inherit', display: 'flex', alignItems: 'center', padding: '0.2rem', borderRadius: '6px', transition: 'background 0.2s' }} className="icon-btn">
+                <Paperclip size={18} />
                 <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} />
              </label>
           </div>
           <form onSubmit={handleSendMessage} style={{ flex: 1 }}>
              <input 
                type="text" value={newMessage} onChange={e => handleTyping(e.target.value)}
-               placeholder="Type a message..."
+               placeholder="Message..."
                style={{ 
-                 width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px',
-                 padding: '0.55rem 1rem', fontSize: '0.875rem', outline: 'none', color: 'var(--text-main)',
+                 width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px',
+                 padding: '0.4rem 0.75rem', fontSize: '0.825rem', outline: 'none', color: 'var(--text-main)',
                  transition: 'border-color 0.2s'
                }}
              />
@@ -578,16 +577,15 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
              onClick={(e) => handleSendMessage(e as any)}
              disabled={!newMessage.trim() && !uploading}
              style={{ 
-               background: newMessage.trim() ? 'var(--brand)' : 'var(--bg-main)', 
-               color: newMessage.trim() ? 'white' : 'var(--text-sub)', 
-               border: `1px solid ${newMessage.trim() ? 'transparent' : 'var(--border)'}`,
-               borderRadius: '50%', width: '38px', height: '38px', flexShrink: 0,
-               display: 'flex', alignItems: 'center', justifyContent: 'center', 
-               cursor: newMessage.trim() ? 'pointer' : 'default',
-               transition: 'all 0.2s',
+                background: newMessage.trim() ? 'var(--brand)' : 'var(--bg-main)', 
+                color: newMessage.trim() ? 'white' : 'var(--text-sub)', 
+                border: `1px solid ${newMessage.trim() ? 'transparent' : 'var(--border)'}`,
+                borderRadius: '50%', width: '32px', height: '32px', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                cursor: newMessage.trim() ? 'pointer' : 'default'
              }}
           >
-             <Send size={17} />
+             <Send size={15} />
           </button>
        </div>
 

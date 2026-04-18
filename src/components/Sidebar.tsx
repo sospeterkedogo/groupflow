@@ -190,7 +190,7 @@ export default function Sidebar({ user }: SidebarProps) {
         }}
       >
         {/* Header / Toggle */}
-        <div style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
+        <div style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
               <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.04em', flexShrink: 0 }}>
@@ -231,12 +231,12 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         {/* Global Search Interface */}
-        <div style={{ padding: isOpen ? '1.25rem 1rem 0' : '1rem 0.75rem 0' }}>
+        <div style={{ padding: isOpen ? '0.75rem 0.6rem 0' : '0.75rem 0.5rem 0' }}>
             <GlobalSearch collapsed={!isOpen} />
         </div>
 
         {/* Nav Links */}
-        <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <nav style={{ flex: 1, padding: '0.75rem 0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {navLinks.map((link) => {
             let isActive = link.path === '/dashboard' 
               ? pathname === '/dashboard' 
@@ -257,15 +257,15 @@ export default function Sidebar({ user }: SidebarProps) {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1.25rem',
-                  padding: isOpen ? '0.85rem 1.5rem' : '0.85rem 0',
+                  gap: '0.75rem',
+                  padding: isOpen ? '0.5rem 1rem' : '0.5rem 0',
                   color: isActive ? 'var(--brand)' : 'var(--text-sub)',
-                  backgroundColor: isActive ? 'rgba(var(--brand-rgb), 0.06)' : 'transparent',
+                  backgroundColor: isActive ? 'rgba(var(--brand-rgb), 0.05)' : 'transparent',
                   fontWeight: isActive ? 900 : 700,
-                  fontSize: '0.9rem',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                  fontSize: '0.85rem',
+                  transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
                   justifyContent: isOpen ? 'flex-start' : 'center',
-                  borderRadius: isOpen ? '0 50px 50px 0' : '16px',
+                  borderRadius: isOpen ? '0 30px 30px 0' : '12px',
                   marginRight: isOpen ? '1rem' : '0.75rem',
                   marginLeft: isOpen ? '0' : '0.75rem',
                   position: 'relative',
@@ -275,7 +275,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 }}
                 title={!isOpen ? link.name : ''}
               >
-                <link.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                <link.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                 {isOpen && <span style={{ letterSpacing: '-0.01em' }}>{link.name}</span>}
                 {isActive && (
                   <div style={{ position: 'absolute', left: 0, top: '15%', bottom: '15%', width: '4px', background: 'var(--brand)', borderRadius: '0 4px 4px 0' }} />
@@ -290,15 +290,15 @@ export default function Sidebar({ user }: SidebarProps) {
            <div style={{ 
              display: 'flex', 
              alignItems: 'center', 
-             gap: '0.75rem', 
-             padding: isOpen ? '0.75rem' : '0', 
+             gap: '0.5rem', 
+             padding: isOpen ? '0.5rem' : '0', 
              backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent',
-             borderRadius: '16px',
+             borderRadius: '12px',
              border: isOpen ? '1px solid var(--border)' : 'none',
              justifyContent: isOpen ? 'flex-start' : 'center',
              cursor: 'pointer',
              transition: 'all 0.2s ease',
-             minHeight: '48px'
+             minHeight: '40px'
            }}
            className="identity-pill"
            onClick={() => window.location.href = '/dashboard/profile'}
@@ -322,22 +322,22 @@ export default function Sidebar({ user }: SidebarProps) {
              )}
            </div>
 
-           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.6rem' }}>
+           <div style={{ display: 'flex', flexDirection: isOpen ? 'row' : 'column', gap: '0.4rem' }}>
              <button 
                onClick={toggleTheme}
-               style={{ flex: 1, height: '42px', borderRadius: '14px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-               title="Toggle Interface Aesthetics"
+               style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               title="Toggle Aesthetics"
                className="panel-tool"
              >
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
              </button>
              <button 
                onClick={handleSignOut}
-               style={{ flex: 1, height: '42px', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
-               title="Terminate Session"
+               style={{ flex: 1, height: '36px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+               title="End Session"
                className="panel-tool"
              >
-               <LogOut size={20} />
+               <LogOut size={18} />
              </button>
            </div>
         </div>

@@ -21,25 +21,27 @@
   --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  /* Spacing & Layout Tokens */
-  --h-nav: 64px;
-  --h-mobile-bottom: 74px;
-  --p-safe: 1.5rem;
-  --section-p: 2rem;
-  --card-p: 1.25rem;
-  --gap-md: 1.25rem;
-  --gap-lg: 2rem;
+  /* HIGH DENSITY Spacing & Layout Tokens */
+  --h-nav: 52px;
+  --h-mobile-bottom: 64px;
+  --p-safe: 0.75rem;
+  --section-p: 1rem;
+  --card-p: 0.75rem;
+  --gap-md: 0.5rem;
+  --gap-lg: 0.75rem;
   --vh-dynamic: 100dvh;
 }
 
 /* Mobile Overrides */
 @media (max-width: 768px) {
   :root {
-    --p-safe: 0.75rem;
-    --section-p: 1.25rem;
-    --card-p: 1rem;
-    --gap-md: 0.75rem;
-    --gap-lg: 1.25rem;
+    --h-nav: 48px;
+    --h-mobile-bottom: 56px;
+    --p-safe: 0.5rem;
+    --section-p: 0.75rem;
+    --card-p: 0.6rem;
+    --gap-md: 0.4rem;
+    --gap-lg: 0.6rem;
   }
 }
 
@@ -251,7 +253,7 @@ body {
   background-color: var(--bg-main);
   color: var(--text-main);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  line-height: 1.6;
+  line-height: 1.4;
   transition: background-color 0.4s ease, color 0.4s ease;
   overflow-x: hidden;
 }
