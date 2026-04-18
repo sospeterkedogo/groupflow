@@ -110,8 +110,9 @@ export default function Sidebar({ user }: SidebarProps) {
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Peer Network', path: '/dashboard/network', icon: Users },
+    { name: 'Share & Borrow', path: '/dashboard/marketplace', icon: TrendingUp },
     { name: 'Group Statistics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics', icon: BarChart3 },
-    { name: 'Advanced Access', path: '/dashboard/upgrade', icon: TrendingUp },
+    { name: 'Management', path: '/dashboard/upgrade', icon: Activity },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]

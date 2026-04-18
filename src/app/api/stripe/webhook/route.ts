@@ -51,7 +51,8 @@ function buildWebhookPayload(event: Stripe.Event) {
       amountTotal: session.amount_total ?? null,
       currency: session.currency ?? null,
       mode: session.mode ?? 'payment',
-      status: session.payment_status ?? 'unknown'
+      status: session.payment_status ?? 'unknown',
+      metadata: session.metadata ?? {}
     } as PaymentWorkflowPayload
   }
 

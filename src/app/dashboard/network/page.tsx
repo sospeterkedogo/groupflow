@@ -1,362 +1,329 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { Search, MapPin, Clock, LayoutGrid, List, User, Users, GraduationCap, X, ChevronRight, Check } from 'lucide-react'
+import { 
+  Search, 
+  User, 
+  MessageSquare, 
+  ExternalLink, 
+  Users, 
+  GraduationCap, 
+  Sparkles, 
+  Fingerprint, 
+  Compass,
+  ChevronRight,
+  Info
+} from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 import { Profile } from '@/types/database'
-import CollaboratorsList from '@/components/CollaboratorsList'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
-type ViewMode = 'grid' | 'list'
-
 export default function NetworkPage() {
-  const [users, setUsers] = useState<Profile[]>([])
-  const [suggestions, setSuggestions] = useState<Profile[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [teamMembers, setTeamMembers] = useState<Profile[]>([])
+  const [personalNetwork, setPersonalNetwork] = useState<Profile[]>([])
+  const [suggestedUsers, setSuggestedUsers] = useState<Profile[]>([])
+  const [globalCount, setGlobalCount] = useState(0)
   const [search, setSearch] = useState('')
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
-  const [filterMode, setFilterMode] = useState<'all' | 'circle'>('all')
-  const [currentUserGroup, setCurrentUserGroup] = useState<string | null>(null)
-  const [connections, setConnections] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
+  
   const router = useRouter()
   const { withLoading } = useSmartLoading()
-  
-  const supabase = createBrowserSupabaseClient()
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { onlineUsers } = usePresence()
 
-  const fetchCurrentGroupAndConnections = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: profile } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
-      if (profile) setCurrentUserGroup(profile.group_id)
+  const fetchMetrics = useCallback(async () => {
+    // 1. Fetch Global User Count
+    const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+    setGlobalCount(count || 0)
 
-      const { data: conn } = await supabase
-        .from('user_connections')
-        .select('user_id, target_id')
-        .or(`user_id.eq.${user.id},target_id.eq.${user.id}`)
-        .eq('status', 'connected')
-      
-      if (conn) {
-        const ids = conn.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
-        setConnections(new Set(ids))
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    // 2. Fetch Team Members
+    const { data: me } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
+    if (me?.group_id) {
+      const { data: team } = await supabase.from('profiles').select('*').eq('group_id', me.group_id).neq('id', user.id)
+      setTeamMembers(team || [])
+    }
+
+    // 3. Fetch Personal Network (Connections)
+    const { data: conn } = await supabase
+      .from('user_connections')
+      .select('user_id, target_id')
+      .or(`user_id.eq.${user.id},target_id.eq.${user.id}`)
+      .eq('status', 'connected')
+    
+    if (conn) {
+      const ids = conn.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
+      if (ids.length > 0) {
+        const { data: net } = await supabase.from('profiles').select('*').in('id', ids)
+        setPersonalNetwork(net || [])
       }
     }
+
+    // 4. Fetch Suggestions (Members You May Know)
+    const { data: sugg } = await supabase
+      .from('profiles')
+      .select('*')
+      .neq('id', user.id)
+      .not('group_id', 'eq', me?.group_id || '00000000-0000-0000-0000-000000000000')
+      .limit(10)
+    setSuggestedUsers(sugg || [])
+    
+    setLoading(false)
   }, [supabase])
 
-  const fetchUsers = useCallback(async (queryStr?: string) => {
-    setLoading(true)
-    let query = supabase
-      .from('profiles')
-      .select('*, groups(name, module_code, is_encrypted)')
-      .order('total_score', { ascending: false })
-      .limit(50)
-    
-    const term = queryStr || search
-    if (term.trim()) {
-      query = query.or(`full_name.ilike.%${term}%,school_id.ilike.%${term}%`)
-    }
-
-    const response = await query as { data: Profile[] | null }
-    if (response.data) setUsers(response.data)
-    setLoading(false)
-  }, [supabase, search])
-
   useEffect(() => {
-    withLoading(async () => {
-      await Promise.all([
-        fetchCurrentGroupAndConnections(),
-        fetchUsers()
-      ])
-    }, 'Searching Academic Network...')
-  }, [fetchCurrentGroupAndConnections, fetchUsers, withLoading])
+    void fetchMetrics()
+  }, [fetchMetrics])
 
-  // Smart Suggestions Logic
-  useEffect(() => {
-    if (search.length < 2) {
-      setSuggestions([])
-      setShowSuggestions(false)
-      return
-    }
-
-    const fetchSuggestions = async () => {
-      const response = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url, school_id')
-        .or(`full_name.ilike.%${search}%,school_id.ilike.%${search}%`)
-        .limit(5) as { data: Profile[] | null }
-      
-      if (response.data) {
-        setSuggestions(response.data)
-        setShowSuggestions(true)
-      }
-    }
-
-    const timer = setTimeout(fetchSuggestions, 150)
-    return () => clearTimeout(timer)
-  }, [search, supabase])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchUsers()
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [search, fetchUsers])
-
-  const formatLastSeen = (timestamp: string | null) => {
-    if (!timestamp) return 'Never'
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-    if (diffInSeconds < 60) return 'Just now'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  const filterList = (list: Profile[]) => {
+    return list.filter(u => 
+      u.full_name?.toLowerCase().includes(search.toLowerCase()) || 
+      u.course_name?.toLowerCase().includes(search.toLowerCase())
+    )
   }
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--p-safe)', animation: 'fadeIn 0.5s ease-out' }}>
-       
-       <div className="network-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2.5rem', alignItems: 'start' }}>
-          
-          {/* Main Network Section */}
-          <div>
-            <div className="content-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-              <div>
-                <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Peer Network</h1>
-                <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Identify collaborators, subject matter experts, and research peers.</p>
-              </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                  <button 
-                    onClick={() => setFilterMode('all')} 
-                    style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 800, borderRadius: '10px', border: 'none', background: filterMode === 'all' ? 'var(--surface)' : 'transparent', color: filterMode === 'all' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: filterMode === 'all' ? 'var(--shadow-sm)' : 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
-                  >
-                    Global
-                  </button>
-                  <button 
-                    onClick={() => setFilterMode('circle')} 
-                    style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 800, borderRadius: '10px', border: 'none', background: filterMode === 'circle' ? 'var(--surface)' : 'transparent', color: filterMode === 'circle' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: filterMode === 'circle' ? 'var(--shadow-sm)' : 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
-                  >
-                    Circle
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                  <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}>
-                    <LayoutGrid size={18} />
-                  </button>
-                  <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'list' ? 'var(--surface)' : 'transparent', color: viewMode === 'list' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'list' ? 'var(--shadow-sm)' : 'none' }}>
-                    <List size={18} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Smart Search Bar */}
-            <div className="search-container" style={{ position: 'relative', marginBottom: '3rem', zIndex: 100 }}>
-              <Search size={24} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand)', opacity: 0.8 }} />
-              <input 
-                type="text" 
-                className="form-input search-input" 
-                placeholder="Search by name or ID number..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                onFocus={() => search.length >= 2 && setShowSuggestions(true)}
-                style={{ 
-                  paddingLeft: '4rem', paddingRight: '1.5rem', height: '4rem', fontSize: '1.1rem', 
-                  borderRadius: '20px', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)',
-                  backgroundColor: 'var(--surface)', fontWeight: 600
-                }}
-              />
-
-              {/* Suggestions Dropdown */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div style={{ 
-                  position: 'absolute', top: '105%', left: 0, right: 0, 
-                  background: 'var(--surface)', borderRadius: '18px', border: '1px solid var(--border)', 
-                  boxShadow: 'var(--shadow-2xl)', overflow: 'hidden', padding: '0.5rem'
-                }}>
-                  {suggestions.map(s => (
-                    <div 
-                      key={s.id} 
-                      onClick={() => { 
-                        withLoading(async () => {
-                          await new Promise(r => setTimeout(r, 600));
-                          router.push('/dashboard/network/profile/' + s.id); 
-                        }, 'Redirecting to Profile...');
-                        setSearch(''); 
-                        setShowSuggestions(false); 
-                      }}
-                      style={{ 
-                        display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
-                        borderRadius: '12px', cursor: 'pointer', transition: 'background 0.2s' 
-                      }}
-                      className="suggestion-item"
-                    >
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-sub)', overflow: 'hidden' }}>
-                        {s.avatar_url ? <img src={s.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={20} style={{ margin: '8px' }} color="var(--text-sub)" />}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 700 }}>{s.full_name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>ID: {s.school_id || 'N/A'}</div>
-                      </div>
-                      <ChevronRight size={16} color="var(--text-sub)" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Results Grid/List */}
-            {(() => {
-              const displayedUsers = filterMode === 'circle' 
-                ? users.filter(u => connections.has(u.id))
-                : users
-
-              if (loading && users.length === 0) {
-                return (
-                  <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="skeleton" style={{ height: '180px', borderRadius: '24px' }} />
-                    ))}
-                  </div>
-                )
-              }
-
-              if (displayedUsers.length === 0) {
-                return (
-                  <div style={{ textAlign: 'center', padding: '6rem 2rem', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                    <Search size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                    <h3 style={{ margin: 0, color: 'var(--text-main)' }}>{filterMode === 'circle' ? 'No established connections found' : 'No scholars identified'}</h3>
-                    <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>
-                      {filterMode === 'circle' 
-                        ? 'Synchronize with research peers to build your personal network circuit.' 
-                        : 'Refine your search parameters by name or institutional identifier.'}
-                    </p>
-                  </div>
-                )
-              }
-
-              return (
-                <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {displayedUsers.map(u => {
-                    const isOnline = onlineUsers.has(u.id)
-                    const isPrivate = (u as any).groups?.is_encrypted && u.group_id !== currentUserGroup
-                    
-                    return (
-                      <div 
-                        key={u.id} 
-                        className="kanban-card card-interactive" 
-                        onClick={() => {
-                          withLoading(async () => {
-                            await new Promise(r => setTimeout(r, 600));
-                            router.push('/dashboard/network/profile/' + u.id);
-                          }, 'Accessing Scholar Profile...');
-                        }}
-                        style={{ 
-                          padding: '1.5rem', cursor: 'pointer', borderRadius: '24px', position: 'relative',
-                          display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
-                          alignItems: viewMode === 'grid' ? 'stretch' : 'center',
-                          gap: '1.25rem'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', position: 'relative' }}>
-                            {u.avatar_url ? <img src={u.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={32} style={{ margin: '14px' }} color="var(--text-sub)" />}
-                            {isOnline && <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)' }} />}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                              {isPrivate ? 'Protected Identity' : u.full_name}
-                            </h3>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
-                              <GraduationCap size={14} />
-                              <span>{u.course_name || 'Software Engineering'}</span>
-                              {connections.has(u.id) && (
-                                 <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.2rem', color: 'var(--success)', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                   <Check size={12} /> Connected
-                                 </span>
-                               )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--bg-sub)', padding: '1rem', borderRadius: '16px', flex: viewMode === 'list' ? 1 : 'unset' }}>
-                          <div>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Score</span>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Position</span>
-                            <div style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
-                              <MapPin size={14} color="var(--accent)" />
-                              <span>{isPrivate ? 'Restricted' : ((u as any).groups?.module_code || 'Unassigned')}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {viewMode === 'grid' && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                            <Clock size={14} />
-                            <span>{isOnline ? <b style={{ color: 'var(--success)' }}>Active Now</b> : `Seen ${formatLastSeen(u.last_seen ?? null)}`}</span>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            })()}
-          </div>
-
-          {/* Sidebar Area */}
-          <div style={{ position: 'sticky', top: '2rem' }}>
-             <CollaboratorsList 
-                currentGroupId={currentUserGroup} 
-                onViewProfile={(profile) => {
-                  withLoading(async () => {
-                    await new Promise(r => setTimeout(r, 600));
-                    router.push('/dashboard/network/profile/' + profile.id);
-                  }, 'Accessing Node Info...');
-                }} 
-             />
-             
-             <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'linear-gradient(135deg, var(--brand), #6366f1)', borderRadius: '24px', color: 'white', boxShadow: 'var(--shadow-xl)' }}>
-                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Expand your Academic Reach</h4>
-                <p style={{ margin: '1rem 0 1.5rem', fontSize: '0.9rem', opacity: 0.9, lineHeight: 1.5 }}>
-                  Collaborating with scholars across academic disciplines? Utilize institutional identifiers to integrate collaborators into your current research track.
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 700 }}>
-                   <Users size={16} />
-                   <span>Global Academic Graph</span>
-                </div>
+    <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '6rem' }}>
+      
+      {/* ── NETWORK HUD ────────────────────────────────────────────────── */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '2rem' }}>
+        <div>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 950, letterSpacing: '-0.06em', margin: 0, lineHeight: 0.9 }}>
+            Peer Network
+          </h1>
+          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1.5rem' }}>
+             <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Institution Global</span>
+                <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--brand)' }}>{globalCount.toLocaleString()} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Scholars</span></span>
+             </div>
+             <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Synchronized</span>
+                <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--success)' }}>{personalNetwork.length} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Nodes</span></span>
              </div>
           </div>
+        </div>
+
+        <div style={{ width: '100%', maxWidth: '400px', position: 'relative' }}>
+          <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+          <input 
+            type="text" 
+            placeholder="Global filter by name or course..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ 
+              width: '100%', 
+              padding: '1rem 1rem 1rem 3.5rem', 
+              borderRadius: '16px', 
+              border: '1px solid var(--border)', 
+              background: 'var(--surface)', 
+              fontSize: '1rem',
+              fontWeight: 600,
+              boxShadow: 'var(--shadow-sm)',
+              outline: 'none'
+            }}
+          />
+        </div>
+      </header>
+
+      {/* ── NETWORK SECTIONS ───────────────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+        
+        {/* 1. Institutional Circle */}
+        <NetworkSection 
+          title="Institutional Circle" 
+          icon={<Users size={18} />} 
+          users={filterList(teamMembers)} 
+          loading={loading}
+          router={router}
+          onlineUsers={onlineUsers}
+        />
+
+        {/* 2. Synchronized Network */}
+        <NetworkSection 
+          title="Synchronized Network" 
+          icon={<Fingerprint size={18} />} 
+          users={filterList(personalNetwork)} 
+          loading={loading}
+          router={router}
+          onlineUsers={onlineUsers}
+        />
+
+        {/* 3. Members You May Know */}
+        <NetworkSection 
+          title="Members You May Know" 
+          icon={<Compass size={18} />} 
+          users={filterList(suggestedUsers)} 
+          loading={loading}
+          router={router}
+          onlineUsers={onlineUsers}
+        />
+
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeInHeader { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+    </div>
+  )
+}
+
+function NetworkSection({ title, icon, users, loading, router, onlineUsers }: { 
+  title: string, 
+  icon: React.ReactNode, 
+  users: Profile[], 
+  loading: boolean,
+  router: any,
+  onlineUsers: Set<string>
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+       <div style={{ 
+         display: 'flex', 
+         alignItems: 'center', 
+         padding: '0.5rem 0.75rem', 
+         borderBottom: '1px solid var(--border)',
+         marginBottom: '0.75rem',
+         gap: '0.75rem',
+         background: 'rgba(var(--brand-rgb), 0.02)',
+         borderRadius: '8px',
+         color: 'var(--text-sub)'
+       }}>
+          <Search size={14} style={{ opacity: 0.5 }} />
+          <h2 style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, flex: 1 }}>
+            {title} <span style={{ opacity: 0.5, fontWeight: 700 }}>({users.length})</span>
+          </h2>
+          <div style={{ opacity: 0.6 }}>{icon}</div>
        </div>
 
-       {/* Navigation and state driven UI components have been transitioned to dynamic routes */}
+       {loading ? (
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '60px', borderRadius: '12px' }} />)}
+         </div>
+       ) : users.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-sub)', fontSize: '0.85rem', background: 'var(--bg-sub)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
+             No peers identified in this sector.
+          </div>
+       ) : (
+         <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {users.map(u => (
+              <NetworkRow key={u.id} user={u} router={router} isOnline={onlineUsers.has(u.id)} />
+            ))}
+         </div>
+       )}
+    </div>
+  )
+}
 
-       <style jsx>{`
-          .suggestion-item:hover { background: var(--bg-sub); }
-          .card-interactive { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-          .card-interactive:hover { transform: translateY(-8px); border-color: var(--brand); box-shadow: var(--shadow-xl); }
-          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-          @media (max-width: 1024px) {
-            .network-main-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
-            .sidebar-area { position: static !important; }
-            .content-header { flex-direction: column; align-items: flex-start !important; gap: 1rem; }
-          }
-          @media (max-width: 768px) {
-            .fluid-h1 { font-size: 2rem !important; }
-            .search-container { margin-bottom: 2rem !important; }
-            .search-input { height: 3.5rem !important; font-size: 0.95rem !important; padding-left: 3.5rem !important; }
-            .network-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
-          }
-       `}</style>
+function NetworkRow({ user, router, isOnline }: { user: Profile, router: any, isOnline: boolean }) {
+  return (
+    <div 
+      className="network-row"
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        padding: '0.75rem 0', 
+        borderBottom: '1px solid rgba(var(--text-main-rgb), 0.05)',
+        transition: 'all 0.2s',
+        gap: '1rem'
+      }}
+    >
+      <div style={{ position: 'relative' }}>
+        <div style={{ 
+          width: '44px', 
+          height: '44px', 
+          borderRadius: '12px', 
+          background: 'var(--bg-sub)', 
+          border: '1px solid var(--border)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          overflow: 'hidden',
+          fontSize: '0.9rem',
+          fontWeight: 900,
+          color: 'var(--brand)'
+        }}>
+          {user.avatar_url ? <img src={user.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user.full_name?.[0]}
+        </div>
+        {isOnline && (
+           <div style={{ 
+             position: 'absolute', 
+             bottom: '-2px', 
+             right: '-2px', 
+             width: '12px', 
+             height: '12px', 
+             borderRadius: '50%', 
+             background: 'var(--success)', 
+             border: '2px solid var(--surface)',
+             boxShadow: '0 0 10px var(--success)' 
+           }} />
+        )}
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '1rem', fontWeight: 850, color: 'var(--text-main)', lineHeight: 1.2 }}>{user.full_name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+           <GraduationCap size={12} />
+           <span style={{ fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{user.course_name || user.tagline || 'Academic Collaborator'}</span>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <button 
+          onClick={() => router.push(`/dashboard/network/profile/${user.id}`)}
+          className="btn-phonebook"
+          style={{ 
+            padding: '0.5rem 1rem', 
+            borderRadius: '10px', 
+            background: 'var(--bg-sub)', 
+            border: '1px solid var(--border)', 
+            fontSize: '0.75rem', 
+            fontWeight: 800, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            color: 'var(--text-main)' 
+          }}
+        >
+          <User size={14} />
+          <span className="desktop-only">Profile</span>
+        </button>
+        <button 
+          onClick={() => router.push(`/dashboard/network/chat/${user.id}`)}
+          className="btn-phonebook"
+          style={{ 
+            padding: '0.5rem 1rem', 
+            borderRadius: '10px', 
+            background: 'var(--brand)', 
+            border: 'none', 
+            fontSize: '0.75rem', 
+            fontWeight: 900, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            color: 'white',
+            boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.2)' 
+          }}
+        >
+          <MessageSquare size={14} />
+          <span className="desktop-only">Message</span>
+        </button>
+      </div>
+
+      <style jsx>{`
+        .network-row:hover {
+           background: rgba(var(--brand-rgb), 0.02);
+           padding-left: 0.5rem;
+           padding-right: 0.5rem;
+           border-radius: 12px;
+        }
+        @media (max-width: 600px) {
+           .desktop-only { display: none; }
+        }
+      `}</style>
     </div>
   )
 }

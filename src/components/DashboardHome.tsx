@@ -50,7 +50,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     if (!groupId) return
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, last_seen')
+      .select('id, full_name, avatar_url, last_seen, role')
       .eq('group_id', groupId)
 
     if (error) {
@@ -81,6 +81,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
   const [projectProgress, setProjectProgress] = useState(0)
   const [progressLabel, setProgressLabel] = useState('Initializing')
+  const [totalBacklog, setTotalBacklog] = useState(0)
 
   const fetchProjectProgress = useCallback(async () => {
     if (!groupId) return
@@ -91,24 +92,23 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
     if (error || !tasks || tasks.length === 0) {
       setProjectProgress(0)
-      setProgressLabel('Getting Started')
+      setProgressLabel('Empty Backlog')
+      setTotalBacklog(0)
       return
     }
+
+    const pending = tasks.filter(t => t.status !== 'Done').length
+    setTotalBacklog(pending)
 
     const completed = tasks.filter(t => t.status === 'Done').length
     const progress = Math.round((completed / tasks.length) * 100)
     setProjectProgress(progress)
 
-    if (progress < 20) setProgressLabel('Research & Planning')
-    else if (progress < 40) setProgressLabel('Foundation Logic')
-    else if (progress < 60) setProjectProgress(40) // Manual clamp if needed, but let's use labels
-
     // Better logic for labels
-    if (progress <= 30) setProgressLabel('Getting Started')
-    else if (progress <= 50) setProgressLabel('Strategic Drafting')
-    else if (progress <= 70) setProgressLabel('Core Development')
-    else if (progress < 80) setProgressLabel('Refining Logic')
-    else setProgressLabel('Nearly There')
+    if (progress <= 30) setProgressLabel('Initial Sprint')
+    else if (progress <= 50) setProgressLabel('Core Development')
+    else if (progress <= 80) setProgressLabel('Refining Protocol')
+    else setProgressLabel('Ready for Release')
   }, [groupId, supabase])
 
   useEffect(() => {
@@ -127,7 +127,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
-          () => void fetchPersonalTaskCount()
+          () => {
+            void fetchPersonalTaskCount()
+            void fetchProjectProgress()
+          }
         )
         .on(
           'postgres_changes',
@@ -140,7 +143,14 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         supabase.removeChannel(channel)
       }
     }
-  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchMembers, supabase])
+  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchProjectProgress, fetchMembers, supabase])
+
+  const renderRoleBadge = (role: string | null) => {
+    const r = role?.toUpperCase()
+    if (r === 'TEAM_LEADER' || r === 'ADMIN') return <span style={{ fontSize: '0.6rem', padding: '1px 6px', borderRadius: '4px', background: 'var(--brand)', color: 'white', fontWeight: 900, marginLeft: '4px' }}>{r.replace('_', ' ')}</span>
+    if (r === 'MODERATOR') return <span style={{ fontSize: '0.6rem', padding: '1px 6px', borderRadius: '4px', background: 'var(--success)', color: 'white', fontWeight: 900, marginLeft: '4px' }}>MOD</span>
+    return null
+  }
 
   if (!profile) {
     return (
@@ -196,7 +206,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               }}
             >
               <Users size={16} />
-              Team Members
+              Team Roster
               <span style={{
                 background: showMembers ? 'white' : 'var(--brand)',
                 color: showMembers ? 'var(--brand)' : 'white',
@@ -222,7 +232,8 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               padding: '1rem',
               borderRadius: '16px',
               border: '1px solid var(--border)',
-              maxWidth: 'fit-content'
+              maxWidth: 'fit-content',
+              zIndex: 100
             }}>
               {members.map(m => {
                 const isSelf = m.id === profile?.id
@@ -277,9 +288,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                       }} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', lineHeight: 1 }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', lineHeight: 1, display: 'flex', alignItems: 'center' }}>
                         {m.full_name?.split(' ')[0]}{isSelf && ' (You)'}
-                      </span>
+                        {renderRoleBadge(m.role)}
+                      </div>
                       <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '2px' }}>
                         {isOnline ? 'Active Now' : 'Offline'}
                       </span>
@@ -312,10 +324,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       {/* ── METRICS MODULES ────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         {[
-          { icon: <Activity size={20} />, label: 'Action Items', value: personalTaskCount, sub: 'Assigned pending', color: 'var(--brand)' },
-          { icon: <TrendingUp size={20} />, label: 'Group Contribution', value: profile?.total_score || 0, sub: 'Team points earned', color: 'var(--success)' },
-          { icon: <Calendar size={20} />, label: 'Timeline Status', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
-          { icon: <Zap size={20} />, label: 'Sync Integrity', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
+          { icon: <Activity size={20} />, label: 'Your Objectives', value: personalTaskCount, sub: 'Personal tasks pending', color: 'var(--brand)' },
+          { icon: <Users size={20} />, label: 'Team Backlog', value: totalBacklog, sub: 'Group tasks remaining', color: 'var(--success)' },
+          { icon: <TrendingUp size={20} />, label: 'Global Progress', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
+          { icon: <Zap size={20} />, label: 'Productivity Index', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
         ].map((stat, i) => (
           <div key={i} className="control-card" style={{
             padding: '1rem',

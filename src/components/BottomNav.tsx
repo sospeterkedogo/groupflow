@@ -24,8 +24,8 @@ export default function BottomNav() {
     { name: 'Board', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Inbox', path: '/dashboard/notifications', icon: Bell },
     { name: 'Network', path: '/dashboard/network', icon: Users },
-    { name: 'Profile', path: '/dashboard/profile', icon: UserCircle },
-    { name: 'Settings', path: '/dashboard/settings', icon: Settings },
+    { name: 'Share', path: '/dashboard/marketplace', icon: TrendingUp },
+    { name: 'Admin', path: '/dashboard/upgrade', icon: Settings },
   ]
 
   const handleNav = (path: string, name: string) => {

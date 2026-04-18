@@ -29,31 +29,38 @@ export default function NotificationBell() {
       if (!rect) return
 
       const isMobile = window.innerWidth <= 768
-      const width = isMobile ? Math.min(380, window.innerWidth - 20) : 320
+      const width = isMobile ? Math.min(380, window.innerWidth - 32) : 320
       
-      // Calculate horizontal position
-      let left = rect.right - width
+      let left: string | number = rect.right - width
+      let top: string | number = rect.bottom + 10
+
       if (isMobile) {
-        // Center on mobile with safe margin
-        left = (window.innerWidth - width) / 2
+        // Force fixed centering on mobile
+        left = 16
+        top = 70 // Below mobile header
+        setDropdownStyle({
+          position: 'fixed',
+          top: `${top}px`,
+          left: `${left}px`,
+          width: `calc(100vw - 32px)`,
+          maxHeight: '70vh',
+          overflow: 'hidden',
+          zIndex: 9000,
+        })
       } else {
-        // Clamp to screen edges for desktop with 12px gutter
-        left = Math.min(Math.max(12, left), window.innerWidth - width - 12)
+        // Clamp to screen edges for desktop
+        left = Math.min(Math.max(12, rect.right - width), window.innerWidth - width - 12)
+        const maxHeight = Math.min(450, window.innerHeight - top - 20)
+        setDropdownStyle({
+          position: 'fixed',
+          top: `${top}px`,
+          left: `${left}px`,
+          width: `${width}px`,
+          maxHeight: `${maxHeight}px`,
+          overflow: 'hidden',
+          zIndex: 9000,
+        })
       }
-
-      // Ensure vertical alignment is within viewport
-      const top = Math.min(rect.bottom + 10, window.innerHeight - 200)
-      const maxHeight = Math.min(450, window.innerHeight - top - 20)
-
-      setDropdownStyle({
-        position: 'fixed',
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${width}px`,
-        maxHeight: `${maxHeight}px`,
-        overflow: 'hidden',
-        zIndex: 9000,
-      })
     }
 
     updatePosition()

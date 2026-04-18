@@ -14,6 +14,7 @@ export type PaymentWorkflowPayload = {
   mode: string | null
   status: string | null
   invoiceId?: string | null
+  metadata?: Record<string, any>
 }
 
 export async function paymentWorkflow(payload: PaymentWorkflowPayload) {
@@ -28,6 +29,11 @@ export async function paymentWorkflow(payload: PaymentWorkflowPayload) {
 
   if (!userId) {
     throw new FatalError('Unable to resolve payment owner.')
+  }
+
+  if (payload.metadata?.type === 'purchase' && payload.metadata?.listing_id) {
+    await handleMarketplacePurchase(supabase, userId, payload)
+    return { handled: true }
   }
 
   if (payload.eventType === 'checkout.session.completed') {
@@ -241,5 +247,44 @@ async function handleInvoiceFailed(supabase: SupabaseAdminClient, userId: string
     title: 'Payment issue',
     message: `We were unable to process your plan payment. Please update your payment details in Stripe.`,
     link: '/dashboard'
+  }])
+}
+
+async function handleMarketplacePurchase(supabase: SupabaseAdminClient, buyerId: string, payload: PaymentWorkflowPayload) {
+  'use step'
+  const listingId = payload.metadata?.listing_id
+  const sellerId = payload.metadata?.seller_id
+  const productName = payload.metadata?.product_name || 'Marketplace Item'
+
+  // Update listing
+  await supabase
+    .from('marketplace_listings')
+    .update({ status: 'SOLD' })
+    .eq('id', listingId)
+
+  // Notify Seller
+  await supabase.from('notifications').insert([{
+    user_id: sellerId,
+    type: 'payment_completed',
+    title: 'Item Sold / Funds Secured',
+    message: `Payment received for "${productName}". Please coordinate hand-off at your specified safe-zone.`,
+    link: `/dashboard/marketplace`
+  }])
+
+  // Notify Buyer
+  await supabase.from('notifications').insert([{
+    user_id: buyerId,
+    type: 'payment_completed',
+    title: 'Transaction Authorized',
+    message: `Your payment for "${productName}" is confirmed. Meet the seller at their designated academic safe-zone to complete the transfer.`,
+    link: `/dashboard/marketplace`
+  }])
+
+  // Activity Log
+  await supabase.from('activity_log').insert([{
+    user_id: buyerId,
+    action_type: 'marketplace_purchase',
+    description: `Purchased "${productName}" from the marketplace`,
+    metadata: { listing_id: listingId, seller_id: sellerId, price: payload.amountTotal }
   }])
 }

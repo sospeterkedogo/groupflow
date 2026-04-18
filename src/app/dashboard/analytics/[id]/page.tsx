@@ -16,15 +16,15 @@ import {
 } from 'recharts'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Building': '#38bdf8',
-  'Structure':   '#8b5cf6',
-  'Design':   '#ec4899',
-  'Testing': '#10b981',
+  'Implementation': '#38bdf8',
+  'Architecture':   '#8b5cf6',
+  'UX/UI Design':   '#ec4899',
+  'Quality Assurance': '#10b981',
   'Research':       '#f59e0b',
-  'Helping':     '#6366f1',
-  'Writing':  '#64748b',
-  'Systems':         '#06b6d4',
-  'Ethics':         '#ef4444',
+  'Mentorship':     '#6366f1',
+  'Documentation':  '#64748b',
+  'DevOps':         '#06b6d4',
+  'Ethics & Legal': '#ef4444',
 }
 
 const STATUS_COLORS: Record<string, string> = {
