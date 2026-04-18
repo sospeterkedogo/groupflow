@@ -45,63 +45,63 @@ export default function ProfilePage() {
                   <div style={{ position: 'absolute', bottom: '10px', right: '10px', width: '22px', height: '22px', borderRadius: '50%', background: 'var(--success)', border: '3px solid var(--surface)', boxShadow: '0 0 10px var(--success)' }} />
                </div>
 
-                <div style={{ flex: '1 1 320px' }}>
-                   <h1 className="fluid-h1" style={{ fontWeight: 950, margin: 0, fontSize: '2.5rem', letterSpacing: '-0.04em' }}>{profile?.full_name}</h1>
-                   {profile?.tagline && (
-                      <p style={{ fontSize: '1rem', color: 'var(--brand)', fontStyle: 'italic', margin: '0.4rem 0 0.75rem', fontWeight: 800 }}>
-                         "{profile.tagline}"
-                      </p>
-                   )}
-                   <p style={{ color: 'var(--text-sub)', fontSize: '1rem', margin: '0.5rem 0 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 700 }}>
-                     <ShieldCheck size={18} color="var(--brand)" />
-                     {profile?.course_name || 'GroupFlow Elite'} &bull; {(profile as any)?.groups?.name || 'Independent Specialist'}
+                 <div style={{ flex: '1 1 320px' }}>
+                    <h1 className="fluid-h1" style={{ fontWeight: 950, margin: 0, fontSize: '2.5rem', letterSpacing: '-0.04em' }}>{profile?.full_name}</h1>
+                    {profile?.tagline && (
+                       <p style={{ fontSize: '1rem', color: 'var(--brand)', fontStyle: 'italic', margin: '0.4rem 0 0.75rem', fontWeight: 800 }}>
+                          "{profile.tagline}"
+                       </p>
+                    )}
+                    <p style={{ color: 'var(--text-sub)', fontSize: '1rem', margin: '0.5rem 0 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 700 }}>
+                      <ShieldCheck size={18} color="var(--brand)" />
+                      {profile?.course_name || 'System Analyst'} &bull; {(profile as any)?.groups?.name || 'Session Node'}
+                    </p>
+                   <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 700 }}>
+                         <Mail size={14} /> {profile?.email}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 700 }}>
+                         <Calendar size={14} /> Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'N/A'}
+                      </span>
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--gap-md)' }}>
+
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--gap-md)', marginBottom: '0.5rem' }}>
+                <div style={{ background: 'var(--brand)', color: 'white', borderRadius: '20px', padding: 'var(--card-p)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '150px', boxShadow: '0 8px 16px rgba(var(--brand-rgb), 0.2)' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.5rem' }}>
+                      <Activity size={18} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>System Influence</span>
+                   </div>
+                   <div style={{ fontSize: '2.75rem', fontWeight: 950, lineHeight: 1, letterSpacing: '-0.04em' }}>{profile?.total_score || 0}</div>
+                   <p style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.6rem', fontWeight: 700 }}>Contribution Authority</p>
+                </div>
+
+                <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--card-p)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem', justifyContent: 'center' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Account Status</span>
+                      <span style={{ fontWeight: 950, fontSize: '1rem', color: 'var(--success)' }}>{profile?.rank || 'Verified'}</span>
+                   </div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Terminal ID</span>
+                      <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>{profile?.school_id || 'U-ID-01'}</span>
+                   </div>
+                </div>
+             </div>
+
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100%, 1fr))', gap: 'var(--gap-md)', marginBottom: '0.5rem' }}>
+                <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--section-p)', border: '1px solid var(--border)' }}>
+                   <h3 style={{ fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
+                      <Fingerprint size={16} color="var(--brand)" /> 
+                      Performance Summary
+                   </h3>
+                   <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.9, fontWeight: 500 }}>
+                      {profile?.biography || `System operator active within the GroupFlow environment. Contributing to high-performance modular units and collaborative synchronization.`}
                    </p>
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 700 }}>
-                        <Mail size={14} /> {profile?.email}
-                     </span>
-                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 700 }}>
-                        <Calendar size={14} /> Joined {profile?.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : 'N/A'}
-                     </span>
-                  </div>
-               </div>
-            </div>
-         </div>
-
-         <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--gap-md)' }}>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--gap-md)', marginBottom: '0.5rem' }}>
-               <div style={{ background: 'var(--brand)', color: 'white', borderRadius: '20px', padding: 'var(--card-p)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '150px', boxShadow: '0 8px 16px rgba(var(--brand-rgb), 0.2)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.5rem' }}>
-                     <Activity size={18} />
-                     <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>Global Influence</span>
-                  </div>
-                  <div style={{ fontSize: '2.75rem', fontWeight: 950, lineHeight: 1, letterSpacing: '-0.04em' }}>{profile?.total_score || 0}</div>
-                  <p style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.6rem', fontWeight: 700 }}>Workstation Authority Score</p>
-               </div>
-
-               <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--card-p)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem', justifyContent: 'center' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Legacy Tier</span>
-                     <span style={{ fontWeight: 950, fontSize: '1rem', color: 'var(--success)' }}>#{profile?.rank || 'Level 1'}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Registry ID</span>
-                     <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>{profile?.school_id || 'NOT_LINKED'}</span>
-                  </div>
-               </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100%, 1fr))', gap: 'var(--gap-md)', marginBottom: '0.5rem' }}>
-               <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--section-p)', border: '1px solid var(--border)' }}>
-                  <h3 style={{ fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
-                     <Fingerprint size={16} color="var(--brand)" /> 
-                     Operational Narrative
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.9, fontWeight: 500 }}>
-                     {profile?.biography || `Core active specialist in the GroupFlow network. Leading ${profile?.course_name || 'distributed modules'} with a focus on high-fidelity implementation.`}
-                  </p>
-               </div>
+                </div>
 
                {profile?.stack && (
                   <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '20px', padding: '1.75rem', border: '1px solid var(--border)' }}>

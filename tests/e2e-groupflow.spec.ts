@@ -36,17 +36,17 @@ test.describe('End-to-End: GroupFlow Control Station', () => {
       
       // Wait for Dashboard landing
       await expect(p).toHaveURL(/\/dashboard/);
-      await expect(p.locator('text=Welcome to GroupFlow')).toBeVisible();
+      await expect(p.locator('text=Control Station Initialized')).toBeVisible();
     }
 
     // 2. TEAM INITIALIZATION (User 0 creates the team)
-    await pages[0].click('text="Join a Module / Group"');
+    await pages[0].click('text="Initialize Hub Access"');
     await expect(pages[0]).toHaveURL(/\/dashboard\/join/);
     
     await pages[0].fill('input[id="name"]', 'Alpha Test Team');
     await pages[0].fill('input[id="module_code"]', moduleCode);
     await pages[0].fill('input[id="create_join_password"]', joinPassword);
-    await pages[0].click('button:has-text("Create Team")');
+    await pages[0].click('button:has-text("Establish Session")');
 
     // Wait for redirect to Dashboard with Kanban
     await expect(pages[0]).toHaveURL(/\/dashboard/);
@@ -55,10 +55,10 @@ test.describe('End-to-End: GroupFlow Control Station', () => {
     // 3. TEAM COALESCENCE (Users 1-3 join the team)
     for (let i = 1; i < users.length; i++) {
       const p = pages[i];
-      await p.click('text="Join a Module / Group"');
+      await p.click('text="Initialize Hub Access"');
       await p.fill('input[id="create_module_code"]', moduleCode);
       await p.fill('input[id="join_password"]', joinPassword);
-      await p.click('button:has-text("Verify & Join")');
+      await p.click('button:has-text("Authorize Access")');
       
       await expect(p).toHaveURL(/\/dashboard/);
       await expect(p.locator('text=Alpha Test Team')).toBeVisible();

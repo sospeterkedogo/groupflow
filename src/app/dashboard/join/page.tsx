@@ -40,15 +40,15 @@ function JoinGroupContent() {
           {/* Create Group Route */}
           <div className="auth-card" style={{ flex: '1 1 300px', margin: 0 }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <Plus size={20} color="var(--accent-color)" />
-                <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Create New Group</h2>
+                 <Plus size={20} color="var(--brand)" />
+                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Establish New Team</h2>
              </div>
-             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-                Form a new team module on the GroupFlow platform.
-             </p>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
+                 Initialize a primary team module for project orchestration.
+              </p>
              <form action={createGroup}>
-                <div className="form-group">
-                   <label className="form-label" htmlFor="name">Group Name:</label>
+                 <div className="form-group">
+                    <label className="form-label" htmlFor="name" style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>Team Designation:</label>
                    <input className="form-input" id="name" name="name" type="text" placeholder="e.g. Apollo Team" required />
                 </div>
                 <div className="form-group">
@@ -59,7 +59,7 @@ function JoinGroupContent() {
                    <label className="form-label" htmlFor="create_join_password">Join Password:</label>
                    <input className="form-input" id="create_join_password" name="join_password" type="password" placeholder="Set a group password" required />
                 </div>
-                <SubmitButton label="Create Team" />
+                 <SubmitButton label="Establish Session" />
              </form>
           </div>
 
@@ -67,11 +67,11 @@ function JoinGroupContent() {
           <div className="auth-card" style={{ flex: '1 1 300px', margin: 0 }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                 <Key size={20} color="var(--primary-color)" />
-                <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Join Existing Module</h2>
-             </div>
-             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-                Link your account to an existing class cohort using the module code given by your lecturer.
-             </p>
+                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Link to Session Node</h2>
+              </div>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
+                 Connect your account to an active session module using the security code provided by the module Lead.
+              </p>
              <form action={joinGroup}>
                 <div className="form-group">
                    <label className="form-label" htmlFor="create_module_code">Module Code:</label>
@@ -81,7 +81,7 @@ function JoinGroupContent() {
                    <label className="form-label" htmlFor="join_password">Join Password:</label>
                    <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Enter group password" required />
                 </div>
-                <SubmitButton label="Verify & Join" secondary />
+                 <SubmitButton label="Authorize Access" secondary />
              </form>
           </div>
 

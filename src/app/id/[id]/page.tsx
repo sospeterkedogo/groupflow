@@ -96,11 +96,11 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '1.5rem', color: 'var(--text-sub)', fontSize: '1.1rem' }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <MapPin size={18} />
-                    <span>{(Array.isArray(profile.groups) ? profile.groups[0]?.name : profile.groups?.name) || 'Independent Specialist'}</span>
+                    <span>{(Array.isArray(profile.groups) ? profile.groups[0]?.name : profile.groups?.name) || 'Operational Node'}</span>
                  </div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <TrendingUp size={18} />
-                    <span>Expertise Level: {profile.total_score > 500 ? 'Architect' : 'Lead Specialist'}</span>
+                    <span>Performance Tier: {profile.total_score > 500 ? 'System Architect' : 'Strategic Specialist'}</span>
                  </div>
               </div>
             </div>
@@ -110,7 +110,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
             <div style={{ background: 'var(--surface)', padding: '2.5rem', borderRadius: '32px', border: '1px solid var(--border)', textAlign: 'center' }}>
                <Award size={40} color="var(--brand)" style={{ marginBottom: '1rem' }} />
                <div style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.02em' }}>{profile.total_score}</div>
-               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Validity Score</div>
+               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Influence Score</div>
             </div>
             <div style={{ background: 'var(--surface)', padding: '2.5rem', borderRadius: '32px', border: '1px solid var(--border)', textAlign: 'center' }}>
                <Zap size={40} color="#ff9800" style={{ marginBottom: '1rem' }} />
@@ -120,18 +120,18 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
             <div style={{ background: 'var(--surface)', padding: '2.5rem', borderRadius: '32px', border: '1px solid var(--border)', textAlign: 'center' }}>
                <Clock size={40} color="var(--text-sub)" style={{ marginBottom: '1rem' }} />
                <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '1rem' }}>{isOnline ? 'ACTIVE' : 'OFFLINE'}</div>
-               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', marginTop: '0.5rem' }}>Live Presence Status</div>
+               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-sub)', textTransform: 'uppercase', marginTop: '0.5rem' }}>Live Session Status</div>
             </div>
           </div>
 
           <section style={{ background: 'var(--surface)', borderRadius: '32px', border: '1px solid var(--border)', padding: '3rem' }}>
             <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                <FileCheck size={24} color="var(--brand)" /> 
-               Execution Registry
+               Personnel Registry
             </h2>
             <div style={{ display: 'grid', gap: '1rem' }}>
                {tasks.length === 0 ? (
-                 <p style={{ color: 'var(--text-sub)', fontStyle: 'italic' }}>No certified contributions detected in the public log.</p>
+                 <p style={{ color: 'var(--text-sub)', fontStyle: 'italic' }}>No active entries detected in the system log.</p>
                ) : (
                  tasks.map(task => (
                    <div key={task.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem', background: 'var(--bg-main)', borderRadius: '20px', border: '1px solid var(--border)' }}>
@@ -147,7 +147,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ id: st
           </section>
 
           <footer style={{ marginTop: '6rem', textAlign: 'center', opacity: 0.6 }}>
-             <p style={{ fontSize: '0.9rem' }}>Academic Protocol ID: <strong>{profile.id}</strong></p>
+             <p style={{ fontSize: '0.9rem' }}>System Registry ID: <strong>{profile.id}</strong></p>
              <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1.5rem' }}>
                 <a href="#" style={{ color: 'var(--text-main)' }}><ExternalLink size={20} /></a>
                 <a href="#" style={{ color: 'var(--text-main)' }}><User size={20} /></a>

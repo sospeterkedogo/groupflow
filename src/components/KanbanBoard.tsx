@@ -395,15 +395,17 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                 })}
               </div>
               {others.length > 0 && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>
-                  {others.length} {others.length === 1 ? 'collaborator' : 'collaborators'} active
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.8rem', background: 'var(--bg-main)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {others.length} Team {others.length === 1 ? 'Node' : 'Nodes'} Active
+                  </span>
+                </div>
               )}
             </div>
           </div>
           {overdueCount > 0 && (
-            <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertCircle size={14} /> {overdueCount} Overdue Tasks
+            <span className="badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
+              <AlertCircle size={14} /> {overdueCount} Critical Tasks
             </span>
           )}
         </div>
@@ -411,8 +413,8 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           <div style={{ width: `${globalProbability}%`, height: '100%', backgroundColor: globalProbability < 30 ? 'var(--error)' : 'var(--brand)', transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>Overall Progress: <span style={{ color: 'var(--text-main)' }}>{globalProbability}%</span></span>
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 600 }}>{storageTasks?.length || 0} Tasks</span>
+          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 700 }}>Project Velocity: <span style={{ color: 'var(--text-main)', fontWeight: 900 }}>{globalProbability}%</span></span>
+          <span style={{ fontSize: '0.875rem', color: 'var(--text-sub)', fontWeight: 700 }}>{storageTasks?.length || 0} Registered Tasks</span>
         </div>
       </div>
 
@@ -421,13 +423,13 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
           <input 
             type="text" 
-            placeholder="Filter tasks by title, category, or keyword..." 
+            placeholder="Search system tasks..." 
             value={boardSearch}
             onChange={(e) => setBoardSearch(e.target.value)}
             style={{ 
               width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '14px', 
               background: 'var(--bg-sub)', border: '1px solid var(--border)', color: 'var(--text-main)', 
-              fontSize: '0.875rem', outline: 'none', transition: 'all 0.2s' 
+              fontSize: '0.875rem', outline: 'none', transition: 'all 0.2s', fontWeight: 600
             }}
             className="search-focus"
           />
@@ -441,12 +443,12 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           )}
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontSize: '0.75rem', fontWeight: 800 }} className="hide-mobile">
-              <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
-              ACTIVE UPLINK
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }} className="hide-mobile">
+              <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
+              Node Verified
             </div>
-          <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
-            + New Task
+          <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto', fontWeight: 900, padding: '0.75rem 1.5rem', borderRadius: '14px' }}>
+            + Create Task
           </button>
         </div>
       </div>

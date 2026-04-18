@@ -131,42 +131,42 @@ export default function Sidebar({ user }: SidebarProps) {
         zIndex: 5000,
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 1rem',
+        padding: '0 0.75rem',
         background: 'var(--surface)',
         borderBottom: '2px solid var(--border)',
         boxShadow: 'var(--shadow-md)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <button 
             onClick={() => setIsOpen(true)} 
             aria-label="Toggle Menu"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
-               <Activity size={20} />
+            <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
+               <Activity size={18} />
             </div>
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.2rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.1rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
               Group<span style={{ color: 'var(--brand)' }}>Flow</span>
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 6px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
-              <span style={{ fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE</span>
+              <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE NODES</span>
             </div>
           </div>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <NotificationBell />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ transform: 'scale(0.85)' }}><NotificationBell /></div>
           <button 
-            onClick={() => handleNav('/dashboard/profile', 'My Profile')} 
-            style={{ width: '36px', height: '36px', borderRadius: '50%', border: '2px solid var(--brand)', overflow: 'hidden', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
+            onClick={() => router.push('/dashboard/profile')} 
+            style={{ width: '32px', height: '32px', borderRadius: '10px', border: '2px solid var(--brand)', overflow: 'hidden', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
           >
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
             ) : (
-              <UserCircle size={22} color="var(--text-sub)" />
+              <UserCircle size={20} color="var(--text-sub)" />
             )}
           </button>
         </div>
@@ -192,16 +192,16 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Header / Toggle */}
         <div style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', minHeight: 'var(--h-nav)' }}>
           {isOpen ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-              <button onClick={() => handleNav('/dashboard', 'Dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.3rem', color: 'var(--text-main)', letterSpacing: '-0.04em' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
+              <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.04em', flexShrink: 0 }}>
                 Group<span style={{ color: 'var(--brand)' }}>Flow</span>
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 12px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.05em' }}>{onlineCount} ONLINE</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE</span>
               </div>
               <div style={{ flex: 1 }} />
-              <div className="hide-mobile" style={{ marginRight: '0.5rem' }}>
+              <div className="hide-mobile" style={{ marginRight: '0.25rem', flexShrink: 0 }}>
                 <NotificationBell />
               </div>
             </div>

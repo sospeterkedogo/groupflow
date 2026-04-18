@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
-import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, UserCircle } from 'lucide-react'
+import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users } from 'lucide-react'
 import { Group } from '@/types/database'
 import { useProfile } from '@/context/ProfileContext'
 
@@ -141,11 +141,11 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
           </h1>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-            <div style={{ padding: '0.6rem 1.25rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '12px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.25rem' }}>
+            <div style={{ padding: '0.65rem 1.4rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '14px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: 'var(--shadow-sm)' }}>
                <Zap size={14} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
-               <span style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-                  CURRENT TEAM: <span style={{ color: 'var(--brand)' }}>{group?.name || 'SYNCING...'}</span>
+               <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  ACTIVE SESSION: <span style={{ color: 'var(--brand)' }}>{group?.name || 'INITIALIZING...'}</span>
                </span>
             </div>
             
@@ -153,27 +153,30 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
               onClick={() => setShowMembers(!showMembers)}
               className={`btn ${showMembers ? 'btn-primary' : 'btn-secondary'}`}
               style={{ 
-                fontSize: '0.75rem', 
+                fontSize: '0.8rem', 
                 fontWeight: 900, 
-                padding: '0.6rem 1.25rem', 
-                borderRadius: '12px', 
+                padding: '0.65rem 1.4rem', 
+                borderRadius: '14px', 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '0.5rem',
+                gap: '0.6rem',
                 border: showMembers ? 'none' : '1px solid var(--border)',
                 transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                boxShadow: showMembers ? '0 4px 12px rgba(var(--brand-rgb), 0.3)' : 'none'
+                boxShadow: showMembers ? '0 4px 12px rgba(var(--brand-rgb), 0.3)' : 'var(--shadow-sm)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
               }}
             >
-              <UserCircle size={16} />
-              TEAM MEMBERS
+              <Users size={16} />
+              Team Members
               <span style={{ 
                 background: showMembers ? 'white' : 'var(--brand)', 
                 color: showMembers ? 'var(--brand)' : 'white', 
-                padding: '1px 6px', 
-                borderRadius: '6px', 
-                fontSize: '0.65rem',
-                marginLeft: '0.25rem'
+                padding: '2px 8px', 
+                borderRadius: '8px', 
+                fontSize: '0.7rem',
+                marginLeft: '0.4rem',
+                fontWeight: 950
               }}>
                 {members.length || 0}
               </span>

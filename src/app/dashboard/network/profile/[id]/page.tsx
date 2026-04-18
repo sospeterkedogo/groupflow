@@ -259,33 +259,33 @@ export default function StudentProfilePage() {
              {activeTab === 'info' && (
                 <div style={{ animation: 'slideUp 0.4s ease-out' }}>
                    <div style={{ marginBottom: '2.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.02em', marginBottom: '1rem' }}>Student Overview</h3>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.02em', marginBottom: '1rem' }}>Specialist Overview</h3>
                       <div style={{ padding: '1.25rem', background: 'var(--bg-sub)', borderRadius: '22px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                          <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                             <GraduationCap size={20} />
                          </div>
                          <div>
-                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Current Track</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 850 }}>{member.course_name || 'Independent Study'}</div>
+                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Current Protocol</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 850 }}>{member.course_name || 'System Analyst'}</div>
                          </div>
                       </div>
                    </div>
 
                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2.5rem' }}>
                       <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Points</div>
+                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Authority Score</div>
                          <div style={{ fontSize: '2.25rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.03em' }}>{member.total_score}</div>
                       </div>
                       <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Grad Class</div>
-                         <div style={{ fontSize: '1.1rem', fontWeight: 900, marginTop: '0.5rem' }}>Class of {member.completion_year}</div>
+                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Project Cycle</div>
+                         <div style={{ fontSize: '1.1rem', fontWeight: 900, marginTop: '0.5rem' }}>Class of {member.completion_year || '2026'}</div>
                       </div>
                    </div>
 
                    <div style={{ marginBottom: '2rem' }}>
-                      <h4 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>About {member.full_name?.split(' ')[0]}</h4>
+                      <h4 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Personnel Dossier</h4>
                       <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85, whiteSpace: 'pre-wrap' }}>
-                        {member.biography || `An active scholar in the GroupFlow network, specializing in ${member.course_name || 'their academic field'} and contributing to collaborative research initiatives.`}
+                        {member.biography || `An active specialist in the GroupFlow network, focusing on modular systems and distributed collaborative synchronization.`}
                       </p>
                    </div>
 

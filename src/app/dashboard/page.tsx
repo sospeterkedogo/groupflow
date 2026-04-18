@@ -20,11 +20,11 @@ export default async function DashboardPage() {
   if (!profile?.group_id) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '4rem' }}>
-        <h2 style={{ marginBottom: '1rem', fontSize: '2rem', fontWeight: 900 }}>Welcome to GroupFlow</h2>
-        <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', fontWeight: 500 }}>Your workspace is currently a blank canvas. Join a project module to begin orchestrating.</p>
+        <h2 style={{ marginBottom: '1rem', fontSize: '2.5rem', fontWeight: 950, letterSpacing: '-0.04em' }}>Control Station Initialized</h2>
+        <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', fontWeight: 600, fontSize: '1.1rem' }}>Operational node detected. Please link to a project module to begin orchestration.</p>
         
-        <Link href="/dashboard/join" className="btn btn-primary" style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem', borderRadius: '16px' }}>
-           Join a Module / Group
+        <Link href="/dashboard/join" className="btn btn-primary" style={{ padding: '1rem 2.5rem', width: 'auto', fontSize: '1.1rem', borderRadius: '16px', fontWeight: 900 }}>
+           Initialize Hub Access
         </Link>
       </div>
     )
