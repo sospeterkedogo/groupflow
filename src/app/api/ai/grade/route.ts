@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { checkBotId } from 'botid/server'
 
 const OPENAI_API_URL = process.env.OPENAI_API_BASE || 'https://api.openai.com/v1'
 const OPENAI_API_KEY = process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY
 
 export async function POST(req: Request) {
+  // BotID Verification
+  const verification = await checkBotId()
+  if (verification.isBot) {
+    return new NextResponse(JSON.stringify({ 
+      error: 'Automated access detected. Only scholars may enter the Skirmish archives.' 
+    }), { status: 403 })
+  }
+
   if (!OPENAI_API_KEY) {
     return new NextResponse(JSON.stringify({ error: 'AI Gateway is not configured.' }), { status: 500 })
   }

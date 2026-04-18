@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { checkBotId } from 'botid/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-11-15',
 })
 
 export async function POST(req: Request) {
+  // BotID Verification
+  const verification = await checkBotId()
+  if (verification.isBot) {
+    return new NextResponse(JSON.stringify({ 
+      error: 'Automated request detected. Please return to the dashboard and try again.' 
+    }), { status: 403 })
+  }
+
   const supabase = await createServerSupabaseClient()
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 

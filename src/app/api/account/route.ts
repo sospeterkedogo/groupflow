@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { checkBotId } from 'botid/server'
 
 export async function GET(req: Request) {
+  // BotID Verification
+  const verification = await checkBotId()
+  if (verification.isBot) {
+    return new NextResponse('Automated request intercepted. Only verified scholars may export archives.', { status: 403 })
+  }
+
   try {
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -45,6 +52,12 @@ export async function GET(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  // BotID Verification
+  const verification = await checkBotId()
+  if (verification.isBot) {
+    return new NextResponse('Automated termination request intercepted. Only verified scholars may obliterate their identity.', { status: 403 })
+  }
+
   try {
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
