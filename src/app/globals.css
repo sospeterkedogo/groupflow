@@ -21,11 +21,26 @@
   --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  /* Responsive Tokens */
+  /* Spacing & Layout Tokens */
   --h-nav: 64px;
   --h-mobile-bottom: 74px;
-  --p-safe: 1rem;
+  --p-safe: 1.5rem;
+  --section-p: 2rem;
+  --card-p: 1.25rem;
+  --gap-md: 1.25rem;
+  --gap-lg: 2rem;
   --vh-dynamic: 100dvh;
+}
+
+/* Mobile Overrides */
+@media (max-width: 768px) {
+  :root {
+    --p-safe: 0.75rem;
+    --section-p: 1.25rem;
+    --card-p: 1rem;
+    --gap-md: 0.75rem;
+    --gap-lg: 1.25rem;
+  }
 }
 
 /* Native Dark Mode Fallback (ThemeProvider overrides this) */
@@ -539,7 +554,7 @@ h1, h2, h3, h4, h5, h6 {
   overflow-x: hidden;
   position: relative;
   background-color: var(--bg-main);
-  padding: 1.5rem;
+  padding: var(--p-safe);
   transition: all 0.3s ease;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -561,8 +576,8 @@ h1, h2, h3, h4, h5, h6 {
   .sidebar-container.closed { transform: translateX(-100%); }
 
   .main-content {
-    padding: 1rem;
-    padding-top: calc(var(--h-nav) + 1rem); /* Space for Top Header */
+    padding: var(--p-safe);
+    padding-top: calc(var(--h-nav) + var(--p-safe)); /* Space for Top Header */
     padding-bottom: calc(var(--h-mobile-bottom) + 3.5rem + env(safe-area-inset-bottom)); /* Aggressive space for Bottom Nav */
     height: var(--vh-dynamic);
     width: 100%;

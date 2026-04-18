@@ -642,15 +642,15 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
       <style jsx>{`
         .avatar-bubble:hover { transform: scale(1.15) translateY(-2px); z-index: 10; filter: brightness(1.1); }
-        .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; min-height: 70vh; }
+        .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-md); min-height: 70vh; }
         @media (max-width: 1024px) {
           .kanban-board { display: flex; overflow-x: auto; padding-bottom: 2rem; }
           .kanban-column { flex: 0 0 calc(100vw - 3rem); }
         }
-        .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid var(--border); }
+        .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: var(--card-p); display: flex; flex-direction: column; gap: var(--gap-md); border: 1px solid var(--border); }
         .kanban-column-header { font-weight: 800; font-size: 0.875rem; text-transform: uppercase; color: var(--text-sub); display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 0.5rem; }
-        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; min-height: 200px; }
-        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; cursor: grab; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: var(--gap-md); min-height: 200px; }
+        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--card-p); cursor: grab; transition: all 0.3s; box-shadow: var(--shadow-sm); }
         .kanban-card:hover { transform: translateY(-4px); border-color: var(--brand); }
         .kanban-card-title { font-weight: 700; font-size: 1rem; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.4; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
