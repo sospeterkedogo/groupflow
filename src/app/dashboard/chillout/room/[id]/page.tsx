@@ -1,191 +1,297 @@
 'use client'
 
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { 
   RoomProvider, 
   useStorage, 
   useMutation, 
   useMyPresence, 
-  useOthers,
-  useUpdateMyPresence
+  useOthers
 } from '@/liveblocks.config'
 import { LiveList, LiveObject } from '@liveblocks/client'
 import { 
   Trophy, 
   Timer, 
-  User, 
   Crown, 
-  CheckCircle2, 
-  XCircle, 
-  ArrowRight,
   Zap,
-  Target,
-  Download,
-  LogOut,
-  Sparkles,
-  Loader2
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
+import { useNotifications } from '@/components/NotificationProvider'
 import confetti from 'canvas-confetti'
+import { motion, AnimatePresence } from 'framer-motion'
 import { jsPDF } from 'jspdf'
+import { updateUserGameStats } from '@/app/dashboard/actions'
 
 export default function QuizRoomPage() {
   const params = useParams()
   const roomId = params?.id as string
   
+  if (!roomId) return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="animate-spin" /></div>
+
   return (
     <RoomProvider 
       id={roomId} 
       initialStorage={{ 
-        tasks: new LiveList([]),
-        messages: new LiveList([]),
         quizQuestions: new LiveList([]),
         quizScores: new LiveList([]),
         quizStatus: 'setup',
         currentQuestionIndex: 0,
         activeTurnUserId: null,
-        gameId: roomId
+        roundStartTime: 0,
+        timerDuration: 20,
+        config: new LiveObject({ difficulty: 'Medium', mode: 'Speed Recall' })
       }}
-      initialPresence={{ draggingTaskId: null, isThinking: false }}
+      initialPresence={{ draggingTaskId: null, isThinking: false, lastAction: null }}
     >
-      <QuizGameContainer />
+      <QuizGameContainer roomId={roomId} />
     </RoomProvider>
   )
 }
 
-function QuizGameContainer() {
+function QuizGameContainer({ roomId }: { roomId: string }) {
   const { profile } = useProfile()
+  const { addToast } = useNotifications()
   const router = useRouter()
   const [me, updateMyPresence] = useMyPresence()
   const others = useOthers()
+  
   const quizStatus = useStorage(s => s.quizStatus)
   const questions = useStorage(s => s.quizQuestions)
-  const currentIdx = useStorage(s => s.currentQuestionIndex)
+  const currentIdx = useStorage(s => s.currentQuestionIndex) ?? 0
   const scores = useStorage(s => s.quizScores)
   const activeTurnId = useStorage(s => s.activeTurnUserId)
+  const roundStartTime = useStorage(s => s.roundStartTime)
+  const timerDuration = useStorage(s => s.timerDuration) ?? 20
+  const config = useStorage(s => s.config)
   
+  const [timeLeft, setTimeLeft] = useState(timerDuration)
   const [showIntro, setShowIntro] = useState(true)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [hasAnswered, setHasAnswered] = useState(false)
-  
-  // ── MUTATIONS ───────────────────────────────────────────────────
-  const initializeGame = useMutation(({ storage }) => {
-    // Generate some mock questions if empty
-    if (storage.get('quizQuestions').length === 0) {
-      const qPool = [
-        { id: '1', question: 'What is the primary goal of GroupFlow?', options: ['Automation', 'Accountability', 'Socializing', 'Gaming'], correctAnswer: 1 },
-        { id: '2', question: 'Which phase comes after Research in our workflow?', options: ['Execute', 'Plan', 'Verify', 'Deploy'], correctAnswer: 1 },
-        { id: '3', question: 'What does Flux representative of?', options: ['Money', 'Activity', 'Energy', 'Velocity'], correctAnswer: 3 },
-        { id: '4', question: 'Maximum capacity of a Pro team?', options: ['5', '12', '25', 'Unlimited'], correctAnswer: 2 }
-      ]
-      qPool.forEach(q => storage.get('quizQuestions').push(q))
-    }
-    storage.set('quizStatus', 'playing')
-    // Pick first random player
-    const players = [profile?.id, ...others.map(o => o.connectionId)].filter(Boolean) as string[]
-    storage.set('activeTurnUserId', players[Math.floor(Math.random() * players.length)])
-  }, [profile?.id, others])
+  const [textAnswer, setTextAnswer] = useState('')
+  const [isRevealed, setIsRevealed] = useState(false)
+  const [isGrading, setIsGrading] = useState(false)
+  const [aiCritique, setAiCritique] = useState('')
 
-  const submitAnswer = useMutation(({ storage }, isCorrect: boolean) => {
+  // ── LOADING GUARD ──────────────────────────────────────────────
+  if (quizStatus === null) {
+    return (
+      <div style={{ height: 'calc(var(--vh-dynamic) - 6rem)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--text-sub)' }}>
+         <Loader2 className="animate-spin" size={32} />
+         <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>Calibrating Storage...</div>
+      </div>
+    )
+  }
+  const [hasSetupData, setHasSetupData] = useState(false)
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const setup = sessionStorage.getItem(`skirmish_setup_${roomId}`)
+        if (setup) setHasSetupData(true)
+    }
+  }, [roomId])
+
+  const handleStartSkirmish = useMutation(({ storage }) => {
+    const setupRaw = sessionStorage.getItem(`skirmish_setup_${roomId}`)
+    if (!setupRaw) return
+
+    try {
+        const { questions: newQs, config: setupConfig } = JSON.parse(setupRaw)
+        
+        // Populate Storage
+        const qList = storage.get('quizQuestions')
+        qList.clear()
+        newQs.forEach((q: any) => qList.push(q))
+        
+        storage.set('quizStatus', 'playing')
+        storage.set('currentQuestionIndex', 0)
+        storage.set('roundStartTime', Date.now())
+        storage.set('activeTurnUserId', profile?.id)
+        
+        const firstQ = newQs[0]
+        const firstDuration = (firstQ?.difficulty_multiplier || 2) * 10
+        storage.set('timerDuration', firstDuration)
+        
+        const conf = storage.get('config')
+        conf.set('difficulty', setupConfig.difficulty)
+        conf.set('mode', setupConfig.mode)
+
+        addToast('Skirmish Injected', 'AI shards synchronized. Battle started!', 'success')
+        sessionStorage.removeItem(`skirmish_setup_${roomId}`)
+    } catch (err) {
+        addToast('Critical Failure', 'Mental sync aborted.', 'error')
+    }
+  }, [roomId, profile])
+
+  // ── TIMER LOGIC ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (quizStatus !== 'playing' || !roundStartTime) return
+
+    const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - roundStartTime) / 1000)
+        const remaining = Math.max(0, (timerDuration || 20) - elapsed)
+        setTimeLeft(remaining)
+
+        if (remaining === 0 && activeTurnId === profile?.id) {
+            handleSkipRound()
+        }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [quizStatus, roundStartTime, timerDuration, activeTurnId, profile?.id])
+
+  // ── RESET UI ON QUESTION CHANGE ──────────────────────────────────
+  useEffect(() => {
+    setSelectedOption(null)
+    setHasAnswered(false)
+    setTextAnswer('')
+    setIsRevealed(false)
+    setAiCritique('')
+    setTimeLeft(timerDuration || 20)
+  }, [currentIdx, timerDuration])
+
+  // ── MUTATIONS ───────────────────────────────────────────────────
+  const submitActionResult = useMutation(({ storage }, isCorrect: boolean, bonusXp = 0) => {
     const userId = profile?.id
     if (!userId) return
 
     // Update Scores
     const scoresList = storage.get('quizScores')
     let found = false
+    const pointsToAdd = isCorrect ? (100 + bonusXp) : -50
+
     for (let i = 0; i < scoresList.length; i++) {
         if (scoresList.get(i).userId === userId) {
-            scoresList.set(i, { ...scoresList.get(i), points: scoresList.get(i).points + (isCorrect ? 100 : -25) })
+            scoresList.set(i, { ...scoresList.get(i), points: Math.max(0, scoresList.get(i).points + pointsToAdd) })
             found = true
             break
         }
     }
     if (!found) {
-        scoresList.push({ userId, userName: profile?.full_name || 'Anonymous', points: isCorrect ? 100 : 0 })
+        scoresList.push({ userId, userName: profile?.full_name || 'Anonymous', points: Math.max(0, pointsToAdd) })
     }
 
-    // Move to next turn
+    // Next Round Setup
+    const currentQList = storage.get('quizQuestions')
     const nextIdx = storage.get('currentQuestionIndex') + 1
-    if (nextIdx < storage.get('quizQuestions').length) {
+    
+    if (nextIdx < currentQList.length) {
       storage.set('currentQuestionIndex', nextIdx)
-      const allPlayers = [userId, ...others.map(o => o.id)].filter(Boolean)
-      storage.set('activeTurnUserId', allPlayers[Math.floor(Math.random() * allPlayers.length)])
+      storage.set('roundStartTime', Date.now())
+      
+      const nextQ = currentQList.get(nextIdx)
+      const nextDuration = (nextQ.difficulty_multiplier || 2) * 10
+      storage.set('timerDuration', nextDuration)
+
+      const players = [userId, ...others.map(o => o.id)].filter(Boolean)
+      storage.set('activeTurnUserId', players[nextIdx % players.length])
     } else {
       storage.set('quizStatus', 'results')
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } })
+      handleFinalizeStats()
     }
   }, [profile, others])
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowIntro(false), 3000)
-    return () => clearTimeout(timer)
-  }, [])
+  const handleSkipRound = () => {
+    submitActionResult(false)
+    addToast('Time Out!', 'The round was skipped due to temporal flux.', 'warning')
+  }
 
-  const currentQ = questions[currentIdx]
+  const handleFinalizeStats = async () => {
+    if (!profile?.id) return
+    const myScore = scores.find(s => s.userId === profile.id)?.points || 0
+    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
+
+    await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
+  }
+
+  // ── INTERACTION HANDLERS ───────────────────────────────────────
+  const currentQ = questions && questions.length > currentIdx ? questions[currentIdx] : null
   const isMyTurn = activeTurnId === profile?.id
 
-  const handleSelect = (idx: number) => {
-    if (!isMyTurn || hasAnswered) return
+  const handleMCSelect = (idx: number) => {
+    if (!isMyTurn || hasAnswered || !currentQ) return
     setSelectedOption(idx)
     setHasAnswered(true)
     
     const correct = idx === currentQ.correctAnswer
     if (correct) confetti({ particleCount: 40, scalar: 0.7 })
     
-    setTimeout(() => {
-      submitAnswer(correct)
-      setSelectedOption(null)
-      setHasAnswered(false)
-    }, 1500)
+    setTimeout(() => submitActionResult(correct), 1500)
   }
 
-  // ── TROPHY GENERATION ───────────────────────────────────────────
+  const handleAIEvaluation = async () => {
+    if (!textAnswer.trim() || !currentQ) return
+    setIsGrading(true)
+    try {
+        const res = await fetch('/api/ai/grade', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+              question: currentQ.question,
+              correctAnswer: currentQ.correctAnswer,
+              userResponse: textAnswer
+           })
+        })
+        const data = await res.json()
+        setAiCritique(data.critique)
+        setHasAnswered(true)
+        
+        if (data.isCorrect) confetti({ particleCount: 50 })
+        
+        setTimeout(() => submitActionResult(data.isCorrect, data.score), 2500)
+    } catch (err) {
+        addToast('Evaluation Failed', 'Judge is offline.', 'error')
+    } finally {
+        setIsGrading(false)
+    }
+  }
+
   const downloadTrophy = () => {
+    if (!scores || scores.length === 0) return
     const doc = new jsPDF()
-    const winner = scores.sort((a,b) => b.points - a.points)[0]
+    const sortedScores = [...scores].sort((a,b) => b.points - a.points)
+    const winner = sortedScores[0]
     
-    doc.setFillColor(15, 23, 42) // Slate 900
+    doc.setFillColor(15, 23, 42)
     doc.rect(0, 0, 210, 297, 'F')
     
-    doc.setTextColor(59, 130, 246) // Blue 500
-    doc.setFontSize(40)
-    doc.text('INSTITUTIONAL TROPHY', 105, 50, { align: 'center' })
+    doc.setTextColor(59, 130, 246)
+    doc.setFontSize(35)
+    doc.text('SKIRMISH RECEIPT', 105, 50, { align: 'center' })
     
     doc.setTextColor(255, 255, 255)
-    doc.setFontSize(22)
-    doc.text('ACADEMIC DOMINANCE ATTAINED', 105, 80, { align: 'center' })
+    doc.setFontSize(20)
+    doc.text(`${config?.difficulty || 'Standard'} ${config?.mode || 'Battle'}`.toUpperCase(), 105, 75, { align: 'center' })
     
-    doc.setFontSize(16)
-    doc.text(`Game ID: ${quizStatus === 'results' ? 'GF-' + Math.random().toString(36).substr(2,6).toUpperCase() : 'PENDING'}`, 105, 100, { align: 'center' })
-    
-    doc.setTextColor(251, 191, 36) // Amber 400
-    doc.setFontSize(30)
-    doc.text(winner?.userName?.toUpperCase() || 'ANONYMOUS', 105, 130, { align: 'center' })
+    doc.setTextColor(251, 191, 36)
+    doc.setFontSize(28)
+    doc.text(winner?.userName?.toUpperCase() || 'PEER', 105, 120, { align: 'center' })
     
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(14)
-    doc.text(`TOTAL SCORE: ${winner?.points || 0}`, 105, 150, { align: 'center' })
-    doc.text(`QUESTIONS CLEARED: ${questions.length}`, 105, 160, { align: 'center' })
+    doc.text(`VICTORY SCORE: ${winner?.points || 0}`, 105, 140, { align: 'center' })
+    doc.text(`CHALLENGES CLEARED: ${questions?.length || 0}`, 105, 150, { align: 'center' })
     
-    doc.setDrawColor(59, 130, 246)
-    doc.setLineWidth(1)
-    doc.line(40, 175, 170, 175)
-    
-    doc.setFontSize(10)
-    doc.text('GROUPFLOW CHILL OUT PROTOCOL v1.0', 105, 280, { align: 'center' })
-    
-    doc.save(`trophy_${winner?.userName || 'winner'}.pdf`)
+    doc.save(`skirmish_receipt_${winner?.userName || 'winner'}.pdf`)
   }
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowIntro(false), 2500)
+    return () => clearTimeout(timer)
+  }, [])
 
   if (showIntro) {
     return (
       <div style={{ height: 'var(--vh-dynamic)', background: 'var(--bg-main)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-         <div className="glitch-container" style={{ position: 'relative' }}>
-            <Zap size={100} className="text-brand animate-pulse" fill="var(--brand)" />
-         </div>
-         <h1 style={{ fontSize: '3rem', fontWeight: 950, letterSpacing: '-0.05em', marginTop: '2rem' }}>INITIALIZING <span style={{ color: 'var(--brand)' }}>SKIRMISH</span></h1>
-         <p style={{ color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Binding Real-Time Flux...</p>
+         <motion.div initial={{ scale: 0.5, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring' }}>
+            <Zap size={120} className="text-brand" fill="var(--brand)" style={{ filter: 'drop-shadow(0 0 30px rgba(var(--brand-rgb), 0.5))' }} />
+         </motion.div>
+         <h1 style={{ fontSize: '3.5rem', fontWeight: 950, letterSpacing: '-0.06em', marginTop: '2rem' }}>SKIRMISH <span style={{ color: 'var(--brand)' }}>ACTIVE</span></h1>
+         <p style={{ color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em' }}>Calibrating Neural Flux...</p>
       </div>
     )
   }
@@ -193,107 +299,187 @@ function QuizGameContainer() {
   return (
     <div className="page-fade" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '2rem', height: 'calc(var(--vh-dynamic) - 6rem)', overflow: 'hidden' }}>
       
-      {/* ── MAIN GAME AREA ────────────────────────────────────────── */}
-      <div style={{ background: 'var(--surface)', borderRadius: '32px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+      {/* ── MAIN SKYRMISH AREA ────────────────────────────────────────── */}
+      <div style={{ background: 'var(--surface)', borderRadius: '32px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden', boxShadow: 'var(--shadow-xl)' }}>
         
         {quizStatus === 'setup' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
              <Crown size={80} className="text-brand" style={{ marginBottom: '2rem', opacity: 0.2 }} />
-             <h2 style={{ fontSize: '2rem', fontWeight: 950, marginBottom: '1rem' }}>Waiting for Participants</h2>
-             <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', maxWidth: '400px', fontWeight: 600 }}>The skirmish will begin once the lobby creator initializes the synchronized questions.</p>
-             {profile?.id && others.length > 0 && <button onClick={initializeGame} className="btn btn-primary" style={{ padding: '1rem 3rem', borderRadius: '16px', fontWeight: 950, fontSize: '1.1rem' }}>DEPLOY GAME FLUX</button>}
-             {others.length === 0 && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-sub)', fontWeight: 700 }}><Loader2 className="animate-spin" size={20} /> SYNCING WITH PEERS...</div>}
+             <h2 style={{ fontSize: '2rem', fontWeight: 950, marginBottom: '1rem' }}>Establishing Connection</h2>
+             <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', maxWidth: '450px', fontWeight: 600 }}>
+                {hasSetupData 
+                  ? "Neural sync detected. You are the Host. Deploy the academic shards when ready." 
+                  : "Syncing with Command Node. Waiting for Host to initiate the skirmish."}
+             </p>
+             
+             {hasSetupData ? (
+                <button 
+                  onClick={handleStartSkirmish}
+                  className="btn btn-primary"
+                  style={{ padding: '1.25rem 3.5rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem', boxShadow: '0 10px 30px rgba(var(--brand-rgb), 0.3)' }}
+                >
+                  STRIKE FIRST: DEPLOY SHARDS
+                </button>
+             ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--brand)', fontWeight: 900 }}>
+                      <Loader2 className="animate-spin" size={24} /> 
+                      <span className="animate-pulse">AWAITING HOST COMMAND...</span>
+                   </div>
+                   <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)' }}>{others.length + 1} Scholars Connected</div>
+                </div>
+             )}
           </div>
         )}
 
-        {quizStatus === 'playing' && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '3rem' }}>
+        {quizStatus === 'playing' && currentQ && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '3rem' }}>
              {/* Header */}
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 950 }}>{currentIdx + 1}</div>
+                   <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 950, fontSize: '1.25rem' }}>{currentIdx + 1}</div>
                    <div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Current Round</div>
-                      <div style={{ fontWeight: 800 }}>Institutional Logic</div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.15em' }}>Round Progress</div>
+                      <div style={{ fontWeight: 850 }}>{config?.mode || 'Battle'} <span style={{ color: 'var(--text-sub)' }}>({config?.difficulty || 'Standard'})</span></div>
                    </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem 1rem', background: 'var(--bg-sub)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                   <Timer size={18} className="text-brand" />
-                   <span style={{ fontWeight: 900, fontSize: '1.25rem', fontFamily: 'monospace' }}>--:--</span>
+                
+                {/* SMART TIMER */}
+                <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                    <svg style={{ transform: 'rotate(-90deg)', width: '60px', height: '60px' }}>
+                        <circle cx="30" cy="30" r="26" fill="none" stroke="var(--border)" strokeWidth="4" />
+                        <motion.circle 
+                            cx="30" cy="30" r="26" fill="none" stroke="var(--brand)" strokeWidth="4"
+                            strokeDasharray="163.36"
+                            animate={{ strokeDashoffset: 163.36 * (1 - timeLeft / (timerDuration || 20)) }}
+                            transition={{ duration: 1, ease: 'linear' }}
+                        />
+                    </svg>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 950, fontSize: '0.9rem', fontFamily: 'monospace' }}>
+                        {timeLeft}s
+                    </div>
                 </div>
              </div>
 
-             {/* Question Card */}
-             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '1rem' }}>{currentQ?.question}</h2>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center' }}>
-                   <Target size={16} className="text-brand" />
-                   <span style={{ fontWeight: 700, color: 'var(--text-sub)' }}>
-                      Active Player: <span style={{ color: isMyTurn ? 'var(--brand)' : 'var(--text-main)', fontWeight: 950 }}>{isMyTurn ? 'YOU' : others.find(o => o.id === activeTurnId)?.info?.name || 'A Peer'}</span>
-                   </span>
+             {/* Question Area */}
+             <div style={{ textAlign: 'center', marginBottom: '3rem', minHeight: '120px' }}>
+                <AnimatePresence mode="wait">
+                   <motion.h2 
+                     key={currentIdx}
+                     initial={{ y: 20, opacity: 0 }}
+                     animate={{ y: 0, opacity: 1 }}
+                     style={{ fontSize: '2.25rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '1.5rem' }}
+                   >
+                     {currentQ.question}
+                   </motion.h2>
+                </AnimatePresence>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', alignItems: 'center' }}>
+                   <motion.div 
+                     animate={isMyTurn ? { scale: [1, 1.05, 1], boxShadow: ['0 0 0px var(--brand)', '0 0 20px var(--brand)', '0 0 0px var(--brand)'] } : {}}
+                     transition={{ repeat: Infinity, duration: 1.5 }}
+                     style={{ padding: '6px 16px', background: isMyTurn ? 'var(--brand)' : 'var(--bg-sub)', color: isMyTurn ? 'white' : 'var(--text-sub)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                   >
+                      {isMyTurn ? '🚨 Your Turn to Strike' : `⚡ ${others.find(o => o.id === activeTurnId)?.info?.name || 'Peer'} is Thinking...`}
+                   </motion.div>
                 </div>
              </div>
 
-             {/* Options Grid */}
-             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                {currentQ?.options.map((opt: string, i: number) => {
-                  const isSelected = selectedOption === i
-                  const isCorrect = hasAnswered && i === currentQ.correctAnswer
-                  const isWrong = hasAnswered && isSelected && i !== currentQ.correctAnswer
-                  
-                  return (
-                    <button 
-                      key={i}
-                      disabled={!isMyTurn || hasAnswered}
-                      onClick={() => handleSelect(i)}
-                      className={`option-btn ${isSelected ? 'selected' : ''}`}
-                      style={{ 
-                        padding: '1.5rem', 
-                        borderRadius: '20px', 
-                        border: '2px solid var(--border)', 
-                        background: 'var(--bg-sub)',
-                        textAlign: 'left',
-                        fontSize: '1.1rem',
-                        fontWeight: 800,
-                        cursor: isMyTurn ? 'pointer' : 'default',
-                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderColor: isCorrect ? 'var(--success)' : isWrong ? 'var(--error)' : isSelected ? 'var(--brand)' : 'var(--border)'
-                      }}
-                    >
-                      <span>{opt}</span>
-                      {isCorrect && <CheckCircle2 className="text-success" />}
-                      {isWrong && <XCircle className="text-error" />}
-                    </button>
-                  )
-                })}
+             {/* Dynamic Mode Controller */}
+             <div style={{ flex: 1 }}>
+                {/* 1. Multiple Choice Mode */}
+                {currentQ?.type === 'multiple_choice' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                        {currentQ.options?.map((opt: string, i: number) => {
+                            const isCorrect = hasAnswered && i === currentQ.correctAnswer
+                            const isWrong = hasAnswered && selectedOption === i && i !== currentQ.correctAnswer
+                            return (
+                                <button 
+                                  key={i}
+                                  disabled={!isMyTurn || hasAnswered}
+                                  onClick={() => handleMCSelect(i)}
+                                  className="glass"
+                                  style={{ 
+                                    padding: '1.5rem', borderRadius: '20px', border: '2px solid',
+                                    borderColor: isCorrect ? 'var(--success)' : isWrong ? 'var(--error)' : selectedOption === i ? 'var(--brand)' : 'var(--border)',
+                                    background: isCorrect ? 'rgba(var(--success-rgb), 0.05)' : 'var(--surface)',
+                                    textAlign: 'left', fontWeight: 800, cursor: isMyTurn ? 'pointer' : 'default', transition: '0.2s', width: '100%'
+                                  }}
+                                >
+                                    {opt}
+                                </button>
+                            )
+                        })}
+                    </div>
+                )}
+
+                {/* 2. Speed Recall Mode */}
+                {config?.mode === 'Speed Recall' && currentQ?.type === 'explanation' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+                        <AnimatePresence>
+                           {isRevealed ? (
+                               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ padding: '2rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '24px', border: '1px dashed var(--brand)', width: '100%', textAlign: 'center' }}>
+                                  <div style={{ fontSize: '0.7rem', fontWeight: 950, color: 'var(--brand)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Correct Answer</div>
+                                  <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{currentQ?.correctAnswer}</div>
+                               </motion.div>
+                           ) : (
+                               <button onClick={() => setIsRevealed(true)} className="btn btn-primary" style={{ padding: '1rem 3rem', borderRadius: '16px', fontWeight: 950 }}>REVEAL FLUX</button>
+                           )}
+                        </AnimatePresence>
+
+                        {isRevealed && isMyTurn && !hasAnswered && (
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => { setHasAnswered(true); submitActionResult(false); }} className="btn" style={{ background: 'var(--error)', color: 'white', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 900 }}>MISSED IT</button>
+                                <button onClick={() => { setHasAnswered(true); confetti(); submitActionResult(true); }} className="btn" style={{ background: 'var(--success)', color: 'white', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 900 }}>GOT IT!</button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* 3. AI Evaluated Mode */}
+                {config?.mode === 'AI Evaluated' && currentQ?.type === 'explanation' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <textarea 
+                          value={textAnswer}
+                          onChange={(e) => setTextAnswer(e.target.value)}
+                          disabled={!isMyTurn || hasAnswered}
+                          placeholder="Synthesize your explanation here..."
+                          style={{ width: '100%', height: '140px', background: 'var(--bg-sub)', border: '2px solid var(--border)', borderRadius: '20px', padding: '1.5rem', color: 'var(--text-main)', fontSize: '1rem', outline: 'none', resize: 'none', transition: 'border-color 0.2s' }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                           <div style={{ color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 600 }}>{textAnswer.length} characters used</div>
+                           <button 
+                             onClick={handleAIEvaluation}
+                             disabled={!isMyTurn || hasAnswered || isGrading || !textAnswer.trim()}
+                             className="btn btn-primary"
+                             style={{ padding: '0.8rem 2.5rem', borderRadius: '14px', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                           >
+                              {isGrading ? <Loader2 className="animate-spin" size={18} /> : <Zap size={18} />}
+                              DEPLOY FOR GRADING
+                           </button>
+                        </div>
+                        {aiCritique && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ padding: '1rem 1.5rem', background: 'var(--bg-main)', borderLeft: '4px solid var(--brand)', borderRadius: '0 12px 12px 0' }}>
+                               <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase' }}>Judge's Critique:</span>
+                               <p style={{ margin: '4px 0 0', fontWeight: 700, fontStyle: 'italic' }}>"{aiCritique}"</p>
+                            </motion.div>
+                        )}
+                    </div>
+                )}
              </div>
-          </div>
+          </motion.div>
         )}
 
         {quizStatus === 'results' && (
            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '3rem' }}>
-              <div className="trophy-reveal" style={{ position: 'relative', marginBottom: '2rem' }}>
-                 <Trophy size={120} className="text-brand" fill="var(--brand)" style={{ filter: 'drop-shadow(0 0 20px rgba(var(--brand-rgb), 0.4))' }} />
-                 <Sparkles size={40} style={{ position: 'absolute', top: -20, right: -20, color: '#fbbf24' }} className="animate-pulse" />
-              </div>
-              <h2 style={{ fontSize: '3rem', fontWeight: 950, marginBottom: '0.5rem' }}>SKIRMISH COMPLETE</h2>
-              <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, maxWidth: '500px', marginBottom: '3rem' }}>The academic hierarchy has been re-established. Final scores are now immutable and archived.</p>
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1, rotate: [0, 10, -10, 0] }} transition={{ duration: 0.5 }}>
+                 <Trophy size={140} className="text-brand" fill="var(--brand)" style={{ filter: 'drop-shadow(0 0 40px rgba(var(--brand-rgb), 0.4))' }} />
+              </motion.div>
+              <h2 style={{ fontSize: '3.5rem', fontWeight: 950, marginBottom: '0.5rem', letterSpacing: '-0.04em' }}>SKIRMISH CONCLUDED</h2>
+              <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, maxWidth: '500px', marginBottom: '3rem' }}>The hierarchy has been established. XP rewards have been injected into your profile.</p>
               
               <div style={{ display: 'flex', gap: '1.5rem' }}>
-                 <button 
-                   onClick={downloadTrophy}
-                   className="btn btn-primary" 
-                   style={{ padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.75rem' }}
-                 >
-                    <Download size={20} />
-                    Download Trophy Receipt
-                 </button>
-                 <button onClick={() => router.push('/dashboard/chillout')} className="btn btn-secondary" style={{ padding: '1rem 2.5rem', borderRadius: '16px', fontWeight: 950 }}>
-                    Exit Lobby
-                 </button>
+                 <button onClick={downloadTrophy} className="btn btn-primary" style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(var(--brand-rgb), 0.2)' }}>Download Skirmish Receipt</button>
+                 <button onClick={() => router.push('/dashboard/chillout')} className="btn btn-secondary" style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem' }}>Exit Zone</button>
               </div>
            </div>
         )}
@@ -302,54 +488,66 @@ function QuizGameContainer() {
       {/* ── SIDEBAR / LEADERBOARD ─────────────────────────────────── */}
       <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
          <div style={{ flex: 1, background: 'var(--surface)', borderRadius: '32px', border: '1px solid var(--border)', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ fontSize: '0.8rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               <Target size={14} className="text-brand" /> Live Leaderboard
-            </h3>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.15em', marginBottom: '1.5rem' }}>Skirmish Standings</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-               {scores.sort((a,b) => b.points - a.points).map((s, idx) => (
-                 <div key={s.userId} style={{ padding: '0.75rem', borderRadius: '14px', background: s.userId === profile?.id ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '24px', fontWeight: 900, color: idx === 0 ? '#fbbf24' : 'var(--text-sub)' }}>#{idx + 1}</div>
-                    <div style={{ flex: 1, fontWeight: 800, fontSize: '0.85rem' }}>{s.userName}</div>
-                    <div style={{ fontWeight: 950, color: 'var(--brand)', fontSize: '0.9rem' }}>{s.points}</div>
+               {scores && [...scores].sort((a,b) => b.points - a.points).map((s, idx) => (
+                 <div key={s.userId} style={{ padding: '1rem', borderRadius: '16px', background: s.userId === profile?.id ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ width: '24px', fontWeight: 950, color: idx === 0 ? '#fbbf24' : 'var(--text-sub)', fontSize: '1.1rem' }}>{idx + 1}.</div>
+                    <div style={{ flex: 1, fontWeight: 850, fontSize: '0.9rem' }}>{s.userName}</div>
+                    <div style={{ fontWeight: 1000, color: 'var(--brand)', fontSize: '1.1rem' }}>{s.points}</div>
                  </div>
                ))}
-               {scores.length === 0 && <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-sub)', fontSize: '0.8rem' }}>Awaiting points data...</div>}
+               {(!scores || scores.length === 0) && (
+                 <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-sub)', fontSize: '0.8rem', fontWeight: 600 }}>Initializing Standings...</div>
+               )}
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
-               <div style={{ fontSize: '0.7rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '1rem' }}>Scholars in Room ({others.length + 1})</div>
-               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--brand)', padding: '2px', border: activeTurnId === profile?.id ? '2px solid var(--success)' : 'none' }}>
-                     <img src={profile?.avatar_url || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+               <div style={{ fontSize: '0.7rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '1rem' }}>Room Population ({others.length + 1})</div>
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--brand)', padding: '2px', border: activeTurnId === profile?.id ? '2px solid var(--success)' : 'none' }}>
+                     <img src={profile?.avatar_url || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                   </div>
                   {others.map(o => (
-                    <div key={o.id} style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--bg-sub)', padding: '2px', border: activeTurnId === o.id ? '2px solid var(--success)' : 'none' }}>
-                      <img src={o.info?.avatar || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    <div key={o.id} style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--bg-sub)', padding: '2px', border: activeTurnId === o.id ? '2px solid var(--success)' : 'none' }}>
+                      <img src={o.info?.avatar || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                     </div>
                   ))}
                </div>
             </div>
          </div>
 
-         <button onClick={() => router.push('/dashboard/chillout')} className="btn btn-secondary" style={{ width: '100%', padding: '1rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', fontWeight: 950 }}>
-            <LogOut size={18} /> Abandon Skirmish
+         <button onClick={() => router.push('/dashboard/chillout')} className="btn btn-secondary" style={{ width: '100%', padding: '1.25rem', borderRadius: '20px', fontWeight: 950, color: 'var(--error)', borderColor: '#ef444433' }}>
+            ABANDON SKIRMISH
          </button>
       </aside>
 
-      <style jsx>{`
-        .option-btn:hover:not(:disabled) {
-           border-color: var(--brand) !important;
-           transform: translateX(8px);
-        }
-        .option-btn.selected {
-           background: rgba(var(--brand-rgb), 0.1) !important;
-        }
+      <style dangerouslySetInnerHTML={{ __html: `
         .animate-pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } }
         .page-fade { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-      `}</style>
+        
+        .neural-bg {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(circle at 50% 50%, rgba(var(--brand-rgb), 0.03) 0%, transparent 70%);
+          z-index: -1;
+          pointer-events: none;
+        }
+
+        .neural-bg::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+      `}} />
+      <div className="neural-bg" />
     </div>
   )
 }

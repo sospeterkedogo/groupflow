@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { X, Info, UserPlus } from 'lucide-react'
+import { X, Info, UserPlus, CheckCircle2, AlertCircle, Timer } from 'lucide-react'
 import { Notification, NotificationContextType, Toast } from '@/types/ui'
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
@@ -161,44 +161,69 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       
       {/* Absolute Toast Container */}
       <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', zIndex: 9999 }}>
-        {toasts.map(toast => (
-          <div 
-            key={toast.id} 
-            className="glass"
-            style={{ 
-              padding: '1.25rem', 
-              borderRadius: '16px', 
-              minWidth: '320px', 
-              maxWidth: '400px', 
-              display: 'flex', 
-              alignItems: 'flex-start', 
-              gap: '1rem',
-              animation: 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              boxShadow: 'var(--shadow-lg)'
-            }}
-          >
-            <div style={{ 
-              padding: '0.5rem', 
-              borderRadius: '10px', 
-              background: toast.type === 'assignment' ? 'rgba(26, 115, 232, 0.1)' : 'rgba(30, 142, 62, 0.1)',
-              color: toast.type === 'assignment' ? 'var(--brand)' : 'var(--success)'
-            }}>
-               {toast.type === 'assignment' ? <UserPlus size={20} /> : <Info size={20} />}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>{toast.title}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{toast.message}</div>
-            </div>
-            <button 
-              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)' }}
+        {toasts.map(toast => {
+          const isError = toast.type === 'error'
+          const isSuccess = toast.type === 'success'
+          const isWarning = toast.type === 'warning'
+          const isAssignment = toast.type === 'assignment'
+          
+          const colors = {
+            bg: isError ? 'rgba(239, 68, 68, 0.1)' : 
+                isSuccess ? 'rgba(34, 197, 94, 0.1)' : 
+                isWarning ? 'rgba(245, 158, 11, 0.1)' : 
+                isAssignment ? 'rgba(26, 115, 232, 0.1)' : 'rgba(148, 163, 184, 0.1)',
+            text: isError ? '#ef4444' : 
+                  isSuccess ? '#22c55e' : 
+                  isWarning ? '#f59e0b' : 
+                  isAssignment ? 'var(--brand)' : 'var(--text-sub)',
+            border: isError ? '#ef444433' : 
+                    isSuccess ? '#22c55e33' : 
+                    isWarning ? '#f59e0b33' : 
+                    'var(--border)'
+          }
+
+          return (
+            <div 
+              key={toast.id} 
+              className="glass"
+              style={{ 
+                padding: '1.25rem', 
+                borderRadius: '16px', 
+                minWidth: '320px', 
+                maxWidth: '400px', 
+                display: 'flex', 
+                alignItems: 'flex-start', 
+                gap: '1rem',
+                animation: 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                border: `1px solid ${colors.border}`,
+                background: 'var(--surface)',
+                boxShadow: 'var(--shadow-lg)'
+              }}
             >
-              <X size={16} />
-            </button>
-          </div>
-        ))}
+              <div style={{ 
+                padding: '0.5rem', 
+                borderRadius: '10px', 
+                background: colors.bg,
+                color: colors.text
+              }}>
+                 {isError ? <AlertCircle size={20} /> : 
+                  isSuccess ? <CheckCircle2 size={20} /> : 
+                  isWarning ? <Timer size={20} /> : 
+                  isAssignment ? <UserPlus size={20} /> : <Info size={20} />}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>{toast.title}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{toast.message}</div>
+              </div>
+              <button 
+                onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)', padding: '4px' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )
+        })}
       </div>
 
       <style jsx>{`

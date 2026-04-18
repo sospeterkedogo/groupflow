@@ -49,3 +49,41 @@ export async function distributeTaskScore(taskId: string, assignees: string[]) {
   revalidatePath('/dashboard', 'layout')
   return { success: true }
 }
+
+export async function updateUserGameStats(userId: string, xpEarned: number, won: boolean) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Admin Node keys missing.')
+  }
+
+  const adminClient = createClient(supabaseUrl, supabaseServiceKey)
+
+  // 1. Fetch current stats
+  const { data: stats } = await adminClient
+    .from('user_game_stats')
+    .select('total_xp, wins, games_played')
+    .eq('user_id', userId)
+    .single()
+
+  const currentStats = stats || { total_xp: 0, wins: 0, games_played: 0 }
+
+  // 2. Update stats
+  const { data, error } = await adminClient
+    .from('user_game_stats')
+    .upsert({
+      user_id: userId,
+      total_xp: currentStats.total_xp + xpEarned,
+      wins: currentStats.wins + (won ? 1 : 0),
+      games_played: currentStats.games_played + 1,
+      updated_at: new Date().toISOString()
+    })
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  
+  revalidatePath('/dashboard/chillout', 'page')
+  return { success: true, stats: data }
+}
