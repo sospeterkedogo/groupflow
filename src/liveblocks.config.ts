@@ -20,12 +20,33 @@ type Presence = {
   draggingTaskId: string | null;
   userName?: string;
   isTyping?: boolean;
+  isThinking?: boolean; // For the "Chill Out" game turn indicator
+};
+
+type QuizQuestion = {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+};
+
+type QuizScore = {
+  userId: string;
+  userName: string;
+  points: number;
 };
 
 // Storage is the persistent, conflict-free state of the room
 type Storage = {
   tasks: LiveList<Task>;
   messages: LiveList<ChatMessage>;
+  // Chill Out Zone - Quiz State
+  quizQuestions: LiveList<QuizQuestion>;
+  quizScores: LiveList<QuizScore>;
+  quizStatus: 'setup' | 'initializing' | 'playing' | 'results';
+  currentQuestionIndex: number;
+  activeTurnUserId: string | null;
+  gameId: string | null;
 };
 
 export const {

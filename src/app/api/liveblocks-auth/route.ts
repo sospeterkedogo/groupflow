@@ -28,8 +28,8 @@ export async function POST(request: Request) {
 
     const { room } = await request.json();
 
-    // Security: Only allow users to join their assigned group room
-    if (room && profile?.group_id !== room) {
+    // Security: Only allow users to join their assigned group room or a dynamic quiz room
+    if (room && !room.startsWith('quiz_') && profile?.group_id !== room) {
       return new NextResponse("Forbidden: Not in this group", { status: 403 });
     }
 

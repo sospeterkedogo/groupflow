@@ -233,6 +233,29 @@ export default function NotificationBell() {
                              </button>
                            </div>
                          )}
+
+                         {notif.type === 'quiz_invite' && !notif.read && (
+                           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
+                             <button 
+                               className="btn-sm btn-primary" 
+                               style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem', background: 'var(--accent)', borderColor: 'var(--accent)' }}
+                               onClick={() => {
+                                 markAsRead(notif.id);
+                                 const roomId = notif.metadata?.room_id;
+                                 if (roomId) window.location.href = `/dashboard/chillout/room/${roomId}`;
+                               }}
+                             >
+                               Accept & Join
+                             </button>
+                             <button 
+                               className="btn-sm btn-ghost" 
+                               style={{ padding: '0.3rem 0.6rem', fontSize: '0.7rem', border: '1px solid var(--border)' }}
+                               onClick={() => markAsRead(notif.id)}
+                             >
+                               Decline
+                             </button>
+                           </div>
+                         )}
                       </div>
                    </div>
                 </div>

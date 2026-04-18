@@ -16,7 +16,8 @@ import {
   Activity,
   Moon,
   Sun,
-  TrendingUp
+  TrendingUp,
+  Sparkles
 } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 import { Profile } from '@/types/auth'
@@ -111,6 +112,7 @@ export default function Sidebar({ user }: SidebarProps) {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Peer Network', path: '/dashboard/network', icon: Users },
     { name: 'Share & Borrow', path: '/dashboard/marketplace', icon: TrendingUp },
+    { name: 'Chill Out Zone', path: '/dashboard/chillout', icon: Sparkles },
     { name: 'Group Statistics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics', icon: BarChart3 },
     { name: 'Management', path: '/dashboard/upgrade', icon: Activity },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
