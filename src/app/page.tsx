@@ -300,10 +300,35 @@ export default function Home() {
                 { step: '03', title: 'Share your progress', desc: "Every milestone is saved, creating a clear and reliable history of your achievement." },
                 { step: '04', title: 'Succeed together', desc: "Get a clear view of how everyone is contributing, so your entire team can thrive." }
               ].map((s, i) => (
-                <div key={i} style={{ padding: '3.5rem 2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '44px', textAlign: 'left', position: 'relative', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                   <div style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', fontWeight: 900, color: 'rgba(var(--brand-rgb), 0.05)', position: 'absolute', top: '1.5rem', right: '2rem', letterSpacing: '-0.05em' }}>{s.step}</div>
-                   <h3 style={{ fontSize: 'clamp(1.4rem, 4vw, 1.7rem)', fontWeight: 900, marginBottom: '0.5rem', position: 'relative', letterSpacing: '-0.02em' }}>{s.title}</h3>
-                   <p style={{ color: 'var(--text-sub)', fontSize: 'clamp(1rem, 3vw, 1.15rem)', lineHeight: 1.6, position: 'relative', fontWeight: 500 }}>{s.desc}</p>
+                <div key={i} style={{ padding: '3.5rem 2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '44px', textAlign: 'left', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                   <div style={{ 
+                     fontSize: 'clamp(3.5rem, 6vw, 5rem)', 
+                     fontWeight: 900, 
+                     color: 'rgba(var(--brand-rgb), 0.04)', 
+                     position: 'absolute', 
+                     top: '1rem', 
+                     right: '1.5rem', 
+                     letterSpacing: '-0.06em',
+                     zIndex: 0,
+                     userSelect: 'none'
+                   }}>{s.step}</div>
+                   <h3 style={{ 
+                     fontSize: 'clamp(1.5rem, 4vw, 1.85rem)', 
+                     fontWeight: 950, 
+                     marginBottom: '0.75rem', 
+                     position: 'relative', 
+                     letterSpacing: '-0.03em',
+                     maxWidth: '85%',
+                     zIndex: 1
+                   }}>{s.title}</h3>
+                   <p style={{ 
+                     color: 'var(--text-sub)', 
+                     fontSize: 'clamp(1rem, 3vw, 1.15rem)', 
+                     lineHeight: 1.6, 
+                     position: 'relative', 
+                     fontWeight: 500,
+                     zIndex: 1
+                   }}>{s.desc}</p>
                 </div>
               ))}
            </div>
