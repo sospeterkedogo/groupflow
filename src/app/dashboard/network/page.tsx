@@ -18,6 +18,7 @@ export default function NetworkPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [filterMode, setFilterMode] = useState<'all' | 'circle'>('all')
   const [currentUserGroup, setCurrentUserGroup] = useState<string | null>(null)
   const [connections, setConnections] = useState<Set<string>>(new Set())
   const router = useRouter()
@@ -127,13 +128,30 @@ export default function NetworkPage() {
                 <h1 className="fluid-h1" style={{ fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>Peer Network</h1>
                 <p style={{ color: 'var(--text-sub)', fontSize: '1rem', marginTop: '0.5rem' }}>Identify collaborators, subject matter experts, and research peers.</p>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}>
-                  <LayoutGrid size={20} />
-                </button>
-                <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'list' ? 'var(--surface)' : 'transparent', color: viewMode === 'list' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'list' ? 'var(--shadow-sm)' : 'none' }}>
-                  <List size={20} />
-                </button>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                  <button 
+                    onClick={() => setFilterMode('all')} 
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 800, borderRadius: '10px', border: 'none', background: filterMode === 'all' ? 'var(--surface)' : 'transparent', color: filterMode === 'all' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: filterMode === 'all' ? 'var(--shadow-sm)' : 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                  >
+                    Global
+                  </button>
+                  <button 
+                    onClick={() => setFilterMode('circle')} 
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', fontWeight: 800, borderRadius: '10px', border: 'none', background: filterMode === 'circle' ? 'var(--surface)' : 'transparent', color: filterMode === 'circle' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: filterMode === 'circle' ? 'var(--shadow-sm)' : 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                  >
+                    Circle
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.4rem', background: 'var(--bg-sub)', padding: '0.4rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                  <button onClick={() => setViewMode('grid')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'grid' ? 'var(--surface)' : 'transparent', color: viewMode === 'grid' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'grid' ? 'var(--shadow-sm)' : 'none' }}>
+                    <LayoutGrid size={18} />
+                  </button>
+                  <button onClick={() => setViewMode('list')} style={{ padding: '0.5rem', borderRadius: '10px', border: 'none', background: viewMode === 'list' ? 'var(--surface)' : 'transparent', color: viewMode === 'list' ? 'var(--brand)' : 'var(--text-sub)', cursor: 'pointer', boxShadow: viewMode === 'list' ? 'var(--shadow-sm)' : 'none' }}>
+                    <List size={18} />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -194,87 +212,105 @@ export default function NetworkPage() {
             </div>
 
             {/* Results Grid/List */}
-            {loading && users.length === 0 ? (
-              <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="skeleton" style={{ height: '180px', borderRadius: '24px' }} />
-                ))}
-              </div>
-            ) : users.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '6rem 2rem', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                <Search size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <h3 style={{ margin: 0, color: 'var(--text-main)' }}>No scholars identified</h3>
-                <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>Refine your search parameters by name or institutional identifier.</p>
-              </div>
-            ) : (
-              <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {users.map(u => {
-                  const isOnline = onlineUsers.has(u.id)
-                  const isPrivate = (u as any).groups?.is_encrypted && u.group_id !== currentUserGroup
-                  
-                  return (
-                    <div 
-                      key={u.id} 
-                      className="kanban-card card-interactive" 
-                      onClick={() => {
-                        withLoading(async () => {
-                          await new Promise(r => setTimeout(r, 600));
-                          router.push('/dashboard/network/profile/' + u.id);
-                        }, 'Accessing Scholar Profile...');
-                      }}
-                      style={{ 
-                        padding: '1.5rem', cursor: 'pointer', borderRadius: '24px', position: 'relative',
-                        display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
-                        alignItems: viewMode === 'grid' ? 'stretch' : 'center',
-                        gap: '1.25rem'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', position: 'relative' }}>
-                          {u.avatar_url ? <img src={u.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={32} style={{ margin: '14px' }} color="var(--text-sub)" />}
-                          {isOnline && <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)' }} />}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <h3 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                            {isPrivate ? 'Protected Identity' : u.full_name}
-                          </h3>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
-                            <GraduationCap size={14} />
-                            <span>{u.course_name || 'Software Engineering'}</span>
-                            {connections.has(u.id) && (
-                               <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.2rem', color: 'var(--success)', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                 <Check size={12} /> Connected
-                               </span>
-                             )}
+            {(() => {
+              const displayedUsers = filterMode === 'circle' 
+                ? users.filter(u => connections.has(u.id))
+                : users
+
+              if (loading && users.length === 0) {
+                return (
+                  <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="skeleton" style={{ height: '180px', borderRadius: '24px' }} />
+                    ))}
+                  </div>
+                )
+              }
+
+              if (displayedUsers.length === 0) {
+                return (
+                  <div style={{ textAlign: 'center', padding: '6rem 2rem', background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)' }}>
+                    <Search size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                    <h3 style={{ margin: 0, color: 'var(--text-main)' }}>{filterMode === 'circle' ? 'No established connections found' : 'No scholars identified'}</h3>
+                    <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>
+                      {filterMode === 'circle' 
+                        ? 'Synchronize with research peers to build your personal network circuit.' 
+                        : 'Refine your search parameters by name or institutional identifier.'}
+                    </p>
+                  </div>
+                )
+              }
+
+              return (
+                <div className="network-grid" style={viewMode === 'grid' ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' } : { display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {displayedUsers.map(u => {
+                    const isOnline = onlineUsers.has(u.id)
+                    const isPrivate = (u as any).groups?.is_encrypted && u.group_id !== currentUserGroup
+                    
+                    return (
+                      <div 
+                        key={u.id} 
+                        className="kanban-card card-interactive" 
+                        onClick={() => {
+                          withLoading(async () => {
+                            await new Promise(r => setTimeout(r, 600));
+                            router.push('/dashboard/network/profile/' + u.id);
+                          }, 'Accessing Scholar Profile...');
+                        }}
+                        style={{ 
+                          padding: '1.5rem', cursor: 'pointer', borderRadius: '24px', position: 'relative',
+                          display: 'flex', flexDirection: viewMode === 'grid' ? 'column' : 'row',
+                          alignItems: viewMode === 'grid' ? 'stretch' : 'center',
+                          gap: '1.25rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', position: 'relative' }}>
+                            {u.avatar_url ? <img src={u.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={32} style={{ margin: '14px' }} color="var(--text-sub)" />}
+                            {isOnline && <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--success)', border: '2px solid var(--surface)' }} />}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                              {isPrivate ? 'Protected Identity' : u.full_name}
+                            </h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
+                              <GraduationCap size={14} />
+                              <span>{u.course_name || 'Software Engineering'}</span>
+                              {connections.has(u.id) && (
+                                 <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.2rem', color: 'var(--success)', fontWeight: 800, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                   <Check size={12} /> Connected
+                                 </span>
+                               )}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--bg-sub)', padding: '1rem', borderRadius: '16px', flex: viewMode === 'list' ? 1 : 'unset' }}>
-                        <div>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Score</span>
-                          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Position</span>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
-                            <MapPin size={14} color="var(--accent)" />
-                            <span>{isPrivate ? 'Restricted' : ((u as any).groups?.module_code || 'Unassigned')}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--bg-sub)', padding: '1rem', borderRadius: '16px', flex: viewMode === 'list' ? 1 : 'unset' }}>
+                          <div>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Score</span>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{u.total_score}</div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase' }}>Position</span>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
+                              <MapPin size={14} color="var(--accent)" />
+                              <span>{isPrivate ? 'Restricted' : ((u as any).groups?.module_code || 'Unassigned')}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {viewMode === 'grid' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
-                          <Clock size={14} />
-                          <span>{isOnline ? <b style={{ color: 'var(--success)' }}>Active Now</b> : `Seen ${formatLastSeen(u.last_seen ?? null)}`}</span>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                        {viewMode === 'grid' && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', fontSize: '0.8rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                            <Clock size={14} />
+                            <span>{isOnline ? <b style={{ color: 'var(--success)' }}>Active Now</b> : `Seen ${formatLastSeen(u.last_seen ?? null)}`}</span>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </div>
 
           {/* Sidebar Area */}

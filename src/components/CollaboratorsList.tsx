@@ -12,6 +12,7 @@ interface CollaboratorsListProps {
 
 export default function CollaboratorsList({ currentGroupId, onViewProfile }: CollaboratorsListProps) {
   const [collaborators, setCollaborators] = useState<Profile[]>([])
+  const [personalNetwork, setPersonalNetwork] = useState<Profile[]>([])
   const [suggested, setSuggested] = useState<Profile[]>([])
   const [connections, setConnections] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -34,14 +35,14 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Fetch 8 random users who are NOT in the current group and NOT the user
-    // We use a simpler query for random suggestions
+    // Fetch up to 5 random users who are NOT in the current group and NOT already connected
+    // This avoids cluttering suggestions with people already in the network
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .neq('id', user.id)
-      .not('group_id', 'eq', currentGroupId)
-      .limit(8)
+      .not('group_id', 'eq', currentGroupId || '00000000-0000-0000-0000-000000000000') // handle null
+      .limit(6)
 
     if (data) setSuggested(data as Profile[])
   }, [supabase, currentGroupId])
@@ -50,13 +51,29 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { data } = await supabase
+    // 1. Fetch connected IDs for fast lookup
+    const { data: connData } = await supabase
       .from('user_connections')
-      .select('target_id')
-      .eq('user_id', user.id)
+      .select('user_id, target_id')
+      .or(`user_id.eq.${user.id},target_id.eq.${user.id}`)
+      .eq('status', 'connected')
 
-    if (data) {
-      setConnections(new Set(data.map(c => c.target_id)))
+    if (connData) {
+      const ids = connData.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
+      setConnections(new Set(ids))
+
+      // 2. Fetch full profiles for these connections
+      if (ids.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', ids)
+          .limit(10)
+        
+        if (profiles) setPersonalNetwork(profiles as Profile[])
+      } else {
+        setPersonalNetwork([])
+      }
     }
   }, [supabase])
 
@@ -66,33 +83,47 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
       setLoading(true)
       await Promise.all([
         fetchCollaborators(),
-        fetchSuggested(),
-        fetchConnections()
+        fetchConnections(),
+        fetchSuggested()
       ])
       if (active) setLoading(false)
     }
 
     void load()
-    return () => { active = false }
-  }, [currentGroupId, fetchCollaborators, fetchSuggested, fetchConnections])
+    
+    // Subscribe to connection updates
+    const channel = supabase.channel('network_updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_connections' }, () => {
+        void fetchConnections()
+      })
+      .subscribe()
+
+    return () => { 
+      active = false
+      supabase.removeChannel(channel)
+    }
+  }, [currentGroupId, fetchCollaborators, fetchConnections, fetchSuggested])
 
   const handleConnect = async (targetId: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    // Create a connection request/approval flow
+    // For immediate addition in this simplified UI flow, we upsert to connected
     const { error } = await supabase
       .from('user_connections')
       .upsert({ user_id: user.id, target_id: targetId, status: 'connected' })
 
     if (!error) {
       setConnections(prev => new Set([...Array.from(prev), targetId]))
+      void fetchConnections() // Refresh network list
       
       // Send notification to target
       await supabase.from('notifications').insert({
         user_id: targetId,
         type: 'connection_request',
-        title: 'Network Connection',
-        message: `${user.user_metadata?.full_name || 'Someone'} connected with you on GroupFlow.`,
+        title: 'Network Expansion',
+        message: `${user.user_metadata?.full_name || 'A scholar'} has established a synchronization link with you.`,
         metadata: { sender_id: user.id }
       })
     }
@@ -191,11 +222,30 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         )}
       </div>
 
-      {/* 2. SUGGESTED SECTION */}
+      {/* 2. PERSONAL NETWORK SECTION */}
+      {personalNetwork.length > 0 && (
+        <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '0.5rem', background: 'rgba(var(--accent-rgb), 0.1)', borderRadius: '10px' }}>
+              <Sparkles size={20} color="var(--brand)" />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Personal Network</h3>
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>Your established academic circle</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {personalNetwork.map(renderUserCard)}
+          </div>
+        </div>
+      )}
+
+      {/* 3. SUGGESTED SECTION */}
       <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div style={{ padding: '0.5rem', background: 'rgba(var(--accent-rgb), 0.1)', borderRadius: '10px' }}>
-            <Sparkles size={20} color="var(--brand)" />
+          <div style={{ padding: '0.5rem', background: 'rgba(var(--text-main-rgb), 0.05)', borderRadius: '10px' }}>
+            <UserPlus size={20} color="var(--text-sub)" />
           </div>
           <div>
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Global Discovery</h3>
