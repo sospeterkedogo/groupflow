@@ -88,6 +88,7 @@ export default function NotificationsPage() {
             <div 
               key={n.id}
               className="glass"
+              onClick={() => !n.read && markAsRead(n.id)}
               style={{ 
                 padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', 
                 background: n.read ? 'var(--surface)' : 'rgba(var(--brand-rgb), 0.03)',
@@ -96,7 +97,8 @@ export default function NotificationsPage() {
                 position: 'relative',
                 display: 'flex',
                 gap: '1.25rem',
-                alignItems: 'flex-start'
+                alignItems: 'flex-start',
+                cursor: n.read ? 'default' : 'pointer'
               }}
             >
               {!n.read && <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 10px var(--brand)' }} />}

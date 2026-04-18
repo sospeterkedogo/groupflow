@@ -73,42 +73,44 @@ export default function CalendarView({ groupId, onTaskSaved }: { groupId: string
 
   return (
     <div className="calendar-container" style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2rem', boxShadow: 'var(--shadow-md)', animation: 'fadeIn 0.5s ease-out' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '1.5rem',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
         <div>
           {loading ? (
-            <>
-              <div className="skeleton skeleton-title" style={{ width: '250px', height: '2rem', marginBottom: '0.4rem' }} />
-              <div className="skeleton skeleton-text" style={{ width: '150px' }} />
-            </>
+            <div className="skeleton skeleton-title" style={{ width: '180px', height: '1.5rem' }} />
           ) : (
             <>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Calendar size={28} color="var(--brand)" />
+              <h2 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.75rem)', fontWeight: 900, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Calendar size={24} color="var(--brand)" />
                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h2>
-              <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: 600 }}>Central Scheduling Hub</p>
+              <p className="mobile-hide" style={{ color: 'var(--text-sub)', fontSize: '0.85rem', marginTop: '0.2rem', fontWeight: 600 }}>Central Scheduling Hub</p>
             </>
           )}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button onClick={handlePrevMonth} className="btn-icon" disabled={loading} style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.5 : 1 }}><ChevronLeft size={20} /></button>
-          <button onClick={handleNextMonth} className="btn-icon" disabled={loading} style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.5 : 1 }}><ChevronRight size={20} /></button>
+          <button onClick={handlePrevMonth} className="btn-icon" disabled={loading} style={{ padding: '0.5rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer' }}><ChevronLeft size={18} /></button>
+          <button onClick={handleNextMonth} className="btn-icon" disabled={loading} style={{ padding: '0.5rem', borderRadius: '50%', background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer' }}><ChevronRight size={18} /></button>
         </div>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: 'var(--border)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} style={{ background: 'var(--bg-sub)', padding: '1rem', textAlign: 'center', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+          <div key={i} style={{ background: 'var(--bg-sub)', padding: '0.75rem 0.25rem', textAlign: 'center', fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>
             {day}
           </div>
         ))}
 
         {loading ? (
           Array.from({ length: 35 }).map((_, idx) => (
-            <div key={idx} style={{ background: 'var(--bg-sub)', minHeight: '120px', padding: '0.75rem' }}>
-              <div className="skeleton skeleton-avatar" style={{ width: '24px', height: '24px', marginBottom: '0.75rem' }} />
-              {idx % 5 === 0 && <div className="skeleton skeleton-text" style={{ width: '80%', height: '14px', borderRadius: '4px' }} />}
-              {idx % 7 === 0 && <div className="skeleton skeleton-text" style={{ width: '60%', height: '14px', borderRadius: '4px' }} />}
+            <div key={idx} style={{ background: 'var(--bg-sub)', minHeight: '80px', padding: '0.5rem' }}>
+              <div className="skeleton skeleton-avatar" style={{ width: '16px', height: '16px' }} />
             </div>
           ))
         ) : (
@@ -128,68 +130,65 @@ export default function CalendarView({ groupId, onTaskSaved }: { groupId: string
                 }
               }}
               style={{ 
-                background: day ? 'var(--bg-sub)' : 'var(--bg-main)', 
-                minHeight: '120px', 
-                padding: '0.75rem', 
+                background: day ? 'var(--bg-sub)' : 'rgba(var(--bg-main-rgb), 0.3)', 
+                minHeight: 'clamp(70px, 12vh, 120px)', 
+                padding: '0.4rem', 
                 position: 'relative',
                 transition: 'background 0.2s',
-                cursor: day ? 'pointer' : 'default'
+                cursor: day ? 'pointer' : 'default',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem'
               }}
               className={day ? 'calendar-day-cell' : ''}
             >
               {day && (
                 <>
                   <div style={{ 
-                    fontSize: '1rem', 
-                    fontWeight: 700, 
+                    fontSize: '0.85rem', 
+                    fontWeight: 800, 
                     color: isToday ? 'white' : 'var(--text-main)',
                     background: isToday ? 'var(--brand)' : 'transparent',
-                    width: '32px',
-                    height: '32px',
+                    width: '24px',
+                    height: '24px',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginBottom: '0.75rem',
-                    boxShadow: isToday ? '0 4px 10px rgba(var(--brand-rgb), 0.3)' : 'none'
+                    boxShadow: isToday ? '0 2px 6px rgba(var(--brand-rgb), 0.3)' : 'none',
+                    margin: '0 auto'
                   }}>
                     {day}
                   </div>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    {dayTasks.map(task => (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', overflow: 'hidden' }}>
+                    {dayTasks.slice(0, 3).map(task => (
                       <div 
                         key={task.id}
                         onClick={async (e) => {
-                           e.stopPropagation() // Prevent triggering the day click
+                           e.stopPropagation()
                            const { data } = await supabase.from('tasks').select('*').eq('id', task.id).single()
                            setSelectedTask(data as Task | null)
                            setPreselectedDate(undefined)
                            setIsModalOpen(true)
                         }}
                         style={{ 
-                          fontSize: '0.65rem', 
-                          fontWeight: 700, 
-                          padding: '0.4rem 0.6rem', 
-                          borderRadius: '8px', 
-                          background: task.status === 'Done' ? 'rgba(30, 142, 62, 0.1)' : 'rgba(var(--brand-rgb), 0.1)',
+                          fontSize: '0.55rem', 
+                          fontWeight: 800, 
+                          padding: '0.2rem 0.4rem', 
+                          borderRadius: '6px', 
+                          background: task.status === 'Done' ? 'rgba(30, 142, 62, 0.15)' : 'rgba(var(--brand-rgb), 0.15)',
                           color: task.status === 'Done' ? 'var(--success)' : 'var(--brand)',
-                          border: `1px solid ${task.status === 'Done' ? 'rgba(30, 142, 62, 0.2)' : 'rgba(var(--brand-rgb), 0.2)'}`,
                           whiteSpace: 'nowrap',
                           textOverflow: 'ellipsis',
                           overflow: 'hidden',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          transition: 'transform 0.2s, box-shadow 0.2s'
+                          border: '1px solid rgba(0,0,0,0.05)'
                         }}
-                        className="calendar-task-tag"
                       >
-                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
                          {task.title}
                       </div>
                     ))}
+                    {dayTasks.length > 3 && <div style={{ fontSize: '0.5rem', textAlign: 'center', color: 'var(--text-sub)', fontWeight: 800 }}>+{dayTasks.length - 3} more</div>}
                   </div>
                 </>
               )}
@@ -215,8 +214,11 @@ export default function CalendarView({ groupId, onTaskSaved }: { groupId: string
       )}
 
       <style jsx>{`
-        .calendar-day-cell:hover { background: var(--bg-main) !important; }
-        .calendar-task-tag:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); filter: brightness(1.1); }
+        .calendar-day-cell:hover { background: var(--surface) !important; }
+        @media (max-width: 768px) {
+           .calendar-container { padding: 1.25rem !important; }
+           .mobile-hide { display: none !important; }
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>

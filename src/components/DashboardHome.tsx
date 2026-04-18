@@ -32,6 +32,8 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const [group, setGroup] = useState<Group | null>(null)
   const [newTaskSignal, setNewTaskSignal] = useState(0)
   const [syncToken, setSyncToken] = useState(0)
+  const [members, setMembers] = useState<any[]>([])
+  const [showMembers, setShowMembers] = useState(false)
   
   const handleCalendarTaskSaved = useCallback(async () => {
     setSyncToken(prev => prev + 1)
@@ -42,6 +44,15 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const fetchGroupDetails = useCallback(async () => {
     const { data } = await supabase.from('groups').select('*').eq('id', groupId).single()
     if (data) setGroup(data)
+  }, [groupId, supabase])
+
+  const fetchMembers = useCallback(async () => {
+    if (!groupId) return
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, last_seen')
+      .eq('group_id', groupId)
+    if (data) setMembers(data)
   }, [groupId, supabase])
 
   const fetchPersonalTaskCount = useCallback(async () => {
@@ -65,8 +76,11 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   useEffect(() => {
     if (profile?.id && groupId) {
       void (async () => {
-        await fetchPersonalTaskCount()
-        await fetchGroupDetails()
+        await Promise.all([
+          fetchPersonalTaskCount(),
+          fetchGroupDetails(),
+          fetchMembers()
+        ])
       })()
 
       const channel = supabase.channel('personal_tasks_count')
@@ -88,7 +102,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         supabase.removeChannel(channel)
       }
     }
-  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchGroupDetails, supabase])
+  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchGroupDetails, fetchMembers, supabase])
 
   if (!profile) {
     return (
@@ -110,7 +124,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1400px', margin: '0 auto', paddingBottom: '4rem' }}>
       
       {/* ── CONTROL PANEL HEADER ─────────────────────────────────────────── */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '2rem', flexWrap: 'wrap' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '300px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
             <div className="pulse-pill" style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 10px var(--success)' }} />
@@ -121,9 +135,43 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           <h1 style={{ fontSize: 'clamp(2.25rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.05em', color: 'var(--text-main)', margin: 0, lineHeight: 1 }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
           </h1>
-          <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, marginTop: '0.75rem', opacity: 0.8 }}>
-             Active Session: <span style={{ color: 'var(--brand)', fontWeight: 800 }}>{group?.name || 'Loading Project...'}</span>
-          </p>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.75rem' }}>
+            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, margin: 0, opacity: 0.8 }}>
+               Active: <span style={{ color: 'var(--brand)', fontWeight: 800 }}>{group?.name || 'Syncing System...'}</span>
+            </p>
+            <button 
+              onClick={() => setShowMembers(!showMembers)}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-main)', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '20px', border: '1px solid var(--border)' }}
+            >
+              {showMembers ? 'Hide Team' : `Show Team (${members.length})`}
+            </button>
+          </div>
+
+          {showMembers && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem', animation: 'fadeIn 0.3s ease-out' }}>
+               {members.map(m => {
+                 const isSelf = m.id === profile?.id
+                 const lastSeenDate = m.last_seen ? new Date(m.last_seen) : null
+                 const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 60000)
+                 
+                 return (
+                   <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '6px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}>
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
+                          {m.avatar_url ? <img src={m.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : m.full_name?.[0]}
+                        </div>
+                        <div style={{ position: 'absolute', bottom: -2, right: -2, width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? 'var(--success)' : '#64748b', border: '2px solid var(--surface)' }} />
+                      </div>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: isOnline ? 'var(--text-main)' : 'var(--text-sub)' }}>
+                        {m.full_name?.split(' ')[0]}{isSelf && ' (You)'}
+                      </span>
+                   </div>
+                 )
+               })}
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -149,7 +197,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         {[
           { icon: <Activity size={20} />, label: 'Action Items', value: personalTaskCount, sub: 'Assigned pending', color: 'var(--brand)' },
           { icon: <TrendingUp size={20} />, label: 'Group Momentum', value: profile?.total_score || 0, sub: 'Engagement yield', color: 'var(--success)' },
-          { icon: <Calendar size={20} />, label: 'Phase Status', value: 'Active', sub: 'Current project sprint', color: '#f59e0b' },
+          { icon: <Calendar size={20} />, label: 'Timeline Status', value: 'On Track', sub: 'Project roadmap status', color: '#f59e0b' },
           { icon: <Zap size={20} />, label: 'Sync Integrity', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
         ].map((stat, i) => (
           <div key={i} className="control-card" style={{
@@ -191,7 +239,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         <div style={{ display: 'flex', gap: '0.4rem' }}>
           {[
             { id: 'board', label: 'Central Board', icon: <LayoutDashboard size={18} /> },
-            { id: 'calendar', label: 'Timeline Stream', icon: <Calendar size={18} /> }
+            { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> }
           ].map(tab => (
             <button
               key={tab.id}
@@ -290,6 +338,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         @media (max-width: 768px) {
           .mobile-hide { display: none !important; }
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   )
