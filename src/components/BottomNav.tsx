@@ -8,7 +8,8 @@ import {
   Users, 
   UserCircle, 
   Settings,
-  Bell
+  Bell,
+  TrendingUp
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
