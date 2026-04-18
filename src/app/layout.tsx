@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { NotificationProvider } from '../components/NotificationProvider';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata: Metadata = {
   title: 'GroupFlow - Automating Accountability',
@@ -19,7 +20,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         {/* Wrap all children in NotificationProvider for global access */}
-        <NotificationProvider>{children}</NotificationProvider>
+        <NotificationProvider>
+          {children}
+          <Analytics />
+        </NotificationProvider>
       </body>
     </html>
   );

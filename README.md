@@ -1,78 +1,50 @@
-# GroupFlow 🚀
+# GroupFlow: Engineering Terminal & Academic Ledger
 
-**Dynamic Academic Identity & Team Synergy Platform**
+GroupFlow is a high-fidelity collaboration platform built for technical teams to track, verify, and visualize academic contributions. It replaces generic project management with a structured **Identity Protocol** that bridges coursework with professional engineering readiness.
 
-GroupFlow is a state-of-the-art educational technology platform designed to transform how students collaborate on complex projects. It moves beyond simple task tracking, creating a verifiable **Academic Identity Hub** that bridges the gap between coursework and professional readiness.
+## Core Systems
 
-![GroupFlow Banner](public/assets/auth_bg.png)
+### 🛡️ Identity Protocol
+*   **Technical Arsenal**: Real-time skill matrix and proficiency tracking for engineering stacks (React, TypeScript, Supabase).
+*   **Dynamic Roadmap**: Visualization of degree progression and module completion via enrollment data integration.
+*   **Verifiable Audit Logs**: Instant PDF generation of contribution history for portfolio evidence and tutor review.
 
-## 🌟 Key Features
+### 📊 Tactical Analytics
+*   **KPI Visualization**: Live tracking of completion rates, evidence density, and delivery risks using Recharts.
+*   **Effort Distribution**: Granular breakdown of team participation to ensure equitable project contribution.
+*   **Engineering Kanban**: Specialized task workflow with integrated risk assessment and status durability.
 
-### 🎓 Academic Identity Hub
-- **Dynamic Roadmap**: Real-time visualization of your degree progress (Year 1, 2, 3...) based on enrollment data.
-- **Technical Arsenal**: A curated and customizable skill matrix where students track their proficiency in tools like React, TypeScript, and more.
-- **Verifiable Audit Logs**: Generate professional PDF reports of team performance and individual contributions, perfect for portfolio evidence.
+### ⚡ Communication & Presence
+*   **Secure Infrastructure**: Authentication via Supabase with isolated GitHub OAuth connection flows.
+*   **Real-time Presence**: High-fidelity presence tracking to monitor active contribution within the pipeline.
+*   **Team Discovery**: Managed join-request workflows with admin-level approval protocols.
 
-### 📊 Advanced Project Analytics
-- **Live KPI Tracking**: Monitor completion rates, evidence density, and overdue risks at a glance.
-- **Effort Distribution**: Transparent breakdown of team contributions to ensure fair project participation.
-- **Interactive Kanban**: A futuristic, student-focused task board with integrated risk assessments.
+## Technical Architecture
 
-### 💬 Seamless Collaboration
-- **Real-time Team Chat**: WhatsApp-style communication embedded directly into the workspace.
-- **Presence System**: See who's online and actively contributing to the pipeline.
-- **Join Requests**: Secure team discovery and request management via an admin-approval workflow.
-- **Zen Mode**: A built-in "Break Point" Quiz to keep your technical knowledge sharp during build waits.
+*   **Core**: Next.js 15 (App Router) / TypeScript 5
+*   **Data Tier**: Supabase (PostgreSQL / Auth / Realtime)
+*   **Logic**: Server Actions with Anti-bot Honeypot Security
+*   **Frontend**: Vanilla CSS with Glassmorphism / Lucide React
+*   **Reporting**: jsPDF Engine
 
-## 🛠️ Tech Stack
+## Environment Configuration
 
-- **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
-- **Database & Auth**: [Supabase](https://supabase.com/)
-- **Styling**: Vanilla CSS with High-End Glassmorphism & Cyberpunk Aesthetics
-- **Visualization**: [Recharts](https://recharts.org/)
-- **Reporting**: [jsPDF](https://github.com/parallax/jsPDF)
-- **Icons**: [Lucide React](https://lucide.dev/)
+Initialize the local terminal using `.env.local`:
 
-## 🚀 Getting Started
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+GITHUB_CLIENT_ID=your_oauth_id
+GITHUB_CLIENT_SECRET=your_oauth_secret
+```
 
-### Prerequisites
-- Node.js 18+ 
-- Supabase Project
+## Deployment Protocol
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/groupflow.git
-   cd groupflow
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
-   Create a `.env.local` file with the following:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_key
-   GITHUB_CLIENT_ID=your_id
-   GITHUB_CLIENT_SECRET=your_secret
-   ```
-
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
-
-## 🏗️ Deployment Pipeline
-
-This repository is equipped with a **Tip-Top Deployment Pipeline** via GitHub Actions:
-- **Build Verification**: Automatically runs `npm run build` on every PR to ensure production stability.
-- **Type Safety**: Enforces strict TypeScript checks across the entire ecosystem.
+The repository utilizes a strict verification pipeline:
+*   **Production Validation**: Automated builds on every PR to ensure runtime stability.
+*   **Type Safety**: Mandatory TypeScript verification across all modules.
 
 ---
 
-Built with ❤️ for the next generation of engineers.
+**[v1.0.0]** • Developed for the next generation of software engineers.
