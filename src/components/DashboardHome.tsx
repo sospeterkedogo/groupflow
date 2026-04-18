@@ -48,10 +48,16 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
   const fetchMembers = useCallback(async () => {
     if (!groupId) return
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, full_name, avatar_url, last_seen')
       .eq('group_id', groupId)
+    
+    if (error) {
+      console.error('Error fetching group members:', error.message)
+      return
+    }
+    
     if (data) setMembers(data)
   }, [groupId, supabase])
 
