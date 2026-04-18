@@ -8,8 +8,9 @@ import {
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
-  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search, MessageSquare
+  Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search, MessageSquare, Phone, Globe
 } from 'lucide-react'
+import { detectCountry, getFlagComponent } from '@/utils/geo'
 import ActiveUsersList from '@/components/ActiveUsersList'
 import ActivityLogView from '@/components/ActivityLogView'
 import EmailCenter from '@/components/EmailCenter'
@@ -37,9 +38,9 @@ export default function SettingsPage() {
   const [biography, setBiography] = useState('')
   const [stack, setStack] = useState('')
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [countryCode, setCountryCode] = useState('')
 
   const { currentPalette, setPalette, customBg, setCustomBg } = useTheme()
   const [avatarUrl, setAvatarUrl] = useState('')
@@ -117,6 +118,8 @@ export default function SettingsPage() {
         setBiography(data.biography || '')
         setStack(data.stack || '')
         setAvatarUrl(data.avatar_url || '')
+        setPhoneNumber(data.phone_number || '')
+        setCountryCode(data.country_code || '')
         setIsEncrypted(data.groups?.is_encrypted || false)
         
         if (data.id) {
@@ -169,7 +172,9 @@ export default function SettingsPage() {
         rank: rank,
         tagline: tagline,
         biography: biography,
-        stack: stack
+        stack: stack,
+        phone_number: phoneNumber,
+        country_code: countryCode
       })
       .eq('id', profile.id)
 
@@ -629,6 +634,46 @@ export default function SettingsPage() {
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Achievement Rank</label>
                   <input type="text" className="form-input" value={rank} onChange={e => setRank(e.target.value)} placeholder="e.g. Senior" />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--gap-md)' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Phone Number (International)</label>
+                  <div style={{ position: 'relative' }}>
+                     <Phone size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
+                     <input 
+                      type="tel" 
+                      className="form-input" 
+                      value={phoneNumber} 
+                      onChange={e => {
+                        setPhoneNumber(e.target.value)
+                        const detected = detectCountry(e.target.value)
+                        if (detected) setCountryCode(detected)
+                      }} 
+                      placeholder="+1 555 000 0000" 
+                      style={{ paddingLeft: '3rem' }}
+                     />
+                  </div>
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Country Flag</label>
+                  <div style={{ position: 'relative' }}>
+                     <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '16px' }}>
+                        {(() => {
+                           const Flag = getFlagComponent(countryCode)
+                           return Flag ? <Flag /> : <Globe size={18} color="var(--text-sub)" />
+                        })()}
+                     </div>
+                     <input 
+                      type="text" 
+                      className="form-input" 
+                      value={countryCode} 
+                      onChange={e => setCountryCode(e.target.value.toUpperCase().substring(0,2))} 
+                      placeholder="US, GB, KE..." 
+                      style={{ paddingLeft: '3rem' }}
+                     />
+                  </div>
                 </div>
               </div>
 

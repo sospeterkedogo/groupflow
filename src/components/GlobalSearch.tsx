@@ -5,6 +5,7 @@ import { Search, User, CheckSquare, Users, X, ArrowRight, Loader2 } from 'lucide
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
+import { getFlagComponent } from '@/utils/geo'
 
 interface SearchResult {
   id: string
@@ -12,6 +13,7 @@ interface SearchResult {
   title: string
   subtitle: string
   image_url?: string
+  country_code?: string
 }
 
 interface GlobalSearchProps {
@@ -69,13 +71,20 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
         } else {
           // Fallback to manual queries if RPC fails (e.g. migration not applied)
           const [profiles, tasks, groups] = await Promise.all([
-            supabase.from('profiles').select('id, full_name, avatar_url, course_name').ilike('full_name', `%${query}%`).limit(3),
+            supabase.from('profiles').select('id, full_name, avatar_url, course_name, country_code').ilike('full_name', `%${query}%`).limit(3),
             supabase.from('tasks').select('id, title, status').ilike('title', `%${query}%`).limit(3),
             supabase.from('groups').select('id, name, module_code').ilike('name', `%${query}%`).limit(3)
           ])
 
           const combined: SearchResult[] = [
-            ...(profiles.data || []).map(p => ({ id: p.id, type: 'profile' as const, title: p.full_name, subtitle: p.course_name, image_url: p.avatar_url })),
+            ...(profiles.data || []).map(p => ({ 
+              id: p.id, 
+              type: 'profile' as const, 
+              title: (p as any).full_name, 
+              subtitle: (p as any).course_name, 
+              image_url: (p as any).avatar_url,
+              country_code: (p as any).country_code
+            })),
             ...(tasks.data || []).map(t => ({ id: t.id, type: 'task' as const, title: t.title, subtitle: t.status })),
             ...(groups.data || []).map(g => ({ id: g.id, type: 'group' as const, title: g.name, subtitle: g.module_code }))
           ]

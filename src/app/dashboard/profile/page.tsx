@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { User, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, Fingerprint, Edit2, Check, X, Zap, Handshake, CheckCircle2 } from 'lucide-react'
+import { User, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, Fingerprint, Edit2, Check, X, Zap, Handshake, CheckCircle2, Globe, Target } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
+import { getFlagComponent } from '@/utils/geo'
 
 export default function ProfilePage() {
    const { profile, loading, refreshProfile } = useProfile()
@@ -11,6 +12,21 @@ export default function ProfilePage() {
    const [isEditingBio, setIsEditingBio] = useState(false)
    const [bioText, setBioText] = useState('')
    const [isSaving, setIsSaving] = useState(false)
+   const [achievements, setAchievements] = useState<any[]>([])
+
+   useEffect(() => {
+     async function fetchAchievements() {
+       if (!profile?.id) return
+       const { data: artifacts } = await supabase.from('artifacts').select('*').eq('user_id', profile.id).limit(3)
+       const { data: commits } = await supabase.from('commits').select('*').eq('user_id', profile.id).limit(3)
+       const combined = [
+         ...(artifacts || []).map(a => ({ type: 'artifact', ...a })),
+         ...(commits || []).map(c => ({ type: 'commit', ...c }))
+       ]
+       setAchievements(combined)
+     }
+     fetchAchievements()
+   }, [supabase, profile?.id])
 
    const score = profile?.total_score || 0
    const levelData = useMemo(() => {
@@ -90,7 +106,13 @@ export default function ProfilePage() {
 
                  <div style={{ flex: '1 1 320px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center', marginBottom: '0.5rem' }}>
-                        <h1 className="fluid-h1" style={{ fontWeight: 950, margin: 0, fontSize: '2.5rem', letterSpacing: '-0.04em' }}>{profile?.full_name}</h1>
+                        <h1 className="fluid-h1" style={{ fontWeight: 950, margin: 0, fontSize: '2.5rem', letterSpacing: '-0.04em', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          {profile?.full_name}
+                          {(() => {
+                            const Flag = getFlagComponent((profile as any)?.country_code)
+                            return Flag ? <div style={{ width: '32px', height: '20px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}><Flag /></div> : null
+                          })()}
+                        </h1>
                         {profile?.subscription_plan === 'premium' && (
                           <div className="shimmer-gold" style={{ background: '#d4af37', color: 'black', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Award size={14} /> PREMIUM
@@ -174,57 +196,40 @@ export default function ProfilePage() {
                 </div>
              </div>
 
-             {/* Right Column: Achievements */}
-             <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                   <Award size={24} color="var(--brand)" />
-                   Academic Milestones
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                   {[
-                     { count: 1, name: 'Initial Synchrony', desc: 'Completed the first institutional synchronization.', icon: Zap },
-                     { count: 50, name: 'Logic Architect', desc: 'Constructed the foundation of project protocols.', icon: Activity },
-                     { count: 200, name: 'Protocol Master', desc: 'Maintained project sessions with high integrity.', icon: CheckCircle2 },
-                     { count: 1000, name: 'Grand Fellow', desc: 'Achieved veteran status in the ecosystem.', icon: Handshake }
-                   ].map((m, i) => {
-                      const unlocked = (profile?.total_score || 0) >= m.count;
-                      return (
-                        <div key={i} style={{ 
-                           opacity: unlocked ? 1 : 0.4, 
-                           padding: '1rem', 
-                           background: unlocked ? 'rgba(var(--brand-rgb), 0.03)' : 'var(--bg-sub)', 
-                           borderRadius: '16px', 
-                           border: unlocked ? '1px solid rgba(var(--brand-rgb), 0.1)' : '1px solid var(--border)',
-                           display: 'flex',
-                           alignItems: 'center',
-                           gap: '1rem'
-                        }}>
-                           <div style={{ 
-                              width: '40px', 
-                              height: '40px', 
-                              borderRadius: '12px', 
-                              background: unlocked ? 'var(--brand)' : 'var(--text-sub)', 
-                              color: 'white', 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              justifyContent: 'center' 
-                           }}>
-                              <m.icon size={20} />
-                           </div>
-                           <div>
-                              <div style={{ fontSize: '0.9rem', fontWeight: 900, color: unlocked ? 'var(--text-main)' : 'var(--text-sub)' }}>{m.name}</div>
-                              <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginTop: '2px' }}>{m.desc}</div>
-                           </div>
+              {/* Right Column: Achievements & Credentials */}
+              <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '24px', padding: '2rem', border: '1px solid var(--border)' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 950, margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                       <Award size={24} color="var(--brand)" />
+                       Verifiable Accomplishments
+                    </h3>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 900, background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', padding: '4px 10px', borderRadius: '8px' }}>
+                      {profile?.badges_count || 0} Badges
+                    </div>
+                 </div>
+
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {achievements.length > 0 ? achievements.map((ach, idx) => (
+                      <div key={idx} style={{ padding: '1.25rem', background: 'rgba(var(--brand-rgb), 0.02)', borderRadius: '20px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'all 0.2s' }}>
+                        <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: ach.type === 'artifact' ? 'rgba(var(--brand-rgb), 0.1)' : 'rgba(34, 197, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {ach.type === 'artifact' ? <Target size={20} color="var(--brand)" /> : <CheckCircle2 size={20} color="var(--success)" />}
                         </div>
-                      )
-                   })}
-                   {(profile?.total_score || 0) < 1 && (
-                      <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: 'var(--text-sub)', border: '1px dashed var(--border)', borderRadius: '16px' }}>
-                         <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>Contribute to projects to earn milestones</p>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ach.title || ach.content || 'Contribution'}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            {ach.type === 'artifact' ? 'Academic Evidence' : 'Protocol Synchronization'} &bull; {new Date(ach.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
-                   )}
-                </div>
-             </div>
+                    )) : (
+                      <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-sub)', border: '1px dashed var(--border)', borderRadius: '24px' }}>
+                         <Award size={48} style={{ opacity: 0.1, marginBottom: '1.5rem' }} />
+                         <p style={{ fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>Identity pending credential sync.</p>
+                         <p style={{ fontSize: '0.75rem', marginTop: '0.5rem', opacity: 0.7 }}>Contribute to artifacts or push commits to build your wall.</p>
+                      </div>
+                    )}
+                 </div>
+              </div>
           </div>
 
           <style jsx>{`

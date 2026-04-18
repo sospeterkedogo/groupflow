@@ -1,8 +1,5 @@
-import { X, UserCircle, ShieldCheck, Mail, Target, Award, Hash, GraduationCap, Calendar, UserPlus, Check, MessageSquare } from 'lucide-react'
-import { Profile } from '@/types/database'
-import { useState, useEffect } from 'react'
-import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import ChatRoom from './ChatRoom'
+import { getFlagComponent } from '@/utils/geo'
 
 interface PublicProfileModalProps {
   member: Profile;
@@ -12,10 +9,8 @@ interface PublicProfileModalProps {
 }
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
-  const [isConnected, setIsConnected] = useState(initialConnected)
-  const [loading, setLoading] = useState(false)
-  const [showChat, setShowChat] = useState(false)
   const [me, setMe] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null)
+  const [achievements, setAchievements] = useState<any[]>([])
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
@@ -24,17 +19,27 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
       setMe(user)
       if (!user) return
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('user_connections')
         .select('*')
         .or(`and(user_id.eq.${user.id},target_id.eq.${member.id}),and(user_id.eq.${member.id},target_id.eq.${user.id})`)
         .maybeSingle()
       
-      if (data) {
-        setIsConnected(true)
-      }
+      if (data) setIsConnected(true)
     }
+
+    async function fetchAchievements() {
+      const { data: artifacts } = await supabase.from('artifacts').select('*').eq('user_id', member.id).limit(2)
+      const { data: commits } = await supabase.from('commits').select('*').eq('user_id', member.id).limit(2)
+      const combined = [
+        ...(artifacts || []).map(a => ({ type: 'artifact', ...a })),
+        ...(commits || []).map(c => ({ type: 'commit', ...c }))
+      ]
+      setAchievements(combined)
+    }
+
     checkConnection()
+    fetchAchievements()
   }, [supabase, member.id])
 
   const handleConnect = async () => {
@@ -128,9 +133,15 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
 
         {/* Profile Info */}
         <div style={{ padding: '3.5rem 2rem 2rem' }}>
-           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '0.25rem', letterSpacing: '-0.03em' }}>{member.full_name || 'Anonymous Student'}</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                   <h2 style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em', margin: 0 }}>{member.full_name || 'Anonymous Student'}</h2>
+                   {(() => {
+                      const Flag = getFlagComponent((member as any).country_code)
+                      return Flag ? <div style={{ width: '28px', height: '18px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}><Flag /></div> : null
+                   })()}
+                </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                       <GraduationCap size={16} color="var(--brand)" /> 
@@ -202,36 +213,37 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
               </p>
            </div>
 
-           {/* Achievements Wall */}
-           <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                 <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Achievement Wall</h3>
-                 <span style={{ fontSize: '0.7rem', fontWeight: 800, background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
-                   {member.badges_count || 0} Badges
-                 </span>
-              </div>
-              <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.25rem' }}>
-                 {member.badges_count && member.badges_count > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-                       {[...Array(Math.min(4, member.badges_count))].map((_, i) => (
-                          <div key={i} style={{ aspectRatio: '1', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
-                             <Award size={24} color={i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : 'var(--brand)'} />
-                          </div>
+            {/* Achievements Wall */}
+            <div style={{ marginBottom: '2rem' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Accomplishments</h3>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+                    {member.badges_count || 0} Badges
+                  </span>
+               </div>
+               <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.25rem' }}>
+                  {achievements.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                       {achievements.map((ach, idx) => (
+                         <div key={idx} style={{ padding: '0.75rem', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--bg-sub)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                               {ach.type === 'artifact' ? <Target size={16} color="var(--brand)" /> : <Check size={16} color="var(--success)" />}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                               <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ach.title || ach.content || 'Contribution'}</div>
+                               <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>{ach.type === 'artifact' ? 'Verifiable Artifact' : 'Synced Logic Update'} • {new Date(ach.created_at).toLocaleDateString()}</div>
+                            </div>
+                         </div>
                        ))}
-                       {member.badges_count > 4 && (
-                          <div style={{ aspectRatio: '1', background: 'var(--bg-sub)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 900, color: 'var(--text-sub)' }}>
-                             +{member.badges_count - 4}
-                          </div>
-                       )}
                     </div>
-                 ) : (
+                  ) : (
                     <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-sub)' }}>
                        <Award size={32} style={{ opacity: 0.1, marginBottom: '0.5rem' }} />
                        <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 600 }}>No verifiable credentials recorded yet.</p>
                     </div>
-                 )}
-              </div>
-           </div>
+                  )}
+               </div>
+            </div>
 
            <div style={{ display: 'flex', gap: '1rem' }}>
               <button 

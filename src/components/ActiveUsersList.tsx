@@ -5,6 +5,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { usePresence } from './PresenceProvider'
 import { User, Shield } from 'lucide-react'
 import { ActiveUser } from '@/types/auth'
+import { getFlagComponent } from '@/utils/geo'
 
 export default function ActiveUsersList({
   groupId,
@@ -22,7 +23,7 @@ export default function ActiveUsersList({
     setLoading(true)
     const { data } = await supabase
       .from('profiles')
-      .select('id, full_name, avatar_url, role, last_seen')
+      .select('id, full_name, avatar_url, role, last_seen, country_code')
       .eq('group_id', groupId)
       .order('last_seen', { ascending: false })
 
@@ -137,8 +138,12 @@ export default function ActiveUsersList({
 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontWeight: 700, fontSize: '1rem' }}>
+                  <span style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {member.full_name} {isMe && '(You)'}
+                    {(() => {
+                      const Flag = getFlagComponent((member as any).country_code)
+                      return Flag ? <div style={{ width: '16px', height: '11px', borderRadius: '2px', overflow: 'hidden' }}><Flag /></div> : null
+                    })()}
                   </span>
                   {member.role === 'admin' && <Shield size={14} color="var(--brand)" />}
                 </div>

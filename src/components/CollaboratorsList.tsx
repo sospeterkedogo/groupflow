@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { Profile } from '@/types/database'
 import { Users, UserPlus, Check, ExternalLink, Shield, Sparkles } from 'lucide-react'
+import { getFlagComponent } from '@/utils/geo'
 
 interface CollaboratorsListProps {
   currentGroupId: string | null;
@@ -167,8 +168,12 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         </div>
         
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '0.8rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)' }}>
+          <div style={{ fontSize: '0.8rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             {collab.full_name || 'Anonymous'}
+            {(() => {
+              const Flag = getFlagComponent((collab as any).country_code)
+              return Flag ? <div style={{ width: '14px', height: '10px', borderRadius: '2px', overflow: 'hidden' }}><Flag /></div> : null
+            })()}
           </div>
           <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>
              {isTeammate && <span style={{ color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Users size={10} /> Team</span>}
