@@ -247,13 +247,13 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         {[
           { icon: <Zap size={18} />, label: 'Project Progress', value: `${completionRate}%`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
           { icon: <CheckCircle2 size={18} />, label: 'Completed Tasks', value: `${doneTasks}/${tasks.length}`, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-          { icon: <Users size={18} />, label: 'Team Members', value: members.length, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
+          { icon: <Users size={18} />, label: 'Team Members', value: `${members.length} / ${group?.capacity || 5}`, color: 'var(--brand)', bg: 'rgba(56,189,248,0.1)' },
           { icon: <AlertCircle size={18} />, label: 'Risk Assessment', value: riskLevel, color: riskLevel === 'Optimal' ? '#10b981' : '#ef4444', bg: riskLevel === 'Optimal' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' },
           { icon: <ShieldCheck size={18} />, label: 'Evidence Density', value: evidenceDensity, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
           { icon: <Timer size={18} />, label: 'Overdue Tasks', value: overdueTasks, color: overdueTasks > 0 ? '#ef4444' : '#10b981', bg: overdueTasks > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)' },
         ].map(kpi => (
-          <div key={kpi.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'var(--kpi-p)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ padding: '0.5rem', background: kpi.bg, color: kpi.color, borderRadius: '10px', flexShrink: 0 }}>{kpi.icon}</div>
+          <div key={kpi.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'var(--kpi-p)', display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="kpi-card-print">
+            <div style={{ padding: '0.5rem', background: kpi.bg, color: kpi.color, borderRadius: '10px', flexShrink: 0 }} className="print-hide">{kpi.icon}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: kpi.color, lineHeight: 1 }}>{kpi.value}</div>
               <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{kpi.label}</div>
@@ -511,8 +511,16 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           }
         }
         @media print {
-          button { display: none !important; }
-          body { background: white !important; }
+          @page { margin: 1cm; }
+          button, .print-hide, .btn, .panel-tool, header .btn-inline { display: none !important; }
+          body { background: white !important; color: black !important; padding: 0 !important; }
+          .page-fade { animation: none !important; transform: none !important; }
+          .kpi-grid { gap: 0.5rem !important; }
+          .kpi-card-print { border: 1px solid #eee !important; box-shadow: none !important; }
+          .charts-grid { display: block !important; }
+          .charts-grid > div { margin-bottom: 2rem !important; page-break-inside: avoid !important; border: 1px solid #eee !important; }
+          aside, nav, .sidebar-container, .mobile-header { display: none !important; }
+          .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

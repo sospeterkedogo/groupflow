@@ -140,39 +140,71 @@ export async function kickUser(userId: string) {
 }
 
 export async function sendJoinRequest(groupId: string, senderName: string) {
-  const { createAdminClient, createServerSupabaseClient } = await import('@/utils/supabase/server')
   const supabase = await createServerSupabaseClient()
-  const adminSupabase = await createAdminClient()
 
   // 1. Verify the requester is actually logged in
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  // 2. Avoid duplicate join request messages for the same group
-  const { data: existingRequest, error: fetchError } = await adminSupabase
-    .from('messages')
-    .select('id')
-    .eq('group_id', groupId)
-    .eq('user_id', user.id)
-    .ilike('content', '%[JOIN REQUEST]%')
-    .limit(1)
-    .maybeSingle()
+  // 2. Insert formal request
+  const { error: requestError } = await supabase
+    .from('group_join_requests')
+    .upsert({
+      group_id: groupId,
+      user_id: user.id,
+      status: 'pending'
+    })
 
-  if (fetchError) {
-    throw new Error(fetchError.message)
-  }
+  if (requestError) throw new Error(requestError.message)
 
-  if (existingRequest) {
-    return { success: true, alreadySent: true }
-  }
-
-  const { error } = await adminSupabase.from('messages').insert({
+  // 3. Optional: Still send a message to notify the team in chat
+  const { createAdminClient } = await import('@/utils/supabase/server')
+  const adminSupabase = await createAdminClient()
+  
+  await adminSupabase.from('messages').insert({
     group_id: groupId,
     user_id: user.id,
     content: `👋 [JOIN REQUEST] I'd like to join the team. I'm ${senderName}.`,
     is_system: true
   })
 
-  if (error) throw new Error(error.message)
+  return { success: true }
+}
+
+export async function acceptJoinRequest(requestId: string) {
+  const supabase = await createServerSupabaseClient()
+  const { data: { user: adminUser } } = await supabase.auth.getUser()
+  if (!adminUser) return { error: 'Not authenticated' }
+
+  // 1. Fetch request details
+  const { data: request } = await supabase
+    .from('group_join_requests')
+    .select('user_id, group_id')
+    .eq('id', requestId)
+    .single()
+  
+  if (!request) return { error: 'Request not found' }
+
+  // 2. Add user to group
+  const { error: joinError } = await supabase
+    .from('profiles')
+    .update({ group_id: request.group_id })
+    .eq('id', request.user_id)
+  
+  if (joinError) return { error: joinError.message }
+
+  // 3. Delete the request
+  await supabase.from('group_join_requests').delete().eq('id', requestId)
+
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
+export async function declineJoinRequest(requestId: string) {
+  const supabase = await createServerSupabaseClient()
+  const { error } = await supabase.from('group_join_requests').delete().eq('id', requestId)
+  if (error) return { error: error.message }
+  
+  revalidatePath('/dashboard')
   return { success: true }
 }

@@ -55,25 +55,29 @@ export default function NetworkPage() {
       .or(`user_id.eq.${user.id},target_id.eq.${user.id}`)
       .eq('status', 'connected')
     
+    let connectionIds: string[] = []
     if (conn) {
-      const ids = conn.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
-      if (ids.length > 0) {
-        const { data: net } = await supabase.from('profiles').select('*').in('id', ids)
+      connectionIds = conn.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
+      if (connectionIds.length > 0) {
+        const { data: net } = await supabase.from('profiles').select('*').in('id', connectionIds)
         setPersonalNetwork(net || [])
       }
     }
 
-    // 4. Fetch Suggestions (Members You May Know)
+    // 4. Fetch Suggestions (Scholars you may know)
+    // EXCLUDE: Self, Team Members, and already connected Peers
+    const excludeIds = [user.id, ...(teamMembers.map(m => m.id)), ...connectionIds]
+    
     const { data: sugg } = await supabase
       .from('profiles')
       .select('*')
-      .neq('id', user.id)
-      .not('group_id', 'eq', me?.group_id || '00000000-0000-0000-0000-000000000000')
+      .not('id', 'in', `(${excludeIds.join(',')})`)
       .limit(10)
+    
     setSuggestedUsers(sugg || [])
     
     setLoading(false)
-  }, [supabase])
+  }, [supabase, teamMembers])
 
   useEffect(() => {
     void fetchMetrics()
@@ -97,12 +101,12 @@ export default function NetworkPage() {
           </h1>
           <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1.5rem' }}>
              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Institution Global</span>
-                <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--brand)' }}>{globalCount.toLocaleString()} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Scholars</span></span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Global Community</span>
+                <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--brand)' }}>{globalCount.toLocaleString()} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Peers</span></span>
              </div>
              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>Synchronized</span>
-                <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--success)' }}>{personalNetwork.length} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Nodes</span></span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em' }}>My Network</span>
+                <span style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--success)' }}>{personalNetwork.length} <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Connections</span></span>
              </div>
           </div>
         </div>
@@ -111,7 +115,7 @@ export default function NetworkPage() {
           <Search size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} />
           <input 
             type="text" 
-            placeholder="Global filter by name or course..."
+            placeholder="Search scholars by name or course..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ 
@@ -132,19 +136,19 @@ export default function NetworkPage() {
       {/* ── NETWORK SECTIONS ───────────────────────────────────────────── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
         
-        {/* 1. Institutional Circle */}
+        {/* 1. Global Discovery */}
         <NetworkSection 
-          title="Institutional Circle" 
-          icon={<Users size={18} />} 
-          users={filterList(teamMembers)} 
+          title="Scholars you may know" 
+          icon={<Compass size={18} />} 
+          users={filterList(suggestedUsers)} 
           loading={loading}
           router={router}
           onlineUsers={onlineUsers}
         />
 
-        {/* 2. Synchronized Network */}
+        {/* 2. My Peer Network */}
         <NetworkSection 
-          title="Synchronized Network" 
+          title="My Peer Network" 
           icon={<Fingerprint size={18} />} 
           users={filterList(personalNetwork)} 
           loading={loading}
@@ -152,11 +156,11 @@ export default function NetworkPage() {
           onlineUsers={onlineUsers}
         />
 
-        {/* 3. Members You May Know */}
+        {/* 3. Team Members */}
         <NetworkSection 
-          title="Members You May Know" 
-          icon={<Compass size={18} />} 
-          users={filterList(suggestedUsers)} 
+          title="Team Roster" 
+          icon={<Users size={18} />} 
+          users={filterList(teamMembers)} 
           loading={loading}
           router={router}
           onlineUsers={onlineUsers}

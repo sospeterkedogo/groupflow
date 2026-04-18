@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
-import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users } from 'lucide-react'
+import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle } from 'lucide-react'
 import { Group } from '@/types/database'
 import { useProfile } from '@/context/ProfileContext'
 
@@ -33,6 +33,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const [newTaskSignal, setNewTaskSignal] = useState(0)
   const [syncToken, setSyncToken] = useState(0)
   const [members, setMembers] = useState<any[]>([])
+  const [pendingRequests, setPendingRequests] = useState<any[]>([])
   const [showMembers, setShowMembers] = useState(false)
 
   const handleCalendarTaskSaved = useCallback(async () => {
@@ -60,6 +61,34 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
     if (data) setMembers(data)
   }, [groupId, supabase])
+
+  const fetchPendingRequests = useCallback(async () => {
+    if (!groupId || profile?.role !== 'admin') return
+    const { data } = await supabase
+      .from('group_join_requests')
+      .select('*, profiles(id, full_name, avatar_url)')
+      .eq('group_id', groupId)
+      .eq('status', 'pending')
+
+    setPendingRequests(data || [])
+  }, [groupId, profile?.role, supabase])
+
+  const handleAcceptRequest = async (id: string) => {
+    const { acceptJoinRequest } = await import('@/app/dashboard/join/actions')
+    const res = await acceptJoinRequest(id)
+    if (res.error) alert(res.error)
+    else {
+      void fetchMembers()
+      void fetchPendingRequests()
+    }
+  }
+
+  const handleDeclineRequest = async (id: string) => {
+    const { declineJoinRequest } = await import('@/app/dashboard/join/actions')
+    const res = await declineJoinRequest(id)
+    if (res.error) alert(res.error)
+    else void fetchPendingRequests()
+  }
 
   const fetchPersonalTaskCount = useCallback(async () => {
     if (!profile?.id || !groupId) return
@@ -115,8 +144,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     if (groupId) {
       void fetchGroupDetails()
       void fetchMembers()
+      void fetchPendingRequests()
     }
-  }, [groupId, fetchGroupDetails, fetchMembers])
+  }, [groupId, fetchGroupDetails, fetchMembers, fetchPendingRequests])
 
   useEffect(() => {
     if (profile?.id && groupId) {
@@ -137,13 +167,18 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },
           () => void fetchMembers()
         )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'group_join_requests', filter: `group_id=eq.${groupId}` },
+          () => void fetchPendingRequests()
+        )
         .subscribe()
 
       return () => {
         supabase.removeChannel(channel)
       }
     }
-  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchProjectProgress, fetchMembers, supabase])
+  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchProjectProgress, fetchMembers, fetchPendingRequests, supabase])
 
   const renderRoleBadge = (role: string | null) => {
     const r = role?.toUpperCase()
@@ -217,6 +252,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                 fontWeight: 950
               }}>
                 {members.length || 0} / {group?.capacity || 5}
+                {pendingRequests.length > 0 && ` (+${pendingRequests.length} PENDING)`}
               </span>
             </button>
           </div>
@@ -224,81 +260,93 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           {showMembers && (
             <div style={{
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0.75rem',
+              flexDirection: 'column',
+              gap: '1rem',
               marginTop: '1.25rem',
               animation: 'fadeInSlide 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
               background: 'var(--bg-sub)',
-              padding: '1rem',
-              borderRadius: '16px',
+              padding: '1.25rem',
+              borderRadius: '20px',
               border: '1px solid var(--border)',
-              maxWidth: 'fit-content',
-              zIndex: 100
+              maxWidth: '450px',
+              zIndex: 100,
+              boxShadow: 'var(--shadow-xl)'
             }}>
-              {members.map(m => {
-                const isSelf = m.id === profile?.id
-                const lastSeenDate = m.last_seen ? new Date(m.last_seen) : null
-                // Online if active in last 2 mins
-                const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 120000)
 
-                return (
-                  <div key={m.id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.6rem',
-                    padding: '8px 14px',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '10px',
-                    boxShadow: 'var(--shadow-sm)',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s'
-                  }}
-                    onClick={() => router.push(`/dashboard/network/profile/${m.id}`)}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                  >
-                    <div style={{ position: 'relative' }}>
-                      <div style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        background: 'var(--bg-main)',
+              {/* Active Members */}
+              <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Active Members</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                {members.map(m => {
+                  const isSelf = m.id === profile?.id
+                  const lastSeenDate = m.last_seen ? new Date(m.last_seen) : null
+                  const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 120000)
+
+                  return (
+                    <div key={m.id} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      padding: '8px 14px',
+                      background: 'var(--surface)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '12px',
+                      boxShadow: 'var(--shadow-sm)',
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s'
+                    }}
+                      onClick={() => router.push(`/dashboard/network/profile/${m.id}`)}
+                    >
+                      <div style={{ position: 'relative' }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, color: 'var(--brand)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                          {m.avatar_url ? <img src={m.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.full_name?.[0]}
+                        </div>
+                        <div style={{ position: 'absolute', bottom: -1, right: -1, width: '10px', height: '10px', borderRadius: '50%', background: isOnline ? 'var(--success)' : '#94a3b8', border: '2px solid var(--surface)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', lineHeight: 1, display: 'flex', alignItems: 'center' }}>
+                          {m.full_name?.split(' ')[0]}{isSelf && ' (You)'}
+                          {renderRoleBadge(m.role)}
+                        </div>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '2px' }}>
+                          {isOnline ? 'Active Now' : 'Offline'}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Pending Requests Section */}
+              {pendingRequests.length > 0 && (
+                <>
+                  <div style={{ height: '1px', background: 'var(--border)', margin: '0.5rem 0' }} />
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Incoming Requests ({pendingRequests.length})</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {pendingRequests.map(r => (
+                      <div key={r.id} style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '11px',
-                        fontWeight: 900,
-                        color: 'var(--brand)',
-                        border: '1px solid var(--border)',
-                        overflow: 'hidden'
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        background: 'rgba(var(--brand-rgb), 0.03)',
+                        border: '1px dashed var(--brand)',
+                        borderRadius: '12px'
                       }}>
-                        {m.avatar_url ? <img src={m.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.full_name?.[0]}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {r.profiles?.avatar_url ? <img src={r.profiles.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={18} color="var(--text-sub)" />}
+                          </div>
+                          <div style={{ fontWeight: 850, fontSize: '0.85rem', color: 'var(--text-main)' }}>{r.profiles?.full_name}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.4rem' }}>
+                          <button onClick={() => handleDeclineRequest(r.id)} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--error)', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}>Decline</button>
+                          <button onClick={() => handleAcceptRequest(r.id)} style={{ padding: '6px 10px', borderRadius: '8px', border: 'none', background: 'var(--brand)', color: 'white', fontSize: '0.65rem', fontWeight: 900, cursor: 'pointer' }}>Accept</button>
+                        </div>
                       </div>
-                      <div style={{
-                        position: 'absolute',
-                        bottom: -1,
-                        right: -1,
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        background: isOnline ? 'var(--success)' : '#94a3b8',
-                        border: '2px solid var(--surface)',
-                        boxShadow: isOnline ? '0 0 8px var(--success)' : 'none'
-                      }} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', lineHeight: 1, display: 'flex', alignItems: 'center' }}>
-                        {m.full_name?.split(' ')[0]}{isSelf && ' (You)'}
-                        {renderRoleBadge(m.role)}
-                      </div>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '2px' }}>
-                        {isOnline ? 'Active Now' : 'Offline'}
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                )
-              })}
+                </>
+              )}
             </div>
           )}
         </div>
