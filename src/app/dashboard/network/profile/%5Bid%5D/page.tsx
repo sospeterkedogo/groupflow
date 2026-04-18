@@ -55,17 +55,19 @@ export default function StudentProfilePage() {
     if (profile) {
       setMember(profile as any)
       if (user) {
-        const { data: conn } = await supabase
+        // Check if there is ANY accepted connection or a pending one sent by me
+        const { data: conns } = await supabase
           .from('user_connections')
-          .select('status')
-          .eq('user_id', user.id)
-          .eq('target_id', studentId)
-          .single()
+          .select('id, user_id, target_id, status')
+          .or(`and(user_id.eq.${user.id},target_id.eq.${studentId}),and(user_id.eq.${studentId},target_id.eq.${user.id})`)
 
-        if (conn?.status === 'pending') {
-          setConnectionStatus('pending')
-        } else if (conn && (conn.status === 'connected' || conn.status === 'accepted')) {
+        const connection = conns?.find(c => c.status === 'connected' || c.status === 'accepted')
+        const pendingSentByMe = conns?.find(c => c.user_id === user.id && c.status === 'pending')
+
+        if (connection) {
           setConnectionStatus('connected')
+        } else if (pendingSentByMe) {
+          setConnectionStatus('pending')
         } else {
           setConnectionStatus('idle')
         }
@@ -135,10 +137,10 @@ export default function StudentProfilePage() {
         >
           <ChevronLeft size={20} />
         </button>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0 }}>Scholar Profile</h1>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0 }}>Scholar Transcript</h1>
       </div>
 
-      <div className="profile-main-layout" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1.5rem' }}>
+      <div className="profile-main-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: '1.5rem' }}>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.5rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
@@ -251,7 +253,7 @@ export default function StudentProfilePage() {
                  )}
 
                  <div style={{ marginBottom: '1.5rem' }}>
-                    <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.5rem' }}>Researcher Narrative</h4>
+                    <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.5rem' }}>Scholar Identity</h4>
                     <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85 }}>
                       {member.biography || `An active scholar in the GroupFlow network, specializing in ${member.course_name || 'their academic field'}.`}
                     </p>

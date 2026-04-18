@@ -74,27 +74,26 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   }, [profile, groupId, supabase])
 
   useEffect(() => {
-    if (profile?.id && groupId) {
-      void (async () => {
-        await Promise.all([
-          fetchPersonalTaskCount(),
-          fetchGroupDetails(),
-          fetchMembers()
-        ])
-      })()
+    if (groupId) {
+      void fetchGroupDetails()
+      void fetchMembers()
+    }
+  }, [groupId, fetchGroupDetails, fetchMembers])
 
-      const channel = supabase.channel('personal_tasks_count')
+  useEffect(() => {
+    if (profile?.id && groupId) {
+      void fetchPersonalTaskCount()
+
+      const channel = supabase.channel('dashboard_sync')
         .on(
           'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'tasks',
-            filter: `group_id=eq.${groupId}`
-          },
-          () => {
-            void fetchPersonalTaskCount()
-          }
+          { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
+          () => void fetchPersonalTaskCount()
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` },
+          () => void fetchMembers()
         )
         .subscribe()
 
@@ -102,7 +101,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         supabase.removeChannel(channel)
       }
     }
-  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchGroupDetails, fetchMembers, supabase])
+  }, [profile?.id, groupId, fetchPersonalTaskCount, fetchMembers, supabase])
 
   if (!profile) {
     return (
@@ -136,37 +135,118 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
           </h1>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.75rem' }}>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, margin: 0, opacity: 0.8 }}>
-               Active: <span style={{ color: 'var(--brand)', fontWeight: 800 }}>{group?.name || 'Syncing System...'}</span>
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+            <div style={{ padding: '0.6rem 1.25rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '12px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+               <Zap size={14} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
+               <span style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  Mission Protocol: <span style={{ color: 'var(--brand)' }}>{group?.name || 'INITIALIZING...'}</span>
+               </span>
+            </div>
+            
             <button 
               onClick={() => setShowMembers(!showMembers)}
-              className="btn btn-secondary"
-              style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-main)', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '20px', border: '1px solid var(--border)' }}
+              className={`btn ${showMembers ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ 
+                fontSize: '0.75rem', 
+                fontWeight: 900, 
+                padding: '0.6rem 1.25rem', 
+                borderRadius: '12px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                border: showMembers ? 'none' : '1px solid var(--border)',
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                boxShadow: showMembers ? '0 4px 12px rgba(var(--brand-rgb), 0.3)' : 'none'
+              }}
             >
-              {showMembers ? 'Hide Team' : `Show Team (${members.length})`}
+              <UserCircle size={16} />
+              ROSTER
+              <span style={{ 
+                background: showMembers ? 'white' : 'var(--brand)', 
+                color: showMembers ? 'var(--brand)' : 'white', 
+                padding: '1px 6px', 
+                borderRadius: '6px', 
+                fontSize: '0.65rem',
+                marginLeft: '0.25rem'
+              }}>
+                {members.length}
+              </span>
             </button>
           </div>
 
           {showMembers && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1rem', animation: 'fadeIn 0.3s ease-out' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: '0.75rem', 
+              marginTop: '1.25rem', 
+              animation: 'fadeInSlide 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
+              background: 'var(--bg-sub)',
+              padding: '1rem',
+              borderRadius: '16px',
+              border: '1px solid var(--border)',
+              maxWidth: 'fit-content'
+            }}>
                {members.map(m => {
                  const isSelf = m.id === profile?.id
                  const lastSeenDate = m.last_seen ? new Date(m.last_seen) : null
-                 const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 60000)
+                 // Online if active in last 2 mins
+                 const isOnline = lastSeenDate && (new Date().getTime() - lastSeenDate.getTime() < 120000)
                  
                  return (
-                   <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '6px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px' }}>
+                   <div key={m.id} style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     gap: '0.6rem', 
+                     padding: '8px 14px', 
+                     background: 'var(--surface)', 
+                     border: '1px solid var(--border)', 
+                     borderRadius: '10px',
+                     boxShadow: 'var(--shadow-sm)',
+                     cursor: 'pointer',
+                     transition: 'transform 0.2s'
+                   }}
+                   onClick={() => router.push(`/dashboard/network/profile/${m.id}`)}
+                   onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                   onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                   >
                       <div style={{ position: 'relative' }}>
-                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
-                          {m.avatar_url ? <img src={m.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : m.full_name?.[0]}
+                        <div style={{ 
+                          width: '28px', 
+                          height: '28px', 
+                          borderRadius: '50%', 
+                          background: 'var(--bg-main)', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          fontSize: '11px', 
+                          fontWeight: 900,
+                          color: 'var(--brand)',
+                          border: '1px solid var(--border)',
+                          overflow: 'hidden'
+                        }}>
+                          {m.avatar_url ? <img src={m.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : m.full_name?.[0]}
                         </div>
-                        <div style={{ position: 'absolute', bottom: -2, right: -2, width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? 'var(--success)' : '#64748b', border: '2px solid var(--surface)' }} />
+                        <div style={{ 
+                          position: 'absolute', 
+                          bottom: -1, 
+                          right: -1, 
+                          width: '10px', 
+                          height: '10px', 
+                          borderRadius: '50%', 
+                          background: isOnline ? 'var(--success)' : '#94a3b8', 
+                          border: '2px solid var(--surface)',
+                          boxShadow: isOnline ? '0 0 8px var(--success)' : 'none'
+                        }} />
                       </div>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: isOnline ? 'var(--text-main)' : 'var(--text-sub)' }}>
-                        {m.full_name?.split(' ')[0]}{isSelf && ' (You)'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 850, color: 'var(--text-main)', lineHeight: 1 }}>
+                          {m.full_name?.split(' ')[0]}{isSelf && ' (You)'}
+                        </span>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-sub)', marginTop: '2px' }}>
+                          {isOnline ? 'Active Now' : 'Offline'}
+                        </span>
+                      </div>
                    </div>
                  )
                })}
@@ -334,6 +414,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         @keyframes shimmer-sweep {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
+        }
+        @keyframes fadeInSlide { 
+          from { opacity: 0; transform: translateY(-10px) scale(0.98); } 
+          to { opacity: 1; transform: translateY(0) scale(1); } 
         }
         @media (max-width: 768px) {
           .mobile-hide { display: none !important; }

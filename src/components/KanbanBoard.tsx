@@ -441,7 +441,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           )}
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-sub)' }} className="hide-mobile">Multiplayer active. Drag and drop to collaborate.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontSize: '0.75rem', fontWeight: 800 }} className="hide-mobile">
+              <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
+              ACTIVE UPLINK
+            </div>
           <button className="btn btn-primary" onClick={() => { setSelectedTask(null); setIsModalOpen(true); }} style={{ width: 'auto' }}>
             + New Task
           </button>
