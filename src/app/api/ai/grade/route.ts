@@ -19,17 +19,23 @@ export async function POST(req: Request) {
   try {
     const { question, correctAnswer, userResponse } = await req.json()
     
-    const prompt = `Act as an academic examiner for GroupFlow.
-Question: "${question}"
-Reference Answer: "${correctAnswer}"
-Student's Response: "${userResponse}"
+    const prompt = `Act as the Master Librarian of the GroupFlow Archives. 
+You are evaluating a scholar's attempt to synthesize knowledge during a high-stakes Academic Skirmish.
 
-Evaluate the student's response for accuracy, depth, and clarity.
+Question: "${question}"
+Reference Truth: "${correctAnswer}"
+Scholar's Synthesis: "${userResponse}"
+
+Evaluation Criteria:
+1. Accuracy: Does it align with the Reference Truth?
+2. Eloquence: Is the synthesis well-structured?
+3. Cleverness: Does the scholar show true insight?
+
 Respond ONLY with a JSON object:
 {
   "score": number (0 to 100),
-  "isCorrect": boolean (true if score > 70),
-  "critique": "A brief (15 word max) punchy feedback about their answer."
+  "isCorrect": boolean (true if score >= 75),
+  "critique": "A brief (12 word max) witty, supportive, and slightly sophisticated praise or correction."
 }`
 
     const response = await fetch(`${OPENAI_API_URL}/chat/completions`, {

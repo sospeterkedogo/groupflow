@@ -196,7 +196,6 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
       storage.set('activeTurnUserId', players[nextIdx % players.length])
     } else {
       storage.set('quizStatus', 'results')
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } })
       handleFinalizeStats()
     }
   }, [profile, others])
@@ -213,6 +212,27 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
 
     await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
   }
+
+  const handleResetSkirmish = useMutation(({ storage }) => {
+    storage.set('quizStatus', 'setup')
+    storage.set('currentQuestionIndex', 0)
+    storage.get('quizQuestions').clear()
+    storage.set('activeTurnUserId', null)
+    addToast('Archives Reset', 'Neural buffer cleared. Ready for a new iteration.', 'info')
+  }, [])
+
+  // ── COLLECTIVE CELEBRATION ────────────────────────────────────
+  useEffect(() => {
+    if (quizStatus === 'results') {
+        confetti({ 
+          particleCount: 150, 
+          spread: 80, 
+          origin: { y: 0.6 },
+          colors: ['#0ea5e9', '#38bdf8', '#fbbf24']
+        })
+        addToast('Ascension Validated', 'The collective knowledge has been successfully assimilated.', 'success')
+    }
+  }, [quizStatus])
 
   // ── INTERACTION HANDLERS ───────────────────────────────────────
   const currentQ = questions && questions.length > currentIdx ? questions[currentIdx] : null
@@ -297,7 +317,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
             <Zap size={120} className="text-brand" fill="var(--brand)" style={{ filter: 'drop-shadow(0 0 30px rgba(var(--brand-rgb), 0.5))' }} />
          </motion.div>
          <h1 style={{ fontSize: '3.5rem', fontWeight: 950, letterSpacing: '-0.06em', marginTop: '2rem' }}>SKIRMISH <span style={{ color: 'var(--brand)' }}>ACTIVE</span></h1>
-         <p style={{ color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em' }}>Calibrating Neural Flux...</p>
+         <p style={{ color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em' }}>Assembling Virtual Shards...</p>
       </div>
     )
   }
@@ -311,11 +331,11 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
         {quizStatus === 'setup' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
              <Crown size={80} className="text-brand" style={{ marginBottom: '2rem', opacity: 0.2 }} />
-             <h2 style={{ fontSize: '2rem', fontWeight: 950, marginBottom: '1rem' }}>Establishing Connection</h2>
+             <h2 style={{ fontSize: '2rem', fontWeight: 950, marginBottom: '1rem' }}>Initiating Protocol</h2>
              <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem', maxWidth: '450px', fontWeight: 600 }}>
                 {hasSetupData 
-                  ? "Neural sync detected. You are the Host. Deploy the academic shards when ready." 
-                  : "Syncing with Command Node. Waiting for Host to initiate the skirmish."}
+                  ? "The Master Librarian awaits your signal. Deploy the academic shards whenever you feel adequately prepared." 
+                  : "Synchronizing with the Central Archive. Waiting for the Host to initiate the knowledge extraction."}
              </p>
              
              {hasSetupData ? (
@@ -324,7 +344,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                   className="btn btn-primary"
                   style={{ padding: '1.25rem 3.5rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem', boxShadow: '0 10px 30px rgba(var(--brand-rgb), 0.3)' }}
                 >
-                  STRIKE FIRST: DEPLOY SHARDS
+                  COMMENCE THE EXTRACTION
                 </button>
              ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
@@ -385,7 +405,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                      transition={{ repeat: Infinity, duration: 1.5 }}
                      style={{ padding: '6px 16px', background: isMyTurn ? 'var(--brand)' : 'var(--bg-sub)', color: isMyTurn ? 'white' : 'var(--text-sub)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                    >
-                      {isMyTurn ? '🚨 Your Turn to Strike' : `⚡ ${others.find(o => o.id === activeTurnId)?.info?.name || 'Peer'} is Thinking...`}
+                      {isMyTurn ? '⚡ IT IS YOUR TURN TO SYNTHESIZE' : `🔍 ${others.find(o => o.id === activeTurnId)?.info?.name || 'A Peer'} is currently being evaluated...`}
                    </motion.div>
                 </div>
              </div>
@@ -484,8 +504,9 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
               <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', fontWeight: 600, maxWidth: '500px', marginBottom: '3rem' }}>The hierarchy has been established. XP rewards have been injected into your profile.</p>
               
               <div style={{ display: 'flex', gap: '1.5rem' }}>
-                 <button onClick={downloadTrophy} className="btn btn-primary" style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(var(--brand-rgb), 0.2)' }}>Download Skirmish Receipt</button>
-                 <button onClick={() => router.push('/dashboard/chillout')} className="btn btn-secondary" style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem' }}>Exit Zone</button>
+                 <button onClick={downloadTrophy} className="btn btn-primary" style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(var(--brand-rgb), 0.2)' }}>Record Victory Shard (PDF)</button>
+                 <button onClick={handleResetSkirmish} className="btn btn-secondary" style={{ padding: '1.25rem 3rem', borderRadius: '20px', fontWeight: 950, fontSize: '1.1rem' }}>Enter New Loop</button>
+                  <button onClick={() => router.push('/dashboard/chillout')} className="btn btn-ghost" style={{ padding: '1.25rem 2rem', borderRadius: '20px', fontWeight: 950, fontSize: '1rem' }}>Exit Zone</button>
               </div>
            </div>
         )}
