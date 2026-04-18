@@ -12,11 +12,17 @@ export async function createGroup(formData: FormData) {
   const groupName = (formData.get('name') as string || '').trim()
   const moduleCode = (formData.get('module_code') as string || '').trim().toUpperCase()
   const joinPassword = (formData.get('join_password') as string || '').trim()
+  const capacity = parseInt(formData.get('capacity') as string || '5', 10)
 
   // Create the group
   const { data: newGroup, error: groupError } = await supabase
     .from('groups')
-    .insert([{ name: groupName, module_code: moduleCode, join_password: joinPassword }])
+    .insert([{ 
+      name: groupName, 
+      module_code: moduleCode, 
+      join_password: joinPassword,
+      capacity: capacity 
+    }])
     .select('id')
     .single()
 
@@ -45,10 +51,10 @@ export async function joinGroup(formData: FormData) {
   const moduleCode = (formData.get('module_code') as string || '').trim().toUpperCase()
   const joinPassword = (formData.get('join_password') as string || '').trim()
 
-  // Search for the group
+  // 1. Search for the group and its current member count
   const { data: group } = await supabase
     .from('groups')
-    .select('id, join_password')
+    .select('id, join_password, capacity')
     .eq('module_code', moduleCode)
     .single()
 
@@ -56,12 +62,22 @@ export async function joinGroup(formData: FormData) {
     redirect('/dashboard/join?error=' + encodeURIComponent('Could not find a group with that Module Code.'))
   }
 
-  // Verify password
+  // 2. Verify capacity
+  const { count } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('group_id', group.id)
+
+  if (count !== null && count >= (group.capacity || 5)) {
+    redirect('/dashboard/join?error=' + encodeURIComponent(`Transmission Blocked: This research team has reached its maximum capacity of ${group.capacity} scholars.`))
+  }
+
+  // 3. Verify password
   if (group.join_password && group.join_password !== joinPassword) {
     redirect('/dashboard/join?error=' + encodeURIComponent('Incorrect Join Password for this module.'))
   }
 
-  // Update the user's profile to join this group
+  // 4. Update the user's profile to join this group
   const { data: updatedProfile, error: updateError } = await supabase
     .from('profiles')
     .update({ group_id: group.id })

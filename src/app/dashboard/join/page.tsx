@@ -59,6 +59,10 @@ function JoinGroupContent() {
                    <label className="form-label" htmlFor="create_join_password">Access Password:</label>
                    <input className="form-input" id="create_join_password" name="join_password" type="password" placeholder="Set a workspace password" required style={{ borderRadius: '12px' }} />
                 </div>
+                <div className="form-group">
+                   <label className="form-label" htmlFor="capacity" style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>Max Capacity:</label>
+                   <input className="form-input" id="capacity" name="capacity" type="number" min="2" max="100" defaultValue="5" required style={{ borderRadius: '12px' }} />
+                </div>
                  <SubmitButton label="Create Workspace" />
              </form>
           </div>

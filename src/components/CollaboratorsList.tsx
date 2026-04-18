@@ -20,28 +20,36 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
 
   const fetchCollaborators = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !currentGroupId) return
+    // Use either the passed prop or the profile's group_id
+    const groupId = currentGroupId
+    
+    if (!user || !groupId) {
+      console.warn("CollaboratorsList: No group identity found for team fetch.")
+      return
+    }
 
     const { data } = await supabase
       .from('profiles')
       .select('*')
-      .eq('group_id', currentGroupId)
+      .eq('group_id', groupId)
       .neq('id', user.id)
 
-    if (data) setCollaborators(data as Profile[])
+    if (data) {
+      console.log(`CollaboratorsList: Found ${data.length} team members.`)
+      setCollaborators(data as Profile[])
+    }
   }, [supabase, currentGroupId])
 
   const fetchSuggested = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Fetch up to 5 random users who are NOT in the current group and NOT already connected
-    // This avoids cluttering suggestions with people already in the network
+    // Fetch users NOT in the current group and NOT already connected
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .neq('id', user.id)
-      .not('group_id', 'eq', currentGroupId || '00000000-0000-0000-0000-000000000000') // handle null
+      .not('group_id', 'eq', currentGroupId || '00000000-0000-0000-0000-000000000000')
       .limit(6)
 
     if (data) setSuggested(data as Profile[])
@@ -60,17 +68,21 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
 
     if (connData) {
       const ids = connData.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
-      setConnections(new Set(ids))
+      const uniqueIds = Array.from(new Set(ids))
+      setConnections(new Set(uniqueIds))
 
-      // 2. Fetch full profiles for these connections
-      if (ids.length > 0) {
-        const { data: profiles } = await supabase
+      // 2. Fetch full profiles for these connections (Global Discovery unblocked by RLS)
+      if (uniqueIds.length > 0) {
+        const { data: profiles, error } = await supabase
           .from('profiles')
           .select('*')
-          .in('id', ids)
-          .limit(10)
+          .in('id', uniqueIds)
         
-        if (profiles) setPersonalNetwork(profiles as Profile[])
+        if (error) console.error("Error fetching connection profiles:", error)
+        if (profiles) {
+          console.log(`CollaboratorsList: Found ${profiles.length} personal connections.`)
+          setPersonalNetwork(profiles as Profile[])
+        }
       } else {
         setPersonalNetwork([])
       }
@@ -131,22 +143,22 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
 
   const renderUserCard = (collab: Profile) => {
     const isConnected = connections.has(collab.id)
+    const isTeammate = collab.group_id === currentGroupId
+
     return (
       <div 
         key={collab.id}
         style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '0.75rem', 
-          padding: '0.75rem', 
-          background: 'var(--bg-main)', 
-          borderRadius: '14px', 
-          border: '1px solid var(--border)',
+          gap: '0.6rem', 
+          padding: '0.5rem 0', 
+          borderBottom: '1px solid rgba(var(--text-main-rgb), 0.05)',
           transition: 'all 0.2s',
-          animation: 'fadeIn 0.4s ease-out'
+          animation: 'fadeIn 0.3s ease-out'
         }}
       >
-        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--brand)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900 }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.7rem' }}>
           {collab.avatar_url ? (
             <img src={collab.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
@@ -155,68 +167,60 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
         </div>
         
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {collab.full_name || 'Anonymous Specialist'}
+          <div style={{ fontSize: '0.8rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)' }}>
+            {collab.full_name || 'Anonymous'}
           </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-             <Shield size={10} /> {collab.rank || 'Scholar'}
+          <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, textTransform: 'uppercase' }}>
+             {isTeammate && <span style={{ color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Users size={10} /> Team</span>}
+             <span>{collab.rank || 'Scholar'}</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
           <button 
             onClick={() => onViewProfile(collab)}
             className="panel-tool"
-            style={{ padding: '0.4rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg-sub)' }}
+            style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px' }}
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={12} />
           </button>
-          <button 
-            onClick={() => !isConnected && handleConnect(collab.id)}
-            style={{ 
-              padding: '0.4rem', 
-              borderRadius: '8px', 
-              border: 'none', 
-              background: isConnected ? 'var(--success)' : 'var(--brand)', 
-              color: 'white', 
-              cursor: isConnected ? 'default' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {isConnected ? <Check size={14} /> : <UserPlus size={14} />}
-          </button>
+          {!isConnected && (
+            <button 
+              onClick={() => handleConnect(collab.id)}
+              style={{ 
+                width: '28px', height: '28px', borderRadius: '6px', border: 'none', 
+                background: 'var(--brand)', color: 'white', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              <UserPlus size={12} />
+            </button>
+          )}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="collaborators-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="collaborators-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       
       {/* 1. TEAM SECTION */}
-      <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div style={{ padding: '0.5rem', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '10px' }}>
-            <Users size={20} color="var(--brand)" />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Team Collaborators</h3>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>Connected to your project</p>
-          </div>
+      <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1rem', boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          <Users size={16} color="var(--brand)" />
+          <h3 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Team Collaborators</h3>
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {[1, 2].map(i => <div key={i} className="skeleton" style={{ height: '56px', borderRadius: '14px' }} />)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            {[1, 2].map(i => <div key={i} className="skeleton" style={{ height: '32px', borderRadius: '6px' }} />)}
           </div>
         ) : collaborators.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '1.5rem', border: '1px dashed var(--border)', borderRadius: '16px' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)', fontWeight: 600 }}>System isolated &middot; Group empty</span>
+          <div style={{ textAlign: 'center', padding: '1rem', border: '1px dashed var(--border)', borderRadius: '12px' }}>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700 }}>Empty Set</span>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {collaborators.map(renderUserCard)}
           </div>
         )}
@@ -224,41 +228,31 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
 
       {/* 2. PERSONAL NETWORK SECTION */}
       {personalNetwork.length > 0 && (
-        <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <div style={{ padding: '0.5rem', background: 'rgba(var(--accent-rgb), 0.1)', borderRadius: '10px' }}>
-              <Sparkles size={20} color="var(--brand)" />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Personal Network</h3>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>Your established academic circle</p>
-            </div>
+        <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1rem', boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <Sparkles size={16} color="var(--brand)" />
+            <h3 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Personal Network</h3>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {personalNetwork.map(renderUserCard)}
           </div>
         </div>
       )}
 
       {/* 3. SUGGESTED SECTION */}
-      <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div style={{ padding: '0.5rem', background: 'rgba(var(--text-main-rgb), 0.05)', borderRadius: '10px' }}>
-            <UserPlus size={20} color="var(--text-sub)" />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Global Discovery</h3>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-sub)', fontWeight: 600 }}>Specialists you might know</p>
-          </div>
+      <div style={{ background: 'var(--surface)', borderRadius: '20px', border: '1px solid var(--border)', padding: '1rem', boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          <UserPlus size={16} color="var(--text-sub)" />
+          <h3 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Global Discovery</h3>
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '56px', borderRadius: '14px' }} />)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            {[1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '32px', borderRadius: '6px' }} />)}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {suggested.map(renderUserCard)}
           </div>
         )}

@@ -5,6 +5,7 @@ export type Group = {
   is_encrypted: boolean;
   description: string | null;
   rules: string | null;
+  capacity: number | null;
   created_at: string;
 };
 

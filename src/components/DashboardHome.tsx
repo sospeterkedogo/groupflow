@@ -206,7 +206,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                 marginLeft: '0.4rem',
                 fontWeight: 950
               }}>
-                {members.length || 0}
+                {members.length || 0} / {group?.capacity || 5}
               </span>
             </button>
           </div>
