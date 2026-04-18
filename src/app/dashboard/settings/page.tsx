@@ -35,6 +35,7 @@ export default function SettingsPage() {
   const [badgesCount, setBadgesCount] = useState(0)
   const [tagline, setTagline] = useState('')
   const [biography, setBiography] = useState('')
+  const [stack, setStack] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -107,6 +108,7 @@ export default function SettingsPage() {
         setBadgesCount(data.badges_count ?? 0)
         setTagline(data.tagline || '')
         setBiography(data.biography || '')
+        setStack(data.stack || '')
         if (data.id) {
           fetchJoinRequests(data.id)
         }
@@ -142,7 +144,8 @@ export default function SettingsPage() {
         completion_year: completionYear ? Number(completionYear) : null,
         rank: rank,
         tagline: tagline,
-        biography: biography
+        biography: biography,
+        stack: stack
       })
       .eq('id', profile.id)
 
@@ -611,6 +614,19 @@ export default function SettingsPage() {
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>Share your research interests, achievements, and strengths.</span>
                   </div>
                 </div>
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Technical Arsenal (Stack)</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  value={stack} 
+                  onChange={e => setStack(e.target.value)} 
+                  placeholder="e.g. React, Next.js, FastAPI, PostgreSQL" 
+                />
+                <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>List your primary tools, languages, and frameworks.</p>
               </div>
 
               <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>

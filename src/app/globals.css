@@ -14,12 +14,12 @@
   --warning: #f59e0b;
   --overlay: rgba(0, 0, 0, 0.4);
 
-  --radius: 12px;
-  --radius-lg: 24px;
+  --radius: 8px;
+  --radius-lg: 12px;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
   /* Responsive Tokens */
   --h-nav: 64px;
@@ -335,7 +335,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   letter-spacing: 0.01em;
-  border-radius: 14px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -440,7 +440,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-sm {
   padding: 0.45rem 1rem;
   font-size: 0.78rem;
-  border-radius: 10px;
+  border-radius: 6px;
 }
 .btn-lg {
   padding: 0.9rem 2rem;
@@ -539,7 +539,7 @@ h1, h2, h3, h4, h5, h6 {
   overflow-x: hidden;
   position: relative;
   background-color: var(--bg-main);
-  padding: 2.5rem;
+  padding: 1.5rem;
   transition: all 0.3s ease;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;

@@ -171,6 +171,11 @@ export default function StudentProfilePage() {
             </div>
 
             <h2 style={{ fontSize: '1.75rem', fontWeight: 950, marginBottom: '0.25rem', letterSpacing: '-0.02em' }}>{member.full_name}</h2>
+            {member.tagline && (
+              <div style={{ fontSize: '0.9rem', color: 'var(--brand)', fontWeight: 800, marginBottom: '0.5rem', fontStyle: 'italic' }}>
+                "{member.tagline}"
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--brand)' }}>
                  <ShieldCheck size={16} />

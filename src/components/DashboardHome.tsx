@@ -204,7 +204,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             padding: '1.75rem',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
-            borderRadius: '24px',
+            borderRadius: 'var(--radius)',
             position: 'relative',
             overflow: 'hidden',
             boxShadow: 'var(--shadow-sm)',
@@ -227,7 +227,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         padding: '0.6rem',
         background: 'rgba(var(--bg-sub-rgb), 0.5)',
         backdropFilter: 'blur(10px)',
-        borderRadius: '24px',
+        borderRadius: 'var(--radius)',
         border: '1px solid var(--border)',
         display: 'flex',
         alignItems: 'center',
@@ -265,7 +265,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       <div style={{ 
         minHeight: '65vh',
         background: 'var(--surface)',
-        borderRadius: '32px',
+        borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-xl)',
         overflow: 'hidden',
@@ -299,7 +299,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           padding: '1.25rem 2rem',
           background: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: '24px',
+          borderRadius: 'var(--radius)',
           boxShadow: 'var(--shadow-sm)'
         }}>
            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>

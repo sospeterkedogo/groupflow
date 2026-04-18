@@ -29,6 +29,7 @@ export type Profile = {
   created_at: string;
   tagline?: string | null;
   biography?: string | null;
+  stack?: string | null;
   last_seen?: string | null;
 };
 

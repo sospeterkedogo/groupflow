@@ -359,7 +359,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       )}
 
       {/* Master Milestone HUD */}
-      <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', marginBottom: '0.5rem' }}>
+      <div style={{ backgroundColor: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1rem', marginBottom: '0.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Project Progress</h3>
@@ -646,8 +646,8 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         }
         .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; gap: 1rem; border: 1px solid var(--border); }
         .kanban-column-header { font-weight: 800; font-size: 0.875rem; text-transform: uppercase; color: var(--text-sub); display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid var(--border); margin-bottom: 0.5rem; }
-        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: 1rem; min-height: 200px; }
-        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; cursor: grab; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; min-height: 200px; }
+        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; cursor: grab; transition: all 0.3s; box-shadow: var(--shadow-sm); }
         .kanban-card:hover { transform: translateY(-4px); border-color: var(--brand); }
         .kanban-card-title { font-weight: 700; font-size: 1rem; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.4; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
