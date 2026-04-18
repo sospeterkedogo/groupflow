@@ -29,7 +29,7 @@ export async function taskWorkflow(payload: TaskWorkflowPayload) {
   if (payload.action === 'create') {
     const created = await insertTask(payload.task)
     await logActivity(payload.userId, payload.task.group_id, 'task_created', `Created task: ${payload.task.title}`, { task_id: created.id })
-    await notifyAssignees(payload.task.assignees, payload.task.title, created.id)
+    await notifyAssignees(payload.task.assignees, payload.task.title, created.id, payload.userId)
     return { taskId: created.id }
   }
 
@@ -39,7 +39,7 @@ export async function taskWorkflow(payload: TaskWorkflowPayload) {
 
   await updateTask(payload.task)
   await logActivity(payload.userId, payload.task.group_id, 'task_updated', `Updated task: ${payload.task.title}`, { task_id: payload.task.id })
-  await notifyAssignees(payload.task.assignees, payload.task.title, payload.task.id)
+  await notifyAssignees(payload.task.assignees, payload.task.title, payload.task.id, payload.userId)
   return { taskId: payload.task.id }
 }
 
@@ -98,15 +98,17 @@ async function logActivity(
   }
 }
 
-async function notifyAssignees(assignees: string[], title: string, taskId: string) {
+async function notifyAssignees(assignees: string[], title: string, taskId: string, actingUserId: string) {
   'use step'
 
-  if (assignees.length === 0) {
+  const filtered = assignees.filter(id => id !== actingUserId)
+
+  if (filtered.length === 0) {
     return
   }
 
   const supabase = await createAdminClient()
-  const notifications = assignees.map((userId) => ({
+  const notifications = filtered.map((userId) => ({
     user_id: userId,
     type: 'task_created',
     title: 'New task assigned',

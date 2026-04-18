@@ -171,7 +171,7 @@ export default function Home() {
            
            <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
               GroupFlow professionalizes university group projects through real-time synchronization, verified contribution tracking, and cross-departmental networking. 
-              <span style={{ display: 'block', marginTop: '1rem', color: 'var(--success)', fontWeight: 800, fontSize: '1rem' }}>FREE FOR STUDENTS FOREVER</span>
+              <span style={{ display: 'block', marginTop: '1rem', color: 'var(--success)', fontWeight: 800, fontSize: '1rem' }}>FREE FOR STUDENTS</span>
            </p>
 
            <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>

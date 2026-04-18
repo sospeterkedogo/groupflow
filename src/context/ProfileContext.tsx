@@ -38,8 +38,8 @@ export function ProfileProvider({
   useEffect(() => {
     if (!userId) return
 
-    // Ensure we have current data if initial was partial or missing
-    if (!profile) {
+    // Ensure we have current data if initial was partial or missing (crucially check for 'id')
+    if (!profile || !profile.id) {
       refreshProfile().finally(() => setLoading(false))
     }
 

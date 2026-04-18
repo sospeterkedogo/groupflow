@@ -104,11 +104,11 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     else if (progress < 60) setProjectProgress(40) // Manual clamp if needed, but let's use labels
     
     // Better logic for labels
-    if (progress <= 20) setProgressLabel('Initial Research')
-    else if (progress <= 40) setProgressLabel('Strategic Drafting')
-    else if (progress <= 60) setProgressLabel('Core Development')
-    else if (progress <= 80) setProgressLabel('Refining Logic')
-    else setProgressLabel('Final Submission')
+    if (progress <= 30) setProgressLabel('Getting Started')
+    else if (progress <= 50) setProgressLabel('Strategic Drafting')
+    else if (progress <= 70) setProgressLabel('Core Development')
+    else if (progress < 80) setProgressLabel('Refining Logic')
+    else setProgressLabel('Nearly There')
   }, [groupId, supabase])
 
   useEffect(() => {
@@ -167,7 +167,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
             <div className="pulse-pill" style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 10px var(--success)' }} />
             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-sub)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              System Operational &middot; {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              NEURAL LINK ACTIVE &middot; {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1 }}>

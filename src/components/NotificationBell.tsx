@@ -29,20 +29,21 @@ export default function NotificationBell() {
       if (!rect) return
 
       const isMobile = window.innerWidth <= 768
-      const width = isMobile ? Math.min(360, window.innerWidth - 32) : 320
+      const width = isMobile ? Math.min(380, window.innerWidth - 20) : 320
       
       // Calculate horizontal position
       let left = rect.right - width
       if (isMobile) {
-        // Center on mobile
+        // Center on mobile with safe margin
         left = (window.innerWidth - width) / 2
       } else {
-        // Clamp to screen edges for desktop
+        // Clamp to screen edges for desktop with 12px gutter
         left = Math.min(Math.max(12, left), window.innerWidth - width - 12)
       }
 
-      const top = rect.bottom + 10
-      const maxHeight = Math.max(300, window.innerHeight - top - 32)
+      // Ensure vertical alignment is within viewport
+      const top = Math.min(rect.bottom + 10, window.innerHeight - 200)
+      const maxHeight = Math.min(450, window.innerHeight - top - 20)
 
       setDropdownStyle({
         position: 'fixed',
