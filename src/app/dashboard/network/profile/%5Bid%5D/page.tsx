@@ -221,7 +221,7 @@ export default function StudentProfilePage() {
                        <GraduationCap size={18} color="var(--brand)" />
                        <div>
                           <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Current Track</div>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{member.course_name || 'Independent Researcher'}</div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{member.course_name || 'Independent Scholar'}</div>
                        </div>
                     </div>
                  </div>

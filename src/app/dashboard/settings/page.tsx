@@ -595,10 +595,10 @@ export default function SettingsPage() {
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Tagline / Preferred Title</label>
                   <input type="text" className="form-input" value={tagline} onChange={e => setTagline(e.target.value)} placeholder="e.g. Research Lead, PhD Candidate" />
-                  <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>This appears on your profile and public researcher card.</p>
+                  <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>This appears on your profile and public scholar card.</p>
                 </div>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Researcher Biography</label>
+                  <label className="form-label">Professional Biography</label>
                   <textarea
                     className="form-input"
                     value={biography}
@@ -1067,7 +1067,7 @@ export default function SettingsPage() {
                             <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
                                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1rem' }}>Commit Toolkit Update?</h3>
                                <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-                                 This will update your public researcher profile with the selected technical arsenal.
+                                 This will update your public scholar profile with the selected technical arsenal.
                                </p>
                                <div style={{ display: 'flex', gap: '1rem' }}>
                                   <button className="btn btn-secondary" onClick={() => setSaveConfirmation(false)}>Cancel</button>

@@ -181,7 +181,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
 
            {/* Personal Biography / About */}
            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Researcher Bio</h3>
+              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>Scholar Bio</h3>
               <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.8 }}>
                  A dedicated student specializing in {member.course_name || 'Academic Excellence'}. Focused on collaborative research and high-impact project execution.
               </p>

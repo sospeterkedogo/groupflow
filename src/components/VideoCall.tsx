@@ -61,7 +61,7 @@ export default function VideoCall({ roomName, userName, onClose }: VideoCallProp
             ],
             SHOW_JITSI_WATERMARK: false,
             SHOW_WATERMARK_FOR_GUESTS: false,
-            DEFAULT_REMOTE_DISPLAY_NAME: 'Fellow Researcher',
+            DEFAULT_REMOTE_DISPLAY_NAME: 'Fellow Scholar',
           }
         }
 

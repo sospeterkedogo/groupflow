@@ -56,7 +56,7 @@ export default function ChatPage() {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
         <h2 style={{ fontWeight: 800 }}>Conversation Expired</h2>
-        <p style={{ color: 'var(--text-sub)' }}>We couldn't establish a link with this researcher.</p>
+        <p style={{ color: 'var(--text-sub)' }}>We couldn't establish a link with this specialist.</p>
         <Link href="/dashboard/network" className="btn btn-secondary" style={{ width: 'auto', marginTop: '1rem' }}>Back to Network</Link>
       </div>
     )

@@ -28,11 +28,9 @@ export default function BottomNav() {
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]
 
-  const handleNav = async (path: string, name: string) => {
+  const handleNav = (path: string, name: string) => {
     if (pathname === path) return;
-    await withLoading(async () => {
-      router.push(path);
-    }, `Navigating to ${name}...`);
+    router.push(path);
   }
 
   return (

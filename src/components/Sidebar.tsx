@@ -79,15 +79,10 @@ export default function Sidebar({ user }: SidebarProps) {
   const router = useRouter()
   const { withLoading, showConfirmation } = useSmartLoading()
 
-  const handleNav = async (path: string, name: string) => {
-    if (pathname === path) {
-      if (isMobile) setIsOpen(false);
-      return;
-    }
-    await withLoading(async () => {
-      router.push(path);
-      if (isMobile) setIsOpen(false);
-    }, `Syncing ${name}...`);
+  const handleNav = (path: string, name: string) => {
+    if (pathname === path) return;
+    router.push(path);
+    if (isMobile) setIsOpen(false);
   }
 
   const handleSignOut = () => {
