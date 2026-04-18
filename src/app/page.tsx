@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { 
   ArrowRight, Zap, Shield, Users, Activity, BarChart3, 
   ChevronRight, Globe, Layers, HelpCircle, CheckCircle, 
-  Lock, Trash2, Milestone, BookOpen, Fingerprint, Sparkles
+  Lock, Trash2, Milestone, BookOpen, Fingerprint, Sparkles, Award
 } from 'lucide-react'
 
 export default function Home() {

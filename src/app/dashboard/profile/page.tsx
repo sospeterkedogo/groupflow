@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { User, MapPin, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, BookOpen, Fingerprint, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
