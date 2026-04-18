@@ -64,30 +64,29 @@ function LoginContent() {
     setAuthError(null);
     const supabase = createBrowserSupabaseClient();
     
-    // Sanitize origin to prevent malformed redirect URIs
-    let origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
-    if (origin.endsWith('/')) origin = origin.slice(0, -1);
-    
+    // Explicitly construct absolute redirect URL
+    const origin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL;
     const redirectTo = `${origin}/auth/callback?next=/dashboard`;
-    console.log('[Auth] Initiating GitHub OAuth redirect to:', redirectTo);
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
         redirectTo,
-        skipBrowserRedirect: false
+        scopes: 'read:user user:email'
       }
     });
 
     if (error) {
       console.error('[Auth] GitHub OAuth Error:', error);
-      setAuthError(`Connection Protocol Failed: ${error.message}`);
+      setAuthError(`GitHub connection failed: ${error.message}`);
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!email || !email.includes('@')) {
-      setAuthError('Please provide a valid terminal email to receive a recovery link.')
+  const handleResetPassword = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      setAuthError('Please enter your email above to receive a password reset link.')
       return
     }
 
@@ -97,11 +96,11 @@ function LoginContent() {
 
     try {
       const supabase = createBrowserSupabaseClient()
-      const { error } = await supabase.auth.resetPasswordForEmail(email)
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail)
       if (error) {
-        setAuthError(error.message)
+        setAuthError(`Could not send reset link: ${error.message}`)
       } else {
-        setResetMessage('If your email exists, a reset link has been sent.')
+        setResetMessage('A reset link has been sent to your email address.')
       }
     } finally {
       setIsResetting(false)
@@ -146,7 +145,7 @@ function LoginContent() {
             {isSignUp ? 'Create an account' : 'Welcome back'}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem', fontWeight: 500 }}>
-            {isSignUp ? "Create an account to join your project team." : "Welcome back! Sign in to your workspace."}
+            {isSignUp ? "Create an account to join your project team." : "Welcome back! Sign in to your account."}
           </p>
         </div>
 
@@ -178,13 +177,23 @@ function LoginContent() {
           </div>
 
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)', display: 'flex', justifyContent: 'space-between' }}>
-              Password
-              {isSignUp && passwordStrength && (
-                <span style={{ fontSize: '0.7rem', color: passwordStrength.color, fontWeight: 900, textTransform: 'uppercase' }}>
-                  Strength: {passwordStrength.label}
-                </span>
-              )}
+            <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <span>Password</span>
+               {!isSignUp && (
+                 <button
+                   type="button"
+                   onClick={handleResetPassword}
+                   style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                   disabled={isResetting}
+                 >
+                   {isResetting ? 'Sending...' : 'Reset password'}
+                 </button>
+               )}
+               {isSignUp && passwordStrength && (
+                 <span style={{ fontSize: '0.7rem', color: passwordStrength.color, fontWeight: 900, textTransform: 'uppercase' }}>
+                   Strength: {passwordStrength.label}
+                 </span>
+               )}
             </label>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
@@ -237,17 +246,6 @@ function LoginContent() {
           <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <SubmitButton isSignUp={isSignUp} legalAccepted={legalAccepted} />
             
-            {!isSignUp && (
-              <button
-                type="button"
-                onClick={handleResetPassword}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, alignSelf: 'center', marginTop: '0.5rem' }}
-                disabled={isResetting}
-              >
-                {isResetting ? 'Sending reset link...' : 'Forgot password?'}
-              </button>
-            )}
-
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}

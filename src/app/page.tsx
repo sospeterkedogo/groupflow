@@ -15,7 +15,7 @@ export default function Home() {
     { 
       icon: <Zap size={24} />, 
       title: "Visual progress", 
-      desc: "See how your project is moving. I&apos;ll help you track contributions instantly so everyone stays on the same page.",
+      desc: "See how your project is moving. I'll help you track contributions instantly so everyone stays on the same page.",
       color: "#0ea5e9"
     },
     { 
@@ -27,7 +27,7 @@ export default function Home() {
     { 
       icon: <Layers size={24} />, 
       title: "Reliable records", 
-      desc: "Turn your shared work into clear proof of achievement. It&apos;s the kind of evidence you and your tutors can always trust.",
+      desc: "Turn your shared work into clear proof of achievement. It's the kind of evidence you and your tutors can always trust.",
       color: "#6366f1"
     }
   ]
@@ -43,7 +43,7 @@ export default function Home() {
     },
     {
       q: "Can I delete my account?",
-      a: "Of course. You&apos;re in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
+      a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
     },
     {
       q: "Who is behind GroupFlow?",
@@ -82,7 +82,7 @@ export default function Home() {
                 </div>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
-                   I&apos;m on a mission to bring this tool into many more schools to truly support learning by making every contribution visible and valued.
+                   I'm on a mission to bring this tool into many more schools to truly support learning by making every contribution visible and valued.
                 </div>
              </div>
 
@@ -175,7 +175,7 @@ export default function Home() {
                   This isn't just another app—it's a mission to transform how students work together. I built GroupFlow because I've seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
-                  I&apos;m on a mission to bring this tool into many more schools to truly support learning. By joining the mission, you aren&apos;t just getting a tool; you&apos;re helping bridge the gap for students everywhere.
+                  I'm on a mission to bring this tool into many more schools to truly support learning. By joining the mission, you aren't just getting a tool; you're helping bridge the gap for students everywhere.
                </p>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
@@ -186,7 +186,7 @@ export default function Home() {
                   <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
                      <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><Zap size={24} /></div>
                      <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Work that matters</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>I&apos;ll help you highlight the effort of every team member, from leaders to creators.</p>
+                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>I'll help you highlight the effort of every team member, from leaders to creators.</p>
                   </div>
                </div>
             </div>
@@ -244,7 +244,7 @@ export default function Home() {
               <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Work your way</div>
               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Use the tools you love.</h2>
               <p style={{ fontSize: '1.3rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '4.5rem' }}>
-                 I work with the tools you already use every day. Collaborate where you feel most creative, whether it&apos;s Google Docs, Figma, or GitHub, and I&apos;ll help you keep everything organized.
+                 I work with the tools you already use every day. Collaborate where you feel most creative, whether it's Google Docs, Figma, or GitHub, and I'll help you keep everything organized.
               </p>
               
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4.5rem', flexWrap: 'wrap', opacity: 0.6, filter: 'grayscale(1)' }}>
@@ -272,7 +272,7 @@ export default function Home() {
               <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2.5rem' }}>
                  {[
                     { title: 'Project History & Growth', desc: 'Keep track of your academic journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
-                    { title: 'Team Lab Reports', desc: "I&apos;ll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
+                    { title: 'Team Lab Reports', desc: "I'll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
                     { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
                     { title: 'Project Case Studies', desc: 'Make sure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
                  ].map((usecase, i) => (
@@ -291,7 +291,7 @@ export default function Home() {
         {/* HOW IT WORKS */}
         <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
            <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Simple, transparent, and fair.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I&apos;ll help you focus on the work, while I take care of the organization.</p>
+           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I'll help you focus on the work, while I take care of the organization.</p>
 
            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
               {[
