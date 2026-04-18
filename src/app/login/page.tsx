@@ -60,25 +60,30 @@ function LoginContent() {
   }, [password]);
 
   const handleGithubLogin = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Explicitly prevent any form side-effects
-    setAuthError(null)
-    const supabase = createBrowserSupabaseClient()
+    e.preventDefault();
+    setAuthError(null);
+    const supabase = createBrowserSupabaseClient();
+    
+    // Sanitize origin to prevent malformed redirect URIs
+    let origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+    if (origin.endsWith('/')) origin = origin.slice(0, -1);
+    
+    const redirectTo = `${origin}/auth/callback?next=/dashboard`;
+    console.log('[Auth] Initiating GitHub OAuth redirect to:', redirectTo);
 
-    // Ensure accurate absolute URL for OAuth callback
-    const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || '');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${origin}/auth/callback?next=/dashboard`,
+        redirectTo,
         skipBrowserRedirect: false
       }
-    })
+    });
 
     if (error) {
-      console.error('GitHub Login Error:', error)
-      setAuthError(error.message || "Unable to initiate GitHub authentication.")
+      console.error('[Auth] GitHub OAuth Error:', error);
+      setAuthError(`Connection Protocol Failed: ${error.message}`);
     }
-  }
+  };
 
   const handleResetPassword = async () => {
     if (!email || !email.includes('@')) {
@@ -231,36 +236,53 @@ function LoginContent() {
 
           <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <SubmitButton isSignUp={isSignUp} legalAccepted={legalAccepted} />
+            
             {!isSignUp && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
-                <button
-                  type="button"
-                  onClick={handleResetPassword}
-                  className="btn btn-ghost"
-                  style={{ padding: '0.85rem 1rem', fontSize: '0.9rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.15)' }}
-                  disabled={isResetting}
-                >
-                  {isResetting ? 'Sending reset link...' : 'Forgot password?'}
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => handleGithubLogin(e)}
-                  className="btn btn-secondary"
-                  style={{ padding: '0.85rem 1rem', fontSize: '0.9rem', borderRadius: '14px', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 auto', minWidth: '160px', justifyContent: 'center' }}
-                >
-                  <ExternalLink size={18} /> Continue with GitHub
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, alignSelf: 'center', marginTop: '0.5rem' }}
+                disabled={isResetting}
+              >
+                {isResetting ? 'Sending reset link...' : 'Forgot password?'}
+              </button>
             )}
+
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 700, marginTop: '0.5rem' }}
             >
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
           </div>
         </form>
+
+        {!isSignUp && (
+          <div style={{ marginTop: '1.25rem' }}>
+            <div className="divider" style={{ margin: '1.5rem 0' }}>or continue with</div>
+            <button
+              type="button"
+              onClick={(e) => handleGithubLogin(e)}
+              className="btn btn-secondary"
+              style={{ 
+                width: '100%',
+                padding: '0.85rem 1rem', 
+                fontSize: '0.9rem', 
+                borderRadius: '14px', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '0.5rem', 
+                justifyContent: 'center',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'white'
+              }}
+            >
+              <ExternalLink size={18} /> Continue with GitHub
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Policy Modals */}
