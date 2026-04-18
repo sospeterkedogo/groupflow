@@ -2,19 +2,27 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Sparkles, ArrowRight } from 'lucide-react'
+import { Shield, Sparkles, ArrowRight, CheckCircle2, Check } from 'lucide-react'
+import { useProfile } from '@/context/ProfileContext'
 import TransientError from '@/components/TransientError'
 
 export default function UpgradePage() {
   const [error, setError] = useState<string | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const { profile } = useProfile()
   const router = useRouter()
 
   const handleCheckout = async (plan: 'pro' | 'premium') => {
     setError(null)
     setSuccessMessage(null)
     setLoadingPlan(plan)
+
+    if (plan === 'pro') {
+      const userId = profile?.id || ''
+      window.location.href = `https://buy.stripe.com/aFa14nbhO02s8P68LC7wA02?client_reference_id=${userId}`
+      return
+    }
 
     try {
       const response = await fetch('/api/stripe/checkout', {
@@ -178,10 +186,6 @@ export default function UpgradePage() {
           <ArrowRight size={20} className="text-brand" />
           <span>Stripe secure checkout supports Apple Pay and Google Pay for instantaneous node upgrades.</span>
         </div>
-      </div>
-    </div>
-  )
-}
       </div>
     </div>
   )
