@@ -362,38 +362,51 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
           </div>
 
           {members.length === 0 ? (
-            <p style={{ color: 'var(--text-sub)', textAlign: 'center', padding: '1rem 0' }}>No members yet.</p>
+            <p style={{ color: 'var(--text-sub)', textAlign: 'center', padding: '1rem 0' }}>Syncing with the institutional graph...</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {members.map((member, idx) => {
                 const isOnline = onlineUsers.has(member.id)
-                const effort = calculateMemberEffort(member.id)
-                const pct = totalGroupEffort > 0 ? Math.round((effort / totalGroupEffort) * 100) : 0
+                const tasksDone = calculateMemberEffort(member.id)
                 const assigned = tasks.filter(t => t.assignees?.includes(member.id)).length
+                
                 return (
                   <div key={member.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    padding: '0.6rem 0.75rem', borderRadius: '12px',
-                    background: idx === 0 ? 'rgba(56,189,248,0.05)' : 'var(--bg-main)',
-                    border: `1px solid ${idx === 0 ? 'rgba(56,189,248,0.1)' : 'var(--border)'}`,
-                    flexWrap: 'nowrap'
+                    display: 'flex', alignItems: 'center', gap: '1rem',
+                    padding: '1rem', borderRadius: '16px',
+                    background: idx === 0 ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)',
+                    border: `1px solid ${idx === 0 ? 'var(--brand)' : 'var(--border)'}`,
+                    transition: 'transform 0.2s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}>
-                    <div style={{ width: '18px', textAlign: 'center', fontWeight: 900, fontSize: '0.75rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-sub)', flexShrink: 0 }}>
+                    {/* Rank Badge */}
+                    <div style={{ width: '28px', textAlign: 'center', fontWeight: 950, fontSize: '1rem', color: idx === 0 ? '#fbbf24' : 'var(--text-sub)', flexShrink: 0 }}>
                       {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
                     </div>
+
+                    {/* Avatar with Status */}
                     <div style={{ position: 'relative', flexShrink: 0 }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-sub)', border: '1px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={18} color="var(--text-sub)" />}
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--surface)', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={24} color="var(--text-sub)" />}
                       </div>
-                      <div style={{ position: 'absolute', bottom: 0, right: 0, width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? '#10b981' : 'var(--border)', border: '2px solid var(--surface)' }} />
+                      <div style={{ position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', borderRadius: '50%', background: isOnline ? '#10b981' : 'var(--border)', border: '2px solid var(--surface)', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }} title={isOnline ? "Online" : "Offline"} />
                     </div>
+
+                    {/* Member Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous'}</div>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.email}</div>
+                      <div style={{ fontWeight: 900, fontSize: '0.9rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.full_name || 'Anonymous Specialist'}</div>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.2rem' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700, textTransform: 'uppercase' }}>{member.role || 'Collaborator'}</span>
+                        <span style={{ width: '2px', height: '2px', borderRadius: '50%', background: 'var(--border)' }} />
+                        <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 800 }}>{tasksDone} Tasks Done</span>
+                      </div>
                     </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '40px' }}>
-                      <div style={{ fontWeight: 900, fontSize: '1rem', color: 'var(--brand)' }}>{member.total_score ?? 0}</div>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', fontWeight: 700 }}>pts</div>
+
+                    {/* Points Tally */}
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontWeight: 950, fontSize: '1.25rem', color: idx === 0 ? 'var(--brand)' : 'var(--text-main)', lineHeight: 1 }}>{member.total_score ?? 0}</div>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--text-sub)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Points</div>
                     </div>
                   </div>
                 )

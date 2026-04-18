@@ -116,8 +116,17 @@ export default function SettingsPage() {
         setTagline(data.tagline || '')
         setBiography(data.biography || '')
         setStack(data.stack || '')
+        setAvatarUrl(data.avatar_url || '')
+        setIsEncrypted(data.groups?.is_encrypted || false)
+        
         if (data.id) {
           fetchJoinRequests(data.id)
+          if (data.group_id) fetchTeam(data.group_id)
+        }
+        
+        // Sync global profile if it's missing the joined data
+        if (profile && !profile.groups && data.groups) {
+          setProfile(data)
         }
       }
     }
@@ -743,11 +752,19 @@ export default function SettingsPage() {
             <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Switch between project teams or manage your group affiliation.</p>
 
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Team</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{(profile as any)?.groups?.name || 'No team assigned'}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{(profile as any)?.groups?.module_code || 'Independent'}</div>
-              </div>
+              {(() => {
+                const groupData = Array.isArray((profile as any)?.groups) 
+                  ? (profile as any).groups[0] 
+                  : (profile as any)?.groups;
+                
+                return (
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase' }}>Current Team</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{groupData?.name || 'No team assigned'}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)' }}>{groupData?.module_code || 'Independent'}</div>
+                  </div>
+                )
+              })()}
               {profile?.group_id && (
                 <button
                   onClick={() => handleSwitchGroup(null)}

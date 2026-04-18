@@ -37,110 +37,151 @@ export default function UpgradePage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', padding: '3rem 1.5rem', display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, rgba(10,12,34,1) 0%, rgba(20,25,58,1) 100%)' }}>
-      <div style={{ width: '100%', maxWidth: '960px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <div style={{ color: 'white', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', color: 'var(--brand)' }}>
+    <div style={{ minHeight: '100vh', padding: 'var(--p-safe)', display: 'flex', justifyContent: 'center', background: 'linear-gradient(180deg, #0a0c22 0%, #14193a 100%)' }}>
+      <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', gap: '3rem', paddingTop: '2rem' }}>
+        
+        <div style={{ color: 'white', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--brand)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>
             <Sparkles size={18} /> THE MISSION IS GROWING
           </div>
-          <h1 style={{ fontSize: '3rem', lineHeight: 1.05, fontWeight: 900 }}>Support this project to reach more schools</h1>
-          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.75)', fontSize: '1.1rem', fontWeight: 500 }}>I am building GroupFlow to solve a real problem for student teams. Help me bring this tool to schools everywhere by upgrading your account.</p>
+          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', lineHeight: 1, fontWeight: 950, letterSpacing: '-0.04em', color: 'white', margin: 0 }}>
+            Support this project to <span style={{ color: 'var(--brand)' }}>reach more schools</span>
+          </h1>
+          <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.8)', fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.4 }}>
+            I am building GroupFlow to solve real operational problems for student teams. Your upgrade directly funds infrastructure and new feature development.
+          </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1.5rem' }}>
-          <div style={{ padding: '2rem', borderRadius: '32px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 24px 80px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900 }}>Pro</h2>
-                <p style={{ margin: '0.5rem 0 0', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>Support the ongoing development.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+          
+          {/* PRO CARD */}
+          <div style={{ 
+            padding: '3rem 2.5rem', 
+            borderRadius: '40px', 
+            background: 'rgba(255,255,255,0.03)', 
+            border: '1px solid rgba(255,255,255,0.1)', 
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            transition: 'transform 0.3s ease'
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                   <Shield size={32} />
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                   <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 950, color: 'white' }}>Pro</h2>
+                   <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', fontWeight: 700 }}>MONTHLY SUPPORT</p>
+                </div>
               </div>
-              <Shield size={32} color="var(--brand)" />
-            </div>
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                <span style={{ fontSize: '3rem', fontWeight: 900 }}>£2.99</span>
-                <span style={{ color: 'rgba(255,255,255,0.7)', paddingBottom: '0.4rem', fontWeight: 700 }}>/month</span>
+
+              <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '2rem' }}>
+                  <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.03em' }}>£2.99</span>
+                  <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 800, fontSize: '1.1rem' }}>/mo</span>
+                </div>
+                <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {[
+                    'Priority Feedback for project help',
+                    'Advanced Team Analytics & Insights',
+                    'Group Theme & Brand Customization',
+                    'Unlimited Historical Task Records'
+                  ].map((f, i) => (
+                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '1rem', color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>
+                      <CheckCircle2 size={20} className="text-brand" style={{ flexShrink: 0, marginTop: '2px' }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {[
-                  'Priority Feedback for project help',
-                  'Advanced Team Analytics & Insights',
-                  'Group Theme & Brand Customization',
-                  'Unlimited Historical Task Records'
-                ].map((f, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>
-                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    {f}
-                  </li>
-                ))}
-              </ul>
             </div>
+            
             <button
               className="btn btn-primary"
-              style={{ width: '100%', padding: '1.25rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 800 }}
+              style={{ width: '100%', padding: '1.25rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 950, background: 'var(--brand)', border: 'none', boxShadow: '0 10px 30px rgba(var(--brand-rgb), 0.3)' }}
               onClick={() => handleCheckout('pro')}
               disabled={loadingPlan !== null}
             >
-              {loadingPlan === 'pro' ? 'Starting checkout…' : 'Support with Pro'}
+              {loadingPlan === 'pro' ? 'SYNCING...' : 'Support with Pro'}
             </button>
           </div>
 
-          <div style={{ padding: '2rem', borderRadius: '32px', background: 'rgba(255,255,255,0.07)', border: '2px solid var(--brand)', boxShadow: '0 24px 80px rgba(0,0,0,0.3)', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '-15px', right: '20px', padding: '6px 14px', background: 'var(--brand)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 900 }}>LIFETIME ACCESS</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900 }}>Premium</h2>
-                <p style={{ margin: '0.5rem 0 0', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>The ultimate mission partner experience.</p>
+          {/* PREMIUM CARD */}
+          <div style={{ 
+            padding: '3rem 2.5rem', 
+            borderRadius: '40px', 
+            background: 'rgba(var(--brand-rgb), 0.05)', 
+            border: '2px solid var(--brand)', 
+            backdropFilter: 'blur(10px)',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 32px 64px rgba(0,0,0,0.4)'
+          }}>
+            <div style={{ position: 'absolute', top: '24px', right: '24px', padding: '6px 14px', background: 'var(--brand)', color: 'white', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px' }}>LIFETIME ACCESS</div>
+            
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                   <Sparkles size={32} />
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                   <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 950, color: 'white' }}>Premium</h2>
+                   <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontWeight: 700 }}>PARTNER EDITION</p>
+                </div>
               </div>
-              <Sparkles size={32} color="var(--brand)" />
-            </div>
-            <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                <span style={{ fontSize: '3rem', fontWeight: 900 }}>£99</span>
-                <span style={{ color: 'rgba(255,255,255,0.7)', paddingBottom: '0.4rem', fontWeight: 700 }}>Lifetime</span>
+
+              <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '2rem' }}>
+                  <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.03em' }}>£99</span>
+                  <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 800, fontSize: '1.1rem' }}>Lifetime</span>
+                </div>
+                <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {[
+                    'Everything in Pro, forever',
+                    'School-wide Integration Support',
+                    'Multi-Project Enterprise Hub',
+                    'Dedicated 1-on-1 Setup Session',
+                    'Early Review Lab Access'
+                  ].map((f, i) => (
+                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '1rem', color: 'white', fontWeight: 700 }}>
+                      <div style={{ padding: '2px', background: 'var(--brand)', borderRadius: '50%', color: 'white', flexShrink: 0 }}>
+                         <Check size={14} />
+                      </div>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {[
-                  'Everything in Pro, forever',
-                  'School-wide Integration Support',
-                  'Multi-Project Enterprise Hub',
-                  'Dedicated 1-on-1 Setup Session',
-                  'Early Review Lab Access'
-                ].map((f, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>
-                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    {f}
-                  </li>
-                ))}
-              </ul>
             </div>
+
             <button
-              className="btn btn-secondary"
-              style={{ width: '100%', padding: '1.25rem', borderRadius: '20px', fontSize: '1.1rem', fontWeight: 800, background: 'white', color: 'var(--brand)', border: 'none' }}
+              className="btn"
+              style={{ width: '100%', padding: '1.25rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 950, background: 'white', color: '#0a0c22', border: 'none', cursor: 'pointer', transition: 'transform 0.2s ease' }}
               onClick={() => handleCheckout('premium')}
               disabled={loadingPlan !== null}
             >
-              {loadingPlan === 'premium' ? 'Starting checkout…' : 'Become Premium Partner'}
+              {loadingPlan === 'premium' ? 'INITIALIZING...' : 'Become Premium Partner'}
             </button>
           </div>
+
         </div>
 
         {(error || successMessage) && (
           <TransientError message={error || successMessage || ''} type={successMessage ? 'success' : 'error'} />
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1rem', color: 'rgba(255,255,255,0.7)' }}>
-          <ArrowRight size={18} />
-          <span>Stripe checkout supports Apple Pay and Google Pay when available in your browser.</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '2rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', fontWeight: 500 }}>
+          <ArrowRight size={20} className="text-brand" />
+          <span>Stripe secure checkout supports Apple Pay and Google Pay for instantaneous node upgrades.</span>
         </div>
+      </div>
+    </div>
+  )
+}
       </div>
     </div>
   )

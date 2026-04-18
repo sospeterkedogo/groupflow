@@ -55,9 +55,8 @@ export function ProfileProvider({
           filter: `id=eq.${userId}`
         },
         (payload) => {
-          if (payload.new) {
-            setProfile(payload.new as Profile)
-          }
+          // Instead of raw overprinting, trigger a full joined refetch
+          refreshProfile()
         }
       )
       .subscribe()
