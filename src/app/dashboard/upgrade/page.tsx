@@ -20,6 +20,12 @@ export default function UpgradePage() {
 
     if (plan === 'pro') {
       const userId = profile?.id || ''
+      window.location.href = `https://buy.stripe.com/6oU7sLdpWcPee9q0f67wA03?client_reference_id=${userId}`
+      return
+    }
+
+    if (plan === 'premium') {
+      const userId = profile?.id || ''
       window.location.href = `https://buy.stripe.com/aFa14nbhO02s8P68LC7wA02?client_reference_id=${userId}`
       return
     }
