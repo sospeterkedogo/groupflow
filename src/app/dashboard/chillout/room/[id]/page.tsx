@@ -35,11 +35,14 @@ export default function QuizRoomPage() {
     <RoomProvider 
       id={roomId} 
       initialStorage={{ 
+        tasks: new LiveList([]),
+        messages: new LiveList([]),
         quizQuestions: new LiveList([]),
         quizScores: new LiveList([]),
         quizStatus: 'setup',
         currentQuestionIndex: 0,
         activeTurnUserId: null,
+        gameId: roomId,
         roundStartTime: 0,
         timerDuration: 20,
         config: new LiveObject({ difficulty: 'Medium', mode: 'Speed Recall' })
@@ -109,7 +112,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
         storage.set('quizStatus', 'playing')
         storage.set('currentQuestionIndex', 0)
         storage.set('roundStartTime', Date.now())
-        storage.set('activeTurnUserId', profile?.id)
+        storage.set('activeTurnUserId', profile?.id ?? null)
         
         const firstQ = newQs[0]
         const firstDuration = (firstQ?.difficulty_multiplier || 2) * 10
@@ -164,8 +167,9 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     const pointsToAdd = isCorrect ? (100 + bonusXp) : -50
 
     for (let i = 0; i < scoresList.length; i++) {
-        if (scoresList.get(i).userId === userId) {
-            scoresList.set(i, { ...scoresList.get(i), points: Math.max(0, scoresList.get(i).points + pointsToAdd) })
+        const item = scoresList.get(i)
+        if (item && item.userId === userId) {
+            scoresList.set(i, { ...item, points: Math.max(0, item.points + pointsToAdd) })
             found = true
             break
         }
@@ -183,8 +187,10 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
       storage.set('roundStartTime', Date.now())
       
       const nextQ = currentQList.get(nextIdx)
-      const nextDuration = (nextQ.difficulty_multiplier || 2) * 10
-      storage.set('timerDuration', nextDuration)
+      if (nextQ) {
+          const nextDuration = (nextQ.difficulty_multiplier || 2) * 10
+          storage.set('timerDuration', nextDuration)
+      }
 
       const players = [userId, ...others.map(o => o.id)].filter(Boolean)
       storage.set('activeTurnUserId', players[nextIdx % players.length])
@@ -201,7 +207,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   }
 
   const handleFinalizeStats = async () => {
-    if (!profile?.id) return
+    if (!profile?.id || !scores) return
     const myScore = scores.find(s => s.userId === profile.id)?.points || 0
     const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
 
@@ -509,7 +515,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                   <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--brand)', padding: '2px', border: activeTurnId === profile?.id ? '2px solid var(--success)' : 'none' }}>
                      <img src={profile?.avatar_url || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                   </div>
-                  {others.map(o => (
+                   {others.map(o => (
                     <div key={o.id} style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--bg-sub)', padding: '2px', border: activeTurnId === o.id ? '2px solid var(--success)' : 'none' }}>
                       <img src={o.info?.avatar || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                     </div>

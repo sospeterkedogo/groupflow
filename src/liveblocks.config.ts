@@ -1,4 +1,4 @@
-import { createClient, LiveList } from "@liveblocks/client";
+import { createClient, LiveList, LiveObject } from "@liveblocks/client";
 import { createRoomContext } from "@liveblocks/react";
 import { Task } from "@/types/database";
 
@@ -21,13 +21,24 @@ type Presence = {
   userName?: string;
   isTyping?: boolean;
   isThinking?: boolean; // For the "Chill Out" game turn indicator
+  lastAction?: string | null;
 };
 
 type QuizQuestion = {
   id: string;
   question: string;
-  options: string[];
-  correctAnswer: number;
+  type: 'multiple_choice' | 'explanation';
+  options?: string[];
+  correctAnswer: string | number;
+  difficulty_multiplier?: number;
+};
+
+type UserMeta = {
+  id: string;
+  info: {
+    name: string;
+    avatar: string;
+  }
 };
 
 type QuizScore = {
@@ -47,6 +58,12 @@ type Storage = {
   currentQuestionIndex: number;
   activeTurnUserId: string | null;
   gameId: string | null;
+  roundStartTime: number;
+  timerDuration: number;
+  config: LiveObject<{
+    difficulty: string;
+    mode: string;
+  }>;
 };
 
 export const {
@@ -58,4 +75,4 @@ export const {
   useStorage,
   useMutation,
   useOthersMapped,
-} = createRoomContext<Presence, Storage>(client);
+} = createRoomContext<Presence, Storage, UserMeta>(client);
