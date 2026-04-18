@@ -614,8 +614,6 @@ export default function SettingsPage() {
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>Share your research interests, achievements, and strengths.</span>
                   </div>
                 </div>
-                </div>
-              </div>
 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Technical Arsenal (Stack)</label>
@@ -628,6 +626,7 @@ export default function SettingsPage() {
                 />
                 <p style={{ margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-sub)' }}>List your primary tools, languages, and frameworks.</p>
               </div>
+            </div>
 
               <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
                 <h4 style={{ fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800 }}>
