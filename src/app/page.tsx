@@ -13,22 +13,40 @@ export default function Home() {
   
   const features = [
     { 
-      icon: <Zap size={24} />, 
-      title: "Visual progress", 
-      desc: "See how your project is moving. I'll help you track contributions instantly so everyone stays on the same page.",
-      color: "#0ea5e9"
+      icon: <Layers size={21} />, 
+      title: "Kanban Project Intelligence", 
+      desc: "Synchronized workflow management with real-time state persistence and automated assignment tracking.",
+      color: "var(--brand)"
     },
     { 
-      icon: <Shield size={24} />, 
-      title: "Fair recognition", 
-      desc: "Every contribution counts. My system makes sure every team member's hard work is noticed and valued.",
+      icon: <Users size={21} />, 
+      title: "Global Academic Networking", 
+      desc: "Connect with peers across departments, exchange credentials, and build your professional university network.",
       color: "#10b981"
     },
     { 
-      icon: <Layers size={24} />, 
-      title: "Reliable records", 
-      desc: "Turn your shared work into clear proof of achievement. It's the kind of evidence you and your tutors can always trust.",
+      icon: <Zap size={21} />, 
+      title: "Real-time Synchronization", 
+      desc: "High-performance synchronization for chat, presence, and file management across all team devices.",
+      color: "var(--accent)"
+    },
+    { 
+      icon: <Shield size={21} />, 
+      title: "Verifiable Contribution Hub", 
+      desc: "Secure, audit-ready logs of every research contribution, ensuring transparency for students and faculty.",
       color: "#6366f1"
+    },
+    { 
+      icon: <Milestone size={21} />, 
+      title: "Intelligent Roadmapping", 
+      desc: "Project timeline visualization with 5-stage academic status intervals from research to final submission.",
+      color: "#f59e0b"
+    },
+    { 
+       icon: <Award size={21} />, 
+       title: "Achievement Tier System", 
+       desc: "Differentiated recognition levels based on contribution metrics, unlocking professional profile enhancements.",
+       color: "#fbbf24"
     }
   ]
 
@@ -141,18 +159,19 @@ export default function Home() {
              <Sparkles size={16} /> Celebrate every contribution
            </div>
            
-           <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 8vw, 5.5rem)', maxWidth: '1200px', margin: '0 auto 2rem', fontWeight: 900, letterSpacing: '-0.05em' }}>
-             Group work, <br />
+           <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 8vw, 5rem)', maxWidth: '1200px', margin: '0 auto 2rem', fontWeight: 950, letterSpacing: '-0.05em' }}>
+             Unified Academic <br />
              <span style={{ 
                 background: 'linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 display: 'inline-block'
-              }}>made fair for everyone.</span>
+              }}>Collaboration Engine.</span>
            </h1>
            
-           <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.4rem', lineHeight: 1.5 }}>
-              Group projects can be hard. I help student teams work better together by tracking contributions fairly, so your hard work turns into the recognition it deserves.
+           <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
+              GroupFlow professionalizes university group projects through real-time synchronization, verified contribution tracking, and cross-departmental networking. 
+              <span style={{ display: 'block', marginTop: '1rem', color: 'var(--success)', fontWeight: 800, fontSize: '1rem' }}>FREE FOR STUDENTS FOREVER</span>
            </p>
 
            <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -264,24 +283,22 @@ export default function Home() {
            </div>
         </section>
 
-        {/* ACADEMIC USE CASES */}
-        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)' }}>
+        {/* CORE FEATURES SECTION */}
+        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)' }}>
            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              <h2 style={{ fontSize: '2.75rem', fontWeight: 900, marginBottom: '4rem', textAlign: 'center', letterSpacing: '-0.03em' }}>Built for student success.</h2>
+              <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                 <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Platform Capabilities</div>
+                 <h2 style={{ fontSize: '3.25rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Built for the high-performance student.</h2>
+              </div>
               
-              <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', display: 'grid', gap: '2.5rem' }}>
-                 {[
-                    { title: 'Project History & Growth', desc: 'Keep track of your academic journey with a clear history, showing exactly how your work has evolved.', icon: <Milestone /> },
-                    { title: 'Team Lab Reports', desc: "I'll make sure every part of your analysis and writing is clearly noted and easy to share.", icon: <Activity /> },
-                    { title: 'Coding Projects', desc: 'Connect your code directly to see how every update helps build the final product.', icon: <Zap /> },
-                    { title: 'Project Case Studies', desc: 'Make sure every team member can show their hard work in fast-paced collaborative projects.', icon: <Users /> }
-                 ].map((usecase, i) => (
+              <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', display: 'grid', gap: '2.5rem' }}>
+                 {features.map((feature, i) => (
                     <div key={i} className="hover-lift" style={{ padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '32px' }}>
-                       <div style={{ width: '52px', height: '52px', borderRadius: '13px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', marginBottom: '1.5rem' }}>
-                          {usecase.icon}
+                       <div style={{ width: '52px', height: '52px', borderRadius: '13px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: feature.color, marginBottom: '1.5rem' }}>
+                          {feature.icon}
                        </div>
-                       <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1rem' }}>{usecase.title}</h3>
-                       <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', lineHeight: 1.6 }}>{usecase.desc}</p>
+                       <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1rem' }}>{feature.title}</h3>
+                       <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', lineHeight: 1.6 }}>{feature.desc}</p>
                     </div>
                  ))}
               </div>

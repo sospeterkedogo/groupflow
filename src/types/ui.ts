@@ -108,6 +108,7 @@ export type NotificationContextType = {
   markAsRead: (id: string) => Promise<void>
   markAllAsRead: () => Promise<void>
   addToast: (title: string, message: string, type?: string) => void
+  refreshNotifications: () => Promise<void>
 }
 
 export type Toast = {

@@ -28,10 +28,21 @@ export default function NotificationBell() {
       const rect = menuRef.current?.getBoundingClientRect()
       if (!rect) return
 
-      const width = Math.min(320, window.innerWidth - 24)
-      const left = Math.min(Math.max(12, rect.right - width), window.innerWidth - width - 12)
-      const top = Math.min(rect.bottom + 10, window.innerHeight - 12)
-      const maxHeight = Math.max(220, window.innerHeight - top - 18)
+      const isMobile = window.innerWidth <= 768
+      const width = isMobile ? Math.min(360, window.innerWidth - 32) : 320
+      
+      // Calculate horizontal position
+      let left = rect.right - width
+      if (isMobile) {
+        // Center on mobile
+        left = (window.innerWidth - width) / 2
+      } else {
+        // Clamp to screen edges for desktop
+        left = Math.min(Math.max(12, left), window.innerWidth - width - 12)
+      }
+
+      const top = rect.bottom + 10
+      const maxHeight = Math.max(300, window.innerHeight - top - 32)
 
       setDropdownStyle({
         position: 'fixed',
@@ -40,7 +51,7 @@ export default function NotificationBell() {
         width: `${width}px`,
         maxHeight: `${maxHeight}px`,
         overflow: 'hidden',
-        zIndex: 1000,
+        zIndex: 9000,
       })
     }
 

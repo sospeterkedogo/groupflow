@@ -79,6 +79,38 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     if (count !== null) setPersonalTaskCount(count)
   }, [profile, groupId, supabase])
 
+  const [projectProgress, setProjectProgress] = useState(0)
+  const [progressLabel, setProgressLabel] = useState('Initializing')
+
+  const fetchProjectProgress = useCallback(async () => {
+    if (!groupId) return
+    const { data: tasks, error } = await supabase
+      .from('tasks')
+      .select('status')
+      .eq('group_id', groupId)
+
+    if (error || !tasks || tasks.length === 0) {
+      setProjectProgress(0)
+      setProgressLabel('Getting Started')
+      return
+    }
+
+    const completed = tasks.filter(t => t.status === 'Done').length
+    const progress = Math.round((completed / tasks.length) * 100)
+    setProjectProgress(progress)
+
+    if (progress < 20) setProgressLabel('Research & Planning')
+    else if (progress < 40) setProgressLabel('Foundation Logic')
+    else if (progress < 60) setProjectProgress(40) // Manual clamp if needed, but let's use labels
+    
+    // Better logic for labels
+    if (progress <= 20) setProgressLabel('Initial Research')
+    else if (progress <= 40) setProgressLabel('Strategic Drafting')
+    else if (progress <= 60) setProgressLabel('Core Development')
+    else if (progress <= 80) setProgressLabel('Refining Logic')
+    else setProgressLabel('Final Submission')
+  }, [groupId, supabase])
+
   useEffect(() => {
     if (groupId) {
       void fetchGroupDetails()
@@ -89,6 +121,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   useEffect(() => {
     if (profile?.id && groupId) {
       void fetchPersonalTaskCount()
+      void fetchProjectProgress()
 
       const channel = supabase.channel('dashboard_sync')
         .on(
@@ -285,8 +318,8 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         {[
           { icon: <Activity size={20} />, label: 'Action Items', value: personalTaskCount, sub: 'Assigned pending', color: 'var(--brand)' },
-          { icon: <TrendingUp size={20} />, label: 'Group Momentum', value: profile?.total_score || 0, sub: 'Engagement yield', color: 'var(--success)' },
-          { icon: <Calendar size={20} />, label: 'Timeline Status', value: 'On Track', sub: 'Project roadmap status', color: '#f59e0b' },
+          { icon: <TrendingUp size={20} />, label: 'Group Contribution', value: profile?.total_score || 0, sub: 'Team points earned', color: 'var(--success)' },
+          { icon: <Calendar size={20} />, label: 'Timeline Status', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
           { icon: <Zap size={20} />, label: 'Sync Integrity', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
         ].map((stat, i) => (
           <div key={i} className="control-card" style={{
@@ -393,7 +426,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         }}>
            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Protocol</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Team</span>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
                   {group.name} <span style={{ color: 'var(--text-sub)', fontWeight: 600 }}>&middot; {group.module_code || 'UNIT-X'}</span>
                 </span>
@@ -412,7 +445,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
                 <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Connectivity</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>Node Optimized</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>Network Secure</span>
                 </div>
               </div>
            </div>

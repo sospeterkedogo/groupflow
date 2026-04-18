@@ -19,8 +19,11 @@ export async function GET(request: Request) {
       const redirectUrl = new URL(redirectPath, origin).toString()
       return NextResponse.redirect(redirectUrl)
     }
+    
+    console.error('[Auth Callback] Exchange Error:', error.message)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
   }
 
   // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=Authentication failed. Please try again.`)
+  return NextResponse.redirect(`${origin}/login?error=Invalid or missing authentication code.`)
 }

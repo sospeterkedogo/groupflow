@@ -152,7 +152,7 @@ export default function Sidebar({ user }: SidebarProps) {
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 6px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
-              <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE NODES</span>
+              <span style={{ fontSize: '0.6rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{onlineCount} ACTIVE MEMBERS</span>
             </div>
           </div>
         </div>

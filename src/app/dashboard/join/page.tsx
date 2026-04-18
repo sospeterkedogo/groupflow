@@ -38,50 +38,50 @@ function JoinGroupContent() {
        <div style={{ display: 'flex', gap: '2rem', width: '100%', maxWidth: '800px', flexWrap: 'wrap' }}>
           
           {/* Create Group Route */}
-          <div className="auth-card" style={{ flex: '1 1 300px', margin: 0 }}>
+          <div className="auth-card" style={{ flex: '1 1 300px', margin: 0, borderRadius: '24px' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                  <Plus size={20} color="var(--brand)" />
-                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Establish New Team</h2>
+                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Create Team</h2>
              </div>
               <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
-                 Initialize a primary team module for project orchestration.
+                 Start a new workspace for your academic module or project.
               </p>
              <form action={createGroup}>
                  <div className="form-group">
-                    <label className="form-label" htmlFor="name" style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>Team Designation:</label>
-                   <input className="form-input" id="name" name="name" type="text" placeholder="e.g. Apollo Team" required />
+                    <label className="form-label" htmlFor="name" style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.65rem', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>Workspace Name:</label>
+                   <input className="form-input" id="name" name="name" type="text" placeholder="e.g. Apollo Project" required style={{ borderRadius: '12px' }} />
                 </div>
                 <div className="form-group">
-                   <label className="form-label" htmlFor="module_code">Module Code (Unique):</label>
-                   <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
+                   <label className="form-label" htmlFor="module_code">Module Code (e.g. CS50):</label>
+                   <input className="form-input" id="module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
                 </div>
                 <div className="form-group">
-                   <label className="form-label" htmlFor="create_join_password">Join Password:</label>
-                   <input className="form-input" id="create_join_password" name="join_password" type="password" placeholder="Set a group password" required />
+                   <label className="form-label" htmlFor="create_join_password">Access Password:</label>
+                   <input className="form-input" id="create_join_password" name="join_password" type="password" placeholder="Set a workspace password" required style={{ borderRadius: '12px' }} />
                 </div>
-                 <SubmitButton label="Establish Session" />
+                 <SubmitButton label="Create Workspace" />
              </form>
           </div>
 
           {/* Join Group Route */}
-          <div className="auth-card" style={{ flex: '1 1 300px', margin: 0 }}>
+          <div className="auth-card" style={{ flex: '1 1 300px', margin: 0, borderRadius: '24px' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <Key size={20} color="var(--primary-color)" />
-                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Link to Session Node</h2>
+                <Key size={20} color="var(--brand)" />
+                 <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Join Team</h2>
               </div>
               <p style={{ color: 'var(--text-sub)', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
-                 Connect your account to an active session module using the security code provided by the module Lead.
+                 Connect to an existing project team using the module code and password provided by your team lead.
               </p>
              <form action={joinGroup}>
                 <div className="form-group">
                    <label className="form-label" htmlFor="create_module_code">Module Code:</label>
-                   <input className="form-input" id="create_module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required />
+                   <input className="form-input" id="create_module_code" name="module_code" type="text" placeholder="e.g. CS-501-A" required style={{ borderRadius: '12px' }} />
                 </div>
                 <div className="form-group">
                    <label className="form-label" htmlFor="join_password">Join Password:</label>
-                   <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Enter group password" required />
+                   <input className="form-input" id="join_password" name="join_password" type="password" placeholder="Enter group password" required style={{ borderRadius: '12px' }} />
                 </div>
-                 <SubmitButton label="Authorize Access" secondary />
+                 <SubmitButton label="Join Team" secondary />
              </form>
           </div>
 

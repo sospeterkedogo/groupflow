@@ -156,7 +156,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, addToast }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, addToast, refreshNotifications: fetchNotifications }}>
       {children}
       
       {/* Absolute Toast Container */}

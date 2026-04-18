@@ -82,6 +82,31 @@ function LoginContent() {
     }
   };
 
+  const handleGoogleLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    const supabase = createBrowserSupabaseClient();
+    
+    const origin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL;
+    const redirectTo = `${origin}/auth/callback?next=/dashboard`;
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
+      }
+    });
+
+    if (error) {
+      console.error('[Auth] Google OAuth Error:', error);
+      setAuthError(`Google connection failed: ${error.message}`);
+    }
+  };
+
   const handleResetPassword = async (e: React.MouseEvent) => {
     e.preventDefault();
     const trimmedEmail = email.trim();
@@ -259,26 +284,51 @@ function LoginContent() {
         {!isSignUp && (
           <div style={{ marginTop: '1.25rem' }}>
             <div className="divider" style={{ margin: '1.5rem 0' }}>or continue with</div>
-            <button
-              type="button"
-              onClick={(e) => handleGithubLogin(e)}
-              className="btn btn-secondary"
-              style={{ 
-                width: '100%',
-                padding: '0.85rem 1rem', 
-                fontSize: '0.9rem', 
-                borderRadius: '14px', 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '0.5rem', 
-                justifyContent: 'center',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: 'white'
-              }}
-            >
-              <ExternalLink size={18} /> Continue with GitHub
-            </button>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <button
+                type="button"
+                onClick={(e) => handleGoogleLogin(e)}
+                className="btn btn-secondary"
+                style={{ 
+                  width: '100%',
+                  padding: '0.85rem 1rem', 
+                  fontSize: '0.9rem', 
+                  borderRadius: '14px', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem', 
+                  justifyContent: 'center',
+                  background: 'white',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  color: '#1a1a1b'
+                }}
+              >
+                <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '18px', height: '18px' }} />
+                Continue with Google
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => handleGithubLogin(e)}
+                className="btn btn-secondary"
+                style={{ 
+                  width: '100%',
+                  padding: '0.85rem 1rem', 
+                  fontSize: '0.9rem', 
+                  borderRadius: '14px', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem', 
+                  justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: 'white'
+                }}
+              >
+                <ExternalLink size={18} /> Continue with GitHub
+              </button>
+            </div>
           </div>
         )}
       </div>

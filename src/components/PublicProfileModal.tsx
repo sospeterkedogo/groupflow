@@ -19,8 +19,23 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setMe(data.user))
-  }, [supabase])
+    async function checkConnection() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setMe(user)
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('user_connections')
+        .select('*')
+        .or(`and(user_id.eq.${user.id},target_id.eq.${member.id}),and(user_id.eq.${member.id},target_id.eq.${user.id})`)
+        .maybeSingle()
+      
+      if (data) {
+        setIsConnected(true)
+      }
+    }
+    checkConnection()
+  }, [supabase, member.id])
 
   const handleConnect = async () => {
     setLoading(true)

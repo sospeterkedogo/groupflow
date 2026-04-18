@@ -10,9 +10,36 @@ import { formatDistanceToNow } from 'date-fns'
 type InboxNotification = Notification & { metadata?: { sender_id?: string } }
 
 export default function NotificationsPage() {
-  const { notifications, markAsRead, markAllAsRead, addToast } = useNotifications()
+  const { notifications, markAsRead, markAllAsRead, addToast, refreshNotifications } = useNotifications()
   const [loading, setLoading] = useState(false)
+  const [view, setView] = useState<'inbox' | 'settings'>('inbox')
   const supabase = createBrowserSupabaseClient()
+
+  // Settings state
+  const [settings, setSettings] = useState({
+    email_notifications: true,
+    push_notifications: true,
+    marketing_emails: false
+  })
+
+  useEffect(() => {
+    async function fetchSettings() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('profiles').select('email_notifications, push_notifications, marketing_emails').eq('id', user.id).single()
+      if (data) setSettings(data)
+    }
+    fetchSettings()
+  }, [supabase])
+
+  const updateSetting = async (key: keyof typeof settings, value: boolean) => {
+    const newSettings = { ...settings, [key]: value }
+    setSettings(newSettings)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('profiles').update({ [key]: value }).eq('id', user.id)
+    addToast('Success', 'Preferences updated', 'success')
+  }
 
   const handleAcceptConnection = async (notification: InboxNotification) => {
     setLoading(true)
@@ -53,112 +80,137 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="page-fade" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 var(--p-safe)' }}>
+    <div className="page-fade" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 var(--p-safe) 4rem' }}>
       
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ padding: '10px', background: 'var(--brand)', borderRadius: '14px', boxShadow: '0 8px 16px rgba(var(--brand-rgb), 0.2)' }}>
-            <Inbox size={28} color="white" />
+            <Bell size={28} color="white" />
           </div>
-          <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 900 }}>Inbox Center</h1>
+          <h1 className="fluid-h1" style={{ margin: 0, fontWeight: 950 }}>Notification Center</h1>
         </div>
-        <button 
-          onClick={markAllAsRead}
-          style={{ 
-            fontSize: '0.8rem', fontWeight: 800, color: 'var(--brand)', background: 'rgba(var(--brand-rgb), 0.1)', 
-            border: 'none', padding: '0.6rem 1rem', borderRadius: '10px', cursor: 'pointer' 
-          }}
-        >
-          Mark all read
-        </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {notifications.length === 0 ? (
-          <div style={{ 
-            textAlign: 'center', padding: '5rem 2rem', background: 'var(--surface)', 
-            borderRadius: '24px', border: '1px solid var(--border)', opacity: 0.8 
-          }}>
-            <Bell size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
-            <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.25rem' }}>Your inbox is clean</h3>
-            <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>New connection requests and project updates will appear here.</p>
-          </div>
-        ) : (
-          notifications.map(n => (
-            <div 
-              key={n.id}
-              className="glass"
-              onClick={() => !n.read && markAsRead(n.id)}
-              style={{ 
-                padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', 
-                background: n.read ? 'var(--surface)' : 'rgba(var(--brand-rgb), 0.03)',
-                boxShadow: n.read ? 'none' : '0 4px 20px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease',
-                position: 'relative',
-                display: 'flex',
-                gap: '1.25rem',
-                alignItems: 'flex-start',
-                cursor: n.read ? 'default' : 'pointer'
-              }}
-            >
-              {!n.read && <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)', boxShadow: '0 0 10px var(--brand)' }} />}
-              
-              <div style={{ 
-                width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
-                background: n.type === 'connection_request' ? 'rgba(var(--brand-rgb), 0.1)' : 'var(--bg-sub)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', color: n.type === 'connection_request' ? 'var(--brand)' : 'var(--text-sub)'
-              }}>
-                {n.type === 'connection_request' ? <UserPlus size={24} /> : n.type === 'message' ? <MessageSquare size={24} /> : <Mail size={24} />}
-              </div>
+      {/* Tab Switcher */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+         <button 
+           onClick={() => setView('inbox')}
+           style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, color: view === 'inbox' ? 'var(--brand)' : 'var(--text-sub)', borderBottom: view === 'inbox' ? '2px solid var(--brand)' : 'none' }}
+         >
+           Inbox ({notifications.filter(n => !n.read).length})
+         </button>
+         <button 
+           onClick={() => setView('settings')}
+           style={{ background: 'none', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, color: view === 'settings' ? 'var(--brand)' : 'var(--text-sub)', borderBottom: view === 'settings' ? '2px solid var(--brand)' : 'none' }}
+         >
+           Preferences
+         </button>
+      </div>
 
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 850 }}>{n.title}</h4>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>{formatDistanceToNow(new Date(n.created_at))} ago</span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-sub)', lineHeight: 1.5, marginBottom: '1rem' }}>{n.message}</p>
-                
-                {n.type === 'connection_request' && !n.read && (
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button 
-                      onClick={() => handleAcceptConnection(n)}
-                      disabled={loading}
-                      style={{ 
-                        flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', 
-                        border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.85rem' 
-                      }}
-                    >
-                      {loading ? 'Processing...' : 'Accept'}
-                    </button>
-                    <button 
-                      onClick={() => handleDeclineConnection(n)}
-                      style={{ 
-                        flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'var(--bg-sub)', color: 'var(--text-sub)', 
-                        border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.85rem' 
-                      }}
-                    >
-                      Ignore
-                    </button>
-                  </div>
-                )}
-
-                {n.type === 'connection_accepted' && (
-                   <button 
-                    onClick={() => markAsRead(n.id)}
-                    style={{ 
-                      padding: '0.5rem 1rem', borderRadius: '8px', background: 'var(--bg-sub)', color: 'var(--brand)', 
-                      border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.75rem' 
-                    }}
-                  >
-                    Start Chat
-                  </button>
-                )}
-              </div>
+      {view === 'inbox' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {notifications.length === 0 ? (
+            <div style={{ 
+              textAlign: 'center', padding: '5rem 2rem', background: 'var(--surface)', 
+              borderRadius: '24px', border: '1px solid var(--border)', opacity: 0.8 
+            }}>
+              <Bell size={48} color="var(--text-sub)" style={{ opacity: 0.2, marginBottom: '1.5rem' }} />
+              <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.25rem' }}>Your inbox is clean</h3>
+              <p style={{ color: 'var(--text-sub)', marginTop: '0.5rem' }}>New connection requests and project updates will appear here.</p>
             </div>
-          ))
-        )}
-      </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+                 <button onClick={markAllAsRead} style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: 'var(--brand)', cursor: 'pointer', fontWeight: 700 }}>Mark all as read</button>
+              </div>
+              {notifications.map(n => (
+                <div 
+                  key={n.id}
+                  className="glass"
+                  onClick={() => !n.read && markAsRead(n.id)}
+                  style={{ 
+                    padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', 
+                    background: n.read ? 'var(--surface)' : 'rgba(var(--brand-rgb), 0.03)',
+                    boxShadow: n.read ? 'none' : '0 4px 20px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    display: 'flex',
+                    gap: '1.25rem',
+                    alignItems: 'flex-start',
+                    cursor: n.read ? 'default' : 'pointer'
+                  }}
+                >
+                  {!n.read && <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--brand)' }} />}
+                  
+                  <div style={{ 
+                    width: '48px', height: '48px', borderRadius: '14px', flexShrink: 0,
+                    background: n.type === 'connection_request' ? 'rgba(var(--brand-rgb), 0.1)' : 'var(--bg-sub)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: n.type === 'connection_request' ? 'var(--brand)' : 'var(--text-sub)'
+                  }}>
+                    {n.type === 'connection_request' ? <UserPlus size={24} /> : n.type === 'message' ? <MessageSquare size={24} /> : <Mail size={24} />}
+                  </div>
 
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 850 }}>{n.title}</h4>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-sub)', fontWeight: 600 }}>{formatDistanceToNow(new Date(n.created_at))} ago</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-sub)', lineHeight: 1.5, marginBottom: '1rem' }}>{n.message}</p>
+                    
+                    {n.type === 'connection_request' && !n.read && (
+                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button 
+                          onClick={() => handleAcceptConnection(n)}
+                          disabled={loading}
+                          style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'var(--brand)', color: 'white', border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                          {loading ? 'Processing...' : 'Accept'}
+                        </button>
+                        <button 
+                          onClick={() => handleDeclineConnection(n)}
+                          style={{ flex: 1, padding: '0.6rem', borderRadius: '10px', background: 'var(--bg-sub)', color: 'var(--text-sub)', border: 'none', fontWeight: 750, cursor: 'pointer', fontSize: '0.85rem' }}
+                        >
+                          Ignore
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      ) : (
+        <div style={{ background: 'var(--surface)', borderRadius: '24px', border: '1px solid var(--border)', padding: '2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+           <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 850 }}>Communication Preferences</h3>
+           
+           {[
+             { key: 'email_notifications', label: 'Email Alerts', desc: 'Receive project updates and connection requests via email.' },
+             { key: 'push_notifications', label: 'Push Notifications', desc: 'Real-time browser notifications for chat and system signals.' },
+             { key: 'marketing_emails', label: 'Academic Insights', desc: 'Periodic summaries of your project progress and network growth.' }
+           ].map((item) => (
+             <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '2rem' }}>
+                <div style={{ flex: 1 }}>
+                   <div style={{ fontWeight: 800, fontSize: '1rem', marginBottom: '0.25rem' }}>{item.label}</div>
+                   <div style={{ fontSize: '0.85rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{item.desc}</div>
+                </div>
+                <button 
+                  onClick={() => updateSetting(item.key as any, !settings[item.key as keyof typeof settings])}
+                  style={{ 
+                    width: '50px', height: '26px', borderRadius: '13px', border: 'none', position: 'relative', cursor: 'pointer',
+                    background: settings[item.key as keyof typeof settings] ? 'var(--brand)' : 'var(--bg-sub)',
+                    transition: 'background 0.3s ease'
+                  }}
+                >
+                   <div style={{ 
+                     position: 'absolute', top: '3px', left: settings[item.key as keyof typeof settings] ? '27px' : '3px',
+                     width: '20px', height: '20px', borderRadius: '50%', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.2)', transition: 'left 0.3s ease' 
+                   }} />
+                </button>
+             </div>
+           ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,13 +1,49 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { User, MapPin, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, BookOpen, Fingerprint } from 'lucide-react'
+import { User, MapPin, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, BookOpen, Fingerprint, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { useProfile } from '@/context/ProfileContext'
 
 export default function ProfilePage() {
-   const { profile, loading } = useProfile()
+   const { profile, loading, refreshProfile } = useProfile()
    const supabase = createBrowserSupabaseClient()
+   const [isEditingBio, setIsEditingBio] = useState(false)
+   const [bioText, setBioText] = useState('')
+   const [isSaving, setIsSaving] = useState(false)
+
+   const score = profile?.total_score || 0
+   const levelData = useMemo(() => {
+      if (score < 100) return { level: 1, name: 'Academic Novice', next: 100, color: '#94a3b8' }
+      if (score < 500) return { level: 2, name: 'Project Contributor', next: 500, color: 'var(--success)' }
+      if (score < 2000) return { level: 3, name: 'Senior Researcher', next: 2000, color: 'var(--brand)' }
+      if (score < 5000) return { level: 4, name: 'Lead Analyst', next: 5000, color: 'var(--accent)' }
+      return { level: 5, name: 'Principal Scholar', next: 10000, color: '#fbbf24' }
+   }, [score])
+
+   const progressToNext = Math.min(100, Math.round((score / levelData.next) * 100))
+
+   useEffect(() => {
+      if (profile?.biography) {
+         setBioText(profile.biography)
+      }
+   }, [profile?.biography])
+
+   const handleSaveBio = async () => {
+      if (!profile) return
+      setIsSaving(true)
+      const { error } = await supabase
+         .from('profiles')
+         .update({ biography: bioText })
+         .eq('id', profile.id)
+      
+      if (!error) {
+         await refreshProfile()
+         setIsEditingBio(false)
+      }
+      setIsSaving(false)
+   }
 
    const handleSwitchGroup = async () => {
       if (!profile) return
@@ -74,34 +110,88 @@ export default function ProfilePage() {
                 <div style={{ background: 'var(--brand)', color: 'white', borderRadius: '20px', padding: 'var(--card-p)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '150px', boxShadow: '0 8px 16px rgba(var(--brand-rgb), 0.2)' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.5rem' }}>
                       <Activity size={18} />
-                      <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>System Influence</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>Team Points</span>
                    </div>
                    <div style={{ fontSize: '2.75rem', fontWeight: 950, lineHeight: 1, letterSpacing: '-0.04em' }}>{profile?.total_score || 0}</div>
-                   <p style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.6rem', fontWeight: 700 }}>Contribution Authority</p>
+                   <p style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.6rem', fontWeight: 700 }}>Contribution score earned</p>
                 </div>
 
-                <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--card-p)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem', justifyContent: 'center' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Account Status</span>
-                      <span style={{ fontWeight: 950, fontSize: '1rem', color: 'var(--success)' }}>{profile?.rank || 'Verified'}</span>
-                   </div>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Terminal ID</span>
-                      <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>{profile?.school_id || 'U-ID-01'}</span>
-                   </div>
-                </div>
+                 <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--card-p)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Academic Standing</span>
+                       <span style={{ fontWeight: 950, fontSize: '1rem', color: levelData.color }}>{levelData.name}</span>
+                    </div>
+                    <div style={{ background: 'var(--bg-sub)', height: '6px', borderRadius: '3px', overflow: 'hidden', position: 'relative' }}>
+                       <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${progressToNext}%`, background: levelData.color, transition: 'width 1s ease-out' }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <span style={{ color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 850, textTransform: 'uppercase' }}>Student ID number</span>
+                       <span style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>{profile?.school_id || 'U-ID-01'}</span>
+                    </div>
+                 </div>
              </div>
 
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100%, 1fr))', gap: 'var(--gap-md)', marginBottom: '0.5rem' }}>
-                <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--section-p)', border: '1px solid var(--border)' }}>
-                   <h3 style={{ fontSize: '0.85rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
-                      <Fingerprint size={16} color="var(--brand)" /> 
-                      Performance Summary
-                   </h3>
-                   <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.9, fontWeight: 500 }}>
-                      {profile?.biography || `System operator active within the GroupFlow environment. Contributing to high-performance modular units and collaborative synchronization.`}
-                   </p>
-                </div>
+                 <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '20px', padding: 'var(--section-p)', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                       <h3 style={{ fontSize: '0.85rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.05em' }}>
+                          <Fingerprint size={16} color="var(--brand)" /> 
+                          Personal Statement
+                       </h3>
+                       {!isEditingBio ? (
+                          <button 
+                             onClick={() => setIsEditingBio(true)}
+                             style={{ background: 'none', border: 'none', color: 'var(--brand)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 800 }}
+                          >
+                             <Edit2 size={14} /> EDIT
+                          </button>
+                       ) : (
+                          <div style={{ display: 'flex', gap: '0.75rem' }}>
+                             <button 
+                                onClick={handleSaveBio}
+                                disabled={isSaving}
+                                style={{ background: 'none', border: 'none', color: 'var(--success)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 900 }}
+                             >
+                                <Check size={16} /> {isSaving ? 'SAVING...' : 'SAVE'}
+                             </button>
+                             <button 
+                                onClick={() => {
+                                   setIsEditingBio(false)
+                                   setBioText(profile?.biography || '')
+                                }}
+                                style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 900 }}
+                             >
+                                <X size={16} /> CANCEL
+                             </button>
+                          </div>
+                       )}
+                    </div>
+                    
+                    {isEditingBio ? (
+                       <textarea 
+                          value={bioText}
+                          onChange={(e) => setBioText(e.target.value)}
+                          placeholder="Tell your team about your skills and goals..."
+                          style={{ 
+                             width: '100%', 
+                             minHeight: '120px', 
+                             background: 'var(--bg-sub)', 
+                             border: '1px solid var(--border)', 
+                             borderRadius: '12px', 
+                             padding: '1rem', 
+                             color: 'var(--text-main)', 
+                             fontSize: '1rem', 
+                             fontFamily: 'inherit',
+                             resize: 'vertical',
+                             outline: 'none'
+                          }}
+                       />
+                    ) : (
+                       <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.6, opacity: 0.9, fontWeight: 500 }}>
+                          {profile?.biography || `A groupflow user working on collaborative projects. My contributions help my team succeed.`}
+                       </p>
+                    )}
+                 </div>
 
                {profile?.stack && (
                   <div className="card-item" style={{ background: 'var(--surface)', borderRadius: '20px', padding: '1.75rem', border: '1px solid var(--border)' }}>
@@ -138,14 +228,14 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.1rem', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 950, letterSpacing: '-0.02em' }}>
                    <Award size={24} color="var(--brand)" />
-                   Verified Achievement Registry
+                   Achievements & Awards
                 </h3>
             </div>
             {(!profile?.badges_count) ? (
                <div style={{ textAlign: 'center', padding: '3rem 2rem', background: 'var(--bg-sub)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
                   <BookOpen size={48} color="var(--text-sub)" style={{ opacity: 0.15, marginBottom: '1rem' }} />
-                  <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '1.5rem', fontWeight: 600 }}>Your verifiable achievement credentials will manifest here.</p>
-                  <Link href="/dashboard" className="btn btn-primary" style={{ width: 'auto', padding: '0.8rem 2rem', fontWeight: 900 }}>Initiate First Mission</Link>
+                  <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '1.5rem', fontWeight: 600 }}>Your group project achievements will appear here.</p>
+                  <Link href="/dashboard" className="btn btn-primary" style={{ width: 'auto', padding: '0.8rem 2rem', fontWeight: 900 }}>Start First Task</Link>
                </div>
             ) : (
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>

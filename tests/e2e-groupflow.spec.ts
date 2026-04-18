@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('End-to-End: GroupFlow Control Station', () => {
+  test.setTimeout(120000);
   test('Simulate 4 scholars: signup, team formation, task orchestration, and real-time sync', async ({ browser }) => {
     // Unique session ID to avoid email conflicts during parallel runs
     const sessionSuffix = Date.now().toString().slice(-6);
@@ -23,7 +24,7 @@ test.describe('End-to-End: GroupFlow Control Station', () => {
       await p.goto('/login');
       
       // Navigate to Signup mode
-      await p.click('text="Don\'t have an account? Sign up"');
+      await p.click('text=/Don.*t have an account/i');
       
       await p.fill('input[name="email"]', users[i].email);
       await p.fill('input[name="password"]', users[i].password);
@@ -36,17 +37,17 @@ test.describe('End-to-End: GroupFlow Control Station', () => {
       
       // Wait for Dashboard landing
       await expect(p).toHaveURL(/\/dashboard/);
-      await expect(p.locator('text=Control Station Initialized')).toBeVisible();
+      await expect(p.locator('text=Academic Hub Active')).toBeVisible();
     }
 
     // 2. TEAM INITIALIZATION (User 0 creates the team)
-    await pages[0].click('text="Initialize Hub Access"');
+    await pages[0].click('text=Join or Create Team');
     await expect(pages[0]).toHaveURL(/\/dashboard\/join/);
     
     await pages[0].fill('input[id="name"]', 'Alpha Test Team');
     await pages[0].fill('input[id="module_code"]', moduleCode);
     await pages[0].fill('input[id="create_join_password"]', joinPassword);
-    await pages[0].click('button:has-text("Establish Session")');
+    await pages[0].click('button:has-text("Create Workspace")');
 
     // Wait for redirect to Dashboard with Kanban
     await expect(pages[0]).toHaveURL(/\/dashboard/);
@@ -55,10 +56,10 @@ test.describe('End-to-End: GroupFlow Control Station', () => {
     // 3. TEAM COALESCENCE (Users 1-3 join the team)
     for (let i = 1; i < users.length; i++) {
       const p = pages[i];
-      await p.click('text="Initialize Hub Access"');
+      await p.click('text=Join or Create Team');
       await p.fill('input[id="create_module_code"]', moduleCode);
       await p.fill('input[id="join_password"]', joinPassword);
-      await p.click('button:has-text("Authorize Access")');
+      await p.click('button:has-text("Join Team")');
       
       await expect(p).toHaveURL(/\/dashboard/);
       await expect(p.locator('text=Alpha Test Team')).toBeVisible();

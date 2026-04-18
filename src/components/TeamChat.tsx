@@ -304,6 +304,10 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
      )
   }
 
+  const teamOnlineCount = useMemo(() => {
+    return groupMembers.filter(m => onlineUsers.has(m.id)).length
+  }, [groupMembers, onlineUsers])
+
   return (
     <div 
       style={{
@@ -353,7 +357,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80' }} />
-                          {onlineUsers.size} online
+                          {teamOnlineCount} online
                         </div>
                       </>
                     )}
