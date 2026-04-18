@@ -888,7 +888,19 @@ export default function SettingsPage() {
                       >
                         <button
                           disabled={!canAccess}
-                          onClick={() => setPalette(p.name)}
+                          onClick={async () => {
+                            try {
+                              await setPalette(p.name)
+                              addToast('Appearance Synced', `The ${p.name} palette has been successfully applied to your terminal.`, 'success')
+                            } catch (err: any) {
+                              if (err.message === 'PREMIUM_LOCKED' || err.message === 'PRO_LOCKED') {
+                                addToast('Access Unauthorized', 'This visual protocol requires higher institutional clearance.', 'error')
+                                setActiveTab('billing')
+                              } else {
+                                addToast('Sync Error', err.message || 'Failed to apply theme.', 'error')
+                              }
+                            }
+                          }}
                           style={{
                             width: '100%', padding: '1.25rem', background: p.colors['--bg-sub'], border: currentPalette.name === p.name ? `3px solid ${p.colors['--brand']}` : '1px solid var(--border)',
                             borderRadius: 'inherit', textAlign: 'left', cursor: canAccess ? 'pointer' : 'default', transition: 'all 0.2s',
@@ -914,7 +926,8 @@ export default function SettingsPage() {
                         {isLocked && (
                           <div 
                             className="glass-lock"
-                            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }}
+                            onClick={() => setActiveTab('billing')}
+                            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, cursor: 'pointer' }}
                           >
                             <div style={{ background: 'rgba(255,255,255,0.15)', padding: '0.75rem', borderRadius: '50%', marginBottom: '0.5rem', boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }}>
                               <Lock size={20} color="white" />

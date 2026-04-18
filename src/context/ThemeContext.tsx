@@ -296,6 +296,82 @@ export const PALETTES: Palette[] = [
       '--overlay': 'rgba(0, 0, 0, 0.95)',
     }
   }
+  {
+    name: 'Obsidian Gold',
+    tier: 'premium',
+    colors: {
+      '--bg-main': '#000000',
+      '--bg-sub': '#0a0a0a',
+      '--text-main': '#ffffff',
+      '--text-sub': '#888888',
+      '--brand': '#d4af37',
+      '--brand-hover': '#f1c40f',
+      '--accent': '#9c8644',
+      '--border': '#1a1a1a',
+      '--surface': '#0c0c0c',
+      '--error': '#ff3333',
+      '--success': '#d4af37',
+      '--warning': '#f1c40f',
+      '--overlay': 'rgba(0, 0, 0, 0.9)',
+    }
+  },
+  {
+    name: 'Archival Vellum',
+    tier: 'pro',
+    colors: {
+      '--bg-main': '#f9f7f2',
+      '--bg-sub': '#ffffff',
+      '--text-main': '#1a1a1a',
+      '--text-sub': '#5c5c5c',
+      '--brand': '#7c2d12',
+      '--brand-hover': '#9a3412',
+      '--accent': '#431407',
+      '--border': '#e7e5e4',
+      '--surface': '#ffffff',
+      '--error': '#991b1b',
+      '--success': '#166534',
+      '--warning': '#854d0e',
+      '--overlay': 'rgba(124, 45, 18, 0.05)',
+    }
+  },
+  {
+    name: 'Neon Overdrive',
+    tier: 'premium',
+    colors: {
+      '--bg-main': '#020204',
+      '--bg-sub': '#050508',
+      '--text-main': '#00f7ff',
+      '--text-sub': '#ff00ff',
+      '--brand': '#ff00ff',
+      '--brand-hover': '#00f7ff',
+      '--accent': '#7000ff',
+      '--border': '#101020',
+      '--surface': '#0a0a15',
+      '--error': '#ff0000',
+      '--success': '#00ff00',
+      '--warning': '#ffff00',
+      '--overlay': 'rgba(0, 0, 0, 0.8)',
+    }
+  },
+  {
+    name: 'Midnight Platinum',
+    tier: 'premium',
+    colors: {
+      '--bg-main': '#020617',
+      '--bg-sub': '#0f172a',
+      '--text-main': '#f8fafc',
+      '--text-sub': '#94a3b8',
+      '--brand': '#e2e8f0',
+      '--brand-hover': '#ffffff',
+      '--accent': '#64748b',
+      '--border': '#1e293b',
+      '--surface': '#0f172a',
+      '--error': '#ef4444',
+      '--success': '#10b981',
+      '--warning': '#f59e0b',
+      '--overlay': 'rgba(2, 6, 23, 0.85)',
+    }
+  }
 ]
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -311,7 +387,7 @@ export type ThemeInitialValues = {
   bgUrl?: string
 }
 
-export const ThemeProvider = ({ children, initialTheme }: { children: React.ReactNode, initialTheme?: ThemeInitialValues }) => {
+export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: React.ReactNode, initialTheme?: ThemeInitialValues, userPlan?: string | null }) => {
   // Use initialTheme for initial state to prevent flash during hydration
   const [currentPalette, setCurrentPalette] = useState<Palette>(() => {
     if (initialTheme?.palette) {
@@ -351,15 +427,26 @@ export const ThemeProvider = ({ children, initialTheme }: { children: React.Reac
   const setPalette = async (name: string) => {
     const palette = PALETTES.find(p => p.name === name)
     if (palette) {
+      // Access Control Enforcement
+      const tier = palette.tier || 'free'
+      const isPremium = userPlan === 'premium'
+      const isPro = userPlan === 'pro' || isPremium
+
+      if (tier === 'premium' && !isPremium) {
+        throw new Error('PREMIUM_LOCKED')
+      }
+      if (tier === 'pro' && !isPro) {
+        throw new Error('PRO_LOCKED')
+      }
+
       setCurrentPalette(palette)
-      localStorage.setItem('groupflow_palette', name) // Local persistence for instant load
+      localStorage.setItem('groupflow_palette', name) 
       const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await supabase.from('profiles').update({ 
             theme_config: { palette: name } 
           }).eq('id', user.id)
 
-          // Verifiable Logging
           const { data: profile } = await supabase.from('profiles').select('group_id').eq('id', user.id).single()
           logActivity(user.id, profile?.group_id, 'theme_changed', `Changed palette to ${name}`)
         }

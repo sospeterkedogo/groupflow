@@ -37,7 +37,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <ThemeProvider initialTheme={initialTheme}>
+    <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
       <GlobalLoadingProvider>
         <ProfileProvider userId={user.id} initialProfile={profile as any}>
           <OnboardingWrapper profile={profile as any} user={user}>
