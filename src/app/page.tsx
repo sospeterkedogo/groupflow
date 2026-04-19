@@ -316,7 +316,18 @@ export default function Home() {
                               {category.items.map((item: any) => (
                                 <Link 
                                   key={item.id}
-                                  href="/login?signup=true"
+                                  href={
+                                    item.id === 'kanban' ? '/product/intelligence' :
+                                    item.id === 'sync' ? '/product/sync' :
+                                    item.id === 'roadmap' ? '/product/roadmap' :
+                                    item.id === 'research' ? '/solutions/scholars' :
+                                    item.id === 'teams' ? '/solutions/teams' :
+                                    item.id === 'enterprise' ? '/solutions/enterprise' :
+                                    item.id === 'mission' ? '/docs/vision' :
+                                    item.id === 'achievements' ? '/docs/impact' :
+                                    item.id === 'help' ? '/docs' :
+                                    '/login?signup=true'
+                                  }
                                   className="nav-link-pro"
                                   style={{
                                     padding: '0.75rem',
@@ -344,7 +355,7 @@ export default function Home() {
                 </AnimatePresence>
               </div>
             ))}
-            <Link href="/login" style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}>Documentation</Link>
+            <Link href="/docs" style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}>Documentation</Link>
           </nav>
         </div>
 

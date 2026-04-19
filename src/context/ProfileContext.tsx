@@ -12,7 +12,7 @@ type ProfileContextType = {
   setProfile: React.Dispatch<React.SetStateAction<Profile | null>>
 }
 
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
+export const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
 
 export function ProfileProvider({ 
   children, 

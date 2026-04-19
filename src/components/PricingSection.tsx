@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Shield, Sparkles, CheckCircle2, Check, ArrowRight } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { useProfile } from '@/context/ProfileContext'
+import { ProfileContext } from '@/context/ProfileContext'
+import { useContext } from 'react'
 import TransientError from '@/components/TransientError'
 
 interface PricingSectionProps {
@@ -14,7 +15,8 @@ interface PricingSectionProps {
 export default function PricingSection({ showTitle = true, isLanding = false }: PricingSectionProps) {
   const [error, setError] = useState<string | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
-  const { profile } = useProfile()
+  const context = useContext(ProfileContext)
+  const profile = context?.profile
   const supabase = createBrowserSupabaseClient()
 
   const handleCheckout = async (plan: 'pro' | 'premium') => {
