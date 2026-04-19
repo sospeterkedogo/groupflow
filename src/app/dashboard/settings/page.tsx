@@ -80,10 +80,16 @@ export default function SettingsPage() {
   const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verifying'>('idle')
   const [protectAvatar, setProtectAvatar] = useState(false)
   const [manualAvatarUrl, setManualAvatarUrl] = useState<string | null>(null)
+  const [isToasterMode, setIsToasterMode] = useState(false)
 
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
+    // Sync Toaster Mode from local storage
+    if (typeof window !== 'undefined') {
+      setIsToasterMode(localStorage.getItem('gf_toaster_mode') === 'true')
+    }
+    
     // Parallelize top-level metadata fetches
     const initializeData = async () => {
       await Promise.all([
@@ -1170,6 +1176,34 @@ export default function SettingsPage() {
           <div className="auth-card" style={{ maxWidth: '100%' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>Look & Feel</h2>
             <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Customize your workspace with high-end, professionally curated themes.</p>
+
+            {/* PERFORMANCE OPTIMIZATION (NEW) */}
+            <div style={{ marginBottom: '3.5rem', padding: '1.5rem', background: isToasterMode ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: isToasterMode ? 'var(--brand)' : 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isToasterMode ? 'white' : 'var(--text-sub)' }}>
+                  <PulseIcon size={24} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900 }}>Low Power Mode</h3>
+                  <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 600 }}>Optimizes performance for low-end devices and slow connections by disabling heavy visual effects.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  const next = !isToasterMode
+                  setIsToasterMode(next)
+                  localStorage.setItem('gf_toaster_mode', String(next))
+                  // Update document class immediately for instant feedback
+                  if (next) document.body.classList.add('toaster-mode')
+                  else document.body.classList.remove('toaster-mode')
+                  addToast('Performance Protocol Updated', next ? 'Low Power Mode enabled.' : 'Standard performance restored.', 'info')
+                }}
+                className={isToasterMode ? "btn btn-primary" : "btn btn-secondary"}
+                style={{ width: 'auto', padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}
+              >
+                {isToasterMode ? 'ENABLED' : 'DISABLED'}
+              </button>
+            </div>
 
             {/* Render themes grouped by tier */}
             {(['free', 'pro', 'premium', 'lifetime'] as const).map(tier => {

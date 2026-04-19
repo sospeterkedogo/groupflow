@@ -6,8 +6,9 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   Send, MessageSquare, X, Paperclip, CheckCheck, Clock,
   Trash2, Shield, LayoutGrid, UserCircle, ChevronRight,
-  ExternalLink, Search
+  ExternalLink, Search, Smile, AlertCircle, RefreshCw, ShieldCheck, CloudOff
 } from 'lucide-react'
+import { useConnectivity } from '@/context/ConnectivityContext'
 import { useRouter } from 'next/navigation'
 import { usePresence } from './PresenceProvider'
 import { logActivity } from '@/utils/logging'
@@ -28,6 +29,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
   
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { isOnline } = useConnectivity()
   const supabase = createBrowserSupabaseClient()
   const { onlineUsers, typingUsers, setTypingStatus } = usePresence()
 
@@ -527,7 +529,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
                                 </span>
                                 {isOwn && !m.is_deleted && (
                                   <span style={{ display: 'inline-flex', opacity: 0.8 }}>
-                                     {m.pending ? <Clock size={10} /> : <CheckCheck size={11} />}
+                                     {m.pending ? <Clock size={10} /> : (isOnline ? <ShieldCheck size={11} /> : <CloudOff size={11} />)}
                                   </span>
                                 )}
                                 {canDelete && !m.is_deleted && !m.pending && (
@@ -565,7 +567,7 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
           <form onSubmit={handleSendMessage} style={{ flex: 1 }}>
              <input 
                type="text" value={newMessage} onChange={e => handleTyping(e.target.value)}
-               placeholder="Message..."
+               placeholder={isOnline ? "Message..." : "Offline mode: Messages will queue"}
                style={{ 
                  width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px',
                  padding: '0.4rem 0.75rem', fontSize: '0.825rem', outline: 'none', color: 'var(--text-main)',

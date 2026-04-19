@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { FileUp, GitCommit, AlertCircle, Search, X } from 'lucide-react'
+import { FileUp, GitCommit, AlertCircle, Search, X, RefreshCw, CloudOff } from 'lucide-react'
+import { useConnectivity } from '@/context/ConnectivityContext'
 import { Task, TaskStatus } from '@/types/database'
 import { Profile } from '@/types/auth'
 import { KanbanBoardProps } from '@/types/ui'
@@ -62,6 +63,7 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
 function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   const router = useRouter();
   const supabase = createBrowserSupabaseClient();
+  const { isOnline, isSlow } = useConnectivity()
   const others = useOthers();
   const updateMyPresence = useUpdateMyPresence();
   const othersDragging = useOthers((others) => others.filter(other => other.presence.draggingTaskId !== null));
@@ -603,6 +605,26 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                         >
                           {task.category || 'Legacy'}
                         </span>
+                        
+                        {pendingUpdates.has(task.id) && (
+                          <span style={{ 
+                            fontSize: '0.6rem', color: 'var(--brand)', fontWeight: 900, textTransform: 'uppercase', 
+                            display: 'flex', alignItems: 'center', gap: '0.25rem', letterSpacing: '0.5px' 
+                          }}>
+                            <RefreshCw size={10} className="spin" />
+                            Vault Sync
+                          </span>
+                        )}
+                        
+                        {!isOnline && (
+                          <span style={{ 
+                            fontSize: '0.6rem', color: 'var(--error)', fontWeight: 900, textTransform: 'uppercase', 
+                            display: 'flex', alignItems: 'center', gap: '0.25rem' 
+                          }}>
+                            <CloudOff size={10} />
+                            Local Mode
+                          </span>
+                        )}
                         {task.due_date && (
                           <span style={{ fontSize: '0.65rem', fontWeight: 600, color: new Date(task.due_date).getTime() < Date.now() && task.status !== 'Done' ? 'var(--error)' : 'var(--text-sub)' }}>
                             Due: {new Date(task.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}

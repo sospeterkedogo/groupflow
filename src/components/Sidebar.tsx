@@ -19,8 +19,13 @@ import {
   Sun,
   TrendingUp,
   Sparkles,
-  Music
+  Music,
+  ShieldCheck,
+  Lock,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
+import { useConnectivity } from '@/context/ConnectivityContext'
 import { useTheme } from '@/context/ThemeContext'
 import { Profile } from '@/types/auth'
 import { SidebarProps } from '@/types/ui'
@@ -32,6 +37,7 @@ import { usePresence } from '@/components/PresenceProvider'
 import GlobalSearch from './GlobalSearch'
 
 export default function Sidebar({ user }: SidebarProps) {
+  const { isOnline: isConnected, isSlow } = useConnectivity()
   const [isOpen, setIsOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -331,6 +337,42 @@ export default function Sidebar({ user }: SidebarProps) {
             </div>
           </div>
         )}
+
+        {/* VAULT SECURITY INDICATOR */}
+        <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <div style={{ 
+              width: '32px', height: '32px', borderRadius: '10px', 
+              background: isConnected ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: isConnected ? 'var(--brand)' : 'var(--error)'
+            }}>
+              {isConnected ? <ShieldCheck size={18} /> : <WifiOff size={18} />}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: isConnected ? 'var(--brand)' : 'var(--error)' }}>
+                {isConnected ? 'Vault Verified' : 'Uplink Offline'}
+              </div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 700 }}>
+                {isSlow ? 'Bandwidth Restricted' : 'Optimal Connectivity'}
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ 
+            fontSize: '0.55rem', 
+            fontWeight: 800, 
+            color: 'rgba(255,255,255,0.2)', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px'
+          }}>
+            <span>Node: GF-2026-X</span>
+            <Lock size={10} />
+          </div>
+        </div>
 
         {/* Footer / User Profile */}
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

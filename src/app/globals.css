@@ -133,6 +133,18 @@ body {
   border-radius: 8px;
 }
 
+/* Vault Synchronization Animation */
+.vault-sync-hex {
+  animation: vault-pulse 2s infinite ease-in-out;
+  filter: drop-shadow(0 0 8px rgba(var(--brand-rgb), 0.4));
+}
+
+@keyframes vault-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
 .skeleton-text  { height: 0.85rem; margin-bottom: 0.4rem; }
 .skeleton-title { height: 1.4rem; width: 60%; margin-bottom: 0.75rem; }
 .skeleton-avatar { border-radius: 50% !important; }
@@ -259,6 +271,37 @@ input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible
   outline: 2px solid var(--brand);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(var(--brand-rgb), 0.2);
+}
+
+/* — TOASTER MODE — 
+   Extreme optimization for low-power devices 
+*/
+.toaster-mode * {
+  animation-duration: 0.1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.1ms !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+.toaster-mode .skeleton {
+  animation: none !important;
+  background: var(--bg-sub) !important;
+}
+
+.toaster-mode .vault-sync-hex {
+  animation: none !important;
+}
+
+/* Vault Grid Overlay */
+.vault-grid {
+  background-image: 
+    linear-gradient(rgba(var(--brand-rgb), 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--brand-rgb), 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
 }
 
 /* Tooltip Utility */

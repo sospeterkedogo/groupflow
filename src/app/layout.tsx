@@ -9,6 +9,8 @@ import CookieBanner from '../components/CookieBanner';
 import SessionGuard from '@/components/SessionGuard';
 import PromoBanner from '@/components/PromoBanner';
 import GlobalAnnouncement from '@/components/GlobalAnnouncement';
+import { ConnectivityProvider } from '@/context/ConnectivityContext';
+import ToasterModeManager from '@/components/ToasterModeManager';
 import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
@@ -42,16 +44,18 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <PromoBanner />
-        {/* Wrap all children in NotificationProvider for global access */}
-        <NotificationProvider>
-          <PWARegistry />
-          {children}
-          <CookieBanner />
-          <SessionGuard />
-          <GlobalAnnouncement />
-          <Analytics />
-          <SpeedInsights />
-        </NotificationProvider>
+        <ConnectivityProvider>
+          <ToasterModeManager />
+          <NotificationProvider>
+            <PWARegistry />
+            {children}
+            <CookieBanner />
+            <SessionGuard />
+            <GlobalAnnouncement />
+            <Analytics />
+            <SpeedInsights />
+          </NotificationProvider>
+        </ConnectivityProvider>
 
         {/* PREMIUM SVG FILTERS */}
         <svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none' }}>

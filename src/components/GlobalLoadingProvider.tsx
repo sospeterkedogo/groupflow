@@ -1,7 +1,8 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import { Check, X, Info, AlertTriangle, Loader2 } from 'lucide-react'
+import { Check, X, Info, AlertTriangle, Loader2, ShieldCheck, Lock, WifiOff } from 'lucide-react'
+import { useConnectivity } from '@/context/ConnectivityContext'
 
 interface LoadingState {
   isLoading: boolean
@@ -39,6 +40,7 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
     isOpen: false, title: '', message: '', type: 'info', onConfirm: () => {} 
   })
   
+  const { isOnline, isSlow } = useConnectivity()
   const progressInterval = useRef<NodeJS.Timeout | null>(null)
   const appearanceTimeout = useRef<NodeJS.Timeout | null>(null)
 
@@ -109,12 +111,13 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
           animation: 'fadeIn 0.3s ease-out'
         }}>
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
-            <div style={{ position: 'relative', width: '120px', height: '120px' }}>
-              {/* Spinner */}
+            <div style={{ position: 'relative', width: '120px', height: '120px' }} className="vault-sync-hex">
+              {/* Vault Shield Metaphor */}
               <div style={{ 
-                position: 'absolute', inset: 0, borderRadius: '50%', 
-                border: '6px solid var(--border)', borderTopColor: 'var(--brand)',
-                animation: 'spin 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite'
+                position: 'absolute', inset: 0, borderRadius: '24px', 
+                border: '4px solid var(--border)', borderTopColor: 'var(--brand)',
+                transform: 'rotate(45deg)',
+                animation: 'spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite'
               }} />
               {/* Progress Text */}
               <div style={{ 
@@ -125,8 +128,35 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '1.1rem', fontWeight: 850, color: 'var(--text-main)', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>{loading.message}</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Establishing Secure Link...</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 950, color: 'var(--text-main)', marginBottom: '0.4rem', letterSpacing: '-0.04em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Lock size={18} className="text-brand" />
+                {loading.message}
+              </div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                {isSlow ? 'Low Bandwidth Optimization Active' : 'Establishing Encrypted Node...'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Offline Barrier */}
+      {!isOnline && (
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          zIndex: 100000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(60px)',
+          animation: 'fadeIn 0.5s ease-out', padding: '2rem'
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <div style={{ width: '80px', height: '80px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: 'var(--error)' }}>
+              <WifiOff size={40} />
+            </div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 950, color: 'white', marginBottom: '1rem', letterSpacing: '-0.04em' }}>Vault Locked</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, marginBottom: '2rem', lineHeight: 1.6 }}>Your connection has been interrupted. Access is paused to ensure data integrity.</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--brand)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <span className="pulse-pill" style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }} />
+              Monitoring Recovery...
             </div>
           </div>
         </div>
