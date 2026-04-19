@@ -31,10 +31,11 @@ function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAcc
   )
 }
 
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 
 function LoginContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
   const [isResetting, setIsResetting] = useState(false)
@@ -148,7 +149,7 @@ function LoginContent() {
     const supabase = createBrowserSupabaseClient()
     const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
     if (error) setAuthError(error.message)
-    else window.location.href = '/dashboard'
+    else router.replace('/dashboard')
     setSendingOtp(false)
   }
 
