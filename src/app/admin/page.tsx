@@ -25,6 +25,7 @@ import {
   Download
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
+import type { Profile } from '@/types/database'
 import { 
   BarChart, 
   Bar, 
