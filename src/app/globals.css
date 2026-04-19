@@ -1,18 +1,20 @@
 :root {
-  /* Default Theme Variables */
-  --bg-main: #ffffff;
-  --bg-sub: #f8fafc;
-  --text-main: #0f172a;
-  --text-sub: #475569;
-  --brand: #003366;
-  --brand-hover: #002244;
-  --accent: #0ea5e9;
-  --border: #e2e8f0;
-  --surface: #ffffff;
+  /* High-Fidelity Technical Theme Variables (Supabase Style) */
+  --bg-main: #0a0a0a;
+  --bg-sub: #111111;
+  --text-main: #ededed;
+  --text-sub: #a1a1a1;
+  --brand: #10b981;
+  --brand-rgb: 16, 185, 129;
+  --brand-hover: #0d9668;
+  --accent: #ffffff;
+  --accent-rgb: 255, 255, 255;
+  --border: rgba(255,255,255,0.06);
+  --surface: #141414;
   --error: #ef4444;
   --success: #10b981;
   --warning: #f59e0b;
-  --overlay: rgba(0, 0, 0, 0.4);
+  --overlay: rgba(0, 0, 0, 0.7);
 
   --radius: 8px;
   --radius-lg: 12px;

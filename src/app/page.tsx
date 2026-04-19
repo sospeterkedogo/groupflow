@@ -130,46 +130,93 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-main)', position: 'relative', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#0a0a0a', position: 'relative', overflowX: 'hidden' }}>
       
-      {/* Animated Background Mesh */}
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(var(--brand-rgb), 0.05) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none', zIndex: 0 }} />
+      {/* High-Fidelity Technical Mesh & Grid Overlay */}
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px)', backgroundSize: '64px 64px', pointerEvents: 'none', zIndex: 1 }} />
+      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60vw', height: '60vw', background: 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(16, 185, 129, 0.03) 0%, transparent 70%)', filter: 'blur(100px)', pointerEvents: 'none', zIndex: 0 }} />
 
-      {/* Mission Project Modal */}
+      {/* Institutional Mission Modal */}
       {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'var(--overlay)', backdropFilter: 'blur(12px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(16px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div 
             className="page-fade"
-            style={{ background: 'var(--surface)', maxWidth: '650px', width: '100%', borderRadius: '32px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', padding: '2.5rem', position: 'relative' }}
+            style={{ background: '#111111', maxWidth: '650px', width: '100%', borderRadius: '12px', border: '1px solid #222222', boxShadow: '0 30px 60px rgba(0,0,0,0.7)', padding: '2.5rem', position: 'relative' }}
           >
              <button 
                onClick={() => setIsModalOpen(false)}
-               style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'var(--bg-sub)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}
+               style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#222222', border: 'none', width: '36px', height: '36px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}
              >✕</button>
              
-             <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
-               THE GroupFlow2026 MISSION
+             <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '1px' }}>
+                THE GroupFlow2026 MISSION
              </div>
-             <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Transforming collaboration in schools</h2>
+             <h2 style={{ fontSize: '2rem', fontWeight: 650, marginBottom: '1.5rem', letterSpacing: '-0.03em', color: '#f3f4f6' }}>Revolutionizing academic collaboration.</h2>
              
-             <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
+             <div style={{ display: 'grid', gap: '1.5rem', fontSize: '0.95rem', lineHeight: 1.6, color: '#9ca3af' }}>
                 <div>
-                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Solving a Real Problem</strong>
-                   I built GroupFlow2026 to solve the unfair group dynamics that many students face daily. <a>Please support this project to go into many schools and support learning.</a>
+                   <strong style={{ color: '#f3f4f6', display: 'block', marginBottom: '0.25rem' }}>Solving Invisibility</strong>
+                   GroupFlow2026 was built to eliminate opaque group dynamics. We make every contribution audit-ready and visible to ensure fair recognition for all researchers.
                 </div>
                 <div>
-                   <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
-                   I'm on a mission to bring this tool into many more schools to truly support learning by making every contribution visible and valued.
+                   <strong style={{ color: '#f3f4f6', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
+                   On a mission to integrate this toolkit into global school systems, bridging the gap between individual effort and community goals.
                 </div>
              </div>
 
-             <button className="btn btn-primary" style={{ marginTop: '2rem', width: '100%' }} onClick={() => setIsModalOpen(false)}>
-               Support the Project
+             <button className="btn btn-primary" style={{ marginTop: '2rem', width: '100%', borderRadius: '8px', background: '#10b981', color: '#0a0a0a', border: 'none' }} onClick={() => setIsModalOpen(false)}>
+               Support Global Scale
              </button>
           </div>
         </div>
       )}
+
+      {/* Floating Tactical Sidebar Dock */}
+      <aside 
+        style={{ 
+          position: 'fixed', 
+          left: '1.5rem', 
+          top: '50%', 
+          transform: 'translateY(-50%)', 
+          zIndex: 900, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '0.75rem', 
+          padding: '0.75rem', 
+          background: 'rgba(10, 10, 10, 0.6)', 
+          backdropFilter: 'blur(12px)', 
+          borderRadius: '12px', 
+          border: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+        }}
+        className="hide-mobile"
+      >
+         {[
+           { icon: <LayoutGrid size={20} />, label: 'Kanban' },
+           { icon: <Activity size={20} />, label: 'Analytics' },
+           { icon: <Users size={20} />, label: 'Network' },
+           { icon: <Code size={20} />, label: 'GitHub' }
+         ].map((tool, i) => (
+           <div 
+             key={i} 
+             className="nav-util-btn"
+             style={{ 
+               width: '38px', 
+               height: '38px', 
+               display: 'flex', 
+               alignItems: 'center', 
+               justifyContent: 'center', 
+               borderRadius: '6px', 
+               color: '#6b7280', 
+               cursor: 'pointer',
+               transition: 'all 0.2s ease'
+             }}
+           >
+             {tool.icon}
+           </div>
+         ))}
+      </aside>
 
       {/* Professional Navigation Overhaul (Supabase Style) */}
       <header 
@@ -300,7 +347,6 @@ export default function Home() {
 
         {/* Global Utilities & Authentication */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {/* Search Trigger (Cmd+K Style) */}
           <button 
              className="nav-util-btn"
              style={{ 
@@ -323,7 +369,6 @@ export default function Home() {
              <div style={{ padding: '2px 4px', background: '#222222', borderRadius: '4px', fontSize: '0.65rem' }}>⌘K</div>
           </button>
 
-          {/* GitHub Star Placeholder */}
           <Link 
             href="https://github.com/sospeterkedogo/groupflow" 
             target="_blank"
@@ -336,7 +381,6 @@ export default function Home() {
 
           <div style={{ height: '20px', width: '1px', background: '#222222' }} />
 
-          {/* Refined CTAs */}
           <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, padding: '0.5rem 0.75rem' }}>Sign in</Link>
           <Link 
             href="/login?signup=true" 
@@ -359,284 +403,203 @@ export default function Home() {
         </div>
       </header>
 
-      <main style={{ padding: '4rem 0' }}>
+      <main style={{ padding: '8rem 0', position: 'relative', zIndex: 10 }}>
         
-        {/* HERO */}
-        <section style={{ textAlign: 'center', marginBottom: '8rem', padding: '0 var(--p-safe)', position: 'relative' }}>
+        {/* Unified Architectural HERO */}
+        <section style={{ textAlign: 'center', marginBottom: '10rem', padding: '0 2rem' }}>
            
            <div style={{ 
              display: 'inline-flex', 
              alignItems: 'center', 
              gap: '0.6rem', 
-             padding: '10px 24px', 
-             background: 'rgba(var(--brand-rgb), 0.08)', 
-             borderRadius: '99px', 
-             color: 'var(--brand)',
-             fontSize: '0.85rem',
-             fontWeight: 800,
+             padding: '8px 20px', 
+             background: 'rgba(16, 185, 129, 0.08)', 
+             borderRadius: '6px', 
+             color: '#10b981',
+             fontSize: '0.75rem',
+             fontWeight: 700,
              textTransform: 'uppercase',
-             letterSpacing: '1.5px',
-             marginBottom: '2rem',
-             border: '1px solid rgba(var(--brand-rgb), 0.1)'
+             letterSpacing: '0.05em',
+             marginBottom: '2.5rem',
+             border: '1px solid rgba(16, 185, 129, 0.2)'
            }}>
-             <Sparkles size={16} /> Celebrate every contribution
+             <Sparkles size={14} /> Technical synchronization protocol active
            </div>
            
-           <h1 className="fluid-h1" style={{ marginBottom: '1.5rem', color: 'var(--text-main)', fontSize: 'clamp(2.5rem, 8vw, 5rem)', maxWidth: '1200px', margin: '0 auto 2rem', fontWeight: 950, letterSpacing: '-0.05em' }}>
+           <h1 style={{ marginBottom: '1.5rem', color: '#f3f4f6', fontSize: 'clamp(2.5rem, 7vw, 4.5rem)', maxWidth: '1000px', margin: '0 auto 2rem', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
              Unified Academic <br />
              <span style={{ 
-                background: 'linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)',
+                background: 'linear-gradient(90deg, #10b981 0%, #f3f4f6 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 display: 'inline-block'
               }}>Collaboration Engine.</span>
            </h1>
            
-           <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
-              GroupFlow2026 professionalizes university group projects through real-time synchronization, verified contribution tracking, and cross-departmental networking. 
-              <span style={{ display: 'block', marginTop: '1rem', color: 'var(--success)', fontWeight: 800, fontSize: '1rem' }}>FREE FOR STUDENTS</span>
+           <p style={{ color: '#9ca3af', maxWidth: '750px', margin: '0 auto 4rem', fontWeight: 400, fontSize: '1.125rem', lineHeight: 1.6 }}>
+              Professionalizing research output through real-time state persistence, verified contribution logging, and cross-departmental peer networking. 
+              <span style={{ display: 'block', marginTop: '1.25rem', color: '#10b981', fontWeight: 700, fontSize: '0.875rem', letterSpacing: '0.1em' }}>RECOGNITION FOR EVERY CONTRIBUTOR</span>
            </p>
 
-           <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', alignItems: 'center' }}>
-              <Link href="/login?signup=true" className="btn btn-primary btn-lg" style={{ minWidth: '260px', padding: '1.25rem 2rem', fontSize: '1.1rem', borderRadius: '20px', boxShadow: '0 20px 40px -10px rgba(var(--brand-rgb), 0.3)' }}>
-                Start your project <ArrowRight size={22} />
+           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link 
+                href="/login?signup=true" 
+                style={{ 
+                  background: '#10b981', 
+                  color: '#0a0a0a', 
+                  textDecoration: 'none', 
+                  padding: '1rem 2rem', 
+                  fontSize: '1rem', 
+                  fontWeight: 650, 
+                  borderRadius: '8px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.75rem',
+                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)'
+                }}
+              >
+                Start free project <ArrowRight size={18} />
               </Link>
-              <Link href="/demo" className="btn btn-secondary btn-lg" style={{ minWidth: '260px', padding: '1.25rem 2rem', fontSize: '1.1rem', borderRadius: '20px' }}>
-                See how it works < ChevronRight size={22} />
+              <Link 
+                href="/demo" 
+                style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  color: '#f3f4f6', 
+                  textDecoration: 'none', 
+                  padding: '1rem 2rem', 
+                  fontSize: '1rem', 
+                  fontWeight: 650, 
+                  borderRadius: '8px', 
+                  border: '1px solid #222222',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.75rem'
+                }}
+              >
+                View Protocol <ChevronRight size={18} />
               </Link>
            </div>
         </section>
 
-        {/* SUPPORT THE MISSION */}
-        <section id="mission" style={{ padding: '10rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '6rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ flex: '1 1 500px' }}>
-               <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Support the Mission</div>
-               <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Solving the real problems in our schools.</h2>
-               <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
-                  This isn't just another app—it's a mission to transform how students work together. I built GroupFlow2026 because I've seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
-               </p>
-               <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
-                  I'm on a mission to bring this tool into many more schools to truly support learning. By joining the mission, you aren't just getting a tool; you're helping bridge the gap for students everywhere.
-               </p>
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
-                  <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
-                     <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><CheckCircle size={24} /></div>
-                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>See your impact</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>Every part of your project is naturally linked to your shared goals.</p>
-                  </div>
-                  <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
-                     <div style={{ color: 'var(--brand)', marginBottom: '0.75rem' }}><Zap size={24} /></div>
-                     <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Work that matters</div>
-                     <p style={{ fontSize: '0.9rem', color: 'var(--text-sub)', margin: 0 }}>I'll help you highlight the effort of every team member, from leaders to creators.</p>
-                  </div>
-               </div>
-            </div>
-            <div style={{ flex: '1 1 400px', position: 'relative' }}>
-               <div className="glass" style={{ padding: '3.5rem', borderRadius: '48px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem' }}>
-                     <div style={{ padding: '4px', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '12px', overflow: 'hidden' }}>
-                        <img src="/logo.png" style={{ width: '32px', height: '32px', objectFit: 'cover' }} alt="Logo" />
-                     </div>
-                     <div>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Your Team Hub</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>Always in sync</div>
-                     </div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                     {[
-                        { label: 'Work accurately tracked', val: 'Real-time', color: 'var(--success)' },
-                        { label: 'Team balance', val: 'Optimized', color: 'var(--brand)' },
-                        { label: 'Project records', val: 'Secure', color: 'var(--success)' }
-                     ].map((stat, i) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', background: 'rgba(var(--brand-rgb), 0.03)', borderRadius: '16px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
-                           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-sub)' }}>{stat.label}</span>
-                           <span style={{ fontSize: '0.85rem', fontWeight: 900, color: stat.color }}>{stat.val}</span>
-                        </div>
-                     ))}
-                  </div>
-                  
-                  <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
-                     <div style={{ fontSize: '0.65rem', color: 'var(--text-sub)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Team pulse</div>
-                     <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '1rem' }}>
-                        {[0.1, 0.4, 0.1, 0.7, 0.3, 0.9, 0.2, 0.5, 0.8, 0.4, 0.6, 0.5].map((opacity, i) => (
-                           <div 
-                             key={i} 
-                             style={{ 
-                                width: '4px', 
-                                height: '20px', 
-                                background: 'var(--brand)', 
-                                borderRadius: '99px', 
-                                opacity, 
-                                animation: `spin ${1 + (i % 5) * 0.2}s infinite linear` 
-                             }} 
-                           />
-                        ))}
-                     </div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* EXTERNAL COLLABORATION */}
-        <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
-           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-              <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Work your way</div>
-              <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em' }}>Use the tools you love.</h2>
-              <p style={{ fontSize: '1.3rem', color: 'var(--text-sub)', lineHeight: 1.7, marginBottom: '4.5rem' }}>
-                 I work with the tools you already use every day. Collaborate where you feel most creative, whether it's Google Docs, Figma, or GitHub, and I'll help you keep everything organized.
-              </p>
-              
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '4.5rem', flexWrap: 'wrap', opacity: 0.6, filter: 'grayscale(1)' }}>
-                 {[
-                   { name: 'Google Docs', icon: <Globe size={40} /> },
-                   { name: 'Sheets', icon: <BarChart3 size={40} /> },
-                   { name: 'Figma', icon: <Layers size={40} /> },
-                   { name: 'GitHub', icon: <Activity size={40} /> },
-                   { name: 'Overleaf', icon: <BookOpen size={40} /> }
-                 ].map((tool, i) => (
-                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                      {tool.icon}
-                      <span style={{ fontWeight: 800, fontSize: '0.75rem' }}>{tool.name}</span>
-                   </div>
-                 ))}
-              </div>
-           </div>
-        </section>
-
-        {/* CORE FEATURES SECTION */}
-        <section style={{ padding: '8rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)' }}>
-           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-              <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-                 <div style={{ display: 'inline-flex', padding: '8px 16px', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '12px', color: 'var(--brand)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '1px' }}>Platform Capabilities</div>
-                 <h2 style={{ fontSize: '3.25rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Built for the high-performance student.</h2>
-              </div>
-              
-              <div style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', display: 'grid', gap: '2.5rem' }}>
-                 {features.map((feature, i) => (
-                    <div key={i} className="hover-lift" style={{ padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '32px' }}>
-                       <div style={{ width: '52px', height: '52px', borderRadius: '13px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: feature.color, marginBottom: '1.5rem' }}>
-                          {feature.icon}
-                       </div>
-                       <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1rem' }}>{feature.title}</h3>
-                       <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', lineHeight: 1.6 }}>{feature.desc}</p>
-                    </div>
-                 ))}
-              </div>
-           </div>
-        </section>
-
-        {/* HOW IT WORKS */}
-        <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
-           <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Simple, transparent, and fair.</h2>
-           <p style={{ color: 'var(--text-sub)', fontSize: '1.4rem', marginBottom: '6rem', maxWidth: '850px', margin: '0 auto 6rem' }}>I'll help you focus on the work, while I take care of the organization.</p>
-
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-              {[
-                { step: '01', title: 'Connect your work', desc: "Easily link your Google Docs, GitHub projects, or Figma designs in a few taps." },
-                { step: '02', title: 'Focus on creating', desc: "Work naturally with your team. I'll help you keep track of progress as it happens." },
-                { step: '03', title: 'Share your progress', desc: "Every milestone is saved, creating a clear and reliable history of your achievement." },
-                { step: '04', title: 'Succeed together', desc: "Get a clear view of how everyone is contributing, so your entire team can thrive." }
-              ].map((s, i) => (
-                <div key={i} style={{ padding: '3.5rem 2.5rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '44px', textAlign: 'left', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                   <div style={{ 
-                     fontSize: 'clamp(3.5rem, 6vw, 5rem)', 
-                     fontWeight: 900, 
-                     color: 'rgba(var(--brand-rgb), 0.04)', 
-                     position: 'absolute', 
-                     top: '1rem', 
-                     right: '1.5rem', 
-                     letterSpacing: '-0.06em',
-                     zIndex: 0,
-                     userSelect: 'none'
-                   }}>{s.step}</div>
-                   <h3 style={{ 
-                     fontSize: 'clamp(1.5rem, 4vw, 1.85rem)', 
-                     fontWeight: 950, 
-                     marginBottom: '0.75rem', 
-                     position: 'relative', 
-                     letterSpacing: '-0.03em',
-                     maxWidth: '85%',
-                     zIndex: 1
-                   }}>{s.title}</h3>
-                   <p style={{ 
-                     color: 'var(--text-sub)', 
-                     fontSize: 'clamp(1rem, 3vw, 1.15rem)', 
-                     lineHeight: 1.6, 
-                     position: 'relative', 
-                     fontWeight: 500,
-                     zIndex: 1
-                   }}>{s.desc}</p>
-                </div>
-              ))}
-           </div>
-        </section>
-
-        {/* FAQ SECTION */}
-        <section style={{ padding: '10rem var(--p-safe)', background: 'var(--bg-sub)', borderTop: '1px solid var(--border)' }}>
-           <div style={{ maxWidth: '850px', margin: '0 auto' }}>
-              <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-                 <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(var(--brand-rgb), 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: 'var(--brand)' }}>
-                    <HelpCircle size={32} />
-                 </div>
-                 <h2 style={{ fontSize: '3.75rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Always here to help.</h2>
-                 <p style={{ color: 'var(--text-sub)', fontSize: '1.15rem', marginTop: '1rem' }}>A few things you might want to know about my mission.</p>
-              </div>
-
-              <div style={{ display: 'grid', gap: '2rem' }}>
-                 {faqs.map((faq, i) => (
-                    <div key={i} style={{ padding: '2.5rem', background: 'var(--surface)', borderRadius: '32px', border: '1px solid var(--border)', transition: 'all 0.3s ease' }}>
-                       <h4 style={{ fontSize: '1.45rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', letterSpacing: '-0.02em' }}>
-                          {faq.q}
-                          < ChevronRight size={22} style={{ color: 'var(--brand)' }} />
-                       </h4>
-                       <p style={{ color: 'var(--text-sub)', fontSize: '1.15rem', lineHeight: 1.75 }}>{faq.a}</p>
-                    </div>
-                 ))}
-              </div>
-           </div>
-        </section>
-
-        {/* FINAL CTA */}
-        <section style={{ padding: '10rem var(--p-safe)', textAlign: 'center' }}>
-           <div className="glass" style={{ maxWidth: '1150px', margin: '0 auto', padding: '7rem 3rem', borderRadius: '64px', border: '1px solid var(--border)', background: 'linear-gradient(135deg, var(--brand) 0%, rgba(var(--brand-rgb), 0.8) 100%)', color: 'white', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: '40%', height: '80%', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)', filter: 'blur(40px)', transform: 'rotate(15deg)' }} />
-              
-              <div style={{ position: 'relative', zIndex: 1 }}>
-                 <h2 style={{ fontSize: '4.25rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Believe in better learning.</h2>
-                 <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.9)', marginBottom: '4rem', maxWidth: '800px', margin: '0 auto 4rem', lineHeight: 1.5 }}>
-                    Support this mission to help reach students in schools worldwide. Get access to advanced features for just £2.99/mo or £99 for a lifetime.
+        {/* INSTITUTIONAL MISSION SECTION */}
+        <section id="mission" style={{ padding: '10rem 2rem', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '6rem', alignItems: 'center' }} className="grid-responsive">
+              <div>
+                 <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Global Scholarly Support</div>
+                 <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '2rem', letterSpacing: '-0.03em', lineHeight: 1.1, color: '#f3f4f6' }}>Bridging the gap in academic recognition.</h2>
+                 <p style={{ fontSize: '1.125rem', color: '#9ca3af', lineHeight: 1.7, marginBottom: '3rem' }}>
+                    Standard tools fail to capture the nuance of collaborative research. GroupFlow2026 was architected to ensure that every participant—from lead creators to reviewers—receives verifiable recognition for their effort.
                  </p>
-                 <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/login?signup=true" className="btn btn-lg" style={{ background: 'white', color: 'var(--brand)', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', border: 'none', fontWeight: 900, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>Create your account</Link>
-                    <Link href="/demo" className="btn btn-secondary btn-lg" style={{ border: '2.5px solid white', color: 'white', minWidth: '300px', padding: '1.25rem 2.5rem', borderRadius: '22px', fontWeight: 900 }}>See it in action</Link>
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>
+                       <div style={{ color: '#10b981', marginBottom: '1rem' }}><CheckCircle size={20} /></div>
+                       <div style={{ fontWeight: 650, fontSize: '1rem', marginBottom: '0.5rem', color: '#f3f4f6' }}>Verifiable Output</div>
+                       <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>Audit logs provide a transparent history of every project milestone.</p>
+                    </div>
+                    <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>
+                       <div style={{ color: '#10b981', marginBottom: '1rem' }}><Zap size={20} /></div>
+                       <div style={{ fontWeight: 650, fontSize: '1rem', marginBottom: '0.5rem', color: '#f3f4f6' }}>Instant Sync</div>
+                       <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: 0, lineHeight: 1.5 }}>Synchronize across global departments without state loss.</p>
+                    </div>
                  </div>
-                 
-                 <div style={{ marginTop: '4.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', fontSize: '1rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
-                    <Shield size={20} />
-                    <span>Your work is always yours, and you can delete everything at any time.</span>
+              </div>
+              <div style={{ background: 'linear-gradient(135deg, #111111 0%, #0a0a0a 100%)', padding: '3rem', borderRadius: '16px', border: '1px solid #222222', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2.5rem' }}>
+                    <div style={{ width: '42px', height: '42px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                       <img src="/logo.png" style={{ width: '24px', height: '24px' }} alt="Protocol" />
+                    </div>
+                    <div>
+                       <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981' }}>SYSTEM STATUS</div>
+                       <div style={{ fontSize: '0.9rem', fontWeight: 500, color: '#f3f4f6' }}>Peer-to-Peer Relay Active</div>
+                    </div>
                  </div>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    {[
+                       { label: 'Workforce Balance', val: 'Architectural', color: '#10b981' },
+                       { label: 'Data Integrity', val: 'Encrypted', color: '#10b981' },
+                       { label: 'Cloud Persistence', val: 'Real-time', color: '#10b981' }
+                    ].map((stat, i) => (
+                       <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{stat.label}</span>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: stat.color }}>{stat.val}</span>
+                       </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
+        </section>
+
+        {/* UNIFIED CORE FEATURES GRID */}
+        <section style={{ padding: '10rem 2rem' }}>
+           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
+                 <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Architectural Capabilities</div>
+                 <h2 style={{ fontSize: '2.5rem', fontWeight: 700, color: '#f3f4f6', letterSpacing: '-0.03em' }}>Built for technical scholarship.</h2>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                 {features.map((feature, i) => (
+                    <div key={i} style={{ padding: '2.5rem', background: '#111111', border: '1px solid #222222', borderRadius: '12px', transition: 'border-color 0.2s ease' }} className="nav-link-pro">
+                       <div style={{ color: '#10b981', marginBottom: '1.5rem' }}>{feature.icon}</div>
+                       <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#f3f4f6', marginBottom: '1rem' }}>{feature.title}</h3>
+                       <p style={{ color: '#9ca3af', fontSize: '0.875rem', lineHeight: 1.6 }}>{feature.desc}</p>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* REFINED FAQ SECTION */}
+        <section style={{ padding: '10rem 2rem', background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+                 <h2 style={{ fontSize: '2rem', fontWeight: 700, color: '#f3f4f6', letterSpacing: '-0.02em' }}>Technical FAQ</h2>
+                 <p style={{ color: '#9ca3af', fontSize: '1rem', marginTop: '1rem' }}>Protocols and mission statements.</p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                 {faqs.map((faq, i) => (
+                    <div key={i} style={{ padding: '1.5rem 2.5rem', background: '#111111', borderRadius: '12px', border: '1px solid #222222' }}>
+                       <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#f3f4f6', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          {faq.q}
+                          <ChevronRight size={18} style={{ color: '#10b981' }} />
+                       </h4>
+                       <p style={{ color: '#6b7280', fontSize: '0.95rem', lineHeight: 1.6 }}>{faq.a}</p>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </section>
+
+        {/* FINAL UNIFIED CTA */}
+        <section style={{ padding: '10rem 2rem', textAlign: 'center' }}>
+           <div style={{ maxWidth: '1000px', margin: '0 auto', background: 'linear-gradient(rgba(16, 185, 129, 0.1), transparent)', padding: '6rem 3rem', borderRadius: '24px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <h2 style={{ fontSize: '3rem', fontWeight: 700, color: '#f3f4f6', marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>Start your mission.</h2>
+              <p style={{ fontSize: '1.125rem', color: '#9ca3af', marginBottom: '3.5rem', maxWidth: '650px', margin: '0 auto 3.5rem', lineHeight: 1.6 }}>
+                 Access individual research tiers, project workflows, and Peer-to-Peer recognition protocols. Free for verified students.
+              </p>
+              <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                 <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 650, textDecoration: 'none', boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)' }}>Initialize Workspace</Link>
+                 <Link href="/demo" style={{ border: '1px solid #222222', color: '#f3f4f6', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 650, textDecoration: 'none', background: 'rgba(255,255,255,0.02)' }}>Protocol Demo</Link>
               </div>
            </div>
         </section>
 
       </main>
 
-      <footer style={{ padding: '8rem var(--p-safe)', borderTop: '1px solid var(--border)', textAlign: 'center', background: 'var(--bg-sub)' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '2.5rem', fontWeight: 900, justifyContent: 'center', marginBottom: '2.5rem', letterSpacing: '-0.04em' }}>
-            <img src="/logo.png" style={{ width: '56px', height: '56px', borderRadius: '14px' }} alt="Logo" /> GroupFlow2026
+      <footer style={{ padding: '6rem 2rem', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center', background: '#0a0a0a', position: 'relative', zIndex: 10 }}>
+         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '1.5rem', fontWeight: 700, justifyContent: 'center', marginBottom: '2rem', color: '#f3f4f6' }}>
+            <img src="/logo.png" style={{ width: '38px', height: '38px', borderRadius: '8px' }} alt="Protocol" /> GroupFlow2026
          </div>
-         <p style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.75rem' }}>Built by Sospeter • Mission 2026</p>
-         <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto 4rem', lineHeight: 1.6 }}>
-            Dedicated to helping student teams work better together through transparency, recognition, and fair teamwork.
+         <p style={{ color: '#f3f4f6', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>Built by Sospeter • Mission 2026</p>
+         <p style={{ color: '#6b7280', fontSize: '0.875rem', maxWidth: '500px', margin: '0 auto 4rem', lineHeight: 1.6 }}>
+            Unified collaboration architecture for global academic initiatives. Designed for researchers, scholars, and institutional teams.
          </p>
          
-         <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', borderTop: '1px solid var(--border)', paddingTop: '4rem' }}>
-            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Sign in</Link>
-            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Privacy</Link>
-            <Link href="/login" style={{ color: 'var(--text-sub)', textDecoration: 'none', fontSize: '0.95rem', fontWeight: 700 }}>Terms</Link>
+         <div style={{ display: 'flex', justifyContent: 'center', gap: '2.5rem', opacity: 0.6 }}>
+            <Link href="/login" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 500 }}>Sign in</Link>
+            <Link href="/login" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 500 }}>Privacy Policy</Link>
+            <Link href="/login" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 500 }}>Global Terms</Link>
          </div>
       </footer>
 
