@@ -39,7 +39,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const { currentPalette, setPalette } = useTheme()
   const { onlineUsers } = usePresence()
   const isOnline = Boolean(profile)
-  const onlineCount = onlineUsers.size
+  const onlineCount = onlineUsers?.size || 0
 
   const toggleTheme = () => {
     const paletteNames = ['Google Light', 'Deep Oceanic', 'Cyberpunk']
@@ -89,7 +89,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const handleSignOut = () => {
     showConfirmation({
       title: 'End Session?',
-      message: 'Are you sure you want to securely sign out of the GroupFlow2026 environment?',
+      message: 'Are you sure you want to securely sign out of the environment?',
       type: 'warning',
       onConfirm: async () => {
         await withLoading(async () => {
@@ -158,7 +158,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.1rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
-              Group<span style={{ color: 'var(--brand)' }}>Flow2026</span>
+              Group<span style={{ color: 'var(--brand)' }}>Flow</span>
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 6px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
@@ -204,7 +204,7 @@ export default function Sidebar({ user }: SidebarProps) {
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
               <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.04em', flexShrink: 0 }}>
-                Group<span style={{ color: 'var(--brand)' }}>Flow2026</span>
+                Group<span style={{ color: 'var(--brand)' }}>Flow</span>
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
@@ -321,7 +321,7 @@ export default function Sidebar({ user }: SidebarProps) {
               <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={16} className="shimmer-gold" />
-                <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>MISSION SUPPORT</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>PROJECT SUPPORT</span>
               </div>
               <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Upgrade to Pro</div>
               <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Unlock advanced themes and elite profile status.</p>
@@ -345,7 +345,7 @@ export default function Sidebar({ user }: SidebarProps) {
              minHeight: '40px'
            }}
            className="identity-pill"
-           onClick={() => window.location.href = '/dashboard/profile'}
+           onClick={() => router.push('/dashboard/profile')}
            >
               <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 950, flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 8px rgba(var(--brand-rgb), 0.15)' }}>
                 {profile?.avatar_url ? (

@@ -9,6 +9,8 @@ import {
   ChevronDown, Search, Code, Smartphone, LayoutGrid, Info
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import PricingSection from '@/components/PricingSection'
+
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -150,14 +152,15 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '1px' }}>
-                THE GroupFlow2026 MISSION
+                THE GroupFlow MISSION
              </div>
+
              <h2 style={{ fontSize: '2rem', fontWeight: 650, marginBottom: '1.5rem', letterSpacing: '-0.03em', color: '#f3f4f6' }}>Revolutionizing academic collaboration.</h2>
              
              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '0.95rem', lineHeight: 1.6, color: '#9ca3af' }}>
                 <div>
                    <strong style={{ color: '#f3f4f6', display: 'block', marginBottom: '0.25rem' }}>Solving Invisibility</strong>
-                   GroupFlow2026 was built to eliminate opaque group dynamics. We make every contribution audit-ready and visible to ensure fair recognition for all researchers.
+                   GroupFlow was built to eliminate opaque group dynamics. We make every contribution audit-ready and visible to ensure fair recognition for all researchers.
                 </div>
                 <div>
                    <strong style={{ color: '#f3f4f6', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
@@ -245,7 +248,7 @@ export default function Home() {
              <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
                 <img src="/logo.png" style={{ width: '20px', height: '20px', objectFit: 'contain' }} alt="Logo" />
              </div>
-             <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>GroupFlow2026</span>
+             <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>GroupFlow</span>
           </div>
 
           {/* Architectural Navigation */}
@@ -443,42 +446,46 @@ export default function Home() {
 
            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link 
-                href="/login?signup=true" 
+                href="/login?signup=true&plan=pro" 
                 style={{ 
                   background: '#10b981', 
                   color: '#0a0a0a', 
                   textDecoration: 'none', 
-                  padding: '1rem 2rem', 
-                  fontSize: '1rem', 
-                  fontWeight: 650, 
-                  borderRadius: '8px', 
+                  padding: '1.25rem 2.5rem', 
+                  fontSize: '1.125rem', 
+                  fontWeight: 900, 
+                  borderRadius: '12px', 
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.75rem',
-                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)'
+                  boxShadow: '0 10px 40px rgba(16, 185, 129, 0.25)',
+                  transform: 'scale(1.05)',
+                  transition: 'all 0.2s ease'
                 }}
+                className="hover-lift"
               >
-                Start free project <ArrowRight size={18} />
+                Try Pro Now <Zap size={20} fill="#0a0a0a" />
               </Link>
               <Link 
-                href="/demo" 
+                href="/login?signup=true" 
                 style={{ 
                   background: 'rgba(255,255,255,0.03)', 
                   color: '#f3f4f6', 
                   textDecoration: 'none', 
-                  padding: '1rem 2rem', 
-                  fontSize: '1rem', 
+                  padding: '1.25rem 2.5rem', 
+                  fontSize: '1.125rem', 
                   fontWeight: 650, 
-                  borderRadius: '8px', 
+                  borderRadius: '12px', 
                   border: '1px solid #222222',
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.75rem'
                 }}
               >
-                View Protocol <ChevronRight size={18} />
+                Start free project <ArrowRight size={18} />
               </Link>
            </div>
+
         </section>
 
         {/* INSTITUTIONAL MISSION SECTION */}
@@ -488,7 +495,7 @@ export default function Home() {
                  <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Global Scholarly Support</div>
                  <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '2rem', letterSpacing: '-0.03em', lineHeight: 1.1, color: '#f3f4f6' }}>Bridging the gap in academic recognition.</h2>
                  <p style={{ fontSize: '1.125rem', color: '#9ca3af', lineHeight: 1.7, marginBottom: '3rem' }}>
-                    Standard tools fail to capture the nuance of collaborative research. GroupFlow2026 was architected to ensure that every participant—from lead creators to reviewers—receives verifiable recognition for their effort.
+                    Standard tools fail to capture the nuance of collaborative research. GroupFlow was architected to ensure that every participant—from lead creators to reviewers—receives verifiable recognition for their effort.
                  </p>
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                     <div style={{ background: '#111111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222222' }}>
@@ -571,6 +578,11 @@ export default function Home() {
            </div>
         </section>
 
+        {/* PRICING SECTION */}
+        <section id="pricing" style={{ padding: '10rem 2rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+           <PricingSection isLanding={true} />
+        </section>
+
         {/* FINAL UNIFIED CTA */}
         <section style={{ padding: '10rem 2rem', textAlign: 'center' }}>
            <div style={{ maxWidth: '1000px', margin: '0 auto', background: 'linear-gradient(rgba(16, 185, 129, 0.1), transparent)', padding: '6rem 3rem', borderRadius: '24px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
@@ -579,11 +591,12 @@ export default function Home() {
                  Access individual research tiers, project workflows, and Peer-to-Peer recognition protocols. Free for verified students.
               </p>
               <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                 <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 650, textDecoration: 'none', boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)' }}>Initialize Workspace</Link>
-                 <Link href="/demo" style={{ border: '1px solid #222222', color: '#f3f4f6', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 650, textDecoration: 'none', background: 'rgba(255,255,255,0.02)' }}>Protocol Demo</Link>
+                 <Link href="/login?signup=true&plan=pro" style={{ background: '#10b981', color: '#0a0a0a', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 900, textDecoration: 'none', boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)' }}>Try Pro Now</Link>
+                 <Link href="/login?signup=true" style={{ border: '1px solid #222222', color: '#f3f4f6', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 650, textDecoration: 'none', background: 'rgba(255,255,255,0.02)' }}>Initialize Workspace</Link>
               </div>
            </div>
         </section>
+
 
       </main>
 
@@ -591,7 +604,8 @@ export default function Home() {
          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '1.5rem', fontWeight: 700, justifyContent: 'center', marginBottom: '2rem', color: '#f3f4f6' }}>
             <img src="/logo.png" style={{ width: '38px', height: '38px', borderRadius: '8px' }} alt="Protocol" /> GroupFlow2026
          </div>
-         <p style={{ color: '#f3f4f6', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>Built by Sospeter • Mission 2026</p>
+         <p style={{ color: '#f3f4f6', fontWeight: 600, fontSize: '1rem', marginBottom: '0.5rem' }}>Built by Sospeter • Project Lead</p>
+
          <p style={{ color: '#6b7280', fontSize: '0.875rem', maxWidth: '500px', margin: '0 auto 4rem', lineHeight: 1.6 }}>
             Unified collaboration architecture for global academic initiatives. Designed for researchers, scholars, and institutional teams.
          </p>
