@@ -14,7 +14,7 @@ export type PaymentWorkflowPayload = {
   mode: string | null
   status: string | null
   invoiceId?: string | null
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export async function paymentWorkflow(payload: PaymentWorkflowPayload) {

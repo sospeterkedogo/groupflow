@@ -26,8 +26,8 @@ export async function taskWorkflow(payload: TaskWorkflowPayload) {
   // 1. INDUSTRY GRADE VALIDATION
   try {
     taskSchema.parse(payload.task)
-  } catch (err: any) {
-    throw new FatalError(`Validation Breach: ${err.message}`)
+  } catch (err) {
+    throw new FatalError(`Validation Breach: ${err instanceof Error ? err.message : 'Unknown error'}`)
   }
 
   if (payload.action === 'create') {

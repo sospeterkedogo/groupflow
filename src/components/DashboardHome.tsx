@@ -6,8 +6,21 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
 import CalendarView from './CalendarView'
 import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle } from 'lucide-react'
-import { Group } from '@/types/database'
+import { Group, Profile } from '@/types/database'
 import { useProfile } from '@/context/ProfileContext'
+
+interface JoinRequest {
+  id: string
+  group_id: string
+  user_id: string
+  status: string
+  created_at: string
+  profiles?: {
+    id: string
+    full_name: string | null
+    avatar_url: string | null
+  }
+}
 
 export default function DashboardHome({ groupId }: { groupId: string }) {
   const router = useRouter()
@@ -32,8 +45,8 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const [group, setGroup] = useState<Group | null>(null)
   const [newTaskSignal, setNewTaskSignal] = useState(0)
   const [syncToken, setSyncToken] = useState(0)
-  const [members, setMembers] = useState<any[]>([])
-  const [pendingRequests, setPendingRequests] = useState<any[]>([])
+  const [members, setMembers] = useState<Profile[]>([])
+  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([])
   const [showMembers, setShowMembers] = useState(false)
 
   // 0. BLAZING SPEED CACHE: Perceptive hydration
@@ -83,7 +96,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       return
     }
 
-    if (data) setMembers(data)
+    if (data) setMembers(data as unknown as Profile[])
   }, [groupId, supabase])
 
   const fetchPendingRequests = useCallback(async () => {

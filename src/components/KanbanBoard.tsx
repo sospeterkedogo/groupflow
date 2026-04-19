@@ -35,9 +35,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
       initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
       initialStorage={{ 
         tasks: new LiveList<Task>([]), 
-        messages: new LiveList([]),
-        quizQuestions: new LiveList([]),
-        quizScores: new LiveList([]),
+        messages: new LiveList<any>([]),
+        quizQuestions: new LiveList<any>([]),
+        quizScores: new LiveList<any>([]),
         quizStatus: 'setup',
         currentQuestionIndex: 0,
         activeTurnUserId: null,
@@ -45,8 +45,8 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
         roundStartTime: 0,
         timerDuration: 60,
         config: new LiveObject({
-          difficulty: 'intermediate',
-          mode: 'classic'
+          difficulty: 'intermediate' as const,
+          mode: 'classic' as const
         })
       }}
     >
