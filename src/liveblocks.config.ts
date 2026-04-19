@@ -66,6 +66,8 @@ type Storage = {
   }>;
 };
 
+// TODO: Add fallback to Supabase Realtime if Liveblocks is unavailable
+// Example: if (liveblocksDown) { useSupabaseRealtime() }
 export const {
   RoomProvider,
   useRoom,

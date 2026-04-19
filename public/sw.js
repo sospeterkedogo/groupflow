@@ -1,9 +1,11 @@
-const CACHE_NAME = 'elite-exchange-v1';
+const CACHE_NAME = 'groupflow-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/favicon.png',
   '/pwa-icon-192.png',
   '/pwa-icon-512.png',
+  '/_next/static/', // Next.js static assets
+  '/offline', // Offline game route (should render OfflineGame)
 ];
 
 // Install Event: Precaching App Shell
@@ -34,16 +36,19 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: Network-first with Cache Fallback
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Optional: Cache successful responses
+        // Optionally cache successful responses
         return response;
       })
       .catch(() => {
+        // If offline and request is for a navigation, show offline game
+        if (event.request.mode === 'navigate') {
+          return caches.match('/offline');
+        }
         return caches.match(event.request);
       })
   );
