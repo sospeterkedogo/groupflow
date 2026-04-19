@@ -7,6 +7,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import PWARegistry from '../components/PWARegistry';
 import CookieBanner from '../components/CookieBanner';
 import SessionGuard from '@/components/SessionGuard';
+import PromoBanner from '@/components/PromoBanner';
 import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <PromoBanner />
         {/* Wrap all children in NotificationProvider for global access */}
         <NotificationProvider>
           <PWARegistry />

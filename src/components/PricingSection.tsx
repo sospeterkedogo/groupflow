@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Shield, Sparkles, CheckCircle2, Check, ArrowRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Shield, Sparkles, CheckCircle2, Check, ArrowRight, Loader2 } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { ProfileContext } from '@/context/ProfileContext'
 import { useContext } from 'react'
@@ -15,11 +15,24 @@ interface PricingSectionProps {
 export default function PricingSection({ showTitle = true, isLanding = false }: PricingSectionProps) {
   const [error, setError] = useState<string | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
   const context = useContext(ProfileContext)
   const profile = context?.profile
   const supabase = createBrowserSupabaseClient()
 
-  const handleCheckout = async (plan: 'pro' | 'premium') => {
+  useEffect(() => {
+    const fetchLifetimeCount = async () => {
+      const { count } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('subscription_plan', 'lifetime')
+      
+      setLifetimeSeatsUsed(count || 0)
+    }
+    fetchLifetimeCount()
+  }, [supabase])
+
+  const handleCheckout = async (plan: 'pro' | 'premium' | 'lifetime') => {
     setError(null)
     setLoadingPlan(plan)
 
@@ -43,6 +56,12 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
 
       if (plan === 'premium') {
         window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${userId}`
+        return
+      }
+
+      if (plan === 'lifetime') {
+        // Updated Stripe Lifetime Link (Placeholder - replace with actual if provided)
+        window.location.href = `https://buy.stripe.com/test_lifetime_placeholder?client_reference_id=${userId}`
         return
       }
     } catch (err: any) {
@@ -292,6 +311,103 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
           >
             {loadingPlan === 'premium' ? 'INITIALIZING...' : 'Acquire Premium'}
           </button>
+        </div>
+        
+        {/* LIFETIME TIER (NEW) */}
+        <div style={{ 
+          padding: '3.5rem 2.5rem', 
+          borderRadius: '40px', 
+          background: 'linear-gradient(135deg, rgba(20, 185, 129, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)', 
+          border: '2px solid transparent', 
+          backgroundImage: 'linear-gradient(var(--bg-main), var(--bg-main)), linear-gradient(135deg, #10b981 0%, #6366f1 100%)',
+          backgroundOrigin: 'border-box',
+          backgroundClip: 'padding-box, border-box',
+          backdropFilter: 'blur(30px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          boxShadow: '0 25px 50px rgba(0,0,0,0.4)'
+        }} className="premium-pricing-card popular-tier">
+          <div style={{ position: 'absolute', top: '24px', right: '24px', padding: '6px 16px', background: 'linear-gradient(135deg, #10b981 0%, #6366f1 100%)', color: 'white', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px' }}>LIFETIME ACCESS</div>
+          
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #10b981 0%, #6366f1 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Sparkles size={28} />
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                 <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Lifetime Researcher</h2>
+                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Permanent Protocol Authorization</p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
+                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£99</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/once</span>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 700 }}>
+                The ultimate clearance level. No monthly fees. All future protocol updates, beta features, and elite branding markers included forever.
+              </p>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {[
+                  'Permanent Protocol Authorization',
+                  'Beta Feature Review Lab Access',
+                  'Priority Model Update Stream',
+                  'Institutional "Founder" Marker',
+                  'All Premium Tier Benefits Included'
+                ].map((f, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,1)', fontWeight: 800 }}>
+                    <CheckCircle2 size={16} style={{ color: '#6366f1', flexShrink: 0, marginTop: '3px' }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <button
+            className="btn btn-primary"
+            style={{ 
+              width: '100%', 
+              padding: '1.25rem', 
+              borderRadius: '24px', 
+              fontSize: '1rem', 
+              fontWeight: 950, 
+              background: (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #10b981 0%, #6366f1 100%)', 
+              color: (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'rgba(255,255,255,0.2)' : 'white',
+              border: (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? '1px solid rgba(255,255,255,0.1)' : 'none', 
+              boxShadow: (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'none' : '0 10px 30px rgba(99, 102, 241, 0.3)',
+              cursor: (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'not-allowed' : 'pointer'
+            }}
+            onClick={() => lifetimeSeatsUsed !== null && lifetimeSeatsUsed < 100 && handleCheckout('lifetime')}
+            disabled={loadingPlan !== null || (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100)}
+          >
+            {loadingPlan === 'lifetime' ? 'AUTHORIZING...' : (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'OFFER EXPIRED (Sold Out)' : 'Secure Lifetime Access'}
+          </button>
+
+          {/* SCARCITY INDICATOR (NEW) */}
+          {lifetimeSeatsUsed !== null && (
+            <div style={{ marginTop: '1.5rem' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <span style={{ color: lifetimeSeatsUsed >= 90 ? '#ef4444' : 'var(--brand)' }}>
+                    {lifetimeSeatsUsed >= 100 ? 'Mission Accomplished' : `Only ${100 - lifetimeSeatsUsed} Seats Left`}
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)' }}>{lifetimeSeatsUsed}/100</span>
+               </div>
+               <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${Math.min(lifetimeSeatsUsed, 100)}%`, 
+                    background: lifetimeSeatsUsed >= 90 ? '#ef4444' : 'linear-gradient(90deg, #10b981, #6366f1)',
+                    borderRadius: '100px',
+                    transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }} />
+               </div>
+            </div>
+          )}
         </div>
 
       </div>

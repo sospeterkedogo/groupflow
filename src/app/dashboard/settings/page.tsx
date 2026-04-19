@@ -795,16 +795,69 @@ export default function SettingsPage() {
               Profile Identity
             </h2>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-sm)', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
               <div style={{ position: 'relative', width: 'var(--avatar-size)', height: 'var(--avatar-size)' }}>
-                <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-sub)', border: '2px solid var(--border)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* PREMIUM AVATAR FRAME (NEW) */}
+                <div style={{ 
+                  position: 'absolute', 
+                  inset: '-4px', 
+                  borderRadius: '50%', 
+                  background: (profile?.subscription_plan === 'lifetime' || profile?.subscription_plan === 'premium') 
+                    ? 'linear-gradient(45deg, #d4af37, #ffdf00, #d4af37)' 
+                    : profile?.subscription_plan === 'pro' 
+                      ? 'linear-gradient(45deg, var(--brand), #6366f1)'
+                      : 'transparent',
+                  animation: (profile?.subscription_plan && profile.subscription_plan !== 'free') ? 'spin 3s linear infinite' : 'none',
+                  opacity: (profile?.subscription_plan && profile.subscription_plan !== 'free') ? 1 : 0,
+                  zIndex: 0
+                }} />
+                
+                <div style={{ 
+                  position: 'relative',
+                  width: '100%', 
+                  height: '100%', 
+                  borderRadius: '50%', 
+                  background: 'var(--bg-sub)', 
+                  border: '2px solid var(--border)', 
+                  overflow: 'hidden', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  zIndex: 1
+                }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <User size={32} color="var(--text-sub)" />
                   )}
                 </div>
-                <label style={{ position: 'absolute', bottom: '0', right: '0', minWidth: '110px', padding: '0.6rem 0.9rem', borderRadius: '18px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '2px solid var(--surface)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.01em' }}>
+                
+                {/* TIER BADGE SELLING POINTS (NEW) */}
+                {profile?.subscription_plan && profile.subscription_plan !== 'free' && (
+                  <div style={{ 
+                    position: 'absolute', 
+                    top: '-10px', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    background: profile.subscription_plan === 'lifetime' ? 'linear-gradient(135deg, #d4af37 0%, #ffdf00 100%)' : 'var(--brand)',
+                    color: profile.subscription_plan === 'lifetime' ? 'black' : 'white',
+                    padding: '4px 12px',
+                    borderRadius: '100px',
+                    fontSize: '0.65rem',
+                    fontWeight: 950,
+                    boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+                    zIndex: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    <Sparkles size={12} />
+                    {profile.subscription_plan === 'lifetime' ? 'FOUNDER ACCESS' : profile.subscription_plan === 'premium' ? 'ELITE SCHOLAR' : 'PRO MEMBER'}
+                  </div>
+                )}
+
+                <label style={{ position: 'absolute', bottom: '0', right: '0', minWidth: '110px', padding: '0.6rem 0.9rem', borderRadius: '18px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)', border: '2px solid var(--surface)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.01em', zIndex: 3 }}>
                   Upload Photo
                   <input type="file" accept="image/*" onChange={e => handleFileUpload(e, 'avatar')} style={{ display: 'none' }} />
                 </label>
@@ -1118,9 +1171,14 @@ export default function SettingsPage() {
             <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Customize your workspace with high-end, professionally curated themes.</p>
 
             {/* Render themes grouped by tier */}
-            {(['free', 'pro', 'premium'] as const).map(tier => {
+            {(['free', 'pro', 'premium', 'lifetime'] as const).map(tier => {
+              if (tier === 'lifetime' && profile?.subscription_plan !== 'lifetime') return null; // Only show lifetime tier to lifetime users, or handle differently
+              
               const tierThemes = PALETTES.filter(p => (p.tier || 'free') === tier);
-              const isLocked = tier !== 'free' && profile?.subscription_plan !== 'premium' && (tier !== 'pro' || profile?.subscription_plan !== 'pro');
+              const isLocked = tier !== 'free' && 
+                               profile?.subscription_plan !== 'premium' && 
+                               profile?.subscription_plan !== 'lifetime' && 
+                               (tier !== 'pro' || profile?.subscription_plan !== 'pro');
               const canAccess = !isLocked;
 
               return (
