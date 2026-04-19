@@ -6,6 +6,14 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   // next is the path to redirect to after success
   const next = searchParams.get('next') ?? '/dashboard'
+  const errorParam = searchParams.get('error')
+  const errorDesc = searchParams.get('error_description')
+
+  if (errorParam || errorDesc) {
+    const msg = errorDesc || errorParam || 'OAuth authentication failed'
+    console.error('[Auth Callback] Provider Error:', msg)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(msg)}`)
+  }
 
   if (code) {
     const supabase = await createServerSupabaseClient()
@@ -25,5 +33,5 @@ export async function GET(request: Request) {
   }
 
   // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=Invalid or missing authentication code.`)
+  return NextResponse.redirect(`${origin}/login?error=Invalid or missing authentication code. Visit your Supabase Dashboard to verify Redirect URIs.`)
 }
