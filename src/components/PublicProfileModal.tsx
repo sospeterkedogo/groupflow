@@ -1,5 +1,27 @@
+import React, { useState, useEffect } from 'react'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import type { Profile } from '@/types/auth'
 import ChatRoom from './ChatRoom'
 import { getFlagComponent } from '@/utils/geo'
+import { 
+  X, 
+  UserPlus, 
+  MessageSquare, 
+  UserCircle,
+  GraduationCap,
+  Check,
+  Hash,
+  Globe, 
+  Award, 
+  Mail, 
+  Calendar, 
+  ShieldCheck, 
+  Target, 
+  Zap,
+  CheckCircle2,
+  Activity,
+  Fingerprint
+} from 'lucide-react'
 
 interface PublicProfileModalProps {
   member: Profile;
@@ -11,6 +33,9 @@ interface PublicProfileModalProps {
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [me, setMe] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null)
   const [achievements, setAchievements] = useState<any[]>([])
+  const [isConnected, setIsConnected] = useState(initialConnected)
+  const [loading, setLoading] = useState(false)
+  const [showChat, setShowChat] = useState(false)
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {

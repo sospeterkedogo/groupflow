@@ -21,7 +21,7 @@ import {
   useOthers,
   useUpdateMyPresence
 } from "@/liveblocks.config";
-import { LiveList } from "@liveblocks/client";
+import { LiveList, LiveObject } from "@liveblocks/client";
 import { ClientSideSuspense } from "@liveblocks/react";
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
@@ -33,7 +33,22 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
     <RoomProvider
       id={groupId}
       initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
-      initialStorage={{ tasks: new LiveList<Task>([]), messages: new LiveList([]) }}
+      initialStorage={{ 
+        tasks: new LiveList<Task>([]), 
+        messages: new LiveList([]),
+        quizQuestions: new LiveList([]),
+        quizScores: new LiveList([]),
+        quizStatus: 'setup',
+        currentQuestionIndex: 0,
+        activeTurnUserId: null,
+        gameId: null,
+        roundStartTime: 0,
+        timerDuration: 60,
+        config: new LiveObject({
+          difficulty: 'intermediate',
+          mode: 'classic'
+        })
+      }}
     >
       <ClientSideSuspense fallback={<KanbanBoardSkeleton />}>
         {() => <KanbanBoardContent groupId={groupId} profile={profile} newTaskSignal={newTaskSignal} />}
@@ -59,6 +74,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [now, setNow] = useState(() => Date.now());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 0. BLAZING SPEED CACHE: Load from LocalStorage for instant perception
   useEffect(() => {

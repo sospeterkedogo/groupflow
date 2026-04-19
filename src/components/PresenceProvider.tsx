@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, useTransition } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { PresenceContextType, PresenceState } from '@/types/ui'
@@ -23,6 +23,7 @@ type PresenceProviderProps = {
 export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [isPending, startTransition] = useTransition()
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { addToast } = useNotifications()
@@ -58,27 +59,41 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
       }
     })
 
-    newChannel
-      .on('presence', { event: 'sync' }, () => {
-        const state = newChannel.presenceState() as PresenceState
-        const onlineIds = new Set<string>()
-        const typingIds = new Set<string>()
+    // High-concurrency throttle: only update UI every 750ms during bursts
+    const syncThrottle = useRef<NodeJS.Timeout | null>(null)
+    const pendingState = useRef<{ online: Set<string>, typing: Set<string> } | null>(null)
 
-        Object.entries(state).forEach(([key, presenceItems]) => {
-          onlineIds.add(key)
-          if (presenceItems[0]?.is_typing) {
-            typingIds.add(key)
-          }
-        })
+    const processSync = () => {
+      const state = newChannel.presenceState() as PresenceState
+      const onlineIds = new Set<string>()
+      const typingIds = new Set<string>()
 
+      Object.entries(state).forEach(([key, presenceItems]) => {
+        onlineIds.add(key)
+        if (presenceItems[0]?.is_typing) {
+          typingIds.add(key)
+        }
+      })
+
+      startTransition(() => {
         setOnlineUsers(onlineIds)
         setTypingUsers(typingIds)
       })
+      syncThrottle.current = null
+    }
+
+    newChannel
+      .on('presence', { event: 'sync' }, () => {
+        if (syncThrottle.current) return
+        syncThrottle.current = setTimeout(processSync, 750)
+      })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        setOnlineUsers((prev) => new Set(prev).add(key))
-        if (newPresences[0]?.is_typing) {
-          setTypingUsers((prev) => new Set(prev).add(key))
-        }
+        startTransition(() => {
+          setOnlineUsers((prev) => new Set(prev).add(key))
+          if (newPresences[0]?.is_typing) {
+            setTypingUsers((prev) => new Set(prev).add(key))
+          }
+        })
 
         const newcomerGroupId = newPresences[0]?.group_id
         const name = newPresences[0]?.full_name || 'A teammate'
@@ -96,15 +111,17 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
         }
       })
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        setOnlineUsers((prev) => {
-          const next = new Set(prev)
-          next.delete(key)
-          return next
-        })
-        setTypingUsers((prev) => {
-          const next = new Set(prev)
-          next.delete(key)
-          return next
+        startTransition(() => {
+          setOnlineUsers((prev) => {
+            const next = new Set(prev)
+            next.delete(key)
+            return next
+          })
+          setTypingUsers((prev) => {
+            const next = new Set(prev)
+            next.delete(key)
+            return next
+          })
         })
 
         const leaverGroupId = leftPresences[0]?.group_id

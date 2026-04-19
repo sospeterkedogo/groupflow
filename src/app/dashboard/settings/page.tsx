@@ -62,6 +62,7 @@ export default function SettingsPage() {
   const [customToolInput, setCustomToolInput] = useState('')
   const [pendingAchievements, setPendingAchievements] = useState<any[] | null>(null)
   const [saveConfirmation, setSaveConfirmation] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   // Feedback State
   const [feedbackMessage, setFeedbackMessage] = useState('')

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import { PersistentCache } from '@/utils/cache'
 import { Profile } from '@/types/auth'
 
 type ProfileContextType = {
@@ -22,8 +23,11 @@ export function ProfileProvider({
   userId: string
   initialProfile: Profile | null
 }) {
-  const [profile, setProfile] = useState<Profile | null>(initialProfile)
-  const [loading, setLoading] = useState(!initialProfile)
+  const [profile, setProfile] = useState<Profile | null>(() => {
+    if (initialProfile) return initialProfile
+    return PersistentCache.get<Profile>(`profile_${userId}`)
+  })
+  const [loading, setLoading] = useState(!initialProfile && !profile)
   const supabase = createBrowserSupabaseClient()
 
   const refreshProfile = async () => {
@@ -32,7 +36,10 @@ export function ProfileProvider({
       .select('*, groups(*)')
       .eq('id', userId)
       .single()
-    if (data) setProfile(data)
+    if (data) {
+      setProfile(data)
+      PersistentCache.set(`profile_${userId}`, data, 3600000) // 1 Hour TTL
+    }
   }
 
   useEffect(() => {

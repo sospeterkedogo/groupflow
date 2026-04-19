@@ -8,7 +8,7 @@ import Link from 'next/link'
 import ChatRoom from '@/components/ChatRoom'
 import { Profile } from '@/types/database'
 import { RoomProvider, useOthers } from '@/liveblocks.config'
-import { LiveList } from '@liveblocks/client'
+import { LiveList, LiveObject } from '@liveblocks/client'
 import { usePresence } from '@/components/PresenceProvider'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -131,7 +131,22 @@ export default function ChatPage() {
     <RoomProvider
       id={roomId}
       initialPresence={{ draggingTaskId: null, userName: me.name, isTyping: false }}
-      initialStorage={{ tasks: new LiveList([]), messages: new LiveList([]) }}
+      initialStorage={{ 
+        tasks: new LiveList([]), 
+        messages: new LiveList([]),
+        quizQuestions: new LiveList([]),
+        quizScores: new LiveList([]),
+        quizStatus: 'setup',
+        currentQuestionIndex: 0,
+        activeTurnUserId: null,
+        gameId: null,
+        roundStartTime: 0,
+        timerDuration: 60,
+        config: new LiveObject({
+          difficulty: 'intermediate',
+          mode: 'classic'
+        })
+      }}
     >
       <div style={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.5s ease-out' }}>
         <ChatHeader targetStudent={targetStudent} targetId={targetId} />

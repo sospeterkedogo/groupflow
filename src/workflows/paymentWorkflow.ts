@@ -1,5 +1,5 @@
 import { FatalError } from 'workflow'
-import { createAdminClient } from '@/utils/supabase/server'
+import { createAdminClient } from '../utils/supabase/server'
 
 export type PaymentWorkflowPayload = {
   eventType: 'checkout.session.completed' | 'invoice.payment_succeeded' | 'invoice.payment_failed'

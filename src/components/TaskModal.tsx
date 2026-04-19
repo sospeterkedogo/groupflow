@@ -142,7 +142,7 @@ export default function TaskModal({
     // 1. INDUSTRY GRADE VALIDATION
     const validation = taskSchema.safeParse(payloadTask)
     if (!validation.success) {
-      setError(validation.error.errors[0].message)
+      setError(validation.error.issues[0].message)
       setLoading(false)
       return
     }

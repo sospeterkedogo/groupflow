@@ -1,7 +1,7 @@
 import { FatalError } from 'workflow'
-import { createAdminClient } from '@/utils/supabase/server'
-import type { TaskCategory, TaskStatus } from '@/types/database'
-import { taskSchema } from '@/utils/validation'
+import { createAdminClient } from '../utils/supabase/server'
+import type { TaskCategory, TaskStatus } from '../types/database'
+import { taskSchema } from '../utils/validation'
 
 export type TaskPayload = {
   id?: string
