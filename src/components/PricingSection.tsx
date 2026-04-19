@@ -37,12 +37,12 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
 
       // 2. Direct Stripe Links for instant availability (Always Online)
       if (plan === 'pro') {
-        window.location.href = `https://buy.stripe.com/6oU7sLdpWcPee9q0f67wA03?client_reference_id=${userId}`
+        window.location.href = `https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04?client_reference_id=${userId}`
         return
       }
 
       if (plan === 'premium') {
-        window.location.href = `https://buy.stripe.com/aFa14nbhO02s8P68LC7wA02?client_reference_id=${userId}`
+        window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${userId}`
         return
       }
     } catch (err: any) {
@@ -175,7 +175,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
               </div>
               <div style={{ textAlign: 'right' }}>
                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Pro Scholar</h2>
-                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Advanced Analytics</p>
+                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Advanced Institutional Analytics</p>
               </div>
             </div>
 
@@ -184,7 +184,10 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                 <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£4.99</span>
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
               </div>
-              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 500 }}>
+                Unlock the full technical potential of your research team with priority AI feedback, unlimited multi-project Hubs, and deep visual customization for your academic environment.
+              </p>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {[
                   'Priority AI Feedback Protocols',
                   'Unlimited Multi-Project Groups',
@@ -242,7 +245,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
               </div>
               <div style={{ textAlign: 'right' }}>
                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Premium</h2>
-                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Institutional Partner</p>
+                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Institutional Partner Access</p>
               </div>
             </div>
 
@@ -251,7 +254,10 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                 <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£14.99</span>
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
               </div>
-              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 500 }}>
+                The definitive mandate for academic excellence. Includes lifetime authorization protocols, elite scholar markers, researcher API clearing, and dedicated strategy session support.
+              </p>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {[
                   'Institutional Multi-Project Hubs',
                   'Early Access Review Lab',

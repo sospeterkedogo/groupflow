@@ -1,4 +1,4 @@
-import { parsePhoneNumber, getCountryCallingCode, CountryCode } from 'libphonenumber-js'
+import { parsePhoneNumber } from 'libphonenumber-js'
 import * as Flags from 'country-flag-icons/react/3x2'
 
 /**
@@ -9,7 +9,7 @@ export function detectCountry(phone: string): string | null {
   try {
     const phoneNumber = parsePhoneNumber(phone)
     return phoneNumber.country || null
-  } catch (error) {
+  } catch {
     // Partial number detection logic for better UX while typing
     const digits = phone.replace(/\D/g, '')
     if (digits.length >= 1 && digits.length <= 4) {

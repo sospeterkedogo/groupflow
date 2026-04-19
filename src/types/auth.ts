@@ -1,4 +1,4 @@
-import { Group } from './database'
+import { Group, Achievement } from './database'
 
 export type Profile = {
   id: string;
@@ -22,7 +22,7 @@ export type Profile = {
   biography?: string | null;
   stack?: string | null;
   groups?: Group | Group[]; // Nested group data
-  achievements?: Array<{ name: string; date: string; id?: string; icon?: string }>;
+  achievements?: Achievement[];
   theme_config?: { palette?: string; custom_bg_url?: string };
   custom_bg_url?: string;
   manual_avatar_url?: string | null;

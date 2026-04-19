@@ -10,6 +10,11 @@ export type Group = {
 };
 
 
+export type Achievement = {
+  name: string;
+  date: string;
+};
+
 export type Profile = {
   id: string; // matches auth.users UUID
   email: string | null;
@@ -32,6 +37,7 @@ export type Profile = {
   biography?: string | null;
   stack?: string | null;
   last_seen?: string | null;
+  achievements?: Achievement[] | null;
 };
 
 export type TaskStatus = 'To Do' | 'In Progress' | 'In Review' | 'Done';

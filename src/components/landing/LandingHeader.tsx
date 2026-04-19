@@ -4,9 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Search, Code, Menu, X, MessageSquarePlus } from 'lucide-react'
+import { NavMenus, NavCategory, NavItem } from '@/types/landing'
 
 interface LandingHeaderProps {
-  navMenus: any
+  navMenus: NavMenus
 }
 
 export default function LandingHeader({ navMenus }: LandingHeaderProps) {
@@ -35,7 +36,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
         {/* Brand Identity */}
         <div 
           style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', transition: 'opacity 0.2s ease' }} 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => typeof window !== 'undefined' && window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
            <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
               <img src="/logo.png" style={{ width: '20px', height: '20px', objectFit: 'contain' }} alt="Logo" />
@@ -70,7 +71,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                   transition: 'color 0.2s ease'
                 }}
               >
-                {(navMenus as any)[key].label}
+                {navMenus[key].label}
                 <ChevronDown size={12} style={{ opacity: 0.5, transform: activeDropdown === key ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s ease' }} />
               </button>
 
@@ -102,13 +103,13 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                         gap: '1.5rem'
                       }}
                     >
-                      {(navMenus as any)[key].categories.map((category: any, idx: number) => (
+                      {navMenus[key].categories.map((category: NavCategory, idx: number) => (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                           <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280', marginBottom: '0.25rem' }}>
                             {category.label}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            {category.items.map((item: any) => (
+                            {category.items.map((item: NavItem) => (
                               <Link 
                                 key={item.id}
                                 href={
@@ -270,10 +271,10 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
               {Object.keys(navMenus).map((key) => (
                 <div key={key}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280', marginBottom: '1rem' }}>
-                    {(navMenus as any)[key].label}
+                    {navMenus[key].label}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {(navMenus as any)[key].categories.flatMap((cat: any) => cat.items).map((item: any) => (
+                    {navMenus[key].categories.flatMap((cat: NavCategory) => cat.items).map((item: NavItem) => (
                       <Link 
                         key={item.id}
                         href={

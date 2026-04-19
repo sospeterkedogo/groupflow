@@ -1,4 +1,4 @@
-import { Task, TaskStatus, TaskCategory } from './database'
+// Unused database imports removed to resolve lint warnings
 import { Profile } from './auth'
 
 export type TabName = 'identity' | 'pulse' | 'activity' | 'intercom' | 'security' | 'appearance' | 'workspace' | 'data' | 'team' | 'billing' | 'support' | 'identity_hub';

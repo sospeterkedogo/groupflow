@@ -21,6 +21,7 @@ import { kickUser } from '../join/actions'
 import { logActivity } from '@/utils/logging'
 import { TabName } from '@/types/ui'
 import { Profile } from '@/types/auth'
+import { Group, Achievement } from '@/types/database'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 
@@ -52,15 +53,15 @@ export default function SettingsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
-  const [availableGroups, setAvailableGroups] = useState<any[]>([])
+  const [availableGroups, setAvailableGroups] = useState<Group[]>([])
   const [groupSearch, setGroupSearch] = useState('')
   const [switching, setSwitching] = useState(false)
 
-  const [teamMembers, setTeamMembers] = useState<any[]>([])
+  const [teamMembers, setTeamMembers] = useState<Profile[]>([])
   const [isEncrypted, setIsEncrypted] = useState(false)
   const [updatingGroup, setUpdatingGroup] = useState(false)
   const [customToolInput, setCustomToolInput] = useState('')
-  const [pendingAchievements, setPendingAchievements] = useState<any[] | null>(null)
+  const [pendingAchievements, setPendingAchievements] = useState<Achievement[] | null>(null)
   const [saveConfirmation, setSaveConfirmation] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -100,7 +101,7 @@ export default function SettingsPage() {
       .ilike('content', '%[JOIN REQUEST]%')
 
     if (data) {
-      setSentRequests(Array.from(new Set(data.map((row: any) => row.group_id))))
+      setSentRequests(Array.from(new Set(data.map((row: { group_id: string }) => row.group_id))))
     }
   }
 
@@ -188,7 +189,7 @@ export default function SettingsPage() {
       .eq('id', profile.id)
 
     if (updateError) {
-      console.error('Profile Identity Update Failure:', JSON.stringify(updateError, null, 2))
+      // Error logged via standardized tracker if necessary
       setError(`Identity Sync Error: ${updateError.message || 'Verification failed'}`)
     }
     else {
@@ -204,23 +205,22 @@ export default function SettingsPage() {
 
   const handleCheckout = async (plan: 'pro' | 'premium') => {
     setError(null)
-    setSwitching(true) // Overload switching for checkout loading status
-    try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan })
-      })
-
-      const result = await response.json()
-      if (!response.ok || !result.url) {
-        throw new Error(result?.error || 'Unable to start checkout.')
-      }
-
-      window.location.href = result.url
-    } catch (err: any) {
-      setError(err.message || 'Checkout initiation failed.')
+    setSwitching(true)
+    
+    if (!profile?.id) {
+      setError('Identity context missing. Please refresh and try again.')
       setSwitching(false)
+      return
+    }
+
+    if (plan === 'pro') {
+      window.location.href = `https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04?client_reference_id=${profile.id}`
+      return
+    }
+
+    if (plan === 'premium') {
+      window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${profile.id}`
+      return
     }
   }
 
@@ -289,7 +289,7 @@ export default function SettingsPage() {
       const publicUrl = data.publicUrl
 
       if (type === 'avatar') {
-        const updateData: any = { avatar_url: publicUrl }
+        const updateData: Partial<Profile> = { avatar_url: publicUrl }
         // Priority System: If it's a manual upload, also update manual_avatar_url
         updateData.manual_avatar_url = publicUrl
         await supabase.from('profiles').update(updateData).eq('id', profile.id)
@@ -390,7 +390,8 @@ export default function SettingsPage() {
     setIsDeleting(true)
     try {
       const res = await fetch('/api/account', { method: 'DELETE' })
-      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Account termination failed')
       await supabase.auth.signOut()
       window.location.href = '/login'
     } catch (err: any) {
@@ -1048,7 +1049,7 @@ export default function SettingsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
               {availableGroups
                 .filter(g => g.id !== profile?.group_id)
-                .filter(g => g.name.toLowerCase().includes(groupSearch.toLowerCase()) || g.module_code.toLowerCase().includes(groupSearch.toLowerCase()))
+                .filter(g => g.name.toLowerCase().includes(groupSearch.toLowerCase()) || (g.module_code?.toLowerCase() || '').includes(groupSearch.toLowerCase()))
                 .map(group => {
                 const isPending = pendingRequests.includes(group.id)
                 const isSent = sentRequests.includes(group.id)
@@ -1313,11 +1314,11 @@ export default function SettingsPage() {
                    ]
                    
                    const currentAchievements = pendingAchievements || profile?.achievements || []
-                   const activeTools = currentAchievements.map((a: any) => a.name)
+                   const activeTools = currentAchievements.map((a: Achievement) => a.name)
                    
                    const userCustomTools = currentAchievements
-                    .filter((a: any) => !DEFAULT_TOOLS.includes(a.name))
-                    .map((a: any) => a.name)
+                    .filter((a: Achievement) => !DEFAULT_TOOLS.includes(a.name))
+                    .map((a: Achievement) => a.name)
                    
                    const allDisplayTools = Array.from(new Set([...DEFAULT_TOOLS, ...userCustomTools]))
                    
@@ -1410,7 +1411,7 @@ export default function SettingsPage() {
                                  if (e.key === 'Enter' && customToolInput.trim()) {
                                    const toolName = customToolInput.trim()
                                    const achievements = currentAchievements
-                                   if (achievements.some((a: any) => a.name.toLowerCase() === toolName.toLowerCase())) {
+                                   if (achievements.some((a: Achievement) => a.name.toLowerCase() === toolName.toLowerCase())) {
                                      setError("This tool is already in your arsenal.")
                                      return
                                    }
