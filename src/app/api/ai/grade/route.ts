@@ -54,12 +54,13 @@ Respond ONLY with a JSON object:
         Authorization: `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are a rigorous but fair academic skirmish judge.' },
+          { role: 'system', content: 'You are a rigorous but fair academic skirmish judge. Evaluate accuracy against reference truth. Be witty and brief.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3,
+        temperature: 0.2,
+        max_tokens: 150,
         response_format: { type: "json_object" }
       })
     })

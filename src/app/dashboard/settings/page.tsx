@@ -74,6 +74,11 @@ export default function SettingsPage() {
   const [sentRequests, setSentRequests] = useState<string[]>([])
   const [isGithubLinked, setIsGithubLinked] = useState(false)
   const [isGoogleLinked, setIsGoogleLinked] = useState(false)
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verifying'>('idle')
+  const [protectAvatar, setProtectAvatar] = useState(false)
+  const [manualAvatarUrl, setManualAvatarUrl] = useState<string | null>(null)
 
   const supabase = createBrowserSupabaseClient()
 
@@ -122,6 +127,9 @@ export default function SettingsPage() {
         setPhoneNumber(data.phone_number || '')
         setCountryCode(data.country_code || '')
         setIsEncrypted(data.groups?.is_encrypted || false)
+        setProtectAvatar(data.protect_avatar || false)
+        setIsPhoneVerified(data.is_phone_verified || false)
+        setManualAvatarUrl(data.manual_avatar_url || null)
         
         if (data.id) {
           fetchJoinRequests(data.id)
@@ -216,6 +224,52 @@ export default function SettingsPage() {
     }
   }
 
+  const handleRequestOtp = async () => {
+    if (!phoneNumber) {
+      setError("Please enter a phone number first.")
+      return
+    }
+    setOtpStep('sent')
+    setError(null)
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber })
+      if (error) throw error
+      addToast('Code Dispatched', 'Verification shard sent to your communication device.', 'success')
+    } catch (err: any) {
+      setError(err.message)
+      setOtpStep('idle')
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    if (!otp) return
+    setOtpStep('verifying')
+    setError(null)
+    try {
+      const { error } = await supabase.auth.verifyOtp({ phone: phoneNumber, token: otp, type: 'sms' })
+      if (error) throw error
+      
+      const { error: updateError } = await supabase.from('profiles').update({ is_phone_verified: true, phone_number: phoneNumber }).eq('id', profile?.id)
+      if (updateError) throw updateError
+      
+      setIsPhoneVerified(true)
+      setOtpStep('idle')
+      addToast('Identity Verified', 'Phone connection successfully linked to your node.', 'success')
+      refreshProfile()
+    } catch (err: any) {
+      setError(err.message)
+      setOtpStep('sent')
+    }
+  }
+
+  const handleToggleAvatarProtection = async (val: boolean) => {
+    setProtectAvatar(val)
+    if (!profile) return
+    const { error } = await supabase.from('profiles').update({ protect_avatar: val }).eq('id', profile.id)
+    if (error) addToast('Protocol Error', 'Failed to update protection status.', 'error')
+    else addToast('Protection Updated', val ? 'Manual avatar locked.' : 'Provider sync enabled.', 'success')
+  }
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'bg') => {
     try {
       const file = e.target.files?.[0]
@@ -235,8 +289,12 @@ export default function SettingsPage() {
       const publicUrl = data.publicUrl
 
       if (type === 'avatar') {
-        await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
+        const updateData: any = { avatar_url: publicUrl }
+        // Priority System: If it's a manual upload, also update manual_avatar_url
+        updateData.manual_avatar_url = publicUrl
+        await supabase.from('profiles').update(updateData).eq('id', profile.id)
         setAvatarUrl(publicUrl)
+        setManualAvatarUrl(publicUrl)
       } else {
         await setCustomBg(publicUrl)
       }
@@ -397,6 +455,7 @@ export default function SettingsPage() {
       }}>
         {[
           { id: 'identity', label: 'Personal Identity', icon: User },
+          { id: 'identity_hub', label: 'Identity Hub', icon: ShieldAlert },
           { id: 'pulse', label: 'Presence', icon: PulseIcon },
           { id: 'activity', label: 'Activity Log', icon: History },
           { id: 'intercom', label: 'Mail', icon: Mail },
@@ -597,9 +656,134 @@ export default function SettingsPage() {
           </div>
         )}
 
+        {activeTab === 'identity_hub' && (
+          <div className="auth-card" style={{ maxWidth: '100%' }}>
+            <div style={{ marginBottom: '2.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <ShieldAlert size={28} className="text-brand" />
+                Identity Hub
+              </h2>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.85rem' }}>Manage your technical credentials, secure your profile data, and sync with professional providers.</p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              
+              {/* Profile Protection Mode */}
+              <div style={{ background: protectAvatar ? 'rgba(var(--brand-rgb), 0.03)' : 'var(--bg-sub)', border: protectAvatar ? '2px solid var(--brand)' : '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', transition: '0.3s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: protectAvatar ? 'var(--brand)' : 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: protectAvatar ? 'white' : 'var(--text-sub)' }}>
+                    {protectAvatar ? <Lock size={22} /> : <Shield size={22} />}
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Profile Protection</h3>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.7rem' }}>{protectAvatar ? 'Manual photo locked.' : 'Provider sync enabled.'}</p>
+                  </div>
+                </div>
+                <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <span style={{ fontSize: '0.65rem', fontWeight: 800, color: protectAvatar ? 'var(--brand)' : 'var(--text-sub)' }}>{protectAvatar ? 'PRIORITY_ACTIVE' : 'SYNC_ENABLED'}</span>
+                   <button 
+                    onClick={() => handleToggleAvatarProtection(!protectAvatar)}
+                    className={protectAvatar ? "btn btn-sm btn-primary" : "btn btn-sm btn-secondary"}
+                    style={{ width: 'auto', padding: '0.4rem 0.8rem', fontSize: '0.7rem' }}
+                   >
+                     {protectAvatar ? 'Unlock' : 'Lock Avatar'}
+                   </button>
+                </div>
+              </div>
+
+              {/* GitHub Identity */}
+              <div style={{ background: isGithubLinked ? 'rgba(34, 197, 94, 0.03)' : 'var(--bg-sub)', border: isGithubLinked ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                    <PulseIcon size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>GitHub Identity</h3>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.7rem' }}>Technical archives sync.</p>
+                  </div>
+                </div>
+                <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   {isGithubLinked ? (
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontWeight: 900, fontSize: '0.7rem' }}>
+                        <CheckCircle2 size={14} /> CONNECTED
+                     </div>
+                   ) : (
+                     <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-sub)' }}>Disconnected</span>
+                   )}
+                   {!isGithubLinked && (
+                     <button onClick={() => handleLinkIdentity('github')} className="btn btn-sm btn-primary" style={{ width: 'auto' }}>Link</button>
+                   )}
+                </div>
+              </div>
+
+              {/* Phone OTP Connection */}
+              <div style={{ background: isPhoneVerified ? 'rgba(34, 197, 94, 0.03)' : 'var(--bg-sub)', border: isPhoneVerified ? '1px solid var(--success)' : '1px solid var(--border)', borderRadius: '24px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                    <Phone size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 850 }}>Phone Protocol</h3>
+                    <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.7rem' }}>SMS Verification</p>
+                  </div>
+                </div>
+
+                <div style={{ flex: 1 }}>
+                   {!isPhoneVerified && otpStep === 'idle' && (
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                        <input 
+                          type="tel" 
+                          className="form-input" 
+                          placeholder="+1 555 000 0000" 
+                          value={phoneNumber} 
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          style={{ fontSize: '0.85rem' }}
+                        />
+                        <button onClick={handleRequestOtp} className="btn btn-sm btn-primary" style={{ width: '100%' }}>Send Code</button>
+                     </div>
+                   )}
+
+                   {!isPhoneVerified && (otpStep === 'sent' || otpStep === 'verifying') && (
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          placeholder="Code" 
+                          value={otp} 
+                          onChange={(e) => setOtp(e.target.value)}
+                          maxLength={6}
+                          style={{ textAlign: 'center', letterSpacing: '0.2em', fontSize: '1rem', fontWeight: 900 }}
+                        />
+                        <div style={{ display: 'flex', gap: '0.4rem' }}>
+                          <button onClick={() => setOtpStep('idle')} className="btn btn-sm btn-secondary" style={{ flex: 1 }}>Back</button>
+                          <button onClick={handleVerifyOtp} disabled={otpStep === 'verifying' || otp.length < 6} className="btn btn-sm btn-primary" style={{ flex: 2 }}>
+                            {otpStep === 'verifying' ? '...' : 'Verify'}
+                          </button>
+                        </div>
+                     </div>
+                   )}
+
+                   {isPhoneVerified && (
+                     <div style={{ textAlign: 'center', padding: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--success)', fontWeight: 900, marginBottom: '0.25rem', justifyContent: 'center', fontSize: '0.8rem' }}>
+                           <CheckCircle2 size={18} /> VERIFIED
+                        </div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 800 }}>{phoneNumber}</div>
+                     </div>
+                   )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
         {activeTab === 'identity' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem' }}>Profile Identity</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <User size={24} className="text-brand" />
+              Profile Identity
+            </h2>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-sm)', marginBottom: '2rem', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
               <div style={{ position: 'relative', width: 'var(--avatar-size)', height: 'var(--avatar-size)' }}>
@@ -619,6 +803,28 @@ export default function SettingsPage() {
                 <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Profile Photo</h3>
                 <p style={{ color: 'var(--text-sub)', fontSize: '0.8rem', marginTop: '0.2rem' }}>Update your professional identity.</p>
                 {uploadingAvatar && <p style={{ fontSize: '0.75rem', color: 'var(--brand)', fontWeight: 800, marginTop: '0.4rem' }}>Optimizing...</p>}
+                
+                <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center' }}>
+                  <button 
+                    onClick={() => handleToggleAvatarProtection(!protectAvatar)}
+                    style={{ 
+                      padding: '6px 12px', 
+                      borderRadius: '8px', 
+                      background: protectAvatar ? 'rgba(var(--brand-rgb), 0.1)' : 'var(--bg-sub)', 
+                      border: '1px solid var(--border)',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      color: protectAvatar ? 'var(--brand)' : 'var(--text-sub)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {protectAvatar ? <Lock size={12} /> : <Shield size={12} />}
+                    {protectAvatar ? 'Profile Protection: ACTIVE' : 'Enable Profile Protection'}
+                  </button>
+                </div>
               </div>
             </div>
 

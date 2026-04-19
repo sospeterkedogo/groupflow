@@ -25,6 +25,9 @@ export type Profile = {
   achievements?: Array<{ name: string; date: string; id?: string; icon?: string }>;
   theme_config?: { palette?: string; custom_bg_url?: string };
   custom_bg_url?: string;
+  manual_avatar_url?: string | null;
+  protect_avatar?: boolean;
+  is_phone_verified?: boolean;
 };
 
 export type ActiveUser = {

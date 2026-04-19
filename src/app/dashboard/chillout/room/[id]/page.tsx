@@ -24,6 +24,7 @@ import confetti from 'canvas-confetti'
 import { motion, AnimatePresence } from 'framer-motion'
 import { jsPDF } from 'jspdf'
 import { updateUserGameStats } from '@/app/dashboard/actions'
+import { SkirmishTimer } from '@/components/skirmish/SkirmishTimer'
 
 export default function QuizRoomPage() {
   const params = useParams()
@@ -70,7 +71,6 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const timerDuration = useStorage(s => s.timerDuration) ?? 20
   const config = useStorage(s => s.config)
   
-  const [timeLeft, setTimeLeft] = useState(timerDuration)
   const [showIntro, setShowIntro] = useState(true)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [hasAnswered, setHasAnswered] = useState(false)
@@ -130,21 +130,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   }, [roomId, profile])
 
   // ── TIMER LOGIC ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (quizStatus !== 'playing' || !roundStartTime) return
-
-    const interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - roundStartTime) / 1000)
-        const remaining = Math.max(0, (timerDuration || 20) - elapsed)
-        setTimeLeft(remaining)
-
-        if (remaining === 0 && activeTurnId === profile?.id) {
-            handleSkipRound()
-        }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [quizStatus, roundStartTime, timerDuration, activeTurnId, profile?.id])
+  // Timer controlled by SkirmishTimer component now
 
   // ── RESET UI ON QUESTION CHANGE ──────────────────────────────────
   useEffect(() => {
@@ -153,7 +139,6 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     setTextAnswer('')
     setIsRevealed(false)
     setAiCritique('')
-    setTimeLeft(timerDuration || 20)
   }, [currentIdx, timerDuration])
 
   // ── MUTATIONS ───────────────────────────────────────────────────
@@ -244,9 +229,15 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     setHasAnswered(true)
     
     const correct = idx === currentQ.correctAnswer
-    if (correct) confetti({ particleCount: 40, scalar: 0.7 })
+    if (correct) {
+      confetti({ particleCount: 40, scalar: 0.7 })
+      addToast('Correct!', 'Neural pathways aligned.', 'success')
+    } else {
+      addToast('Incorrect', 'Divergent thought detected.', 'error')
+    }
     
-    setTimeout(() => submitActionResult(correct), 1500)
+    // Performance: Reduced delay for snappier feel
+    setTimeout(() => submitActionResult(correct), 600)
   }
 
   const handleAIEvaluation = async () => {
@@ -266,9 +257,13 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
         setAiCritique(data.critique)
         setHasAnswered(true)
         
-        if (data.isCorrect) confetti({ particleCount: 50 })
+        if (data.isCorrect) {
+          confetti({ particleCount: 50 })
+          addToast('Synthesis Validated', 'AI score: ' + data.score, 'success')
+        }
         
-        setTimeout(() => submitActionResult(data.isCorrect, data.score), 2500)
+        // Performance: Reduced delay
+        setTimeout(() => submitActionResult(data.isCorrect, data.score), 1000)
     } catch (err) {
         addToast('Evaluation Failed', 'Judge is offline.', 'error')
     } finally {
@@ -370,21 +365,14 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                    </div>
                 </div>
                 
-                {/* SMART TIMER */}
-                <div style={{ position: 'relative', width: '60px', height: '60px' }}>
-                    <svg style={{ transform: 'rotate(-90deg)', width: '60px', height: '60px' }}>
-                        <circle cx="30" cy="30" r="26" fill="none" stroke="var(--border)" strokeWidth="4" />
-                        <motion.circle 
-                            cx="30" cy="30" r="26" fill="none" stroke="var(--brand)" strokeWidth="4"
-                            strokeDasharray="163.36"
-                            animate={{ strokeDashoffset: 163.36 * (1 - timeLeft / (timerDuration || 20)) }}
-                            transition={{ duration: 1, ease: 'linear' }}
-                        />
-                    </svg>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 950, fontSize: '0.9rem', fontFamily: 'monospace' }}>
-                        {timeLeft}s
-                    </div>
-                </div>
+                {/* SMART TIMER (Isolated for performance) */}
+                <SkirmishTimer 
+                  roundStartTime={roundStartTime || 0} 
+                  timerDuration={timerDuration || 20}
+                  activeTurnId={activeTurnId}
+                  currentProfileId={profile?.id || null}
+                  onTimeOut={handleSkipRound}
+                />
              </div>
 
              {/* Question Area */}
