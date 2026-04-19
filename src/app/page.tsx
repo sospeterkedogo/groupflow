@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { 
   ArrowRight, Zap, Shield, Users, Activity, BarChart3, 
   ChevronRight, Globe, Layers, HelpCircle, CheckCircle, 
-  Lock, Trash2, Milestone, BookOpen, Fingerprint, Sparkles, Award
+  Lock, Trash2, Milestone, BookOpen, Fingerprint, Sparkles, Award,
+  ChevronDown, Search, Code, Smartphone, LayoutGrid, Info
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   
   const features = [
     { 
@@ -69,6 +72,24 @@ export default function Home() {
     }
   ]
 
+  const navMenus = {
+    product: [
+      { id: 'kanban', title: 'Project Intelligence', desc: 'Advanced Kanban for institutional research.', icon: <LayoutGrid size={20} /> },
+      { id: 'sync', title: 'Real-time Sync', desc: 'Universal presence and file state sharing.', icon: <Zap size={20} /> },
+      { id: 'roadmap', title: 'Academic Roadmap', desc: 'Phased timeline for complex submissions.', icon: <Milestone size={20} /> }
+    ],
+    solutions: [
+      { id: 'research', title: 'Scholars & Researchers', desc: 'Secure contribute logs for high-stakes work.', icon: <BookOpen size={20} /> },
+      { id: 'teams', title: 'Team Collaboration', desc: 'Departmental project management at scale.', icon: <Users size={20} /> },
+      { id: 'enterprise', title: 'Institutional Flow', desc: 'Integrated university project ecosystems.', icon: <Globe size={20} /> }
+    ],
+    resources: [
+      { id: 'mission', title: 'Global Mission 2026', desc: 'Read our manifesto for academic support.', icon: <Fingerprint size={20} /> },
+      { id: 'help', title: 'Help & Knowledge', desc: 'Documentation for technical researchers.', icon: <HelpCircle size={20} /> },
+      { id: 'achievements', title: 'Achievement Stats', desc: 'Global impact of the GroupFlow community.', icon: <Award size={20} /> }
+    ]
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-main)', position: 'relative', overflowX: 'hidden' }}>
       
@@ -112,30 +133,154 @@ export default function Home() {
       )}
 
       {/* Navigation */}
-      <header style={{ 
-        height: 'var(--h-nav)', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        padding: '0 var(--p-safe)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        borderBottom: '1px solid var(--border)',
-        backdropFilter: 'blur(10px)',
-        backgroundColor: 'rgba(var(--bg-main), 0.8)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)' }}>
-           <div style={{ padding: '4px', background: 'var(--brand)', borderRadius: '10px', overflow: 'hidden' }}>
-              <img src="/logo.png" style={{ width: '28px', height: '28px', objectFit: 'cover' }} alt="Logo" />
-           </div>
-           GroupFlow2026
+      <header 
+        style={{ 
+          height: 'var(--h-nav)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          padding: '0 var(--p-safe)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          borderBottom: '1px solid var(--border)',
+          backdropFilter: 'blur(16px)',
+          backgroundColor: 'rgba(var(--bg-main-rgb), 0.8)',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseLeave={() => setActiveDropdown(null)}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+             <div style={{ padding: '4px', background: 'var(--brand)', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.3)' }}>
+                <img src="/logo.png" style={{ width: '28px', height: '28px', objectFit: 'cover' }} alt="Logo" />
+             </div>
+             GroupFlow2026
+          </div>
+
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="nav-links">
+            {Object.keys(navMenus).map((key) => (
+              <div 
+                key={key} 
+                className="nav-item-wrapper" 
+                style={{ position: 'relative' }}
+                onMouseEnter={() => setActiveDropdown(key)}
+              >
+                <button 
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    padding: '0.6rem 0.9rem', 
+                    color: activeDropdown === key ? 'var(--brand)' : 'var(--text-sub)', 
+                    fontWeight: 800, 
+                    fontSize: '0.85rem', 
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    transition: 'all 0.2s ease',
+                    borderRadius: '10px',
+                    backgroundColor: activeDropdown === key ? 'rgba(var(--brand-rgb), 0.05)' : 'transparent'
+                  }}
+                >
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                  <ChevronDown size={14} style={{ transform: activeDropdown === key ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s ease' }} />
+                </button>
+
+                <AnimatePresence>
+                  {activeDropdown === key && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '-20px',
+                        paddingTop: '1rem',
+                        zIndex: 1100
+                      }}
+                    >
+                      <div 
+                        className="glass-card-prestige"
+                        style={{
+                          width: '320px',
+                          background: 'var(--surface)',
+                          borderRadius: '24px',
+                          border: '1px solid var(--border)',
+                          padding: '1.25rem',
+                          boxShadow: 'var(--shadow-2xl)',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {(navMenus as any)[key].map((item: any) => (
+                            <Link 
+                              key={item.id}
+                              href="/login?signup=true"
+                              className="dropdown-item"
+                              style={{
+                                padding: '1rem',
+                                borderRadius: '16px',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: '1rem',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <div style={{ 
+                                padding: '0.6rem', 
+                                background: 'rgba(var(--brand-rgb), 0.1)', 
+                                borderRadius: '12px', 
+                                color: 'var(--brand)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center' 
+                              }}>
+                                {item.icon}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ color: 'var(--text-main)', fontWeight: 900, fontSize: '0.85rem', marginBottom: '0.2rem' }}>{item.title}</div>
+                                <div style={{ color: 'var(--text-sub)', fontSize: '0.75rem', lineHeight: 1.4 }}>{item.desc}</div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+            <Link href="/login" style={{ padding: '0.6rem 1rem', color: 'var(--text-sub)', fontWeight: 800, fontSize: '0.85rem', textDecoration: 'none' }}>Institutional Pricing</Link>
+          </nav>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none' }}>Sign in</Link>
-          <Link href="/login?signup=true" className="btn btn-primary btn-sm btn-inline" style={{ padding: '0.6rem 1.25rem', borderRadius: '12px' }}>Get started</Link>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Quick Start:</span>
+             <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <Link href="/login?signup=true" className="btn-icon-prestige hint-tip" data-tip="Google" style={{ padding: '7px', background: 'var(--bg-sub)', color: 'var(--text-main)', borderRadius: '9px', border: '1px solid var(--border)' }}>
+                   <div style={{ width: '16px', height: '16px', backgroundImage: 'url(https://www.google.com/favicon.ico)', backgroundSize: 'cover' }} />
+                </Link>
+                <Link href="/login?signup=true" className="btn-icon-prestige" style={{ padding: '7px', background: 'var(--bg-sub)', color: 'var(--text-main)', borderRadius: '9px', border: '1px solid var(--border)' }}>
+                   <Code size={16} />
+                </Link>
+                <Link href="/login?signup=true&method=phone" className="btn-icon-prestige" style={{ padding: '7px', background: 'var(--bg-sub)', color: 'var(--text-main)', borderRadius: '9px', border: '1px solid var(--border)' }}>
+                   <Smartphone size={16} />
+                </Link>
+             </div>
+          </div>
+          <div style={{ height: '24px', width: '1px', background: 'var(--border)' }} />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none', fontWeight: 900 }}>Sign in</Link>
+            <Link href="/login?signup=true" className="btn btn-primary btn-sm btn-inline" style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: 950, boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>Join Mission 2026</Link>
+          </div>
         </div>
       </header>
+
       <main style={{ padding: '4rem 0' }}>
         
         {/* HERO */}
@@ -423,6 +568,27 @@ export default function Home() {
         .hover-lift:hover { transform: translateY(-12px); box-shadow: var(--shadow-xl); border-color: var(--brand); }
         .glass { backdrop-filter: blur(12px); }
         
+        .dropdown-item:hover {
+          background-color: rgba(var(--brand-rgb), 0.05);
+          transform: translateX(4px);
+        }
+        
+        .btn-icon-prestige {
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        
+        .btn-icon-prestige:hover {
+          background-color: rgba(var(--brand-rgb), 0.1) !important;
+          border-color: var(--brand) !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.15);
+        }
+
+        .hint-tip {
+          position: relative;
+        }
+
         @media (min-width: 1024px) {
           .floating-element { display: block !important; }
         }

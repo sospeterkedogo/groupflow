@@ -39,7 +39,7 @@ function LoginContent() {
   const error = searchParams.get('error')
   const [isResetting, setIsResetting] = useState(false)
   const [resetMessage, setResetMessage] = useState<string | null>(null)
-  const [authTab, setAuthTab] = useState<'email' | 'phone'>('email')
+  const [authTab, setAuthTab] = useState<'email' | 'phone'>(searchParams.get('method') === 'phone' ? 'phone' : 'email')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState<string | null>(error)
