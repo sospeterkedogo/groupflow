@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { FileUp, GitCommit, AlertCircle, Search, X } from 'lucide-react'
 import { Task, TaskStatus } from '@/types/database'
@@ -167,14 +168,17 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   useEffect(() => {
     let active = true
-    let channel = supabase.channel(`kanban_${groupId}`)
+    let channel: any = null
 
     const initialize = async () => {
-      await fetchTasksFromDB()
+      // Parallelize fetches to eliminate waterfalls
+      await Promise.all([
+        fetchTasksFromDB(),
+        fetchGroupMembers(),
+        fetchCurrentUser()
+      ])
+      
       if (!active) return
-      await fetchGroupMembers()
-      if (!active) return
-      await fetchCurrentUser()
 
       channel = supabase.channel(`kanban_${groupId}`)
         .on(
@@ -327,6 +331,19 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       t.category?.toLowerCase().includes(term)
     )
   }, [storageTasks, boardSearch])
+ 
+  const tasksByStatus = useMemo(() => {
+    const map: Record<TaskStatus, Task[]> = {
+      'To Do': [],
+      'In Progress': [],
+      'In Review': [],
+      'Done': []
+    }
+    filteredTasks.forEach(t => {
+      if (map[t.status]) map[t.status].push(t)
+    })
+    return map
+  }, [filteredTasks])
 
   const calculateProbability = (task: Task) => {
     if (task.status === 'Done') return 100
@@ -418,7 +435,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                       title={`${user.full_name} is active`}
                     >
                       {user.avatar_url ? (
-                        <img src={user.avatar_url} alt={`${user.full_name} avatar`} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                        <Image src={user.avatar_url} alt={`${user.full_name} avatar`} width={24} height={24} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'white' }}>
                           {(user.full_name || '?')[0]}
@@ -503,7 +520,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col)}
             >
-              {filteredTasks.filter((t: Task) => t.status === col).map((task: Task) => {
+              {tasksByStatus[col].map((task: Task) => {
                 const draggingOther = othersDragging.find(o => o.presence?.draggingTaskId === task.id)
 
                 return (

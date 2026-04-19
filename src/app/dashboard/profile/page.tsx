@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import Image from 'next/image'
 import { User, Activity, Award, Mail, Calendar, ShieldCheck, Terminal, Fingerprint, Edit2, Check, X, Zap, Handshake, CheckCircle2, Globe, Target } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { getFlagComponent } from '@/utils/geo'
@@ -96,7 +97,14 @@ export default function ProfilePage() {
                <div style={{ position: 'relative' }}>
                   <div style={{ width: '130px', height: '130px', borderRadius: '50%', background: 'var(--bg-sub)', border: profile?.subscription_plan === 'premium' ? '4px solid #d4af37' : profile?.subscription_plan === 'pro' ? '4px solid var(--pro-cobalt)' : '4px solid var(--surface)', boxShadow: profile?.subscription_plan === 'premium' ? '0 0 25px rgba(212, 175, 55, 0.5)' : profile?.subscription_plan === 'pro' ? '0 0 20px rgba(26, 115, 232, 0.4)' : 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={`${profile.full_name || 'User'} avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <Image 
+                           src={profile.avatar_url} 
+                           alt={`${profile.full_name || 'User'} avatar`} 
+                           width={130} 
+                           height={130} 
+                           priority
+                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
                      ) : (
                         <User size={60} color="var(--text-sub)" />
                      )}

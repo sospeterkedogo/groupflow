@@ -102,14 +102,17 @@ export default function MarketplacePage() {
     void fetchListings()
   }, [fetchListings])
 
-  const categories = ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other']
-
-  const filteredListings = listings.filter(l => {
-    const matchesSearch = l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        l.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = activeCategory === 'All' || l.category === activeCategory
-    return matchesSearch && matchesCategory
-  })
+  const categories = useMemo(() => ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other'], [])
+ 
+  const filteredListings = useMemo(() => {
+    const query = searchQuery.toLowerCase()
+    return listings.filter(l => {
+      const matchesSearch = l.title.toLowerCase().includes(query) ||
+                          l.description?.toLowerCase().includes(query)
+      const matchesCategory = activeCategory === 'All' || l.category === activeCategory
+      return matchesSearch && matchesCategory
+    })
+  }, [listings, searchQuery, activeCategory])
 
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '6rem' }}>

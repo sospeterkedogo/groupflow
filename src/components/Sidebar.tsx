@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   LayoutDashboard, 
@@ -153,7 +154,7 @@ export default function Sidebar({ user }: SidebarProps) {
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
             <div style={{ width: '38px', height: '38px', borderRadius: '12px', overflow: 'hidden', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
-               <img src="/logo.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Logo" />
+               <Image src="/logo.png" width={38} height={38} alt="Logo" priority style={{ objectFit: 'cover' }} />
             </div>
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -174,7 +175,7 @@ export default function Sidebar({ user }: SidebarProps) {
             style={{ width: '32px', height: '32px', borderRadius: '10px', border: '2px solid var(--brand)', overflow: 'hidden', background: 'var(--bg-sub)', cursor: 'pointer', padding: 0 }}
           >
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
+              <Image src={profile.avatar_url} width={32} height={32} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" />
             ) : (
               <UserCircle size={20} color="var(--text-sub)" />
             )}

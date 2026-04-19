@@ -84,8 +84,14 @@ export default function SettingsPage() {
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
-    fetchUserData()
-    fetchGroups()
+    // Parallelize top-level metadata fetches
+    const initializeData = async () => {
+      await Promise.all([
+        fetchUserData(),
+        fetchGroups()
+      ])
+    }
+    initializeData()
   }, [])
 
   const fetchGroups = async () => {
@@ -108,12 +114,14 @@ export default function SettingsPage() {
   const fetchUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      // Check for linked identities
+      // 1. Meta-Information (Linked Identities)
       const identities = user.identities || []
       setIsGithubLinked(identities.some(id => id.provider === 'github'))
       setIsGoogleLinked(identities.some(id => id.provider === 'google'))
 
+      // 2. Profile and Dependent Data
       const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
+      
       if (data) {
         setFullName(data.full_name || '')
         setCourseName(data.course_name || '')
@@ -132,12 +140,13 @@ export default function SettingsPage() {
         setIsPhoneVerified(data.is_phone_verified || false)
         setManualAvatarUrl(data.manual_avatar_url || null)
         
-        if (data.id) {
-          fetchJoinRequests(data.id)
-          if (data.group_id) fetchTeam(data.group_id)
-        }
+        // Parallelize Secondary Context Fetches
+        const contextFetches = []
+        if (data.id) contextFetches.push(fetchJoinRequests(data.id))
+        if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
         
-        // Sync global profile if it's missing the joined data
+        await Promise.all(contextFetches)
+        
         if (profile && !profile.groups && data.groups) {
           setProfile(data)
         }

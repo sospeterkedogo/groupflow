@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { ChevronDown, Search, Code, Menu, X, MessageSquarePlus } from 'lucide-react'
 import { NavMenus, NavCategory, NavItem } from '@/types/landing'
 
@@ -39,7 +40,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
           onClick={() => typeof window !== 'undefined' && window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
            <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
-              <img src="/logo.png" style={{ width: '20px', height: '20px', objectFit: 'contain' }} alt="Logo" />
+              <Image src="/logo.png" width={20} height={20} alt="Logo" priority style={{ objectFit: 'contain' }} />
            </div>
            <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>GroupFlow</span>
         </div>

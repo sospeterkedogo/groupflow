@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import Image from 'next/image'
 import { 
   Search, 
   User, 
@@ -250,7 +251,15 @@ function NetworkRow({ user, router, isOnline }: { user: Profile, router: any, is
           fontWeight: 900,
           color: 'var(--brand)'
         }}>
-          {user.avatar_url ? <img src={user.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user.full_name?.[0]}
+          {user.avatar_url ? (
+            <Image 
+              src={user.avatar_url} 
+              alt={user.full_name || 'Profile'} 
+              width={44} 
+              height={44} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            />
+          ) : user.full_name?.[0]}
         </div>
         {isOnline && (
            <div style={{ 

@@ -194,19 +194,27 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   }, [groupId, supabase, personalTaskCount])
 
   useEffect(() => {
-    if (groupId) {
-      void fetchGroupDetails()
-      void fetchMembers()
-      void fetchPendingRequests()
+    if (!groupId) return
+
+    // BATCH PARALLEL INITIALIZATION
+    const initializeDashboardData = async () => {
+      const tasks = [
+        fetchGroupDetails(),
+        fetchMembers(),
+        fetchPendingRequests()
+      ]
+      
+      if (profile?.id) {
+        tasks.push(fetchPersonalTaskCount())
+        tasks.push(fetchProjectProgress())
+      }
+
+      await Promise.all(tasks)
     }
-  }, [groupId, fetchGroupDetails, fetchMembers, fetchPendingRequests])
 
-  useEffect(() => {
-    if (profile?.id && groupId) {
-      void fetchPersonalTaskCount()
-      void fetchProjectProgress()
+    void initializeDashboardData()
 
-      const channel = supabase.channel('dashboard_sync')
+    const channel = supabase.channel('dashboard_sync')
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'tasks', filter: `group_id=eq.${groupId}` },
@@ -230,7 +238,6 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       return () => {
         supabase.removeChannel(channel)
       }
-    }
   }, [profile?.id, groupId, fetchPersonalTaskCount, fetchProjectProgress, fetchMembers, fetchPendingRequests, supabase])
 
   const renderRoleBadge = (role: string | null) => {
