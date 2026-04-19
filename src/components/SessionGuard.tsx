@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShieldAlert, Clock, LogOut, CheckCircle2 } from 'lucide-react'
+import { Clock, LogOut, CheckCircle2 } from 'lucide-react'
 import ModalOverlay from './ModalOverlay'
 
 const IDLE_TIMEOUT = 1000 * 60 * 4; // 4 minutes of inactivity
@@ -70,14 +70,18 @@ export default function SessionGuard() {
     }
 
     const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart']
+    let lastActivityTime = Date.now()
     
     const handleActivity = () => {
-      if (!showWarning) {
+      const now = Date.now()
+      // Throttle density: Only reset timers if at least 1 second has passed since last activity reset
+      if (!showWarning && now - lastActivityTime > 1000) {
+        lastActivityTime = now
         resetTimers()
       }
     }
 
-    events.forEach(event => window.addEventListener(event, handleActivity))
+    events.forEach(event => window.addEventListener(event, handleActivity, { passive: true }))
     resetTimers()
 
     return () => {

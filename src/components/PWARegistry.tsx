@@ -8,11 +8,8 @@ export default function PWARegistry() {
       window.addEventListener('load', () => {
         navigator.serviceWorker
           .register('/sw.js')
-          .then((registration) => {
-            console.log('Elite Protocol SW registered:', registration.scope)
-          })
           .catch((err) => {
-            console.error('Elite Protocol SW registration failed:', err)
+            // Silently handle error in production or use a logging service
           })
       })
     }

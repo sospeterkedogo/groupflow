@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
@@ -14,6 +15,22 @@ interface LandingHeaderProps {
 export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const supabase = createBrowserSupabaseClient()
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
+    }
+    checkUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
   return (
     <header 
@@ -220,25 +237,46 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
 
         <div style={{ height: '20px', width: '1px', background: '#222222' }} />
 
-        <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, padding: '0.5rem 0.75rem' }}>Sign in</Link>
-        <Link 
-          href="/login?signup=true" 
-          style={{ 
-            background: '#10b981', 
-            color: '#0a0a0a', 
-            textDecoration: 'none', 
-            fontSize: '0.875rem', 
-            fontWeight: 650, 
-            padding: '0.5rem 1rem', 
-            borderRadius: '6px',
-            boxShadow: '0 0 20px rgba(16, 185, 129, 0.1)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-        >
-          Start Project
-        </Link>
+        {user ? (
+          <Link 
+            href="/dashboard" 
+            style={{ 
+              background: '#10b981', 
+              color: '#0a0a0a', 
+              textDecoration: 'none', 
+              fontSize: '0.875rem', 
+              fontWeight: 650, 
+              padding: '0.5rem 1rem', 
+              borderRadius: '6px',
+              boxShadow: '0 0 20px rgba(16, 185, 129, 0.1)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            Dashboard
+          </Link>
+        ) : (
+          <>
+            <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, padding: '0.5rem 0.75rem' }}>Sign in</Link>
+            <Link 
+              href="/login?signup=true" 
+              style={{ 
+                background: '#10b981', 
+                color: '#0a0a0a', 
+                textDecoration: 'none', 
+                fontSize: '0.875rem', 
+                fontWeight: 650, 
+                padding: '0.5rem 1rem', 
+                borderRadius: '6px',
+                boxShadow: '0 0 20px rgba(16, 185, 129, 0.1)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+            >
+              Start Project
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Mobile Menu Toggle */}
@@ -302,8 +340,14 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
               ))}
               <div style={{ paddingTop: '1rem', borderTop: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                  <Link href="/docs" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Documentation</Link>
-                 <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Sign in</Link>
-                 <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Start Project</Link>
+                 {user ? (
+                   <Link href="/dashboard" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+                 ) : (
+                   <>
+                     <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Sign in</Link>
+                     <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Start Project</Link>
+                   </>
+                 )}
               </div>
             </div>
           </motion.div>

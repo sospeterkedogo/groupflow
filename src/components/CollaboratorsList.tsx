@@ -25,7 +25,6 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
     const groupId = currentGroupId
     
     if (!user || !groupId) {
-      console.warn("CollaboratorsList: No group identity found for team fetch.")
       return
     }
 
@@ -36,7 +35,6 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
       .neq('id', user.id)
 
     if (data) {
-      console.log(`CollaboratorsList: Found ${data.length} team members.`)
       setCollaborators(data as Profile[])
     }
   }, [supabase, currentGroupId])
@@ -79,9 +77,7 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
           .select('*')
           .in('id', uniqueIds)
         
-        if (error) console.error("Error fetching connection profiles:", error)
         if (profiles) {
-          console.log(`CollaboratorsList: Found ${profiles.length} personal connections.`)
           setPersonalNetwork(profiles as Profile[])
         }
       } else {
