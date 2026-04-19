@@ -12,6 +12,7 @@ import { ProfileProvider } from '@/context/ProfileContext'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
 import { SpotifyProvider } from '@/context/SpotifyContext'
 import SpotifyMiniPlayer from '@/components/SpotifyMiniPlayer'
+import GlobalAnnouncement from '@/components/GlobalAnnouncement'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,6 +56,7 @@ export default async function DashboardLayout({
                     </main>
 
                     <SpotifyMiniPlayer />
+                    <GlobalAnnouncement />
                     <BottomNav />
                   </NotificationProvider>
                 </SpotifyProvider>
