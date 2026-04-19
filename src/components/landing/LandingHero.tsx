@@ -41,7 +41,7 @@ export default function LandingHero() {
            boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
          }}
        >
-         <Cpu size={14} className="shimmer-gold" /> Protocol 2026_Authorized
+         <Sparkles size={14} className="shimmer-gold" /> Built for Students
        </motion.div>
        
        <motion.h1 
@@ -59,13 +59,13 @@ export default function LandingHero() {
            fontSize: 'clamp(3rem, 10vw, 6.5rem)' 
          }}
        >
-         Unified Academic <br />
+         The simple way to <br />
          <span style={{ 
             background: 'linear-gradient(135deg, var(--brand) 0%, #ffffff 80%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             display: 'inline-block'
-          }}>Collaboration Engine.</span>
+          }}>work as a team.</span>
        </motion.h1>
        
        <motion.p 
@@ -82,7 +82,7 @@ export default function LandingHero() {
            letterSpacing: '-0.01em'
          }}
        >
-          Professionalizing research output through real-time state persistence, verified contribution logging, and cross-departmental peer networking. 
+          Stay organized, track your group projects, and get the recognition you deserve for your hard work. 
           <span style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -96,7 +96,7 @@ export default function LandingHero() {
             letterSpacing: '0.2em',
             opacity: 0.8
           }}>
-            <ShieldCheck size={14} /> PERSISTENT LOGIC • INSTITUTIONAL GRADE
+            <ShieldCheck size={14} /> SECURE FOR STUDENTS • ALWAYS SAVED
           </span>
        </motion.p>
 
@@ -124,7 +124,7 @@ export default function LandingHero() {
             }}
             className="premium-btn-hover"
           >
-            Aquire Clearance <Zap size={20} fill="#0a0a0a" />
+            Upgrade to Pro <Zap size={20} fill="#0a0a0a" />
           </Link>
           <Link 
             href="/login?signup=true" 
@@ -145,7 +145,7 @@ export default function LandingHero() {
             }}
             className="glass-btn-hover"
           >
-            Standard Access <ArrowRight size={18} />
+            Try for Free <ArrowRight size={18} />
           </Link>
        </motion.div>
 

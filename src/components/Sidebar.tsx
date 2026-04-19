@@ -18,7 +18,8 @@ import {
   Moon,
   Sun,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Music
 } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext'
 import { Profile } from '@/types/auth'
@@ -90,7 +91,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const handleSignOut = () => {
     showConfirmation({
       title: 'End Session?',
-      message: 'Are you sure you want to securely sign out of the environment?',
+      message: 'Ready to sign out? Your team will be waiting when you get back.',
       type: 'warning',
       onConfirm: async () => {
         await withLoading(async () => {
@@ -103,7 +104,7 @@ export default function Sidebar({ user }: SidebarProps) {
           }
           await supabase.auth.signOut();
           window.location.href = '/login';
-        }, 'Securing Environment...');
+        }, 'Signing you out...');
       },
       onCancel: () => {}
     });
@@ -111,11 +112,12 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Peer Network', path: '/dashboard/network', icon: Users },
-    { name: 'Share & Borrow', path: '/dashboard/marketplace', icon: TrendingUp },
-    { name: 'Chill Out Zone', path: '/dashboard/chillout', icon: Sparkles },
-    { name: 'Group Statistics', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics', icon: BarChart3 },
-    { name: 'Management', path: '/dashboard/upgrade', icon: Activity },
+    { name: 'Teammates', path: '/dashboard/network', icon: Users },
+    { name: 'Resources', path: '/dashboard/marketplace', icon: TrendingUp },
+    { name: 'Jukebox', path: '/dashboard/music', icon: Music },
+    { name: 'Break Room', path: '/dashboard/chillout', icon: Sparkles },
+    { name: 'Project Stats', path: profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics', icon: BarChart3 },
+    { name: 'Plans', path: '/dashboard/upgrade', icon: Activity },
     { name: 'My Profile', path: '/dashboard/profile', icon: UserCircle },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ]
@@ -150,7 +152,7 @@ export default function Sidebar({ user }: SidebarProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <button 
             onClick={() => setIsOpen(true)} 
-            aria-label="Toggle Menu"
+            aria-label="Open menu"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
             <div style={{ width: '38px', height: '38px', borderRadius: '12px', overflow: 'hidden', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
@@ -228,7 +230,7 @@ export default function Sidebar({ user }: SidebarProps) {
             className="hover-card hide-mobile"
             aria-label={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
           >
-            {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {isOpen ? <ChevronLeft size={20} aria-hidden="true" /> : <ChevronRight size={20} aria-hidden="true" />}
           </button>
           
           <button 
@@ -260,7 +262,7 @@ export default function Sidebar({ user }: SidebarProps) {
               isActive = false
             }
 
-            const isPremiumLocked = (link.name === 'Chill Out Zone' || link.name === 'Group Statistics') && profile?.subscription_plan !== 'premium' && profile?.subscription_plan !== 'pro'
+            const isPremiumLocked = (link.name === 'Break Room' || link.name === 'Project Stats' || link.name === 'Jukebox') && profile?.subscription_plan !== 'premium' && profile?.subscription_plan !== 'pro'
 
             return (
               <button 
@@ -322,10 +324,10 @@ export default function Sidebar({ user }: SidebarProps) {
               <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={16} className="shimmer-gold" />
-                <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>PROJECT SUPPORT</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>TEAM SUPPORT</span>
               </div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Upgrade to Pro</div>
-              <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Unlock advanced themes and elite profile status.</p>
+              <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Upgrade to Pro Member</div>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Unlock advanced themes and elite student status.</p>
             </div>
           </div>
         )}

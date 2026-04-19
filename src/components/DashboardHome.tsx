@@ -64,7 +64,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         setPersonalTaskCount(stats.personal || 0)
         setTotalBacklog(stats.backlog || 0)
         setProjectProgress(stats.progress || 0)
-        setProgressLabel(stats.label || 'Synchronizing...')
+        setProgressLabel(stats.label || 'Just a moment...')
       }
     } catch (e) {
       console.warn('Cache hydration failed defensively:', e)
@@ -115,9 +115,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const handleAcceptRequest = async (id: string) => {
     const { acceptJoinRequest } = await import('@/app/dashboard/join/actions')
     const res = await acceptJoinRequest(id)
-    if (res.error) addToast('Protocol Error', res.error, 'error')
+    if (res.error) addToast('Oops, something went wrong', 'We couldn\'t add the member right now. Let\'s try again.', 'error')
     else {
-      addToast('Sync Success', 'Authorized member integrated into group.', 'success')
+      addToast('All set!', 'Your teammate is now in the group.', 'success')
       void fetchMembers()
       void fetchPendingRequests()
     }
@@ -126,9 +126,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const handleDeclineRequest = async (id: string) => {
     const { declineJoinRequest } = await import('@/app/dashboard/join/actions')
     const res = await declineJoinRequest(id)
-    if (res.error) addToast('System Error', res.error, 'error')
+    if (res.error) addToast('Slight issue', 'We couldn\'t update the request. Please try again.', 'error')
     else {
-      addToast('Request Purged', 'Join request has been successfully declined.', 'info')
+      addToast('Request updated', 'The join request has been removed.', 'info')
       void fetchPendingRequests()
     }
   }
@@ -152,7 +152,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   }, [profile, groupId, supabase])
 
   const [projectProgress, setProjectProgress] = useState(0)
-  const [progressLabel, setProgressLabel] = useState('Initializing')
+  const [progressLabel, setProgressLabel] = useState('Starting up')
   const [totalBacklog, setTotalBacklog] = useState(0)
 
   const fetchProjectProgress = useCallback(async () => {
@@ -177,10 +177,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     setProjectProgress(progress)
 
     // Better logic for labels
-    let label = 'Ready for Release'
-    if (progress <= 30) label = 'Initial Sprint'
-    else if (progress <= 50) label = 'Core Development'
-    else if (progress <= 80) label = 'Refining Protocol'
+    let label = 'Almost finished'
+    if (progress <= 30) label = 'Just starting'
+    else if (progress <= 50) label = 'Making progress'
+    else if (progress <= 80) label = 'Smoothing things out'
     
     setProgressLabel(label)
     
@@ -272,15 +272,15 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
-            {profile?.subscription_plan === 'premium' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>PREMIUM ARCHITECT</span>}
-            {profile?.subscription_plan === 'pro' && <span className="locked-badge locked-badge-pro glow-pro" style={{ margin: 0, fontSize: '0.7rem' }}>PRO SYNC</span>}
+            {profile?.subscription_plan === 'premium' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>PREMIUM TEAM</span>}
+            {profile?.subscription_plan === 'pro' && <span className="locked-badge locked-badge-pro glow-pro" style={{ margin: 0, fontSize: '0.7rem' }}>PRO MEMBER</span>}
           </h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.25rem' }}>
             <div style={{ padding: '0.4rem 0.8rem', background: 'rgba(var(--brand-rgb), 0.08)', borderRadius: '10px', border: '1px solid rgba(var(--brand-rgb), 0.15)', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: 'var(--shadow-sm)' }}>
               <Zap size={12} color="var(--brand)" fill="var(--brand)" style={{ opacity: 0.8 }} />
               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                SESSION: <span style={{ color: 'var(--brand)' }}>{group?.name || 'INITIALIZING...'}</span>
+                TEAM: <span style={{ color: 'var(--brand)' }}>{group?.name || 'STARTING UP...'}</span>
               </span>
             </div>
 
@@ -417,16 +417,18 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           <button
             onClick={() => setNewTaskSignal(prev => prev + 1)}
             className="btn btn-primary btn-inline"
+            aria-label="Create a new task"
             style={{ padding: '0.6rem 1rem', borderRadius: '10px', fontWeight: 900 }}
           >
-            <Zap size={16} fill="currentColor" /> Initiate Task
+            <Zap size={16} fill="currentColor" aria-hidden="true" /> New Task
           </button>
           <button
             onClick={() => router.push(`/dashboard/analytics/${groupId}`)}
             className="btn btn-secondary btn-inline"
+            aria-label="View group updates and progress"
             style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 800 }}
           >
-            Activity Log
+            Group Updates
           </button>
         </div>
       </header>
@@ -434,10 +436,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       {/* ── METRICS MODULES ────────────────────────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         {[
-          { icon: <Activity size={20} />, label: 'Your Objectives', value: personalTaskCount, sub: 'Personal tasks pending', color: 'var(--brand)' },
-          { icon: <Users size={20} />, label: 'Team Backlog', value: totalBacklog, sub: 'Group tasks remaining', color: 'var(--success)' },
-          { icon: <TrendingUp size={20} />, label: 'Global Progress', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
-          { icon: <Zap size={20} />, label: 'Productivity Index', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
+          { icon: <Activity size={20} />, label: 'Your Goals', value: personalTaskCount, sub: 'Tasks for you to do', color: 'var(--brand)' },
+          { icon: <Users size={20} />, label: 'Team Progress', value: totalBacklog, sub: 'Tasks left for the team', color: 'var(--success)' },
+          { icon: <TrendingUp size={20} />, label: 'Overall Completion', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
+          { icon: <Zap size={20} />, label: 'Check Status', value: '100%', sub: 'Safe and secure', color: 'var(--accent)' }
         ].map((stat, i) => (
           <div key={i} className="control-card control-card-entrance" style={{
             padding: '1rem',
@@ -479,7 +481,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       }}>
         <div style={{ display: 'flex', gap: '0.4rem' }}>
           {[
-            { id: 'board', label: 'Central Board', icon: <LayoutDashboard size={18} /> },
+            { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
             { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> }
           ].map(tab => (
             <button
@@ -493,11 +495,11 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', paddingRight: '0.5rem' }}>
-          <button className="panel-tool" data-tooltip="Refresh System" onClick={() => setSyncToken(v => v + 1)}>
-            <Activity size={16} />
+          <button className="panel-tool" data-tooltip="Update view" aria-label="Refresh board data" onClick={() => setSyncToken(v => v + 1)}>
+            <Activity size={16} aria-hidden="true" />
           </button>
-          <button className="panel-tool" data-tooltip="Grid Settings" onClick={() => router.push('/dashboard/settings')}>
-            <TrendingUp size={16} />
+          <button className="panel-tool" data-tooltip="Board Settings" aria-label="Open board settings" onClick={() => router.push('/dashboard/settings')}>
+            <TrendingUp size={16} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -545,26 +547,26 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Team</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Your Team</span>
               <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                {group.name} <span style={{ color: 'var(--text-sub)', fontWeight: 600 }}>&middot; {group.module_code || 'UNIT-X'}</span>
+                {group.name} <span style={{ color: 'var(--text-sub)', fontWeight: 600 }}>&middot; {group.module_code || 'Project'}</span>
               </span>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '2rem' }} className="mobile-hide">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Encryption</span>
-              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--success)' }}>Active AES-256</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Security</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--success)' }}>Your work is safe with us</span>
             </div>
             <div
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', cursor: 'pointer' }}
               onClick={() => router.push('/dashboard/network')}
             >
-              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Connectivity</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Connection</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <div className="pulse-pill" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)' }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>Network Secure</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>Online & Ready</span>
               </div>
             </div>
           </div>

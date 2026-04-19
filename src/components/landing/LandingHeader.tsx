@@ -75,6 +75,8 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
               onMouseEnter={() => setActiveDropdown(key)}
             >
               <button 
+                aria-expanded={activeDropdown === key}
+                aria-haspopup="true"
                 style={{ 
                   background: 'none', 
                   border: 'none', 
@@ -90,7 +92,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                 }}
               >
                 {navMenus[key].label}
-                <ChevronDown size={12} style={{ opacity: 0.5, transform: activeDropdown === key ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s ease' }} />
+                <ChevronDown size={12} style={{ opacity: 0.5, transform: activeDropdown === key ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s ease' }} aria-hidden="true" />
               </button>
 
               <AnimatePresence>
@@ -170,7 +172,20 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
               </AnimatePresence>
             </div>
           ))}
-          <Link href="/docs" style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}>Documentation</Link>
+          <Link 
+            href="#pricing" 
+            style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} 
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} 
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+            onClick={(e) => {
+              e.preventDefault();
+              const el = document.getElementById('pricing');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            Pricing
+          </Link>
+          <Link href="/docs" style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}>Help & Docs</Link>
         </nav>
       </div>
 
@@ -205,6 +220,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
 
         <button 
            className="nav-util-btn"
+           onClick={() => alert("Opening search and help... (Cmd+K triggered)")}
            style={{ 
              background: 'rgba(255,255,255,0.03)', 
              border: '1px solid #222222', 
@@ -273,7 +289,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
               onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
               onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
             >
-              Start Project
+              Get Started
             </Link>
           </>
         )}
@@ -339,7 +355,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                 </div>
               ))}
               <div style={{ paddingTop: '1rem', borderTop: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                 <Link href="/docs" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Documentation</Link>
+                 <Link href="/docs" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Help Center</Link>
                  {user ? (
                    <Link href="/dashboard" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
                  ) : (

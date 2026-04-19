@@ -10,6 +10,8 @@ import OnboardingWrapper from '@/components/OnboardingWrapper'
 import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
 import { ProfileProvider } from '@/context/ProfileContext'
 import ConnectionAlertTray from '@/components/ConnectionAlertTray'
+import { SpotifyProvider } from '@/context/SpotifyContext'
+import SpotifyMiniPlayer from '@/components/SpotifyMiniPlayer'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,16 +45,19 @@ export default async function DashboardLayout({
           <OnboardingWrapper profile={profile as any} user={user}>
             <div className="dashboard-layout">
               <PresenceProvider user={user}>
-                <NotificationProvider>
-                  <Sidebar user={user} />
-                  
-                  <main className="main-content">
-                    <ConnectionAlertTray />
-                    {children}
-                  </main>
+                <SpotifyProvider>
+                  <NotificationProvider>
+                    <Sidebar user={user} />
+                    
+                    <main className="main-content">
+                      <ConnectionAlertTray />
+                      {children}
+                    </main>
 
-                  <BottomNav />
-                </NotificationProvider>
+                    <SpotifyMiniPlayer />
+                    <BottomNav />
+                  </NotificationProvider>
+                </SpotifyProvider>
               </PresenceProvider>
             </div>
           </OnboardingWrapper>

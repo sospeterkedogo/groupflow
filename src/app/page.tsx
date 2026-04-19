@@ -65,24 +65,23 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 14px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 950, marginBottom: '1.25rem', letterSpacing: '2px', border: '1px solid rgba(var(--brand-rgb), 0.2)' }}>
-                STRATEGIC MISSION PROTOCOL
+                THE GROUPFLOW MISSION
              </div>
 
-             <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-0.04em', color: 'white', lineHeight: 1.1 }}>Authorizing Fairness in <br /><span style={{ color: 'var(--brand)' }}>Academic Capital.</span></h2>
-             
-             <div style={{ display: 'grid', gap: '2rem', fontSize: '1rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.6)' }}>
+             <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-0.04em', color: 'white', lineHeight: 1.1 }}>Fair recognition for your <br /><span style={{ color: 'var(--brand)' }}>Hard Work.</span></h2>
+                          <div style={{ display: 'grid', gap: '2rem', fontSize: '1rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.6)' }}>
                 <div>
-                   <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Protocol 01: Visibility</strong>
-                   GroupFlow eliminates opaque group dynamics. We ensure every intellectual contribution is audit-ready and attributed, securing fair recognition for all researchers.
+                   <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal 01: Visibility</strong>
+                   GroupFlow makes sure everyone's hard work counts. We keep a clear record of every task so you get the credit you deserve.
                 </div>
                 <div>
-                   <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Protocol 02: Integration</strong>
-                   Our mandate is to bridge the gap between individual effort and institutional outcomes, scaling this toolkit across the global educational ecosystem.
+                   <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal 02: Teammates</strong>
+                   Our aim is to make group work easy and stress-free, bringing students together to succeed on every project.
                 </div>
              </div>
 
              <button className="btn btn-primary" style={{ marginTop: '2.5rem', width: '100%', padding: '1.25rem', borderRadius: '20px', background: 'var(--brand)', color: '#0a0a0a', fontWeight: 950, fontSize: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(var(--brand-rgb), 0.3)' }} onClick={() => setIsModalOpen(false)}>
-               Support Institutional Scale
+               Got it, let's go!
              </button>
           </div>
         </div>
@@ -162,14 +161,14 @@ export default function Home() {
            }}>
               <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 120%, rgba(var(--brand-rgb), 0.15), transparent 70%)', pointerEvents: 'none' }} />
               
-              <h2 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 950, color: '#f3f4f6', marginBottom: '1.5rem', letterSpacing: '-0.05em', lineHeight: 1 }}>Begin your mission.</h2>
+              <h2 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 950, color: '#f3f4f6', marginBottom: '1.5rem', letterSpacing: '-0.05em', lineHeight: 1 }}>Start your next project.</h2>
               <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4rem', maxWidth: '700px', margin: '0 auto 4rem', lineHeight: 1.4, fontWeight: 500 }}>
-                 Authorize individual research nodes, synchronize project workflows, and implement peer-to-Peer recognition protocols. 
-                 <br /><span style={{ color: 'var(--brand)', fontWeight: 800 }}>Institutional clearance remains free for verified academic specialists.</span>
+                 Keep track of every task, work in sync with your teammates, and make sure everyone gets credit for their help.
+                 <br /><span style={{ color: 'var(--brand)', fontWeight: 800 }}>Basic access is free for all students.</span>
               </p>
               <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
-                 <button onClick={() => setIsModalOpen(true)} style={{ background: 'var(--brand)', color: '#0a0a0a', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 950, border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px rgba(var(--brand-rgb), 0.3)', transition: '0.3s' }}>Secure Clearance</button>
-                 <a href="/login" style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', transition: '0.3s' }}>Initialize Workspace</a>
+                 <button onClick={() => setIsModalOpen(true)} style={{ background: 'var(--brand)', color: '#0a0a0a', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 950, border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px rgba(var(--brand-rgb), 0.3)', transition: '0.3s' }}>Learn More</button>
+                 <a href="/login?signup=true" style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', transition: '0.3s' }}>Get Started</a>
               </div>
            </div>
         </section>

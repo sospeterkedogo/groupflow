@@ -221,11 +221,44 @@ body {
   animation: control-card-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* Focus ring */
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--brand) !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15) !important;
+/* ── ACCESSIBILITY UTILITIES ───────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --text-sub: #ffffff;
+    --border: rgba(255, 255, 255, 0.3);
+    --brand: #22c55e; /* Brighter green */
+  }
+  .btn-secondary {
+    border-color: #fff;
+  }
+}
+
+/* Focus ring improvements for better visibility */
+input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(var(--brand-rgb), 0.2);
 }
 
 /* Tooltip Utility */

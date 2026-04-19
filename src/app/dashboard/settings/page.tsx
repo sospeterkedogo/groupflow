@@ -846,6 +846,7 @@ export default function SettingsPage() {
                     fontSize: '0.65rem',
                     fontWeight: 950,
                     boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+                    filter: profile.subscription_plan === 'lifetime' ? 'url(#glow-gold)' : 'url(#elite-shimmer)',
                     zIndex: 2,
                     display: 'flex',
                     alignItems: 'center',

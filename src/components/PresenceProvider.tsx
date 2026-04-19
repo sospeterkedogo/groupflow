@@ -147,7 +147,8 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
             full_name: userName,
             group_id: groupId,
             online_at: new Date().toISOString(),
-            is_typing: false
+            is_typing: false,
+            music: profile?.subscription_plan === 'pro' || profile?.subscription_plan === 'premium' ? (window as any)._spotify_presence : undefined
           })
 
           await supabase

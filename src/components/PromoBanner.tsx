@@ -1,74 +1,106 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, X, ArrowRight, Zap } from 'lucide-react'
+import { X, Zap } from 'lucide-react'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function PromoBanner() {
-  const [isVisible, setIsVisible] = useState(true)
   const [isClient, setIsClient] = useState(false)
+  const [config, setConfig] = useState<Record<string, any>>({})
+  const [isVisible, setIsVisible] = useState(true)
+  
+  const supabase = createBrowserSupabaseClient()
+  const router = useRouter()
 
   useEffect(() => {
     setIsClient(true)
-    const dismissed = localStorage.getItem('gf_promo_dismissed_aug_2026')
-    if (dismissed) setIsVisible(false)
   }, [])
+
+  useEffect(() => {
+    if (!isClient) return;
+    const fetchConfig = async () => {
+      const { data } = await supabase
+        .from('platform_config')
+        .select('*')
+        .eq('key', 'main_banner')
+        .single()
+      
+      if (data) setConfig(data)
+    }
+    fetchConfig()
+
+    // 2. Real-time Subscription
+    const channel = supabase
+      .channel('banner_sync')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'platform_config', filter: 'key=eq.main_banner' }, (payload) => {
+        setConfig(payload.new)
+      })
+      .subscribe()
+
+    const dismissed = localStorage.getItem('gf_promo_dismissed_v2')
+    if (dismissed) setIsVisible(false)
+
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase])
 
   const handleDismiss = () => {
     setIsVisible(false)
-    localStorage.setItem('gf_promo_dismissed_aug_2026', 'true')
+    localStorage.setItem('gf_promo_dismissed_v2', 'true')
   }
 
-  if (!isClient || !isVisible) return null
+  if (!isClient || !isVisible || !config?.is_active) return null
 
-  // August 31, 2026 expiry check
-  const expiryDate = new Date('2026-09-01')
-  if (new Date() > expiryDate) return null
+  const bannerText = config.value?.text || '30% OFF ALL CLEARANCE TIERS'
+  const promoCode = config.value?.code || 'ELITE30'
 
   return (
     <div className="promo-banner-container" style={{
       position: 'relative',
       zIndex: 20000,
-      background: 'linear-gradient(90deg, #10b981 0%, #6366f1 50%, #10b981 100%)',
-      backgroundSize: '200% auto',
-      animation: 'gradientFlow 5s linear infinite',
+      background: 'linear-gradient(90deg, #10b981 0%, #6366f1 33%, #ec4899 66%, #10b981 100%)',
+      backgroundSize: '300% auto',
+      animation: 'gradientFlow 8s linear infinite',
       color: 'white',
-      padding: '0.6rem 1rem',
+      padding: '0.6rem 1.5rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '2rem',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-      overflow: 'hidden'
+      gap: '2.5rem',
+      boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+      overflow: 'hidden',
+      borderBottom: '1px solid rgba(255,255,255,0.1)'
     }}>
       <div className="promo-shimmer" />
       
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 950, fontSize: '0.8rem', letterSpacing: '0.05em' }}>
-        <Zap size={16} fill="white" className="animate-pulse" />
-        <span style={{ textTransform: 'uppercase' }}>Protocol Upgrade Sale</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 950, fontSize: '0.8rem', letterSpacing: '0.1em', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+        <Zap size={18} fill="white" className="animate-pulse" />
+        <span style={{ textTransform: 'uppercase' }}>Protocol Target</span>
       </div>
 
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '0.5rem', 
-        fontSize: '0.9rem', 
-        fontWeight: 800,
-        color: 'rgba(255,255,255,0.95)'
+        gap: '0.75rem', 
+        fontSize: '0.95rem', 
+        fontWeight: 850,
+        color: 'white',
+        textShadow: '0 2px 10px rgba(0,0,0,0.3)'
       }}>
-        30% OFF ALL CLEARANCE TIERS — USE CODE: <span style={{ 
-          background: 'rgba(255,255,255,0.2)', 
-          padding: '2px 8px', 
-          borderRadius: '4px', 
+        {bannerText} — CODE: <span style={{ 
+          background: 'rgba(255,255,255,1)', 
+          padding: '4px 12px', 
+          borderRadius: '8px', 
           fontFamily: 'monospace',
-          color: 'white',
-          border: '1px solid rgba(255,255,255,0.3)'
-        }}>ELITE30</span>
+          color: 'black',
+          border: '2px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+          fontWeight: 950,
+          scale: '1.05'
+        }}>{promoCode}</span>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, opacity: 0.8, textTransform: 'uppercase' }}>
-          Ends August 31st
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
         <button 
           onClick={handleDismiss}
           style={{ 
@@ -78,35 +110,40 @@ export default function PromoBanner() {
             cursor: 'pointer',
             padding: '4px',
             opacity: 0.6,
-            transition: '0.2s hover'
+            transition: '0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
-          className="hover:opacity-100"
+          className="dismiss-btn"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
       </div>
 
       <style jsx>{`
         @keyframes gradientFlow {
           0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+          100% { background-position: 300% 50%; }
         }
         .promo-shimmer {
           position: absolute;
           top: 0;
           left: 0;
-          width: 100%;
+          width: 50%;
           height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-          transform: translateX(-100%);
-          animation: shimmer 3s infinite;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transform: skewX(-20deg) translateX(-150%);
+          animation: intenseShimmer 4s infinite;
         }
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
+        @keyframes intenseShimmer {
+          0% { transform: skewX(-20deg) translateX(-150%); }
+          50% { transform: skewX(-20deg) translateX(250%); }
+          100% { transform: skewX(-20deg) translateX(250%); }
         }
-        @media (max-width: 768px) {
-          .promo-banner-container { gap: 0.75rem; flex-direction: column; text-align: center; }
+        .dismiss-btn:hover {
+          opacity: 1;
+          transform: rotate(90deg);
+        }
+        @media (max-width: 900px) {
+          .promo-banner-container { gap: 1rem; flex-direction: column; text-align: center; padding: 1rem; }
         }
       `}</style>
     </div>

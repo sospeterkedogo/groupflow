@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Shield, Sparkles, CheckCircle2, Check, ArrowRight, Loader2 } from 'lucide-react'
+import { Shield, Sparkles, CheckCircle2, Check, ArrowRight, Loader2, Key } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { ProfileContext } from '@/context/ProfileContext'
 import { useContext } from 'react'
@@ -16,21 +16,49 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
   const [error, setError] = useState<string | null>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [lifetimeSeatsUsed, setLifetimeSeatsUsed] = useState<number | null>(null)
+  const [proCount, setProCount] = useState<number | null>(null)
+  const [coupon, setCoupon] = useState('')
+  const [discountActive, setDiscountActive] = useState(false)
+  const [validatingCoupon, setValidatingCoupon] = useState(false)
+
   const context = useContext(ProfileContext)
   const profile = context?.profile
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => {
-    const fetchLifetimeCount = async () => {
-      const { count } = await supabase
+    const fetchCounts = async () => {
+      const { count: lifetimeCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .eq('subscription_plan', 'lifetime')
       
-      setLifetimeSeatsUsed(count || 0)
+      const { count: proTotal } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('subscription_plan', 'pro')
+
+      setLifetimeSeatsUsed(lifetimeCount || 0)
+      setProCount(proTotal || 0)
     }
-    fetchLifetimeCount()
+    fetchCounts()
   }, [supabase])
+
+  const handleApplyCoupon = () => {
+    if (!coupon) return
+    setValidatingCoupon(true)
+    
+    // Simulate high-performance validation logic
+    setTimeout(() => {
+      if (coupon.toUpperCase() === 'ELITE30') {
+        setDiscountActive(true)
+        setError(null)
+      } else {
+        setError('Hmm, that code didn\'t work. Please check it and try again.')
+        setDiscountActive(false)
+      }
+      setValidatingCoupon(false)
+    }, 600)
+  }
 
   const handleCheckout = async (plan: 'pro' | 'premium' | 'lifetime') => {
     setError(null)
@@ -47,21 +75,22 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
       }
 
       const userId = user.id
+      const promoParam = discountActive ? `&prefilled_promo_code=${coupon}` : ''
 
       // 2. Direct Stripe Links for instant availability (Always Online)
       if (plan === 'pro') {
-        window.location.href = `https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04?client_reference_id=${userId}`
+        window.location.href = `https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04?client_reference_id=${userId}${promoParam}`
         return
       }
 
       if (plan === 'premium') {
-        window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${userId}`
+        window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${userId}${promoParam}`
         return
       }
 
       if (plan === 'lifetime') {
-        // Updated Stripe Lifetime Link (Placeholder - replace with actual if provided)
-        window.location.href = `https://buy.stripe.com/test_lifetime_placeholder?client_reference_id=${userId}`
+        // Updated Real Stripe Lifetime Link
+        window.location.href = `https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05?client_reference_id=${userId}${promoParam}`
         return
       }
     } catch (err: any) {
@@ -87,10 +116,10 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             textTransform: 'uppercase', 
             letterSpacing: '2px' 
           }}>
-            <Sparkles size={18} /> INSTITUTIONAL AUTHORIZATION
+            <Sparkles size={18} /> Choose your plan
           </div>
           <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', lineHeight: 1, fontWeight: 950, letterSpacing: '-0.05em', color: 'white', margin: 0 }}>
-            Authorize your <span style={{ color: 'var(--brand)' }}>Academic Node</span>
+            Find the right level for your <span style={{ color: 'var(--brand)' }}>Team Space</span>
           </h2>
           <p style={{ 
             maxWidth: '720px', 
@@ -100,10 +129,77 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             fontWeight: 500, 
             lineHeight: 1.5 
           }}>
-            Select the clearance level required for your research objectives. All tiers include core peer-networking protocols.
+            Pick the access level you need for your group projects. All plans include everything you need to start working together.
           </p>
         </div>
       )}
+
+      {/* ── COUPON HUB (NEW) ────────────────────────────────────────── */}
+      <div style={{ 
+        padding: '1.5rem 2rem', 
+        background: 'rgba(255,255,255,0.02)', 
+        borderRadius: '24px', 
+        border: '1px solid var(--border)', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        flexWrap: 'wrap', 
+        gap: '1.5rem',
+        maxWidth: '800px',
+        margin: isLanding ? '0 auto' : '0'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: discountActive ? 'var(--brand)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: discountActive ? 'black' : 'rgba(255,255,255,0.4)', transition: '0.3s' }}>
+            <Key size={22} />
+          </div>
+          <div>
+            <div style={{ fontWeight: 950, fontSize: '0.9rem', color: discountActive ? 'var(--success)' : 'white' }}>
+              {discountActive ? '30% STUDENT DISCOUNT ACTIVE' : 'Enter your promo code'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>
+              {discountActive ? 'Your discount is applied and ready to use.' : 'Have a special code? Enter it here to save on Pro.'}
+            </div>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '0.75rem', flex: 1, maxWidth: '300px' }}>
+          <input 
+            type="text" 
+            placeholder="ELITE30"
+            value={coupon}
+            onChange={(e) => setCoupon(e.target.value)}
+            disabled={discountActive}
+            style={{ 
+              flex: 1, 
+              padding: '0.75rem 1rem', 
+              background: 'rgba(0,0,0,0.3)', 
+              border: '1px solid var(--border)', 
+              borderRadius: '12px', 
+              color: 'white', 
+              fontSize: '0.85rem', 
+              fontWeight: 800,
+              outline: 'none',
+              textTransform: 'uppercase'
+            }}
+          />
+          <button 
+            onClick={handleApplyCoupon}
+            disabled={discountActive || validatingCoupon || !coupon}
+            className="btn btn-primary"
+            style={{ 
+              width: 'auto', 
+              padding: '0.75rem 1.25rem', 
+              borderRadius: '12px', 
+              fontWeight: 950, 
+              fontSize: '0.8rem',
+              background: discountActive ? 'var(--success)' : 'var(--brand)',
+              color: 'black'
+            }}
+          >
+            {validatingCoupon ? <Loader2 className="animate-spin" size={16} /> : discountActive ? 'APPLIED' : 'APPLY'}
+          </button>
+        </div>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         
@@ -140,8 +236,8 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
                 {[
                   'Unified Task Management',
                   '1 Active Collaborative Project',
-                  'Public Peer-Networking Protocol',
-                  'Standard AI Synthesis Engine'
+                  'Standard Team Features',
+                  'Basic AI Project Help'
                 ].map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
                     <CheckCircle2 size={16} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0, marginTop: '3px' }} />
@@ -167,7 +263,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             }}
             disabled
           >
-            Authorized by Default
+            Included for Everyone
           </button>
         </div>
 
@@ -194,25 +290,32 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
               </div>
               <div style={{ textAlign: 'right' }}>
                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Pro Scholar</h2>
-                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Advanced Institutional Analytics</p>
+                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Advanced Team Features</p>
               </div>
             </div>
 
             <div style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
-                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£4.99</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+                {discountActive ? (
+                  <>
+                    <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£3.49</span>
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 800, fontSize: '1.5rem', textDecoration: 'line-through' }}>£4.99</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£4.99</span>
+                )}
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 500 }}>
-                Unlock the full technical potential of your research team with priority AI feedback, unlimited multi-project Hubs, and deep visual customization for your academic environment.
+                Unlock the full potential of your team with smart project tips, unlimited groups, and more ways to make your workspace yours.
               </p>
               <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {[
-                  'Priority AI Feedback Protocols',
-                  'Unlimited Multi-Project Groups',
-                  'Deep Visual Customization Engine',
-                  'Verified Historical Archiving',
-                  'Private SSL Shielded Rooms'
+                  'Smart AI Project Tips',
+                  'Unlimited Team Groups',
+                  'Customized Workspace Styles',
+                  'Automatic Activity Saving',
+                  'Private & Secure Team Rooms'
                 ].map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
                     <CheckCircle2 size={16} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: '3px' }} />
@@ -240,7 +343,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             onClick={() => handleCheckout('pro')}
             disabled={loadingPlan !== null}
           >
-            {loadingPlan === 'pro' ? 'SYNCING...' : 'Elevate to Pro'}
+            {loadingPlan === 'pro' ? 'CONNECTING...' : `Join other ${proCount !== null ? proCount : '#'} members today`}
           </button>
         </div>
 
@@ -264,25 +367,32 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
               </div>
               <div style={{ textAlign: 'right' }}>
                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Premium</h2>
-                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Institutional Partner Access</p>
+                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Full Student Access</p>
               </div>
             </div>
 
             <div style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
-                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£14.99</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+                {discountActive ? (
+                  <>
+                    <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£10.49</span>
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 800, fontSize: '1.5rem', textDecoration: 'line-through' }}>£14.99</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£14.99</span>
+                )}
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 500 }}>
-                The definitive mandate for academic excellence. Includes lifetime authorization protocols, elite scholar markers, researcher API clearing, and dedicated strategy session support.
+                The best way for serious teams to succeed. Includes lifetime access options, special profile badges, and priority support for your projects.
               </p>
               <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {[
-                  'Institutional Multi-Project Hubs',
-                  'Early Access Review Lab',
-                  'Researcher API Clearing',
-                  'Dedicated Protocol Support',
-                  'Strategy Synthesis Session'
+                  'Large Team Project Hubs',
+                  'Early Access to New Features',
+                  'Advanced Data Tools',
+                  'Priority Support',
+                  'Personalized Success Strategy'
                 ].map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
                     <Check size={18} style={{ color: '#6366f1', flexShrink: 0, marginTop: '2px' }} />
@@ -309,7 +419,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             onClick={() => handleCheckout('premium')}
             disabled={loadingPlan !== null}
           >
-            {loadingPlan === 'premium' ? 'INITIALIZING...' : 'Acquire Premium'}
+            {loadingPlan === 'premium' ? 'LOADING...' : 'Get Premium'}
           </button>
         </div>
         
@@ -339,24 +449,31 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
               </div>
               <div style={{ textAlign: 'right' }}>
                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Lifetime Researcher</h2>
-                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Permanent Protocol Authorization</p>
+                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Permanent Lifetime Access</p>
               </div>
             </div>
 
             <div style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
-                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£99</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+                {discountActive ? (
+                  <>
+                    <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£69.30</span>
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 800, fontSize: '1.5rem', textDecoration: 'line-through' }}>£99</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£99</span>
+                )}
                 <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/once</span>
               </div>
               <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 700 }}>
-                The ultimate clearance level. No monthly fees. All future protocol updates, beta features, and elite branding markers included forever.
+                The ultimate choice. Reserved for our first 100 founding members. No monthly fees ever. All future updates and features included for life.
               </p>
               <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {[
-                  'Permanent Protocol Authorization',
-                  'Beta Feature Review Lab Access',
-                  'Priority Model Update Stream',
-                  'Institutional "Founder" Marker',
+                  'Lifetime Feature Access',
+                  'Early Beta Access',
+                  'Priority Update Stream',
+                  'Official "Founder" Profile Badge',
                   'All Premium Tier Benefits Included'
                 ].map((f, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,1)', fontWeight: 800 }}>
@@ -385,7 +502,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             onClick={() => lifetimeSeatsUsed !== null && lifetimeSeatsUsed < 100 && handleCheckout('lifetime')}
             disabled={loadingPlan !== null || (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100)}
           >
-            {loadingPlan === 'lifetime' ? 'AUTHORIZING...' : (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'OFFER EXPIRED (Sold Out)' : 'Secure Lifetime Access'}
+            {loadingPlan === 'lifetime' ? 'CONNECTING...' : (lifetimeSeatsUsed !== null && lifetimeSeatsUsed >= 100) ? 'OFFER EXPIRED (Sold Out)' : 'Secure Lifetime Access'}
           </button>
 
           {/* SCARCITY INDICATOR (NEW) */}
@@ -431,7 +548,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
         justifyContent: isLanding ? 'center' : 'flex-start'
       }}>
         <ArrowRight size={18} style={{ color: 'var(--brand)' }} />
-        <span>Secure checkout powered by Stripe. Authorization includes instant receipt generation.</span>
+        <span>Safe checkout with Stripe. You\'ll get a receipt immediately after joining.</span>
       </div>
 
       <style jsx>{`

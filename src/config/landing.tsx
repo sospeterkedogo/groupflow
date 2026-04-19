@@ -4,50 +4,60 @@ import { Layers, Users, Zap, Shield, Milestone, Award, LayoutGrid, BookOpen, Glo
 export const features = [
   { 
     icon: <Layers size={21} />, 
-    title: "Kanban Project Intelligence", 
-    desc: "Synchronized workflow management with real-time state persistence and automated assignment tracking.",
+    title: "Smart Task Board", 
+    desc: "Easily manage your tasks with real-time updates that save automatically as you work.",
     color: "var(--brand)"
   },
   { 
     icon: <Users size={21} />, 
-    title: "Global Academic Networking", 
-    desc: "Connect with peers across departments, exchange credentials, and build your professional university network.",
+    title: "Student Network", 
+    desc: "Connect with other students in your classes, share resources, and build your university network.",
     color: "#10b981"
   },
   { 
     icon: <Zap size={21} />, 
-    title: "Real-time Synchronization", 
-    desc: "High-performance synchronization for chat, presence, and file management across all team devices.",
+    title: "Quick Syncing", 
+    desc: "Fast and reliable chat and file sharing that stays updated across all your devices.",
     color: "var(--accent)"
   },
   { 
     icon: <Shield size={21} />, 
-    title: "Verifiable Contribution Hub", 
-    desc: "Secure, audit-ready logs of every research contribution, ensuring transparency for students and faculty.",
+    title: "Credit for Your Work", 
+    desc: "We keep a safe record of your help in every project, ensuring you always get the credit you deserve.",
     color: "#6366f1"
   },
   { 
     icon: <Milestone size={21} />, 
-    title: "Intelligent Roadmapping", 
-    desc: "Project timeline visualization with 5-stage academic status intervals from research to final submission.",
+    title: "Visible Progress", 
+    desc: "See your group deadlines clearly and track your project's path from start to finish.",
     color: "#f59e0b"
   },
   { 
      icon: <Award size={21} />, 
-     title: "Achievement Tier System", 
-     desc: "Differentiated recognition levels based on contribution metrics, unlocking professional profile enhancements.",
+     title: "Recognition Badges", 
+     desc: "Earn special badges and profile status based on your contributions and team achievements.",
      color: "#fbbf24"
+  },
+  { 
+    icon: <Shield size={21} />, 
+    title: "Secure & Safe", 
+    desc: "Your data is protected with modern security to keep your work and personal info safe.",
+    color: "#10b981"
   }
 ]
 
 export const faqs = [
   {
     q: "How can I support GroupFlow2026?",
-    a: "You can support this project by upgrading to Pro (£2.99/mo) or Premium (£99 Lifetime). Your contribution directly helps me bring this tool to many more schools and support learning worldwide."
+    a: "You can support this project by upgrading to Pro (£4.99/mo) or Premium (£14.99/mo) or securing a Founder Lifetime Access for £99. Your contribution directly funds the high-performance infrastructure required for global academic excellence."
+  },
+  {
+    q: "What is the 'Orbit Gateway'?",
+    a: "It is our institutional-grade security portal. It utilizes dynamic secret routes and TOTP verification to ensure that only authorized administrative nodes can access the platform's core orchestration layers."
   },
   {
     q: "How is my data protected?",
-    a: "Your privacy is my primary focus. I utilize industry-standard encryption to protect your work, ensuring your personal information remains confidential and is never shared with third parties."
+    a: "We utilize multi-layer encryption and institutional audit logs. Your data is stored in the same high-security environment used by the world's leading academic institutions."
   },
   {
     q: "Can I delete my account?",
@@ -61,55 +71,55 @@ export const faqs = [
 
 export const navMenus = {
   product: {
-    label: 'Product',
+    label: 'Features',
     categories: [
       {
-        label: 'Infrastructure',
+        label: 'Tools',
         items: [
-          { id: 'kanban', title: 'Project Intelligence', desc: 'Real-time Kanban for technical research teams.', icon: <LayoutGrid size={18} /> },
-          { id: 'sync', title: 'Real-time Sync', desc: 'Universal presence and file state synchronization.', icon: <Zap size={18} /> }
+          { id: 'kanban', title: 'Smart Kanban', desc: 'Manage your tasks with real-time updates.', icon: <LayoutGrid size={18} /> },
+          { id: 'sync', title: 'Team Sync', desc: 'Keep everyone on the same page, always.', icon: <Zap size={18} /> }
         ]
       },
       {
-        label: 'Insights',
+        label: 'Planning',
         items: [
-          { id: 'roadmap', title: 'Academic Roadmap', desc: 'Phased timeline intervals for complex submissions.', icon: <Milestone size={18} /> }
+          { id: 'roadmap', title: 'Project Timeline', desc: 'See your deadlines in a clear visual way.', icon: <Milestone size={18} /> }
         ]
       }
     ]
   },
   solutions: {
-    label: 'Solutions',
+    label: 'Who it\'s for',
     categories: [
       {
-        label: 'Use Cases',
+        label: 'Users',
         items: [
-          { id: 'research', title: 'Scholars & Researchers', desc: 'Secure contribute logs for high-stakes projects.', icon: <BookOpen size={18} /> },
-          { id: 'teams', title: 'Team Collaboration', desc: 'Departmental project management at global scale.', icon: <Users size={18} /> }
+          { id: 'research', title: 'Individual Students', desc: 'Track your work and get credit for what you do.', icon: <BookOpen size={18} /> },
+          { id: 'teams', title: 'Study Groups', desc: 'Collaborate easily with your whole class.', icon: <Users size={18} /> }
         ]
       },
       {
-        label: 'Scale',
+        label: 'Organizations',
         items: [
-          { id: 'enterprise', title: 'Institutional Flow', desc: 'Integrated university ecosystems and audit-ready data.', icon: <Globe size={18} /> }
+          { id: 'enterprise', title: 'University Clubs', desc: 'Manage large student groups with ease.', icon: <Globe size={18} /> }
         ]
       }
     ]
   },
   resources: {
-    label: 'Resources',
+    label: 'About',
     categories: [
       {
-        label: 'Community',
+        label: 'Our Project',
         items: [
-          { id: 'mission', title: 'Global Mission 2026', desc: 'Read our manifesto for student support tech.', icon: <Fingerprint size={18} /> },
-          { id: 'achievements', title: 'Impact Stats', desc: 'Global contribution metrics of the community.', icon: <Award size={18} /> }
+          { id: 'mission', title: 'Our Mission', desc: 'Learn why we started GroupFlow.', icon: <Fingerprint size={18} /> },
+          { id: 'achievements', title: 'Community Impact', desc: 'See how we help students worldwide.', icon: <Award size={18} /> }
         ]
       },
       {
-        label: 'Support',
+        label: 'Need Help?',
         items: [
-          { id: 'help', title: 'Help & Knowledge', desc: 'Step-by-step guides for technical leads.', icon: <HelpCircle size={18} /> }
+          { id: 'help', title: 'Help Center', desc: 'Guides and tips to help you get started.', icon: <HelpCircle size={18} /> }
         ]
       }
     ]

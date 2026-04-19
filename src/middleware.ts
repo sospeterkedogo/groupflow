@@ -30,6 +30,21 @@ export default async function proxy(request: NextRequest) {
 
   // Handle Supabase Session & Redirection Logic
   const response = await updateSession(request)
+  const { pathname } = request.nextUrl
+
+  // --- INSTITUTIONAL GUARD: SECRET GATEWAY PROTECTION ---
+  // If attempting to access the secret terminal or admin dashboard
+  if (pathname.startsWith('/terminal') || pathname.startsWith('/admin')) {
+    const supabaseSession = request.cookies.get('sb-access-token')
+    
+    // If no session is detected in cookies, bounce immediately to preserve secrecy
+    if (!supabaseSession) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    // Role verification happens in the Page components for deep-db validation, 
+    // but we add a generic session-check here.
+  }
   
   // Inject Headers for transparency
   response.headers.set('X-RateLimit-Limit', LIMIT.toString())

@@ -123,6 +123,14 @@ export type UserPresence = {
   full_name?: string
   online_at: string
   is_typing?: boolean
+  music?: {
+    isPlaying: boolean
+    trackUri: string
+    trackName: string
+    artistName: string
+    progressMs: number
+    timestamp: number
+  }
 }
 
 export type PresenceState = {

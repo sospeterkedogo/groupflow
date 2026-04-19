@@ -393,10 +393,17 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
     if (initialTheme?.palette) {
       return PALETTES.find(p => p.name === initialTheme.palette) || PALETTES[0]
     }
-    // Fallback to localStorage if available (client-side only)
+    // Fallback to system preference if no localStorage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('groupflow2026_palette')
-      if (saved) return PALETTES.find(p => p.name === saved) || PALETTES[0]
+      if (saved) {
+        const found = PALETTES.find(p => p.name === saved)
+        if (found) return found
+      }
+      
+      // Automatic A11y Sync: Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      return prefersDark ? PALETTES[1] : PALETTES[0] // Deep Oceanic for dark, Google Light for light
     }
     return PALETTES[0]
   })

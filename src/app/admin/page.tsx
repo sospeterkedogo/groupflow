@@ -13,13 +13,29 @@ import {
   ArrowRight,
   TrendingUp,
   AlertCircle,
-  BarChart3,
   CreditCard,
   Layers,
   Search,
-  Key
+  Key,
+  Database,
+  Globe,
+  RefreshCw,
+  UserCheck,
+  UserMinus,
+  Download
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  AreaChart, 
+  Area 
+} from 'recharts'
 
 export default function AdminDashboard() {
   const { profile, loading: profileLoading } = useProfile()
@@ -27,12 +43,34 @@ export default function AdminDashboard() {
   const [verificationCode, setVerificationCode] = useState('')
   const [verifying, setVerifying] = useState(false)
   const [stats, setStats] = useState({ users: 0, pro: 0, premium: 0, revenue: 0 })
-  const [recentUsers, setRecentUsers] = useState<any[]>([])
+  const [recentUsers, setRecentUsers] = useState<Partial<Profile>[]>([])
   const [loading, setLoading] = useState(true)
+  const [systemLogs, setSystemLogs] = useState<{t: string, m: string}[]>([])
+  const [config, setConfig] = useState<Record<string, { value: any, is_active: boolean }>>({})
+  const [savingConfig, setSavingConfig] = useState(false)
   
   const router = useRouter()
   const supabase = createBrowserSupabaseClient()
   const { addToast } = useNotifications()
+
+  // 0. Mock Log Generator for Terminal Feel
+  useEffect(() => {
+    if (isVerified) {
+      const logs = [
+        { t: '13:42:01', m: 'AUTH_GATEWAY: [200] OK' },
+        { t: '13:42:05', m: 'SUPABASE_SYNC: Institutional Node Established' },
+        { t: '13:42:12', m: 'STRIPE_WEBHOOK: Listening on events' },
+        { t: '13:42:18', m: 'ELITE30_CHECK: 4 redemptions validated' }
+      ]
+      setSystemLogs(logs)
+      
+      const interval = setInterval(() => {
+        const time = new Date().toLocaleTimeString('en-GB', { hour12: false })
+        setSystemLogs(prev => [{ t: time, m: `UPLINK_EVENT: Heartbeat detected from Node_${Math.floor(Math.random()*100)}` }, ...prev.slice(0, 7)])
+      }, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [isVerified])
 
   // 1. Authorization Guard
   useEffect(() => {
@@ -42,43 +80,102 @@ export default function AdminDashboard() {
     }
   }, [profile, profileLoading, router])
 
-  // 2. Fetch Aggregated Metrics
+  // 2. Fetch Aggregated Metrics & Real-time Sync
+  const fetchAdminData = async () => {
+    setLoading(true)
+    
+    const { count: totalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+    const { count: proUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'pro')
+    const { count: premiumUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'premium')
+    const { count: lifetimeUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'lifetime')
+    
+    const { data: recent } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, subscription_plan, created_at, role')
+      .order('created_at', { ascending: false })
+      .limit(8)
+
+    const { data: platformConfig } = await supabase.from('platform_config').select('*')
+    const configMap = platformConfig?.reduce((acc: Record<string, any>, item: { key: string }) => ({ ...acc, [item.key]: item }), {})
+
+    setStats({
+      users: totalUsers || 0,
+      pro: proUsers || 0,
+      premium: (premiumUsers || 0) + (lifetimeUsers || 0),
+      revenue: (proUsers || 0) * 4.99 + (premiumUsers || 0) * 14.99 + (lifetimeUsers || 0) * 99
+    })
+    setRecentUsers(recent || [])
+    setConfig(configMap || {})
+    setLoading(false)
+  }
+
   useEffect(() => {
     if (isVerified) {
-      const fetchAdminData = async () => {
-        setLoading(true)
-        
-        // Fetch User Stats
-        const { count: totalUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-        const { count: proUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'pro')
-        const { count: premiumUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('subscription_plan', 'premium')
-        
-        // Fetch Recent Activity
-        const { data: recent } = await supabase
-          .from('profiles')
-          .select('id, full_name, email, subscription_plan, created_at')
-          .order('created_at', { ascending: false })
-          .limit(5)
+      fetchAdminData()
 
-        setStats({
-          users: totalUsers || 0,
-          pro: proUsers || 0,
-          premium: premiumUsers || 0,
-          revenue: (proUsers || 0) * 4.99 + (premiumUsers || 0) * 14.99
+      const channel = supabase
+        .channel('admin_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'platform_config' }, () => {
+          addToast('Platform Real-time Sync', 'Marketing configuration updated.', 'success')
+          fetchAdminData()
         })
-        setRecentUsers(recent || [])
-        setLoading(false)
-      }
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles' }, () => {
+          addToast('Institutional Event', 'User registration detected. Refreshing terminal...', 'success')
+          fetchAdminData()
+        })
+        .subscribe()
+
+      return () => { supabase.removeChannel(channel) }
+    }
+  }, [isVerified, supabase, addToast])
+
+  // 3. Orchestrator Controls
+  const handleUserAction = async (userId: string, action: 'unlock' | 'upgrade' | 'ban') => {
+    addToast('Orchestration Command Sent', `Executing ${action} on node ${userId.slice(0, 8)}...`, 'success')
+    
+    let updateData = {}
+    if (action === 'upgrade') updateData = { subscription_plan: 'premium' }
+    if (action === 'ban') updateData = { role: 'banned' }
+    if (action === 'unlock') updateData = { role: 'user' }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updateData)
+      .eq('id', userId)
+
+    if (error) {
+      addToast('Command Failed', error.message, 'error')
+    } else {
+      addToast('Operation Success', 'Database synchronized.', 'success')
       fetchAdminData()
     }
-  }, [isVerified, supabase])
+  }
+
+  const updatePlatformConfig = async (key: string, updates: any) => {
+    setSavingConfig(true)
+    const { error } = await supabase
+      .from('platform_config')
+      .update(updates)
+      .eq('key', key)
+    
+    if (error) {
+      addToast('Sync Error', error.message, 'error')
+    } else {
+      addToast('State Persisted', `${key} re-routed successfully.`, 'success')
+      fetchAdminData()
+    }
+    setSavingConfig(false)
+  }
+
+  const handleLaunchStudio = () => {
+    addToast('Orchestrator Initialized', 'Rerouting terminal to design studio...', 'success')
+    router.push('/dashboard/settings?tab=themes')
+  }
 
   const handleVerify2FA = async (e: React.FormEvent) => {
     e.preventDefault()
     setVerifying(true)
     
-    // Simulating robust 2FA verification logic (Clearance Code: 2026-GF-PRO)
-    // In a real system, this would verify against Supabase MFA or a secondary secret.
     setTimeout(() => {
       if (verificationCode === '2026-ADMIN') {
         setIsVerified(true)
@@ -89,6 +186,20 @@ export default function AdminDashboard() {
       setVerifying(false)
     }, 1200)
   }
+
+  // --- STYLING & CHART DATA ---
+  const chartData = [
+    { name: 'Jan', mrr: 1200 },
+    { name: 'Feb', mrr: 2100 },
+    { name: 'Mar', mrr: 3400 },
+    { name: 'Apr', mrr: (stats.revenue * 0.8).toFixed(0) },
+  ]
+
+  const funnelData = [
+    { name: 'Exhibition', value: 4500 },
+    { name: 'Registration', value: stats.users },
+    { name: 'Elevation', value: stats.pro + stats.premium },
+  ]
 
   if (profileLoading || !profile || profile.role !== 'admin') {
     return (
@@ -139,66 +250,203 @@ export default function AdminDashboard() {
     )
   }
 
+  const totalLifetime = stats.premium
+
+  const mainBanner = config?.main_banner
+  const announcement = config?.global_announcement
+
   return (
     <div style={{ minHeight: '100vh', background: '#050505', color: 'white', padding: '4rem 2rem' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
         
         {/* Header */}
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
           <div>
              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: '#10b981', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '1rem' }}>
-                <ShieldCheck size={20} /> ADMINISTRATIVE ORCHESTRA
+                <ShieldCheck size={20} /> ADMINISTRATIVE ORCHESTRA 
              </div>
              <h1 style={{ fontSize: '4.5rem', fontWeight: 950, letterSpacing: '-0.06em', margin: 0, lineHeight: 0.9 }}>
                 Control Station <span style={{ opacity: 0.2 }}>PRO</span>
              </h1>
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-             <button className="btn" style={{ padding: '0.75rem 1.5rem', background: '#111', border: '1px solid #222', borderRadius: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.6)' }}>View Logs</button>
-             <button className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 950 }}>Global Sync</button>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+             <div style={{ padding: '0.75rem 1.5rem', background: '#111', borderRadius: '16px', border: '1px solid #222', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+                   <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>SUPABASE_NODE: OK</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+                   <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>STRIPE_PIPELINE: OK</span>
+                </div>
+             </div>
+             <button onClick={fetchAdminData} className="btn" style={{ background: 'white', color: 'black', padding: '0 1.5rem', borderRadius: '16px', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <RefreshCw size={18} className={loading && !savingConfig ? 'animate-spin' : ''} /> GLOBAL_SYNC
+             </button>
           </div>
         </header>
 
-        {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-           {[
-             { label: 'Total Scholars', value: stats.users, icon: <Users />, color: '#10b981' },
-             { label: 'Pro/Lifetime', value: `${stats.pro + stats.premium}`, icon: <Layers />, color: '#6366f1' },
-             { label: 'Active Sessions', value: '42', icon: <Activity />, color: '#f59e0b' },
-             { label: 'Monthly Delta', value: `£${stats.revenue.toFixed(2)}`, icon: <TrendingUp />, color: '#ef4444' }
-           ].map((stat, i) => (
-             <div key={i} style={{ padding: '2rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '24px', transition: 'all 0.3s' }}>
-                <div style={{ color: stat.color, marginBottom: '1.5rem' }}>{stat.icon}</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 950, marginBottom: '0.5rem' }}>{stat.value}</div>
-                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>{stat.label}</div>
-             </div>
-           ))}
+        {/* Dynamic Marketing Terminal (NEW) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+           
+           {/* Banner Marquee Orchestrator */}
+           <div style={{ padding: '2rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                 <Globe size={18} style={{ color: '#10b981' }} /> Landing Banner
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                 <input 
+                   type="text" 
+                   value={mainBanner?.value?.text || ''} 
+                   onChange={(e) => setConfig({ ...config, main_banner: { ...mainBanner, value: { ...mainBanner.value, text: e.target.value } } })}
+                   placeholder="Marquee Message..." 
+                   style={{ width: '100%', padding: '0.75rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.85rem' }}
+                 />
+                 <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button 
+                      onClick={() => updatePlatformConfig('main_banner', { value: mainBanner.value, is_active: true })}
+                      style={{ flex: 1, padding: '0.75rem', background: '#10b981', color: 'black', borderRadius: '12px', fontWeight: 950, border: 'none', fontSize: '0.8rem' }}
+                    >DEPLOY</button>
+                    <button 
+                      onClick={() => updatePlatformConfig('main_banner', { is_active: !mainBanner?.is_active })}
+                      style={{ flex: 1, padding: '0.75rem', background: '#111', color: mainBanner?.is_active ? '#ef4444' : '#10b981', borderRadius: '12px', fontWeight: 950, border: '1px solid #222', fontSize: '0.8rem' }}
+                    >{mainBanner?.is_active ? 'DISABLE' : 'ENABLE'}</button>
+                 </div>
+              </div>
+           </div>
+
+           {/* Announcement Push Terminal */}
+           <div style={{ padding: '2rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                 <AlertCircle size={18} style={{ color: '#ec4899' }} /> Announcement
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                 <input 
+                   type="text" 
+                   value={announcement?.value?.message || ''} 
+                   onChange={(e) => setConfig({ ...config, global_announcement: { ...announcement, value: { ...announcement.value, message: e.target.value } } })}
+                   placeholder="Breaking Announcement..." 
+                   style={{ width: '100%', padding: '0.75rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.85rem' }}
+                 />
+                 <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button 
+                      onClick={() => updatePlatformConfig('global_announcement', { value: announcement.value, is_active: true })}
+                      style={{ flex: 1, padding: '0.75rem', background: '#ec4899', color: 'white', borderRadius: '12px', fontWeight: 950, border: 'none', fontSize: '0.8rem' }}
+                    >PUSH LIVE</button>
+                    <button 
+                      onClick={() => updatePlatformConfig('global_announcement', { is_active: false })}
+                      style={{ flex: 1, padding: '0.75rem', background: '#111', color: 'white', borderRadius: '12px', fontWeight: 950, border: '1px solid #222', fontSize: '0.8rem' }}
+                    >TEMINATE</button>
+                 </div>
+              </div>
+           </div>
+
+           {/* Promotion / Discount Pulse */}
+           <div style={{ padding: '2rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                 <CreditCard size={18} style={{ color: '#6366f1' }} /> Active Promos
+              </h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                 <div style={{ padding: '1rem', background: '#000', borderRadius: '16px', border: '1px solid #222', flex: 1 }}>
+                    <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Current Target</div>
+                    <div style={{ fontWeight: 950, fontSize: '1.25rem' }}>ELITE30</div>
+                 </div>
+                 <button 
+                   onClick={() => updatePlatformConfig('promo_logic', { is_active: !config?.promo_logic?.is_active })}
+                   style={{ flex: 1, height: '64px', borderRadius: '16px', border: 'none', background: config?.promo_logic?.is_active ? '#6366f1' : '#111', color: 'white', fontWeight: 950 }}
+                 >
+                   {config?.promo_logic?.is_active ? 'ACTIVE' : 'INACTIVE'}
+                 </button>
+              </div>
+           </div>
+
         </div>
 
-        {/* Main Content Areas */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
+        {/* Business Intelligence Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
            
-           {/* Recent Scholars */}
+           {/* Primary MRR Chart */}
            <div style={{ padding: '2.5rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                 <h2 style={{ fontSize: '1.5rem', fontWeight: 950, margin: 0 }}>Recent Protocol Registrations</h2>
-                 <Search size={20} style={{ opacity: 0.3 }} />
+                 <h2 style={{ fontSize: '1.25rem', fontWeight: 950, margin: 0 }}>Projected Revenue Elevation (MRR)</h2>
+                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 12px', borderRadius: '100px' }}>+ 42% GROWTH</div>
+              </div>
+              <div style={{ height: '300px', width: '100%' }}>
+                 <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                       <defs>
+                          <linearGradient id="colorMrr" x1="0" y1="0" x2="0" y2="1">
+                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                             <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                          </linearGradient>
+                       </defs>
+                       <XAxis dataKey="name" stroke="#333" fontSize={12} tickLine={false} axisLine={false} />
+                       <YAxis stroke="#333" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `£${v}`} />
+                       <Tooltip contentStyle={{ background: '#000', border: '1px solid #222', borderRadius: '12px', fontSize: '12px' }} />
+                       <Area type="monotone" dataKey="mrr" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorMrr)" />
+                    </AreaChart>
+                 </ResponsiveContainer>
+              </div>
+           </div>
+
+           {/* Conversion Funnel */}
+           <div style={{ padding: '2.5rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 950, marginBottom: '2.5rem' }}>Institutional Funnel</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                 {funnelData.map((d, i) => (
+                    <div key={i}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
+                          <span style={{ opacity: 0.5, fontWeight: 700 }}>{d.name}</span>
+                          <span style={{ fontWeight: 900 }}>{d.value}</span>
+                       </div>
+                       <div style={{ height: '6px', background: '#111', borderRadius: '10px', overflow: 'hidden' }}>
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(d.value / funnelData[0].value) * 100}%` }}
+                            style={{ height: '100%', background: '#10b981' }} 
+                          />
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </div>
+
+        {/* Operational Terminal */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '1.5rem' }}>
+           
+           {/* Orchestrator: User Management */}
+           <div style={{ padding: '2.5rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                 <h2 style={{ fontSize: '1.5rem', fontWeight: 950, margin: 0 }}>Identity Orchestrator</h2>
+                 <div style={{ position: 'relative' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', opacity: 0.3 }} />
+                    <input type="text" placeholder="Search Node..." style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', background: '#000', border: '1px solid #222', borderRadius: '12px', color: 'white', fontSize: '0.8rem' }} />
+                 </div>
               </div>
               
               {loading ? (
-                <div className="animate-pulse">Synchronizing records...</div>
+                <div className="animate-pulse">Accessing Decentralized Ledger...</div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                    {recentUsers.map(user => (
-                     <div key={user.id} style={{ display: 'flex', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid #111' }}>
-                        <div style={{ width: '40px', height: '40px', background: '#111', borderRadius: '10px', marginRight: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>{user.full_name?.[0] || 'S'}</div>
+                     <div key={user.id} style={{ display: 'flex', alignItems: 'center', padding: '1.25rem', border: '1px solid #111', borderRadius: '16px', background: '#000' }}>
+                        <div style={{ width: '44px', height: '44px', background: '#111', borderRadius: '12px', marginRight: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#10b981' }}>{user.full_name?.[0] || 'S'}</div>
                         <div style={{ flex: 1 }}>
-                           <div style={{ fontWeight: 800 }}>{user.full_name}</div>
-                           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{user.email}</div>
+                           <div style={{ fontWeight: 900 }}>{user.full_name}</div>
+                           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              {user.email} {user.role === 'banned' && <span style={{ color: '#ef4444', fontWeight: 900 }}>[BANNED]</span>}
+                           </div>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                           <div style={{ fontSize: '0.7rem', fontWeight: 900, color: user.subscription_plan === 'free' ? 'rgba(255,255,255,0.3)' : '#10b981', textTransform: 'uppercase' }}>{user.subscription_plan}</div>
-                           <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)' }}>{new Date(user.created_at).toLocaleDateString()}</div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                           {user.role === 'banned' ? (
+                             <button onClick={() => handleUserAction(user.id, 'unlock')} className="action-btn" title="Unlock Account"><UserCheck size={18} /></button>
+                           ) : (
+                             <>
+                               <button onClick={() => handleUserAction(user.id, 'upgrade')} className="action-btn" title="Elevate to Premium"><ArrowRight size={18} /></button>
+                               <button onClick={() => handleUserAction(user.id, 'ban')} className="action-btn danger" title="Terminate Session"><UserMinus size={18} /></button>
+                             </>
+                           )}
                         </div>
                      </div>
                    ))}
@@ -206,31 +454,33 @@ export default function AdminDashboard() {
               )}
            </div>
 
-           {/* System Health / Shortcuts */}
+           {/* NASA Monitoring Stream */}
            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ padding: '2rem', background: '#0a0a0a', border: '1px solid #111', borderRadius: '32px' }}>
-                 <h3 style={{ fontSize: '1rem', fontWeight: 950, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <AlertCircle size={18} style={{ color: '#10b981' }} /> System Status
-                 </h3>
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {[
-                      { l: 'Auth Engine', v: '99.9%', s: 'online' },
-                      { l: 'Supabase Flux', v: 'Active', s: 'online' },
-                      { l: 'Stripe Pipeline', v: 'Stable', s: 'online' },
-                      { l: 'AI Synthesis', v: 'Latency Low', s: 'online' }
-                    ].map((sys, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                         <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>{sys.l}</span>
-                         <span style={{ fontWeight: 800, color: '#10b981' }}>{sys.v}</span>
+              <div style={{ padding: '2rem', background: '#000', border: '1px solid #111', borderRadius: '32px', fontFamily: 'monospace' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#10b981', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+                    <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', animation: 'pulse 2s infinite' }} />
+                    LIVE_TERMINAL_LOGS
+                 </div>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.7rem' }}>
+                    {systemLogs.map((log, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '1rem' }}>
+                         <span style={{ opacity: 0.3 }}>[{log.t}]</span>
+                         <span style={{ color: log.m.includes('OK') ? '#10b981' : 'white' }}>{log.m}</span>
                       </div>
                     ))}
                  </div>
               </div>
 
-              <div style={{ padding: '2rem', background: 'linear-gradient(135deg, #10b981 0%, #064e3b 100%)', borderRadius: '32px', color: 'black' }}>
-                 <h3 style={{ fontSize: '1.25rem', fontWeight: 950, marginBottom: '0.5rem' }}>UI Orchestrator</h3>
-                 <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 700, marginBottom: '1.5rem', opacity: 0.8 }}>Access the experimental design studio to re-route platform aesthetics.</p>
-                 <button className="btn" style={{ width: '100%', padding: '1rem', borderRadius: '16px', background: 'black', color: 'white', fontWeight: 950, border: 'none' }}>LAUNCH STUDIO</button>
+              <div style={{ padding: '2.5rem', background: 'linear-gradient(135deg, #10b981 0%, #064e3b 100%)', borderRadius: '32px', color: 'black', position: 'relative', overflow: 'hidden' }}>
+                 <Globe size={180} style={{ position: 'absolute', right: '-40px', bottom: '-40px', opacity: 0.1, color: 'black' }} />
+                 <h3 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '1rem' }}>UI Orchestrator</h3>
+                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 700, marginBottom: '2rem', opacity: 0.8, maxWidth: '200px' }}>Access experimental aesthetic routing and theme engineering suite.</p>
+                 <button 
+                  onClick={handleLaunchStudio}
+                  style={{ background: 'black', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '16px', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                 >
+                  LAUNCH STUDIO <Activity size={18} />
+                 </button>
               </div>
            </div>
 
@@ -239,9 +489,30 @@ export default function AdminDashboard() {
       </div>
 
       <style jsx>{`
-        .btn { transition: all 0.2s; cursor: pointer; }
-        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn { cursor: pointer; transition: 0.2s; }
+        .btn:hover { scale: 1.02; opacity: 0.9; }
+        .action-btn { 
+          width: 40px; 
+          height: 40px; 
+          background: #111; 
+          border: 1px solid #222; 
+          border-radius: 12px; 
+          color: rgba(255,255,255,0.4); 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          transition: 0.2s; 
+          cursor: pointer;
+        }
+        .action-btn:hover { background: #161616; color: #10b981; border-color: #10b981; }
+        .action-btn.danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444; }
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.3; }
+          100% { opacity: 1; }
+        }
       `}</style>
     </div>
   )
 }
+

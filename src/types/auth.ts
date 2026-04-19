@@ -28,6 +28,10 @@ export type Profile = {
   manual_avatar_url?: string | null;
   protect_avatar?: boolean;
   is_phone_verified?: boolean;
+  spotify_access_token?: string | null;
+  spotify_refresh_token?: string | null;
+  spotify_token_expires_at?: string | null;
+  spotify_connected?: boolean;
 };
 
 export type ActiveUser = {

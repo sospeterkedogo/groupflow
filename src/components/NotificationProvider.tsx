@@ -132,7 +132,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       console.error('Persistence error (markAsRead):', err)
       // Rollback
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false } : n))
-      addToast('Sync Failed', 'Could not update notification status.', 'error')
+      addToast('Check connection', 'We couldn\'t update that just now.', 'error')
     }
   }
 
@@ -149,7 +149,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } catch (err) {
       console.error('Persistence error (markAllAsRead):', err)
       setNotifications(original)
-      addToast('Sync Failed', 'Could not clear all notifications.', 'error')
+      addToast('Check connection', 'We couldn\'t clear your notifications.', 'error')
     }
   }
 
@@ -223,7 +223,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 950, color: colors.brand, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>
-                  {type} Protocol
+                  {type === 'info' ? 'Update' : type}
                 </div>
                 <div style={{ fontWeight: 800, fontSize: '1rem', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.2 }}>{toast.title}</div>
                 {toast.message && <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px', lineHeight: 1.4 }}>{toast.message}</div>}
