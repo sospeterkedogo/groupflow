@@ -24,10 +24,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  eslint: {
-    // Enforce ESLint errors in production builds.
-    ignoreDuringBuilds: false,
-  },
   typescript: {
     // Enforce TypeScript errors in production builds.
     ignoreBuildErrors: false,
