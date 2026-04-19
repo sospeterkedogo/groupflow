@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { signup, login } from './actions'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
@@ -52,6 +52,21 @@ function LoginContent() {
   const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
   const [country, setCountry] = useState<string | null>(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
+
+  // Client-side guard: Bounce authenticated users back to dashboard
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createBrowserSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.replace('/dashboard')
+      } else {
+        setCheckingAuth(false)
+      }
+    }
+    checkUser()
+  }, [router])
 
   const handleResetPassword = () => {
     // Basic reset logic placeholder to prevent crash
@@ -154,6 +169,14 @@ function LoginContent() {
   }
 
   const Flag = getFlagComponent(country)
+
+  if (checkingAuth) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
+        <div className="spinner" />
+      </div>
+    )
+  }
 
   return (
     <div style={{

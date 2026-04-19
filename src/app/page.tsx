@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   Users, Activity, LayoutGrid, Code
 } from 'lucide-react'
@@ -17,6 +19,30 @@ import LandingFooter from '@/components/landing/LandingFooter'
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const router = useRouter()
+  const [checkingAuth, setCheckingAuth] = useState(true)
+
+  // Client-side guard: Bounce authenticated users back to dashboard
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createBrowserSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.replace('/dashboard')
+      } else {
+        setCheckingAuth(false)
+      }
+    }
+    checkUser()
+  }, [router])
+
+  if (checkingAuth) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
+        <div className="spinner" />
+      </div>
+    )
+  }
   
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#0a0a0a', position: 'relative', overflowX: 'hidden' }}>

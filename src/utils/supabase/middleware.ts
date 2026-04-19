@@ -49,8 +49,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // REVERSE REDIRECT: If user IS authenticated and trying to access /login, send them to /dashboard
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
+  // REVERSE REDIRECT: If user IS authenticated and trying to access /login or the landing page '/', send them to /dashboard
+  if (user && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname === '/')) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
