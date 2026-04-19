@@ -37,7 +37,15 @@ interface Listing {
   payment_method: string
   status: string
   owner_id: string
+  category: string
+  quantity: number
+  condition: string
   created_at: string
+  profiles?: {
+    full_name: string
+    avatar_url: string
+    role: string
+  }
 }
 
 export default function MarketplacePage() {
@@ -46,7 +54,9 @@ export default function MarketplacePage() {
   const [isPosting, setIsPosting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState('All')
   const [showWalkthrough, setShowWalkthrough] = useState(false)
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
   
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { withLoading } = useSmartLoading()
@@ -76,7 +86,7 @@ export default function MarketplacePage() {
     setLoading(true)
     const { data, error } = await supabase
       .from('marketplace_listings')
-      .select('*')
+      .select('*, profiles(full_name, avatar_url, role)')
       .order('created_at', { ascending: false })
     
     if (error) {
@@ -92,160 +102,183 @@ export default function MarketplacePage() {
     void fetchListings()
   }, [fetchListings])
 
-  const filteredListings = listings.filter(l => 
-    l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    l.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const categories = ['All', 'Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other']
+
+  const filteredListings = listings.filter(l => {
+    const matchesSearch = l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        l.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = activeCategory === 'All' || l.category === activeCategory
+    return matchesSearch && matchesCategory
+  })
 
   return (
     <div className="page-fade" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingBottom: '6rem' }}>
       
-      {/* ── MARKETPLACE HEADER ────────────────────────────────────────── */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShoppingBag className="text-brand" size={32} />
-            Share & Borrow <span style={{ color: 'var(--brand)', opacity: 0.5, fontWeight: 400 }}>/ Hub</span>
-          </h1>
-          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 600 }}>
-            Exchange academic resources safely within your campus ecosystem.
-          </p>
-        </div>
+      {/* ── MARKETPLACE BODY TRACE ────────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
         
-        <button 
-          onClick={() => setIsPosting(true)}
-          className="btn btn-primary"
-          style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.6rem', boxShadow: '0 8px 20px rgba(var(--brand-rgb), 0.3)' }}
-        >
-          <Plus size={20} strokeWidth={3} />
-          Post New Item
-        </button>
-      </header>
-
-      {/* ── SECURITY BANNER ────────────────────────────────────────────── */}
-      <div style={{ 
-        padding: '1rem 1.5rem', 
-        background: 'rgba(239, 68, 68, 0.05)', 
-        border: '1px solid rgba(239, 68, 68, 0.1)', 
-        borderRadius: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem'
-      }}>
-        <ShieldAlert className="text-error" size={24} />
-        <div>
-          <div style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)' }}>Safety Protocol Active</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>
-            Trading illegal or prohibited items is strictly forbidden. All listings are subject to human review and community reporting.
-          </div>
-        </div>
-      </div>
-
-      {/* ── EXPLORER CONTROLS ──────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
-          <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} size={18} />
-          <input 
-            type="text" 
-            placeholder="Search current listings..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '0.8rem 1rem 0.8rem 3rem', 
-              background: 'var(--surface)', 
-              border: '1px solid var(--border)', 
-              borderRadius: '14px',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              outline: 'none',
-              boxShadow: 'var(--shadow-sm)'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* ── LISTINGS GRID ─────────────────────────────────────────────── */}
-      {loading ? (
-        <div style={{ padding: '5rem', textAlign: 'center' }}>
-          <Loader2 size={40} className="animate-spin text-brand" style={{ margin: '0 auto' }} />
-          <p style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--text-sub)' }}>Synchronizing Marketplace Flux...</p>
-        </div>
-      ) : filteredListings.length === 0 ? (
-        <div style={{ padding: '8rem 2rem', textAlign: 'center', background: 'var(--surface)', borderRadius: '24px', border: '1px dashed var(--border)' }}>
-          <ShoppingBag size={48} style={{ margin: '0 auto', opacity: 0.2, marginBottom: '1.5rem' }} />
-          <h3 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>No Items Detected</h3>
-          <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem' }}>Be the first to share an item with your peers.</p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-          {filteredListings.map(item => (
-            <div 
-              key={item.id} 
-              className="glass hover-card"
-              style={{ 
-                borderRadius: '24px', 
-                overflow: 'hidden', 
-                border: '1px solid var(--border)',
-                background: 'var(--surface)',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ height: '200px', background: 'var(--bg-sub)', position: 'relative', overflow: 'hidden' }}>
-                {item.images?.[0] ? (
-                  <Image 
-                    src={supabase.storage.from('marketplace').getPublicUrl(item.images[0]).data.publicUrl} 
-                    alt={item.title} 
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', background: 'var(--bg-main)' }}>
-                    <Plus size={32} opacity={0.3} />
-                  </div>
-                )}
-                <div style={{ 
-                  position: 'absolute', 
-                  top: '1rem', 
-                  right: '1rem', 
-                  padding: '0.4rem 0.8rem', 
-                  background: 'rgba(0,0,0,0.6)', 
-                  backdropFilter: 'blur(10px)', 
-                  borderRadius: '10px',
-                  color: 'white',
-                  fontWeight: 900,
-                  fontSize: '0.75rem'
-                }}>
-                  {item.price === 0 ? 'FREE' : `$${item.price}`}
-                </div>
-              </div>
-              
-              <div style={{ padding: '1.25rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.4rem' }}>{item.title}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--brand)', marginBottom: '0.75rem' }}>
-                  <MapPin size={14} />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>{item.meetup_zone}</span>
-                </div>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-sub)' }}>
-                    <Clock size={14} />
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700 }}>{item.duration_days} Days Loan</span>
-                  </div>
-                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: '2px solid var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                     <ArrowRight size={12} className="text-brand" />
-                  </div>
-                </div>
+        {/* Sidebar Filters */}
+        <aside style={{ width: '220px', flexShrink: 0, position: 'sticky', top: '1rem' }} className="hide-mobile">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 950, textTransform: 'uppercase', color: 'var(--text-sub)', letterSpacing: '0.1em', marginBottom: '1rem' }}>Categories</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {categories.map(cat => (
+                  <button 
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    style={{ 
+                      textAlign: 'left', 
+                      padding: '0.6rem 1rem', 
+                      borderRadius: '12px', 
+                      border: 'none', 
+                      background: activeCategory === cat ? 'var(--brand)' : 'transparent',
+                      color: activeCategory === cat ? 'black' : 'var(--text-main)',
+                      fontSize: '0.85rem',
+                      fontWeight: activeCategory === cat ? 900 : 600,
+                      cursor: 'pointer',
+                      transition: '0.2s'
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
             </div>
-          ))}
+            
+            <div style={{ padding: '1.25rem', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '16px', border: '1px solid rgba(var(--brand-rgb), 0.1)' }}>
+              <div style={{ fontWeight: 950, fontSize: '0.75rem', color: 'var(--brand)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Global Sync</div>
+              <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>Results are live from the campus-wide peer registry.</p>
+            </div>
+          </div>
+        </aside>
+
+        {/* Listings Content */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          {/* SEARCH BAR */}
+          <div style={{ position: 'relative' }}>
+            <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} size={20} />
+            <input 
+              type="text" 
+              placeholder="Filter by title, content, or seller..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: '1rem 1.25rem 1rem 3.5rem', 
+                background: 'var(--surface)', 
+                border: '1px solid var(--border)', 
+                borderRadius: '20px',
+                fontSize: '1rem',
+                fontWeight: 600,
+                boxShadow: 'var(--shadow-md)',
+                outline: 'none'
+              }}
+            />
+          </div>
+
+          {loading ? (
+            <div style={{ padding: '5rem', textAlign: 'center' }}>
+              <Loader2 size={40} className="animate-spin text-brand" style={{ margin: '0 auto' }} />
+              <p style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--text-sub)' }}>Synchronizing Marketplace Flux...</p>
+            </div>
+          ) : filteredListings.length === 0 ? (
+            <div style={{ padding: '8rem 2rem', textAlign: 'center', background: 'var(--surface)', borderRadius: '24px', border: '1px dashed var(--border)' }}>
+              <ShoppingBag size={48} style={{ margin: '0 auto', opacity: 0.2, marginBottom: '1.5rem' }} />
+              <h3 style={{ fontWeight: 900, marginBottom: '0.5rem' }}>No Listings Found</h3>
+              <p style={{ color: 'var(--text-sub)', fontSize: '0.9rem' }}>Divergent results. Try adjusting your clearance filters.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              {filteredListings.map(item => (
+                <div 
+                  key={item.id} 
+                  className="listing-card"
+                  onClick={() => setSelectedListing(item)}
+                  style={{ 
+                    borderRadius: '28px', 
+                    overflow: 'hidden', 
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    cursor: 'pointer',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{ height: '220px', background: 'var(--bg-sub)', position: 'relative', overflow: 'hidden' }}>
+                    {item.images?.[0] ? (
+                      <Image 
+                        src={supabase.storage.from('marketplace').getPublicUrl(item.images[0]).data.publicUrl} 
+                        alt={item.title} 
+                        fill
+                        className="object-cover transition-transform hover:scale-110 duration-500"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)', background: 'var(--bg-main)' }}>
+                        <Plus size={32} opacity={0.3} />
+                      </div>
+                    )}
+                    
+                    {/* Floating Badges */}
+                    <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '6px' }}>
+                      <div style={{ padding: '4px 10px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', borderRadius: '8px', color: 'white', fontWeight: 950, fontSize: '0.65rem', textTransform: 'uppercase' }}>
+                        {item.category || 'Item'}
+                      </div>
+                    </div>
+
+                    <div style={{ 
+                      position: 'absolute', 
+                      bottom: '12px', 
+                      right: '12px', 
+                      padding: '6px 14px', 
+                      background: 'var(--brand)', 
+                      borderRadius: '12px',
+                      color: 'black',
+                      fontWeight: 950,
+                      fontSize: '1rem',
+                      boxShadow: '0 8px 20px rgba(var(--brand-rgb), 0.4)'
+                    }}>
+                      {item.price === 0 ? 'FREE' : `£${item.price}`}
+                    </div>
+                  </div>
+                  
+                  <div style={{ padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                       <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.02em', flex: 1 }}>{item.title}</h3>
+                       <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', border: '1px solid rgba(var(--brand-rgb), 0.2)', padding: '2px 8px', borderRadius: '6px' }}>{item.condition || 'Used'}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-sub)', marginBottom: '1.25rem' }}>
+                      <MapPin size={14} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{item.meetup_zone}</span>
+                    </div>
+                    
+                    {/* Seller Information (JOIN DATA) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--brand)', overflow: 'hidden', border: '2px solid var(--bg-main)' }}>
+                        {item.profiles?.avatar_url ? (
+                          <Image src={item.profiles.avatar_url} width={32} height={32} alt="Seller" />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.6rem' }}>{item.profiles?.full_name?.charAt(0) || '?'}</div>
+                        )}
+                      </div>
+                      <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{item.profiles?.full_name || 'Anonymous Specialist'}</div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase' }}>{item.profiles?.role || 'Contributor'}</div>
+                      </div>
+                      <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-sub)' }}>{item.quantity || 1}x</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* ── ONBOARDING WALKTHROUGH ───────────────────────────────────── */}
       {showWalkthrough && (
@@ -308,16 +341,27 @@ export default function MarketplacePage() {
       )}
 
       <style jsx>{`
-        .hover-card:hover {
-          transform: translateY(-8px);
+        .listing-card:hover {
+          transform: translateY(-12px) scale(1.02);
           border-color: var(--brand) !important;
-          box-shadow: 0 20px 40px rgba(var(--brand-rgb), 0.2);
+          box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .listing-card:hover img {
+          transform: scale(1.1);
         }
         @keyframes sweep {
           from { transform: translateX(-100%); }
           to { transform: translateX(100%); }
         }
       `}</style>
+      
+      {/* ── ITEM DETAIL MODAL ────────────────────────────────────────── */}
+      {selectedListing && (
+        <ItemDetailModal 
+          listing={selectedListing} 
+          onClose={() => setSelectedListing(null)} 
+        />
+      )}
     </div>
   )
 }
@@ -327,6 +371,9 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('0')
+  const [category, setCategory] = useState('Electronics')
+  const [quantity, setQuantity] = useState(1)
+  const [condition, setCondition] = useState<'New' | 'Like New' | 'Used' | 'Refurbished'>('Used')
   const [meetupZone, setMeetupZone] = useState('Library')
   const [meetupDetails, setMeetupDetails] = useState('')
   const [duration, setDuration] = useState(7)
@@ -347,7 +394,7 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
 
   const handlePost = async () => {
     if (!agreed) {
-      alert('You must agree to the institutional policy.')
+      addToast('Authorization Required', 'You must agree to the institutional policy before publishing a listing.', 'warning')
       return
     }
     setUploading(true)
@@ -358,6 +405,11 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
         title,
         description,
         price: parseFloat(price),
+        category,
+        quantity,
+        condition,
+        images: ['placeholder'], // Storage handles actual paths
+        location: meetupZone,
         meetup_zone: meetupZone,
         meetup_details: meetupDetails,
         duration_days: duration,
@@ -381,6 +433,9 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
         description,
         price: parseFloat(price),
         is_free: parseFloat(price) === 0,
+        category,
+        quantity,
+        condition,
         images: uploadedPaths,
         meetup_zone: meetupZone,
         meetup_details: meetupDetails,
@@ -433,6 +488,33 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
                   style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
                 />
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Category</label>
+                  <select 
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
+                  >
+                    {['Electronics', 'Textbooks', 'Lab Equipment', 'Stationery', 'Hardware', 'Other'].map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Condition</label>
+                  <select 
+                    value={condition}
+                    onChange={(e: any) => setCondition(e.target.value)}
+                    style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
+                  >
+                    <option value="New">New</option>
+                    <option value="Like New">Like New</option>
+                    <option value="Used">Used</option>
+                    <option value="Refurbished">Refurbished</option>
+                  </select>
+                </div>
+              </div>
               <div>
                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Visual Evidence ({images.length}/5)</label>
                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
@@ -476,7 +558,16 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
                          style={{ width: '100%', padding: '0.9rem 0.9rem 0.9rem 2.5rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
                        />
                     </div>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-sub)', marginTop: '0.4rem', display: 'block' }}>Enter 0 for Free/Share</span>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Quantity / Stock</label>
+                    <input 
+                      type="number" 
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value))}
+                      min={1}
+                      style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Max Duration (Days)</label>
@@ -582,6 +673,104 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
           >
             {uploading ? <Loader2 className="animate-spin" size={20} /> : step === 3 ? 'Finalize Post' : 'Continue'}
           </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ItemDetailModal({ listing, onClose }: { listing: Listing, onClose: () => void }) {
+  const supabase = createBrowserSupabaseClient()
+  
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 12000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)' }} onClick={onClose} />
+      
+      <div className="page-fade" style={{ 
+        width: '100%', 
+        maxWidth: '900px', 
+        background: 'var(--surface)', 
+        borderRadius: '40px', 
+        overflow: 'hidden', 
+        position: 'relative',
+        boxShadow: 'var(--shadow-2xl)',
+        border: '1px solid var(--border)',
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '90vh'
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1.2fr) 1fr', height: '100%' }}>
+          
+          {/* Left: Media Area */}
+          <div style={{ background: 'var(--bg-sub)', position: 'relative' }}>
+            {listing.images?.[0] ? (
+              <Image 
+                src={supabase.storage.from('marketplace').getPublicUrl(listing.images[0]).data.publicUrl} 
+                alt={listing.title} 
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-sub)' }}>
+                <Plus size={48} opacity={0.3} />
+              </div>
+            )}
+            <button 
+              onClick={onClose}
+              style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: 'none', color: 'white', padding: '0.75rem', borderRadius: '16px', cursor: 'pointer', fontWeight: 900 }}
+            >
+               BACK
+            </button>
+          </div>
+
+          {/* Right: Info Area */}
+          <div style={{ padding: '3rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div>
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                <span style={{ padding: '6px 14px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 950 }}>{listing.category}</span>
+                <span style={{ padding: '6px 14px', background: 'var(--bg-sub)', color: 'var(--text-sub)', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 950 }}>{listing.condition}</span>
+              </div>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 950, letterSpacing: '-0.04em', color: 'white', lineHeight: 1.1, marginBottom: '1rem' }}>{listing.title}</h2>
+              <div style={{ fontSize: '2rem', fontWeight: 950, color: 'var(--brand)' }}>{listing.price === 0 ? 'FREE / SHARE' : `£${listing.price}`}</div>
+            </div>
+
+            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '2px' }}>Description</div>
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, fontSize: '0.95rem' }}>{listing.description}</p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+               <div style={{ padding: '1.25rem', background: 'var(--bg-sub)', borderRadius: '20px' }}>
+                  <div style={{ color: 'var(--brand)', marginBottom: '0.5rem' }}><MapPin size={20} /></div>
+                  <div style={{ fontWeight: 900, color: 'white', fontSize: '0.9rem' }}>{listing.meetup_zone}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginTop: '0.25rem' }}>{listing.meetup_details}</div>
+               </div>
+               <div style={{ padding: '1.25rem', background: 'var(--bg-sub)', borderRadius: '20px' }}>
+                  <div style={{ color: 'var(--brand)', marginBottom: '0.5rem' }}><Clock size={20} /></div>
+                  <div style={{ fontWeight: 900, color: 'white', fontSize: '0.9rem' }}>{listing.duration_days} Days Max</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)', marginTop: '0.25rem' }}>Default Loan Agreement</div>
+               </div>
+            </div>
+
+            <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 950, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Listed By</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div style={{ width: '56px', height: '56px', borderRadius: '20px', background: 'var(--brand)', overflow: 'hidden' }}>
+                  {listing.profiles?.avatar_url && <Image src={listing.profiles.avatar_url} width={56} height={56} alt="Seller" />}
+                </div>
+                <div>
+                   <div style={{ fontWeight: 950, color: 'white', fontSize: '1.1rem' }}>{listing.profiles?.full_name}</div>
+                   <div style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: 800 }}>Institutional Specialist / {listing.profiles?.role}</div>
+                </div>
+              </div>
+              <button 
+                className="btn btn-primary"
+                style={{ width: '100%', marginTop: '2rem', padding: '1.25rem', borderRadius: '20px', fontWeight: 950, fontSize: '1rem' }}
+              >
+                Request Access via Node
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

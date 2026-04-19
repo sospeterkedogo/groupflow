@@ -8,6 +8,7 @@ import CalendarView from './CalendarView'
 import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle } from 'lucide-react'
 import { Group, Profile } from '@/types/database'
 import { useProfile } from '@/context/ProfileContext'
+import { useNotifications } from './NotificationProvider'
 
 interface JoinRequest {
   id: string
@@ -25,6 +26,7 @@ interface JoinRequest {
 export default function DashboardHome({ groupId }: { groupId: string }) {
   const router = useRouter()
   const { profile } = useProfile()
+  const { addToast } = useNotifications()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
   const [currentTime, setCurrentTime] = useState(new Date())
 
@@ -113,8 +115,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const handleAcceptRequest = async (id: string) => {
     const { acceptJoinRequest } = await import('@/app/dashboard/join/actions')
     const res = await acceptJoinRequest(id)
-    if (res.error) alert(res.error)
+    if (res.error) addToast('Protocol Error', res.error, 'error')
     else {
+      addToast('Sync Success', 'Authorized member integrated into group.', 'success')
       void fetchMembers()
       void fetchPendingRequests()
     }
@@ -123,8 +126,11 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const handleDeclineRequest = async (id: string) => {
     const { declineJoinRequest } = await import('@/app/dashboard/join/actions')
     const res = await declineJoinRequest(id)
-    if (res.error) alert(res.error)
-    else void fetchPendingRequests()
+    if (res.error) addToast('System Error', res.error, 'error')
+    else {
+      addToast('Request Purged', 'Join request has been successfully declined.', 'info')
+      void fetchPendingRequests()
+    }
   }
 
   const fetchPersonalTaskCount = useCallback(async () => {
@@ -426,7 +432,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           { icon: <TrendingUp size={20} />, label: 'Global Progress', value: `${projectProgress}%`, sub: progressLabel, color: '#f59e0b' },
           { icon: <Zap size={20} />, label: 'Productivity Index', value: '100%', sub: 'Real-time encryption', color: 'var(--accent)' }
         ].map((stat, i) => (
-          <div key={i} className="control-card" style={{
+          <div key={i} className="control-card control-card-entrance" style={{
             padding: '1rem',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -434,7 +440,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
             position: 'relative',
             overflow: 'hidden',
             boxShadow: 'var(--shadow-sm)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            animationDelay: `${i * 0.1}s`,
+            opacity: 0 // Start hidden for animation
           }}>
             <div style={{ position: 'absolute', top: '-15px', right: '-15px', width: '70px', height: '70px', background: stat.color, filter: 'blur(45px)', opacity: 0.12, pointerEvents: 'none' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: stat.color, marginBottom: '0.5rem' }}>

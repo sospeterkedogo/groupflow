@@ -160,76 +160,94 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       {children}
       
       {/* Absolute Toast Container */}
-      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', zIndex: 9999 }}>
+      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', zIndex: 99999, pointerEvents: 'none' }}>
         {toasts.map(toast => {
-          const isError = toast.type === 'error'
-          const isSuccess = toast.type === 'success'
-          const isWarning = toast.type === 'warning'
-          const isAssignment = toast.type === 'assignment'
+          const type = toast.type?.toLowerCase() || 'info'
+          const isError = type === 'error'
+          const isSuccess = type === 'success'
+          const isWarning = type === 'warning'
           
           const colors = {
-            bg: isError ? 'rgba(239, 68, 68, 0.1)' : 
-                isSuccess ? 'rgba(34, 197, 94, 0.1)' : 
-                isWarning ? 'rgba(245, 158, 11, 0.1)' : 
-                isAssignment ? 'rgba(26, 115, 232, 0.1)' : 'rgba(148, 163, 184, 0.1)',
-            text: isError ? '#ef4444' : 
-                  isSuccess ? '#22c55e' : 
-                  isWarning ? '#f59e0b' : 
-                  isAssignment ? 'var(--brand)' : 'var(--text-sub)',
-            border: isError ? '#ef444433' : 
-                    isSuccess ? '#22c55e33' : 
-                    isWarning ? '#f59e0b33' : 
-                    'var(--border)'
+            brand: isError ? '#ef4444' : isSuccess ? '#10b981' : isWarning ? '#f59e0b' : '#38bdf8',
+            bg: 'rgba(15, 15, 20, 0.9)',
+            border: isError ? 'rgba(239, 68, 68, 0.3)' : isSuccess ? 'rgba(16, 185, 129, 0.3)' : isWarning ? 'rgba(245, 158, 11, 0.3)' : 'rgba(56, 189, 248, 0.3)'
           }
 
           return (
             <div 
               key={toast.id} 
-              className="glass"
               style={{ 
-                padding: '1.25rem', 
-                borderRadius: '16px', 
-                minWidth: '320px', 
-                maxWidth: '400px', 
+                pointerEvents: 'auto',
+                padding: '1.25rem 1.5rem', 
+                borderRadius: '24px', 
+                minWidth: '340px', 
+                maxWidth: '450px', 
                 display: 'flex', 
-                alignItems: 'flex-start', 
-                gap: '1rem',
-                animation: 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                alignItems: 'center', 
+                gap: '1.25rem',
                 border: `1px solid ${colors.border}`,
-                background: 'var(--surface)',
-                boxShadow: 'var(--shadow-lg)'
+                background: colors.bg,
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+                position: 'relative',
+                overflow: 'hidden',
+                animation: 'elite-toast-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'
               }}
             >
+              {/* Progress Bar */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                height: '3px',
+                background: colors.brand,
+                width: '100%',
+                animation: 'elite-toast-progress 5s linear forwards'
+              }} />
+
               <div style={{ 
-                padding: '0.5rem', 
-                borderRadius: '10px', 
-                background: colors.bg,
-                color: colors.text
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px', 
+                background: `rgba(${isError ? '239, 68, 68' : isSuccess ? '16, 185, 129' : '56, 189, 248'}, 0.1)`,
+                color: colors.brand,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
               }}>
-                 {isError ? <AlertCircle size={20} /> : 
-                  isSuccess ? <CheckCircle2 size={20} /> : 
-                  isWarning ? <Timer size={20} /> : 
-                  isAssignment ? <UserPlus size={20} /> : <Info size={20} />}
+                 {isError ? <AlertCircle size={22} /> : 
+                  isSuccess ? <CheckCircle2 size={22} /> : 
+                  isWarning ? <Timer size={22} /> : <Info size={22} />}
               </div>
+              
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.25rem' }}>{toast.title}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.4 }}>{toast.message}</div>
+                <div style={{ fontSize: '0.7rem', fontWeight: 950, color: colors.brand, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>
+                  {type} Protocol
+                </div>
+                <div style={{ fontWeight: 800, fontSize: '1rem', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.2 }}>{toast.title}</div>
+                {toast.message && <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px', lineHeight: 1.4 }}>{toast.message}</div>}
               </div>
+
               <button 
                 onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sub)', padding: '4px' }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.2)', padding: '4px' }}
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
           )
         })}
       </div>
 
-      <style jsx>{`
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(100%) scale(0.9); }
+      <style jsx global>{`
+        @keyframes elite-toast-in {
+          from { opacity: 0; transform: translateX(60px) scale(0.9); }
           to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes elite-toast-progress {
+          from { width: 100%; }
+          to { width: 0%; }
         }
       `}</style>
     </NotificationContext.Provider>

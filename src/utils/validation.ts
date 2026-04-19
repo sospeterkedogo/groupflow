@@ -18,8 +18,10 @@ export const listingSchema = z.object({
   description: z.string().min(20, "Provide a more detailed description").max(2000),
   price: z.number().min(0),
   category: z.string(),
-  images: z.array(z.string().url()).min(1, "At least one image is required"),
-  location: z.string().optional(),
+  quantity: z.number().int().min(1).default(1),
+  condition: z.enum(['New', 'Like New', 'Used', 'Refurbished']),
+  images: z.array(z.string()).min(1, "At least one image is required"),
+  location: z.string().min(3, "Specify a pickup zone or department"),
   contact_info: z.string().optional(),
 })
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import jsPDF from 'jspdf'
 import { Mail, Download, FileText, Send, Inbox } from 'lucide-react'
+import { useNotifications } from './NotificationProvider'
 
 import { VirtualEmail } from '@/types/ui'
 import { Profile } from '@/types/auth'
@@ -19,6 +20,7 @@ export default function EmailCenter({
   const [emails, setEmails] = useState<VirtualEmail[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedEmail, setSelectedEmail] = useState<VirtualEmail | null>(null)
+  const { addToast } = useNotifications()
 
   const generateSimulatedInbox = useCallback(() => {
     const mockEmails: VirtualEmail[] = [
@@ -66,8 +68,8 @@ export default function EmailCenter({
 
     setEmails((prev) => [newEmail, ...prev])
     setLoading(false)
-    alert('Report generated and delivered to your Virtual Inbox.')
-  }, [])
+    addToast('Report Ready', 'Strategic intelligence report generated and delivered to your Virtual Inbox.', 'success')
+  }, [addToast])
 
   const downloadRealPDF = () => {
     const doc = new jsPDF()

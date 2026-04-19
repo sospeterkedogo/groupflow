@@ -8,6 +8,9 @@ import {
 } from 'lucide-react'
 import { usePresence } from '@/components/PresenceProvider'
 import ActivityLogView from '@/components/ActivityLogView'
+import { useNotifications } from '@/components/NotificationProvider'
+import { Group, Task, Profile as ProfileDB } from '@/types/database'
+import { Profile } from '@/types/auth'
 import Link from 'next/link'
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
@@ -36,12 +39,13 @@ const STATUS_COLORS: Record<string, string> = {
 export default function AnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: groupId } = use(params)
   const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const { addToast } = useNotifications()
+  const [currentUser, setCurrentUser] = useState<Profile | null>(null)
   const [isMember, setIsMember] = useState(false)
-  const [group, setGroup] = useState<any>(null)
-  const [tasks, setTasks] = useState<any[]>([])
+  const [group, setGroup] = useState<Group | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
   const [taskSearch, setTaskSearch] = useState('')
-  const [members, setMembers] = useState<any[]>([])
+  const [members, setMembers] = useState<ProfileDB[]>([])
   const [artifacts, setArtifacts] = useState<any[]>([])
   const [mounted, setMounted] = useState(false)
   const { onlineUsers } = usePresence()
@@ -106,9 +110,9 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       const { sendJoinRequest } = await import('@/app/dashboard/join/actions')
       await sendJoinRequest(groupId, currentUser.full_name || 'A student')
       setHasSentRequest(true)
-      alert('Request sent! The team will see your message in their chat.')
+      addToast('Sync Success', 'Protocol access request has been transmitted to team leader.', 'success')
     } catch (err: any) {
-      alert('Error sending request: ' + err.message)
+      addToast('System Error', 'Failed to transmit access request: ' + err.message, 'error')
     } finally {
       setLoading(false)
     }

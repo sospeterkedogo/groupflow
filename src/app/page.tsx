@@ -39,25 +39,25 @@ export default function Home() {
                style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: '#222222', border: 'none', width: '36px', height: '36px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}
              >✕</button>
              
-             <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '1px' }}>
-                THE GroupFlow MISSION
+             <div style={{ display: 'inline-flex', padding: '6px 14px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 950, marginBottom: '1.25rem', letterSpacing: '2px', border: '1px solid rgba(var(--brand-rgb), 0.2)' }}>
+                STRATEGIC MISSION PROTOCOL
              </div>
 
-             <h2 style={{ fontSize: '2rem', fontWeight: 650, marginBottom: '1.5rem', letterSpacing: '-0.03em', color: '#f3f4f6' }}>Revolutionizing academic collaboration.</h2>
+             <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-0.04em', color: 'white', lineHeight: 1.1 }}>Authorizing Fairness in <br /><span style={{ color: 'var(--brand)' }}>Academic Capital.</span></h2>
              
-             <div style={{ display: 'grid', gap: '1.5rem', fontSize: '0.95rem', lineHeight: 1.6, color: '#9ca3af' }}>
+             <div style={{ display: 'grid', gap: '2rem', fontSize: '1rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.6)' }}>
                 <div>
-                   <strong style={{ color: '#f3f4f6', display: 'block', marginBottom: '0.25rem' }}>Solving Invisibility</strong>
-                   GroupFlow was built to eliminate opaque group dynamics. We make every contribution audit-ready and visible to ensure fair recognition for all researchers.
+                   <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Protocol 01: Visibility</strong>
+                   GroupFlow eliminates opaque group dynamics. We ensure every intellectual contribution is audit-ready and attributed, securing fair recognition for all researchers.
                 </div>
                 <div>
-                   <strong style={{ color: '#f3f4f6', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
-                   On a mission to integrate this toolkit into global school systems, bridging the gap between individual effort and community goals.
+                   <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Protocol 02: Integration</strong>
+                   Our mandate is to bridge the gap between individual effort and institutional outcomes, scaling this toolkit across the global educational ecosystem.
                 </div>
              </div>
 
-             <button className="btn btn-primary" style={{ marginTop: '2rem', width: '100%', borderRadius: '8px', background: '#10b981', color: '#0a0a0a', border: 'none' }} onClick={() => setIsModalOpen(false)}>
-               Support Global Scale
+             <button className="btn btn-primary" style={{ marginTop: '2.5rem', width: '100%', padding: '1.25rem', borderRadius: '20px', background: 'var(--brand)', color: '#0a0a0a', fontWeight: 950, fontSize: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(var(--brand-rgb), 0.3)' }} onClick={() => setIsModalOpen(false)}>
+               Support Institutional Scale
              </button>
           </div>
         </div>
@@ -123,15 +123,28 @@ export default function Home() {
         </section>
 
         {/* FINAL UNIFIED CTA */}
-        <section style={{ padding: '10rem 2rem', textAlign: 'center' }}>
-           <div style={{ maxWidth: '1000px', margin: '0 auto', background: 'linear-gradient(rgba(16, 185, 129, 0.1), transparent)', padding: '6rem 3rem', borderRadius: '24px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-              <h2 style={{ fontSize: '3rem', fontWeight: 700, color: '#f3f4f6', marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>Start your mission.</h2>
-              <p style={{ fontSize: '1.125rem', color: '#9ca3af', marginBottom: '3.5rem', maxWidth: '650px', margin: '0 auto 3.5rem', lineHeight: 1.6 }}>
-                 Access individual research tiers, project workflows, and Peer-to-Peer recognition protocols. Free for verified students.
+        <section style={{ padding: 'clamp(5rem, 15vw, 12rem) 2rem', textAlign: 'center', position: 'relative' }}>
+           <div style={{ 
+             maxWidth: '1200px', 
+             margin: '0 auto', 
+             background: 'linear-gradient(135deg, rgba(var(--brand-rgb), 0.08) 0%, rgba(0,0,0,0) 100%)', 
+             padding: 'clamp(3rem, 10vw, 8rem) 2rem', 
+             borderRadius: '56px', 
+             border: '1px solid rgba(var(--brand-rgb), 0.15)',
+             backdropFilter: 'blur(10px)',
+             position: 'relative',
+             overflow: 'hidden'
+           }}>
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 120%, rgba(var(--brand-rgb), 0.15), transparent 70%)', pointerEvents: 'none' }} />
+              
+              <h2 style={{ fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: 950, color: '#f3f4f6', marginBottom: '1.5rem', letterSpacing: '-0.05em', lineHeight: 1 }}>Begin your mission.</h2>
+              <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4rem', maxWidth: '700px', margin: '0 auto 4rem', lineHeight: 1.4, fontWeight: 500 }}>
+                 Authorize individual research nodes, synchronize project workflows, and implement peer-to-Peer recognition protocols. 
+                 <br /><span style={{ color: 'var(--brand)', fontWeight: 800 }}>Institutional clearance remains free for verified academic specialists.</span>
               </p>
-              <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                 <button onClick={() => setIsModalOpen(true)} style={{ background: '#10b981', color: '#0a0a0a', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 10px 30px rgba(16, 185, 129, 0.15)' }}>Join the Mission</button>
-                 <a href="/login" style={{ border: '1px solid #222222', color: '#f3f4f6', padding: '1.25rem 2.5rem', borderRadius: '8px', fontSize: '1rem', fontWeight: 650, textDecoration: 'none', background: 'rgba(255,255,255,0.02)' }}>Initialize Workspace</a>
+              <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', position: 'relative' }}>
+                 <button onClick={() => setIsModalOpen(true)} style={{ background: 'var(--brand)', color: '#0a0a0a', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 950, border: 'none', cursor: 'pointer', boxShadow: '0 20px 40px rgba(var(--brand-rgb), 0.3)', transition: '0.3s' }}>Secure Clearance</button>
+                 <a href="/login" style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '1.4rem 3.5rem', borderRadius: '24px', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', transition: '0.3s' }}>Initialize Workspace</a>
               </div>
            </div>
         </section>

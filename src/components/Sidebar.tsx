@@ -388,29 +388,37 @@ export default function Sidebar({ user }: SidebarProps) {
       </aside>
 
       <style jsx>{`
-        .nav-bubble:hover {
-          transform: translateX(4px);
-          color: var(--brand) !important;
+        .sidebar-container {
+          backdrop-filter: blur(20px);
         }
-        .nav-bubble:active { transform: scale(0.98); }
-        .identity-pill:hover { border-color: var(--brand) !important; background: var(--bg-sub); }
+        .nav-bubble:hover {
+          transform: translateX(6px);
+          color: var(--brand) !important;
+          background: rgba(var(--brand-rgb), 0.08) !important;
+        }
+        .nav-bubble:active { transform: scale(0.96); }
+        .identity-pill:hover { 
+          border-color: var(--brand) !important; 
+          background: var(--bg-main) !important;
+          box-shadow: 0 4px 15px rgba(var(--brand-rgb), 0.05);
+        }
         
         .sidebar-backdrop {
           display: none;
+          pointer-events: none;
+          opacity: 0;
+          visibility: hidden;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(4px);
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          position: fixed;
+          inset: 0;
+          z-index: 4500;
         }
 
         @media (max-width: 768px) {
           .sidebar-backdrop {
             display: block;
-            pointer-events: none;
-            opacity: 0;
-            visibility: hidden;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: fixed;
-            inset: 0;
-            z-index: 4500;
           }
           .sidebar-backdrop.visible {
             pointer-events: auto;
@@ -418,11 +426,12 @@ export default function Sidebar({ user }: SidebarProps) {
             visibility: visible;
           }
 
-          .mobile-header { display: flex !important; }
-          .mobile-header {
-             background: var(--surface) !important;
+          .mobile-header { 
+            display: flex !important; 
+            background: rgba(var(--surface-rgb), 0.8) !important;
+            backdrop-filter: blur(20px);
           }
-          .main-content { margin-left: 0 !important; padding-top: calc(var(--h-nav) + 1rem) !important; }
+          
           .sidebar-container { 
             position: fixed !important;
             left: 0 !important;
@@ -430,14 +439,25 @@ export default function Sidebar({ user }: SidebarProps) {
             bottom: 0 !important;
             z-index: 5100 !important;
             background: var(--surface) !important;
-            box-shadow: 20px 0 50px rgba(0,0,0,0.4) !important;
+            box-shadow: 30px 0 60px rgba(0,0,0,0.5) !important;
             transform: translateX(-100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
             width: 85vw !important;
-            max-width: 340px !important;
+            max-width: 320px !important;
+            border-right: 1px solid rgba(255,255,255,0.05) !important;
           }
           .sidebar-container.open { transform: translateX(0) !important; }
-          .sidebar-container.closed { transform: translateX(-100%) !important; }
+        }
+
+        .glass-card-prestige {
+          background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+          border: 1px solid rgba(255,255,255,0.08);
+          transition: all 0.3s ease;
+        }
+        .glass-card-prestige:hover {
+          background: rgba(255,255,255,0.05);
+          border-color: var(--brand);
+          transform: translateY(-2px);
         }
 
         .active-project::after {
@@ -446,21 +466,43 @@ export default function Sidebar({ user }: SidebarProps) {
           inset: 0;
           border-radius: inherit;
           box-shadow: 0 0 0 2px var(--brand);
-          opacity: 0.1;
-          animation: pulse-border 2s infinite;
+          opacity: 0;
+          animation: pulse-border 3s infinite;
         }
         @keyframes pulse-border {
-          0% { opacity: 0.1; }
-          50% { opacity: 0.2; }
-          100% { opacity: 0.1; }
+          0% { opacity: 0; transform: scale(1); }
+          50% { opacity: 0.2; transform: scale(1.02); }
+          100% { opacity: 0; transform: scale(1); }
         }
         .pulse-pill {
           animation: pulse-glow 2s infinite;
         }
         @keyframes pulse-glow {
           0% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.2); }
+          50% { opacity: 0.5; transform: scale(1.3); }
           100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .locked-badge-premium {
+          background: linear-gradient(90deg, #fbbf24, #f59e0b);
+          color: black !important;
+          padding: 2px 6px;
+          border-radius: 6px;
+          font-size: 0.55rem;
+          font-weight: 950;
+          margin-left: auto;
+          box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+        }
+
+        .nav-bubble {
+           position: relative;
+           overflow: hidden;
+        }
+        
+        .panel-tool:hover {
+           background: var(--surface) !important;
+           border-color: var(--brand) !important;
+           color: var(--brand) !important;
         }
       `}</style>
     </div>

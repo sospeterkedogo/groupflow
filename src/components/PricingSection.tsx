@@ -53,7 +53,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+    <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '4rem' }}>
       
       {showTitle && (
         <div style={{ color: 'white', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: isLanding ? 'center' : 'left' }}>
@@ -68,64 +68,132 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             textTransform: 'uppercase', 
             letterSpacing: '2px' 
           }}>
-            <Sparkles size={18} /> Professional Infrastructure
+            <Sparkles size={18} /> INSTITUTIONAL AUTHORIZATION
           </div>
-          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', lineHeight: 1.1, fontWeight: 950, letterSpacing: '-0.04em', color: 'white', margin: 0 }}>
-            Elevate your <span style={{ color: 'var(--brand)' }}>academic output</span>
+          <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', lineHeight: 1, fontWeight: 950, letterSpacing: '-0.05em', color: 'white', margin: 0 }}>
+            Authorize your <span style={{ color: 'var(--brand)' }}>Academic Node</span>
           </h2>
           <p style={{ 
-            maxWidth: '680px', 
+            maxWidth: '720px', 
             margin: isLanding ? '0 auto' : '0',
-            color: 'rgba(255,255,255,0.7)', 
-            fontSize: '1.1rem', 
+            color: 'rgba(255,255,255,0.6)', 
+            fontSize: '1.2rem', 
             fontWeight: 500, 
-            lineHeight: 1.6 
+            lineHeight: 1.5 
           }}>
-            Choose the tier that matches your research ambitions. All plans include core synchronization protocols.
+            Select the clearance level required for your research objectives. All tiers include core peer-networking protocols.
           </p>
         </div>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         
-        {/* PRO CARD */}
+        {/* STANDARD TIER */}
         <div style={{ 
-          padding: '3rem 2.5rem', 
+          padding: '3.5rem 2.5rem', 
           borderRadius: '40px', 
-          background: 'rgba(255,255,255,0.02)', 
-          border: '1px solid rgba(255,255,255,0.08)', 
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(255,255,255,0.01)', 
+          border: '1px solid rgba(255,255,255,0.05)', 
+          backdropFilter: 'blur(20px)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           position: 'relative'
-        }} className="hover-lift">
+        }} className="premium-pricing-card">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <Shield size={32} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <ArrowRight size={28} />
               </div>
               <div style={{ textAlign: 'right' }}>
-                 <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 950, color: 'white' }}>Pro</h2>
-                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 800 }}>SCHOLAR TIER</p>
+                 <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Standard</h2>
+                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Basic Access</p>
               </div>
             </div>
 
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '2rem' }}>
-                <span style={{ fontSize: '4.5rem', fontWeight: 950, color: 'white', letterSpacing: '-0.03em' }}>£2.99</span>
-                <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 800, fontSize: '1rem' }}>/mo</span>
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
+                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£0</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
               </div>
-              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {[
-                  'Priority Feedback for project help',
-                  'Advanced Team Analytics & Insights',
-                  'Group Theme & Brand Customization',
-                  'Unlimited Historical Task Records'
+                  'Unified Task Management',
+                  '1 Active Collaborative Project',
+                  'Public Peer-Networking Protocol',
+                  'Standard AI Synthesis Engine'
                 ].map((f, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.95rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>
-                    <CheckCircle2 size={18} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: '2px' }} />
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
+                    <CheckCircle2 size={16} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0, marginTop: '3px' }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <button
+            className="btn btn-secondary"
+            style={{ 
+              width: '100%', 
+              padding: '1.25rem', 
+              borderRadius: '24px', 
+              fontSize: '0.95rem', 
+              fontWeight: 950, 
+              background: 'rgba(255,255,255,0.03)', 
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.1)', 
+              cursor: 'pointer'
+            }}
+            disabled
+          >
+            Authorized by Default
+          </button>
+        </div>
+
+        {/* PRO TIER */}
+        <div style={{ 
+          padding: '3.5rem 2.5rem', 
+          borderRadius: '40px', 
+          background: 'rgba(var(--brand-rgb), 0.02)', 
+          border: '2px solid var(--brand)', 
+          backdropFilter: 'blur(30px)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+        }} className="premium-pricing-card popular-tier">
+          <div style={{ position: 'absolute', top: '24px', right: '24px', padding: '6px 12px', background: 'var(--brand)', color: '#0a0a0a', borderRadius: '100px', fontSize: '0.65rem', fontWeight: 950, letterSpacing: '1px' }}>RECOMMENDED</div>
+          
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--brand)', color: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Shield size={28} />
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                 <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Pro Scholar</h2>
+                 <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Advanced Analytics</p>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
+                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£4.99</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
+              </div>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {[
+                  'Priority AI Feedback Protocols',
+                  'Unlimited Multi-Project Groups',
+                  'Deep Visual Customization Engine',
+                  'Verified Historical Archiving',
+                  'Private SSL Shielded Rooms'
+                ].map((f, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)', fontWeight: 700 }}>
+                    <CheckCircle2 size={16} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: '3px' }} />
                     {f}
                   </li>
                 ))}
@@ -138,7 +206,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             style={{ 
               width: '100%', 
               padding: '1.25rem', 
-              borderRadius: '20px', 
+              borderRadius: '24px', 
               fontSize: '1rem', 
               fontWeight: 950, 
               background: 'var(--brand)', 
@@ -150,73 +218,68 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
             onClick={() => handleCheckout('pro')}
             disabled={loadingPlan !== null}
           >
-            {loadingPlan === 'pro' ? 'SYNCING...' : 'Upgrade to Pro'}
+            {loadingPlan === 'pro' ? 'SYNCING...' : 'Elevate to Pro'}
           </button>
         </div>
 
-        {/* PREMIUM CARD */}
+        {/* PREMIUM TIER */}
         <div style={{ 
-          padding: '3rem 2.5rem', 
+          padding: '3.5rem 2.5rem', 
           borderRadius: '40px', 
-          background: 'rgba(var(--brand-rgb), 0.05)', 
-          border: '2px solid var(--brand)', 
-          backdropFilter: 'blur(10px)',
-          position: 'relative',
+          background: 'rgba(255,255,255,0.02)', 
+          border: '1px solid rgba(255,255,255,0.08)', 
+          backdropFilter: 'blur(20px)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          boxShadow: '0 32px 64px rgba(0,0,0,0.5)'
-        }} className="hover-lift">
-          <div style={{ position: 'absolute', top: '24px', right: '24px', padding: '6px 14px', background: 'var(--brand)', color: 'white', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 950, letterSpacing: '1px' }}>LIFETIME ACCESS</div>
-          
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative'
+        }} className="premium-pricing-card">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                 <Sparkles size={32} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3rem' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--brand) 0%, #6366f1 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <Sparkles size={28} />
               </div>
-              <div style={{ textAlign: 'left' }}>
-                 <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 950, color: 'white' }}>Premium</h2>
-                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 800 }}>INSTITUTIONAL PARTNER</p>
+              <div style={{ textAlign: 'right' }}>
+                 <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 950, color: 'white' }}>Premium</h2>
+                 <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>Institutional Partner</p>
               </div>
             </div>
 
-            <div style={{ marginBottom: '2.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '2rem' }}>
-                <span style={{ fontSize: '4.5rem', fontWeight: 950, color: 'white', letterSpacing: '-0.03em' }}>£99</span>
-                <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 800, fontSize: '1rem' }}>Lifetime</span>
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginBottom: '2.5rem' }}>
+                <span style={{ fontSize: '4rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em' }}>£14.99</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem' }}>/mo</span>
               </div>
-              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {[
-                  'Everything in Pro, forever',
-                  'School-wide Integration Support',
-                  'Multi-Project Enterprise Hub',
-                  'Dedicated 1-on-1 Setup Session',
-                  'Early Review Lab Access'
+                  'Institutional Multi-Project Hubs',
+                  'Early Access Review Lab',
+                  'Researcher API Clearing',
+                  'Dedicated Protocol Support',
+                  'Strategy Synthesis Session'
                 ].map((f, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.95rem', color: 'white', fontWeight: 700 }}>
-                    <div style={{ padding: '2px', background: 'var(--brand)', borderRadius: '50%', color: 'white', flexShrink: 0 }}>
-                       <Check size={12} />
-                    </div>
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                    <Check size={18} style={{ color: '#6366f1', flexShrink: 0, marginTop: '2px' }} />
                     {f}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-
+          
           <button
-            className="btn"
+            className="btn btn-secondary"
             style={{ 
               width: '100%', 
               padding: '1.25rem', 
-              borderRadius: '20px', 
+              borderRadius: '24px', 
               fontSize: '1rem', 
               fontWeight: 950, 
               background: 'white', 
               color: '#0a0a0a', 
               border: 'none', 
-              cursor: 'pointer',
-              transition: 'transform 0.2s ease' 
+              cursor: 'pointer'
             }}
             onClick={() => handleCheckout('premium')}
             disabled={loadingPlan !== null}
@@ -235,27 +298,32 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
         display: 'flex', 
         alignItems: 'center', 
         gap: '1rem', 
-        marginTop: '2rem', 
-        padding: '1.25rem', 
-        background: 'rgba(255,255,255,0.03)', 
-        borderRadius: '20px', 
-        border: '1px solid rgba(255,255,255,0.08)', 
-        color: 'rgba(255,255,255,0.5)', 
+        marginTop: '1rem', 
+        padding: '1.5rem 2rem', 
+        background: 'rgba(255,255,255,0.02)', 
+        borderRadius: '24px', 
+        border: '1px solid rgba(255,255,255,0.05)', 
+        color: 'rgba(255,255,255,0.4)', 
         fontSize: '0.85rem', 
         fontWeight: 600,
         justifyContent: isLanding ? 'center' : 'flex-start'
       }}>
         <ArrowRight size={18} style={{ color: 'var(--brand)' }} />
-        <span>Secure checkout powered by Stripe. Supports Apple Pay, Google Pay, and global credit networks.</span>
+        <span>Secure checkout powered by Stripe. Authorization includes instant receipt generation.</span>
       </div>
 
       <style jsx>{`
-        .hover-lift:hover {
+        .premium-pricing-card:hover {
           transform: translateY(-8px);
-          border-color: rgba(var(--brand-rgb), 0.3) !important;
-          background: rgba(255,255,255,0.04) !important;
+          border-color: rgba(var(--brand-rgb), 0.2) !important;
+          background: rgba(255,255,255,0.03) !important;
+        }
+        .popular-tier:hover {
+          transform: translateY(-12px) scale(1.02);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.6) !important;
         }
       `}</style>
     </div>
+
   )
 }

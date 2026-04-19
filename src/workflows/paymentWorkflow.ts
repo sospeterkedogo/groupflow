@@ -109,7 +109,7 @@ async function resolveUserId(supabase: SupabaseAdminClient, payload: PaymentWork
 async function handleCheckoutCompleted(supabase: SupabaseAdminClient, userId: string, payload: PaymentWorkflowPayload) {
   'use step'
 
-  const planLabel = payload.productLabel || (payload.plan === 'premium' ? 'Premium pre-registration' : 'Pro pre-registration')
+  const planLabel = payload.productLabel || (payload.plan === 'premium' ? 'Institutional Partner Authorization' : 'Pro Scholar Clearance')
   const normalizedPlan = payload.plan || 'pro'
   const status = payload.status === 'paid' || payload.status === 'complete' ? 'paid' : payload.status || 'pending'
   
@@ -261,6 +261,20 @@ async function handleMarketplacePurchase(supabase: SupabaseAdminClient, buyerId:
     .from('marketplace_listings')
     .update({ status: 'SOLD' })
     .eq('id', listingId)
+
+  // Record Payment for Auditing
+  const internalRef = `GF-MP-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`
+  await supabase.from('payments').insert([{
+    user_id: buyerId,
+    amount_total: payload.amountTotal,
+    currency: payload.currency,
+    status: 'paid',
+    price_type: 'marketplace',
+    plan_label: `Purchase: ${productName}`,
+    invoice_number: internalRef,
+    stripe_session_id: payload.sessionId,
+    metadata: { ...payload.metadata, item_name: productName, seller_id: sellerId }
+  }])
 
   // Notify Seller
   await supabase.from('notifications').insert([{
