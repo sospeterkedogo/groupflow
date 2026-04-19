@@ -73,21 +73,60 @@ export default function Home() {
   ]
 
   const navMenus = {
-    product: [
-      { id: 'kanban', title: 'Project Intelligence', desc: 'Advanced Kanban for institutional research.', icon: <LayoutGrid size={20} /> },
-      { id: 'sync', title: 'Real-time Sync', desc: 'Universal presence and file state sharing.', icon: <Zap size={20} /> },
-      { id: 'roadmap', title: 'Academic Roadmap', desc: 'Phased timeline for complex submissions.', icon: <Milestone size={20} /> }
-    ],
-    solutions: [
-      { id: 'research', title: 'Scholars & Researchers', desc: 'Secure contribute logs for high-stakes work.', icon: <BookOpen size={20} /> },
-      { id: 'teams', title: 'Team Collaboration', desc: 'Departmental project management at scale.', icon: <Users size={20} /> },
-      { id: 'enterprise', title: 'Institutional Flow', desc: 'Integrated university project ecosystems.', icon: <Globe size={20} /> }
-    ],
-    resources: [
-      { id: 'mission', title: 'Global Mission 2026', desc: 'Read our manifesto for academic support.', icon: <Fingerprint size={20} /> },
-      { id: 'help', title: 'Help & Knowledge', desc: 'Documentation for technical researchers.', icon: <HelpCircle size={20} /> },
-      { id: 'achievements', title: 'Achievement Stats', desc: 'Global impact of the GroupFlow community.', icon: <Award size={20} /> }
-    ]
+    product: {
+      label: 'Product',
+      categories: [
+        {
+          label: 'Infrastructure',
+          items: [
+            { id: 'kanban', title: 'Project Intelligence', desc: 'Real-time Kanban for technical research teams.', icon: <LayoutGrid size={18} /> },
+            { id: 'sync', title: 'Real-time Sync', desc: 'Universal presence and file state synchronization.', icon: <Zap size={18} /> }
+          ]
+        },
+        {
+          label: 'Insights',
+          items: [
+            { id: 'roadmap', title: 'Academic Roadmap', desc: 'Phased timeline intervals for complex submissions.', icon: <Milestone size={18} /> }
+          ]
+        }
+      ]
+    },
+    solutions: {
+      label: 'Solutions',
+      categories: [
+        {
+          label: 'Use Cases',
+          items: [
+            { id: 'research', title: 'Scholars & Researchers', desc: 'Secure contribute logs for high-stakes projects.', icon: <BookOpen size={18} /> },
+            { id: 'teams', title: 'Team Collaboration', desc: 'Departmental project management at global scale.', icon: <Users size={18} /> }
+          ]
+        },
+        {
+          label: 'Scale',
+          items: [
+            { id: 'enterprise', title: 'Institutional Flow', desc: 'Integrated university ecosystems and audit-ready data.', icon: <Globe size={18} /> }
+          ]
+        }
+      ]
+    },
+    resources: {
+      label: 'Resources',
+      categories: [
+        {
+          label: 'Community',
+          items: [
+            { id: 'mission', title: 'Global Mission 2026', desc: 'Read our manifesto for student support tech.', icon: <Fingerprint size={18} /> },
+            { id: 'achievements', title: 'Impact Stats', desc: 'Global contribution metrics of the community.', icon: <Award size={18} /> }
+          ]
+        },
+        {
+          label: 'Support',
+          items: [
+            { id: 'help', title: 'Help & Knowledge', desc: 'Step-by-step guides for technical leads.', icon: <HelpCircle size={18} /> }
+          ]
+        }
+      ]
+    }
   }
 
   return (
@@ -132,33 +171,38 @@ export default function Home() {
         </div>
       )}
 
-      {/* Navigation */}
+      {/* Professional Navigation Overhaul (Supabase Style) */}
       <header 
         style={{ 
-          height: 'var(--h-nav)', 
+          height: '64px',
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between', 
-          padding: '0 var(--p-safe)',
+          padding: '0 2rem',
           position: 'sticky',
           top: 0,
           zIndex: 1000,
-          borderBottom: '1px solid var(--border)',
-          backdropFilter: 'blur(16px)',
-          backgroundColor: 'rgba(var(--bg-main-rgb), 0.8)',
-          transition: 'all 0.3s ease'
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(10, 10, 10, 0.8)',
+          transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onMouseLeave={() => setActiveDropdown(null)}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', cursor: 'pointer' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-             <div style={{ padding: '4px', background: 'var(--brand)', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.3)' }}>
-                <img src="/logo.png" style={{ width: '28px', height: '28px', objectFit: 'cover' }} alt="Logo" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
+          {/* Brand Identity */}
+          <div 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', transition: 'opacity 0.2s ease' }} 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+             <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
+                <img src="/logo.png" style={{ width: '20px', height: '20px', objectFit: 'contain' }} alt="Logo" />
              </div>
-             GroupFlow2026
+             <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>GroupFlow2026</span>
           </div>
 
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} className="nav-links">
+          {/* Architectural Navigation */}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {Object.keys(navMenus).map((key) => (
               <div 
                 key={key} 
@@ -170,114 +214,148 @@ export default function Home() {
                   style={{ 
                     background: 'none', 
                     border: 'none', 
-                    padding: '0.6rem 0.9rem', 
-                    color: activeDropdown === key ? 'var(--brand)' : 'var(--text-sub)', 
-                    fontWeight: 800, 
-                    fontSize: '0.85rem', 
+                    padding: '0.5rem 0.75rem', 
+                    color: activeDropdown === key ? '#f3f4f6' : '#9ca3af', 
+                    fontWeight: 500, 
+                    fontSize: '0.875rem', 
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
-                    transition: 'all 0.2s ease',
-                    borderRadius: '10px',
-                    backgroundColor: activeDropdown === key ? 'rgba(var(--brand-rgb), 0.05)' : 'transparent'
+                    gap: '0.25rem',
+                    transition: 'color 0.2s ease'
                   }}
                 >
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                  <ChevronDown size={14} style={{ transform: activeDropdown === key ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.3s ease' }} />
+                  {(navMenus as any)[key].label}
+                  <ChevronDown size={12} style={{ opacity: 0.5, transform: activeDropdown === key ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s ease' }} />
                 </button>
 
                 <AnimatePresence>
                   {activeDropdown === key && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      initial={{ opacity: 0, y: 5, scale: 0.99 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      exit={{ opacity: 0, y: 5, scale: 0.99 }}
+                      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                       style={{
                         position: 'absolute',
                         top: '100%',
-                        left: '-20px',
-                        paddingTop: '1rem',
+                        left: '-2rem',
+                        paddingTop: '0.75rem',
                         zIndex: 1100
                       }}
                     >
                       <div 
-                        className="glass-card-prestige"
                         style={{
-                          width: '320px',
-                          background: 'var(--surface)',
-                          borderRadius: '24px',
-                          border: '1px solid var(--border)',
-                          padding: '1.25rem',
-                          boxShadow: 'var(--shadow-2xl)',
-                          overflow: 'hidden'
+                          width: '560px',
+                          background: '#111111',
+                          borderRadius: '12px',
+                          border: '1px solid #222222',
+                          padding: '1.5rem',
+                          boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(2, 1fr)',
+                          gap: '1.5rem'
                         }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          {(navMenus as any)[key].map((item: any) => (
-                            <Link 
-                              key={item.id}
-                              href="/login?signup=true"
-                              className="dropdown-item"
-                              style={{
-                                padding: '1rem',
-                                borderRadius: '16px',
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: '1rem',
-                                textDecoration: 'none',
-                                transition: 'all 0.2s ease'
-                              }}
-                            >
-                              <div style={{ 
-                                padding: '0.6rem', 
-                                background: 'rgba(var(--brand-rgb), 0.1)', 
-                                borderRadius: '12px', 
-                                color: 'var(--brand)', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center' 
-                              }}>
-                                {item.icon}
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ color: 'var(--text-main)', fontWeight: 900, fontSize: '0.85rem', marginBottom: '0.2rem' }}>{item.title}</div>
-                                <div style={{ color: 'var(--text-sub)', fontSize: '0.75rem', lineHeight: 1.4 }}>{item.desc}</div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
+                        {(navMenus as any)[key].categories.map((category: any, idx: number) => (
+                          <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280', marginBottom: '0.25rem' }}>
+                              {category.label}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              {category.items.map((item: any) => (
+                                <Link 
+                                  key={item.id}
+                                  href="/login?signup=true"
+                                  className="nav-link-pro"
+                                  style={{
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '0.75rem',
+                                    textDecoration: 'none',
+                                    transition: 'background 0.2s ease'
+                                  }}
+                                >
+                                  <div style={{ color: '#10b981', marginTop: '0.1rem' }}>{item.icon}</div>
+                                  <div style={{ flex: 1 }}>
+                                    <div style={{ color: '#f3f4f6', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.1rem' }}>{item.title}</div>
+                                    <div style={{ color: '#9ca3af', fontSize: '0.75rem', lineHeight: 1.5 }}>{item.desc}</div>
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ))}
-            <Link href="/login" style={{ padding: '0.6rem 1rem', color: 'var(--text-sub)', fontWeight: 800, fontSize: '0.85rem', textDecoration: 'none' }}>Institutional Pricing</Link>
+            <Link href="/login" style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}>Documentation</Link>
           </nav>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-             <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '1px' }}>Quick Start:</span>
-             <div style={{ display: 'flex', gap: '0.4rem' }}>
-                <Link href="/login?signup=true" className="btn-icon-prestige hint-tip" data-tip="Google" style={{ padding: '7px', background: 'var(--bg-sub)', color: 'var(--text-main)', borderRadius: '9px', border: '1px solid var(--border)' }}>
-                   <div style={{ width: '16px', height: '16px', backgroundImage: 'url(https://www.google.com/favicon.ico)', backgroundSize: 'cover' }} />
-                </Link>
-                <Link href="/login?signup=true" className="btn-icon-prestige" style={{ padding: '7px', background: 'var(--bg-sub)', color: 'var(--text-main)', borderRadius: '9px', border: '1px solid var(--border)' }}>
-                   <Code size={16} />
-                </Link>
-                <Link href="/login?signup=true&method=phone" className="btn-icon-prestige" style={{ padding: '7px', background: 'var(--bg-sub)', color: 'var(--text-main)', borderRadius: '9px', border: '1px solid var(--border)' }}>
-                   <Smartphone size={16} />
-                </Link>
+        {/* Global Utilities & Authentication */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Search Trigger (Cmd+K Style) */}
+          <button 
+             className="nav-util-btn"
+             style={{ 
+               background: 'rgba(255,255,255,0.03)', 
+               border: '1px solid #222222', 
+               borderRadius: '6px', 
+               padding: '0.4rem 0.75rem', 
+               color: '#6b7280',
+               fontSize: '0.75rem',
+               display: 'flex',
+               alignItems: 'center',
+               gap: '3rem',
+               cursor: 'pointer',
+               transition: 'all 0.2s ease'
+             }}
+          >
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Search size={14} /> Search...
              </div>
-          </div>
-          <div style={{ height: '24px', width: '1px', background: 'var(--border)' }} />
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none', fontWeight: 900 }}>Sign in</Link>
-            <Link href="/login?signup=true" className="btn btn-primary btn-sm btn-inline" style={{ padding: '0.65rem 1.5rem', borderRadius: '12px', fontWeight: 950, boxShadow: '0 4px 12px rgba(var(--brand-rgb), 0.2)' }}>Join Mission 2026</Link>
-          </div>
+             <div style={{ padding: '2px 4px', background: '#222222', borderRadius: '4px', fontSize: '0.65rem' }}>⌘K</div>
+          </button>
+
+          {/* GitHub Star Placeholder */}
+          <Link 
+            href="https://github.com/sospeterkedogo/groupflow" 
+            target="_blank"
+            style={{ color: '#9ca3af', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+          >
+             <Code size={16} /> 1.2k
+          </Link>
+
+          <div style={{ height: '20px', width: '1px', background: '#222222' }} />
+
+          {/* Refined CTAs */}
+          <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, padding: '0.5rem 0.75rem' }}>Sign in</Link>
+          <Link 
+            href="/login?signup=true" 
+            style={{ 
+              background: '#10b981', 
+              color: '#0a0a0a', 
+              textDecoration: 'none', 
+              fontSize: '0.875rem', 
+              fontWeight: 650, 
+              padding: '0.5rem 1rem', 
+              borderRadius: '6px',
+              boxShadow: '0 0 20px rgba(16, 185, 129, 0.1)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          >
+            Start Project
+          </Link>
         </div>
       </header>
 
@@ -568,25 +646,15 @@ export default function Home() {
         .hover-lift:hover { transform: translateY(-12px); box-shadow: var(--shadow-xl); border-color: var(--brand); }
         .glass { backdrop-filter: blur(12px); }
         
-        .dropdown-item:hover {
-          background-color: rgba(var(--brand-rgb), 0.05);
-          transform: translateX(4px);
+        .nav-link-pro:hover {
+          background-color: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        .btn-icon-prestige {
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        
-        .btn-icon-prestige:hover {
-          background-color: rgba(var(--brand-rgb), 0.1) !important;
-          border-color: var(--brand) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.15);
-        }
-
-        .hint-tip {
-          position: relative;
+        .nav-util-btn:hover {
+          border-color: #444444 !important;
+          color: #f3f4f6 !important;
+          background: rgba(255,255,255,0.05) !important;
         }
 
         @media (min-width: 1024px) {
