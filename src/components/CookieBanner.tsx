@@ -53,9 +53,9 @@ export default function CookieBanner() {
               <Shield size={24} />
             </div>
             <div style={{ flex: 1 }}>
-              <h4 style={{ margin: 0, color: '#f3f4f6', fontSize: '1.1rem', fontWeight: 700 }}>Privacy & Performance</h4>
+              <h4 style={{ margin: 0, color: '#f3f4f6', fontSize: '1.1rem', fontWeight: 700 }}>We value your privacy</h4>
               <p style={{ margin: '0.25rem 0 0', color: '#9ca3af', fontSize: '0.875rem', lineHeight: 1.5 }}>
-                We use technical cookies to synchronize your workspace and optimize protocol speeds. Choose your experience.
+                We use cookies to improve your experience and keep everything running smoothly. Is that okay?
               </p>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function CookieBanner() {
                 gap: '0.5rem'
               }}
             >
-              <Zap size={14} /> Maximum Speed
+              Essential Only
             </button>
             <button 
               onClick={() => handleAccept('all')}
@@ -99,7 +99,7 @@ export default function CookieBanner() {
                 gap: '0.5rem'
               }}
             >
-              <Check size={14} /> Accept All
+              <Check size={14} /> Yes, Accept All
             </button>
           </div>
         </motion.div>

@@ -5,6 +5,8 @@ import { NotificationProvider } from '../components/NotificationProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import PWARegistry from '../components/PWARegistry';
+import CookieBanner from '../components/CookieBanner';
+import SessionGuard from '@/components/SessionGuard';
 import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
@@ -41,6 +43,8 @@ export default function RootLayout({
         <NotificationProvider>
           <PWARegistry />
           {children}
+          <CookieBanner />
+          <SessionGuard />
           <Analytics />
           <SpeedInsights />
         </NotificationProvider>

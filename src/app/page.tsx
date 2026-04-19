@@ -8,7 +8,6 @@ import { features, faqs, navMenus } from '@/config/landing'
 
 // Component Imports
 import PricingSection from '@/components/PricingSection'
-import CookieBanner from '@/components/CookieBanner'
 import LandingHeader from '@/components/landing/LandingHeader'
 import LandingHero from '@/components/landing/LandingHero'
 import LandingMission from '@/components/landing/LandingMission'
@@ -151,7 +150,6 @@ export default function Home() {
       </main>
 
       <LandingFooter />
-      <CookieBanner />
 
       <style jsx>{`
         .fluid-h1 { line-height: 1.05; letter-spacing: -0.05em; }
