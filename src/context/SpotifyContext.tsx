@@ -10,6 +10,7 @@ interface SpotifyContextType {
   deviceId: string | null
   playbackState: Spotify.PlaybackState | null
   isConnected: boolean
+  isPremium: boolean | null
   isSDKReady: boolean
   connectSpotify: () => void
   playTrack: (uri: string) => Promise<void>
@@ -28,7 +29,26 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [deviceId, setDeviceId] = useState<string | null>(null)
   const [playbackState, setPlaybackState] = useState<Spotify.PlaybackState | null>(null)
   const [isSDKReady, setIsSDKReady] = useState(false)
+  const [isPremium, setIsPremium] = useState<boolean | null>(null)
   const supabase = createBrowserSupabaseClient()
+
+  // 0. Fetch Spotify Profile (Inclusive check for Premium)
+  useEffect(() => {
+    if (!profile?.spotify_access_token) return
+
+    const fetchSpotifyProfile = async () => {
+      try {
+        const res = await fetch('https://api.spotify.com/v1/me', {
+          headers: { 'Authorization': `Bearer ${profile.spotify_access_token}` }
+        })
+        const data = await res.json()
+        setIsPremium(data.product === 'premium')
+      } catch (err) {
+        console.error('Failed to fetch Spotify profile:', err)
+      }
+    }
+    fetchSpotifyProfile()
+  }, [profile?.spotify_access_token])
 
   // 1. Refresh Token Logic
   const refreshSpotifyToken = useCallback(async () => {
@@ -148,6 +168,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       deviceId, 
       playbackState, 
       isConnected: !!profile?.spotify_connected,
+      isPremium,
       isSDKReady,
       connectSpotify,
       playTrack,

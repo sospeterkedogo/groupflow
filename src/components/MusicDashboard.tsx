@@ -16,7 +16,7 @@ interface Track {
 export default function MusicDashboard() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Track[]>([])
-  const { playTrack, isConnected, connectSpotify } = useSpotify()
+  const { playTrack, isConnected, isPremium, connectSpotify } = useSpotify()
   const { profile } = useProfile()
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -56,12 +56,13 @@ export default function MusicDashboard() {
         <p style={{ color: 'var(--text-sub)' }}>Search and play music for everyone in your workspace.</p>
       </header>
 
-      <form onSubmit={handleSearch} style={{ position: 'relative' }}>
+      <form onSubmit={handleSearch} style={{ position: 'relative' }} role="search">
         <input 
           type="text" 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for tracks, artists, or albums..."
+          aria-label="Search Spotify tracks"
           style={{
             width: '100%',
             padding: '1.25rem 1.5rem 1.25rem 3.5rem',
@@ -73,23 +74,49 @@ export default function MusicDashboard() {
             outline: 'none'
           }}
         />
-        <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} size={20} />
+        <Search style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-sub)' }} size={20} aria-hidden="true" />
       </form>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+      {isConnected && isPremium === false && (
+        <div style={{ 
+          padding: '1rem', 
+          background: 'rgba(251, 191, 36, 0.05)', 
+          border: '1px solid rgba(251, 191, 36, 0.1)', 
+          borderRadius: '16px',
+          display: 'flex',
+          gap: '1rem',
+          alignItems: 'center'
+        }}>
+          <Disc size={24} color="#fbbf24" />
+          <div style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700 }}>
+            Since you're on a Spotify Free account, playback will open in your external Spotify app rather than inside GroupFlow.
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }} aria-label="Search results">
         {results.map(track => (
-          <div key={track.id} style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '1rem', 
-            padding: '1rem', 
-            background: 'var(--surface)', 
-            border: '1px solid var(--border)', 
-            borderRadius: '16px',
-            transition: 'all 0.3s ease',
-            cursor: 'default'
-          }} className="hover-lift">
-            <img src={track.album.images[0]?.url} style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} />
+          <div 
+            key={track.id} 
+            role="listitem"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '1rem', 
+              padding: '1rem', 
+              background: 'var(--surface)', 
+              border: '1px solid var(--border)', 
+              borderRadius: '16px',
+              transition: 'all 0.3s ease',
+              cursor: 'default'
+            }} 
+            className="hover-lift"
+          >
+            <img 
+              src={track.album.images[0]?.url} 
+              style={{ width: '64px', height: '64px', borderRadius: '8px', objectFit: 'cover' }} 
+              alt={`Cover for ${track.name}`}
+            />
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <div style={{ fontWeight: 850, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{track.name}</div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', fontWeight: 600 }}>{track.artists.map(a => a.name).join(', ')}</div>
@@ -97,9 +124,10 @@ export default function MusicDashboard() {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button 
                 onClick={() => playTrack(track.uri)}
+                aria-label={`Play ${track.name} by ${track.artists[0].name}`}
                 style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--brand)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
-                <Play size={18} fill="currentColor" style={{ marginLeft: '2px' }} />
+                <Play size={18} fill="currentColor" style={{ marginLeft: '2px' }} aria-hidden="true" />
               </button>
             </div>
           </div>
