@@ -41,7 +41,7 @@ export async function GET(req: Request) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="groupflow-archive-${user.id}.json"`
+        'Content-Disposition': `attachment; filename="GroupFlow2026-archive-${user.id}.json"`
       }
     })
 

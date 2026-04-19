@@ -228,10 +228,10 @@ export default function SettingsPage() {
       const compressedFile = await imageCompression(file, { maxSizeMB: 0.8, maxWidthOrHeight: 1200, useWebWorker: true })
       const fileName = `${profile.id}-${type}-${Date.now()}.jpg`
 
-      const { error: uploadError } = await supabase.storage.from('groupflow_assets').upload(fileName, compressedFile, { upsert: true })
+      const { error: uploadError } = await supabase.storage.from('GroupFlow2026_assets').upload(fileName, compressedFile, { upsert: true })
       if (uploadError) throw uploadError
 
-      const { data } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+      const { data } = supabase.storage.from('GroupFlow2026_assets').getPublicUrl(fileName)
       const publicUrl = data.publicUrl
 
       if (type === 'avatar') {
@@ -431,7 +431,7 @@ export default function SettingsPage() {
         {activeTab === 'support' && (
           <div className="auth-card" style={{ maxWidth: '100%' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Send Feedback</h2>
-            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Tell us how we can make GroupFlow better for your team.</p>
+            <p style={{ color: 'var(--text-sub)', marginBottom: '2.5rem' }}>Tell us how we can make GroupFlow2026 better for your team.</p>
             
             {feedbackSuccess ? (
               <div style={{ textAlign: 'center', padding: '3rem', background: 'rgba(var(--brand-rgb), 0.05)', borderRadius: '24px', border: '1px dashed var(--brand)' }}>
@@ -1256,7 +1256,7 @@ export default function SettingsPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div className="auth-card" style={{ maxWidth: '100%' }}>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Personal Data Management</h2>
-              <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Audit and export your activity within the GroupFlow ecosystem.</p>
+              <p style={{ color: 'var(--text-sub)', marginBottom: '2rem' }}>Audit and export your activity within the GroupFlow2026 ecosystem.</p>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                 <div>
@@ -1299,7 +1299,7 @@ export default function SettingsPage() {
             <div style={{ marginBottom: '1.5rem', color: 'var(--error)' }}><AlertTriangle size={60} /></div>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Final Confirmation</h3>
             <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: 1.6 }}>
-              This will <strong>permanently delete</strong> your GroupFlow account and all associated data. This action cannot be undone.
+              This will <strong>permanently delete</strong> your GroupFlow2026 account and all associated data. This action cannot be undone.
             </p>
             <input
               type="text" className="form-input" placeholder="Type DELETE to confirm" value={deleteConfirmation}

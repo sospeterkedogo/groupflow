@@ -49,7 +49,7 @@ const TOPICS = [
   },
   { 
     id: 'institutional', 
-    name: 'GroupFlow Protocols', 
+    name: 'GroupFlow2026 Protocols', 
     icon: Terminal, 
     color: 'var(--accent)',
     description: "Deep dive into the app's advanced governance."

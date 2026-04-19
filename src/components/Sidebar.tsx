@@ -89,7 +89,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const handleSignOut = () => {
     showConfirmation({
       title: 'End Session?',
-      message: 'Are you sure you want to securely sign out of the GroupFlow environment?',
+      message: 'Are you sure you want to securely sign out of the GroupFlow2026 environment?',
       type: 'warning',
       onConfirm: async () => {
         await withLoading(async () => {
@@ -152,13 +152,13 @@ export default function Sidebar({ user }: SidebarProps) {
             aria-label="Toggle Menu"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
-               <Activity size={18} />
+            <div style={{ width: '38px', height: '38px', borderRadius: '12px', overflow: 'hidden', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)' }}>
+               <img src="/logo.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Logo" />
             </div>
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.1rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
-              Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+              Group<span style={{ color: 'var(--brand)' }}>Flow2026</span>
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 6px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
@@ -204,7 +204,7 @@ export default function Sidebar({ user }: SidebarProps) {
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
               <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.04em', flexShrink: 0 }}>
-                Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+                Group<span style={{ color: 'var(--brand)' }}>Flow2026</span>
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
@@ -259,6 +259,8 @@ export default function Sidebar({ user }: SidebarProps) {
               isActive = false
             }
 
+            const isPremiumLocked = (link.name === 'Chill Out Zone' || link.name === 'Group Statistics') && profile?.subscription_plan !== 'premium' && profile?.subscription_plan !== 'pro'
+
             return (
               <button 
                 key={link.name}
@@ -286,7 +288,14 @@ export default function Sidebar({ user }: SidebarProps) {
                 title={!isOpen ? link.name : ''}
               >
                 <link.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                {isOpen && <span style={{ letterSpacing: '-0.01em' }}>{link.name}</span>}
+                {isOpen && (
+                  <>
+                    <span style={{ letterSpacing: '-0.01em' }}>{link.name}</span>
+                    {isPremiumLocked && (
+                      <span className="locked-badge locked-badge-premium">PREMIUM</span>
+                    )}
+                  </>
+                )}
                 {isActive && (
                   <div style={{ position: 'absolute', left: 0, top: '15%', bottom: '15%', width: '4px', background: 'var(--brand)', borderRadius: '0 4px 4px 0' }} />
                 )}
@@ -294,6 +303,31 @@ export default function Sidebar({ user }: SidebarProps) {
             )
           })}
         </nav>
+
+        {/* GO PRO CARD */}
+        {isOpen && (!profile?.subscription_plan || profile.subscription_plan === 'free') && (
+          <div style={{ padding: '0 1rem 1rem' }}>
+            <div 
+              className="glass-card-prestige"
+              style={{ 
+                padding: '1.25rem', 
+                borderRadius: '20px', 
+                position: 'relative', 
+                overflow: 'hidden',
+                cursor: 'pointer'
+              }}
+              onClick={() => router.push('/dashboard/upgrade')}
+            >
+              <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '60px', height: '60px', background: 'var(--brand)', filter: 'blur(35px)', opacity: 0.2 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <Sparkles size={16} className="shimmer-gold" />
+                <span style={{ fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', color: 'var(--text-main)' }}>MISSION SUPPORT</span>
+              </div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.25rem' }}>Upgrade to Pro</div>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-sub)', margin: 0, lineHeight: 1.4 }}>Unlock advanced themes and elite profile status.</p>
+            </div>
+          </div>
+        )}
 
         {/* Footer / User Profile */}
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

@@ -321,10 +321,10 @@ export default function TaskModal({
        
        const fileName = `evidence-${task.id}-${Date.now()}-${file.name}`
        
-       const { error: uploadError } = await supabase.storage.from('groupflow_assets').upload(fileName, file)
+       const { error: uploadError } = await supabase.storage.from('GroupFlow2026_assets').upload(fileName, file)
        if (uploadError) throw uploadError
        
-       const { data: publicUrlData } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+       const { data: publicUrlData } = supabase.storage.from('GroupFlow2026_assets').getPublicUrl(fileName)
        
        const payload = {
          task_id: task.id,

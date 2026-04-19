@@ -239,8 +239,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '300px' }}>
 
-          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1 }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
+            {profile?.subscription_plan === 'premium' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>PREMIUM ARCHITECT</span>}
+            {profile?.subscription_plan === 'pro' && <span className="locked-badge locked-badge-pro glow-pro" style={{ margin: 0, fontSize: '0.7rem' }}>PRO SYNC</span>}
           </h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.25rem' }}>

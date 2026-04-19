@@ -75,7 +75,7 @@ export default function ProfilePage() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--p-safe) 4rem', animation: 'fadeIn 0.5s ease-out' }}>
 
          {/* Identity Hub Header */}
-          <div className={`profile-header-card ${profile?.subscription_plan === 'premium' ? 'premium-aura' : ''}`} style={{ 
+          <div className={`profile-header-card ${profile?.subscription_plan === 'premium' ? 'glow-premium' : profile?.subscription_plan === 'pro' ? 'glow-pro' : ''}`} style={{ 
             maxWidth: '100%', 
             marginBottom: 'var(--gap-lg)', 
             padding: 'var(--section-p)', 
@@ -83,8 +83,8 @@ export default function ProfilePage() {
             overflow: 'hidden', 
             background: 'var(--surface)', 
             borderRadius: '24px', 
-            border: profile?.subscription_plan === 'premium' ? '2px solid #d4af37' : profile?.subscription_plan === 'pro' ? '2px solid var(--brand)' : '1px solid var(--border)', 
-            boxShadow: profile?.subscription_plan === 'premium' ? '0 0 30px rgba(212, 175, 55, 0.2)' : 'var(--shadow-lg)',
+            border: profile?.subscription_plan === 'premium' ? '2px solid var(--gold-primary)' : profile?.subscription_plan === 'pro' ? '2px solid var(--pro-cobalt)' : '1px solid var(--border)', 
+            boxShadow: profile?.subscription_plan === 'premium' ? '0 0 40px rgba(212, 175, 55, 0.25)' : profile?.subscription_plan === 'pro' ? '0 0 30px rgba(26, 115, 232, 0.15)' : 'var(--shadow-lg)',
             transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
           }}>
             {profile?.subscription_plan === 'premium' && (
@@ -94,7 +94,7 @@ export default function ProfilePage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-lg)', flexWrap: 'wrap', justifyContent: 'center', textAlign: 'center' }}>
                <div style={{ position: 'relative' }}>
-                  <div style={{ width: '130px', height: '130px', borderRadius: '50%', background: 'var(--bg-sub)', border: profile?.subscription_plan === 'premium' ? '4px solid #d4af37' : '4px solid var(--surface)', boxShadow: profile?.subscription_plan === 'premium' ? '0 0 20px rgba(212, 175, 55, 0.4)' : 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  <div style={{ width: '130px', height: '130px', borderRadius: '50%', background: 'var(--bg-sub)', border: profile?.subscription_plan === 'premium' ? '4px solid #d4af37' : profile?.subscription_plan === 'pro' ? '4px solid var(--pro-cobalt)' : '4px solid var(--surface)', boxShadow: profile?.subscription_plan === 'premium' ? '0 0 25px rgba(212, 175, 55, 0.5)' : profile?.subscription_plan === 'pro' ? '0 0 20px rgba(26, 115, 232, 0.4)' : 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                      {profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt={`${profile.full_name || 'User'} avatar`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                      ) : (
@@ -114,13 +114,13 @@ export default function ProfilePage() {
                           })()}
                         </h1>
                         {profile?.subscription_plan === 'premium' && (
-                          <div className="shimmer-gold" style={{ background: '#d4af37', color: 'black', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Award size={14} /> PREMIUM
+                          <div className="locked-badge locked-badge-premium glow-premium" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 16px', fontSize: '0.75rem' }}>
+                            <Award size={14} /> PREMIUM ARCHITECT
                           </div>
                         )}
                         {profile?.subscription_plan === 'pro' && (
-                          <div style={{ background: 'var(--brand)', color: 'white', padding: '4px 12px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 950, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Zap size={14} /> PRO
+                          <div className="locked-badge locked-badge-pro glow-pro" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 16px', fontSize: '0.75rem' }}>
+                            <Zap size={14} /> PRO ANALYST
                           </div>
                         )}
                     </div>

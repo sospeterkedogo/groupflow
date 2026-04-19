@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('End-to-End: GroupFlow Control Station', () => {
+test.describe('End-to-End: GroupFlow2026 Control Station', () => {
   test.setTimeout(120000);
   test('Simulate 4 scholars: signup, team formation, task orchestration, and real-time sync', async ({ browser }) => {
     // Unique session ID to avoid email conflicts during parallel runs

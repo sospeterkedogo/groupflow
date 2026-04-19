@@ -56,7 +56,7 @@ Schema:
       body: JSON.stringify({
         model: 'gpt-4o', // Preferred for logic/academic quality
         messages: [
-          { role: 'system', content: 'You are a high-level academic skirmish engine for GroupFlow. You generate rigorous, challenging questions that test deep understanding. Return results in pure JSON.' },
+          { role: 'system', content: 'You are a high-level academic skirmish engine for GroupFlow2026. You generate rigorous, challenging questions that test deep understanding. Return results in pure JSON.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.8,

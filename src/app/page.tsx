@@ -52,7 +52,7 @@ export default function Home() {
 
   const faqs = [
     {
-      q: "How can I support GroupFlow?",
+      q: "How can I support GroupFlow2026?",
       a: "You can support this project by upgrading to Pro (£2.99/mo) or Premium (£99 Lifetime). Your contribution directly helps me bring this tool to many more schools and support learning worldwide."
     },
     {
@@ -64,8 +64,8 @@ export default function Home() {
       a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
     },
     {
-      q: "Who is behind GroupFlow?",
-      a: "I created GroupFlow to help student teams feel more supported and recognized during group work."
+      q: "Who is behind GroupFlow2026?",
+      a: "I created GroupFlow2026 to help student teams feel more supported and recognized during group work."
     }
   ]
 
@@ -89,14 +89,14 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 12px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '1px' }}>
-               THE GROUPFLOW MISSION
+               THE GroupFlow2026 MISSION
              </div>
              <h2 style={{ fontSize: '2.25rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>Transforming collaboration in schools</h2>
              
              <div style={{ display: 'grid', gap: '1.5rem', fontSize: '1rem', lineHeight: 1.6, color: 'var(--text-sub)' }}>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Solving a Real Problem</strong>
-                   I built GroupFlow to solve the unfair group dynamics that many students face daily. <a>Please support this project to go into many schools and support learning.</a>
+                   I built GroupFlow2026 to solve the unfair group dynamics that many students face daily. <a>Please support this project to go into many schools and support learning.</a>
                 </div>
                 <div>
                    <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.25rem' }}>Our Goal</strong>
@@ -126,10 +126,10 @@ export default function Home() {
         backgroundColor: 'rgba(var(--bg-main), 0.8)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-main)' }}>
-           <div style={{ padding: '6px', background: 'var(--brand)', borderRadius: '10px' }}>
-              <Activity size={20} color="white" />
+           <div style={{ padding: '4px', background: 'var(--brand)', borderRadius: '10px', overflow: 'hidden' }}>
+              <img src="/logo.png" style={{ width: '28px', height: '28px', objectFit: 'cover' }} alt="Logo" />
            </div>
-           GroupFlow
+           GroupFlow2026
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <Link href="/login" className="btn btn-ghost btn-sm btn-inline" style={{ border: 'none' }}>Sign in</Link>
@@ -170,7 +170,7 @@ export default function Home() {
            </h1>
            
            <p className="fluid-p" style={{ color: 'var(--text-sub)', maxWidth: '850px', margin: '0 auto 3.5rem', fontWeight: 500, fontSize: '1.35rem', lineHeight: 1.5 }}>
-              GroupFlow professionalizes university group projects through real-time synchronization, verified contribution tracking, and cross-departmental networking. 
+              GroupFlow2026 professionalizes university group projects through real-time synchronization, verified contribution tracking, and cross-departmental networking. 
               <span style={{ display: 'block', marginTop: '1rem', color: 'var(--success)', fontWeight: 800, fontSize: '1rem' }}>FREE FOR STUDENTS</span>
            </p>
 
@@ -191,7 +191,7 @@ export default function Home() {
                <div style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Support the Mission</div>
                <h2 style={{ fontSize: '3.75rem', fontWeight: 900, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Solving the real problems in our schools.</h2>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-sub)', lineHeight: 1.8, marginBottom: '2rem' }}>
-                  This isn't just another app—it's a mission to transform how students work together. I built GroupFlow because I've seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
+                  This isn't just another app—it's a mission to transform how students work together. I built GroupFlow2026 because I've seen first-hand how invisible work and unfair group dynamics can discourage even the most dedicated students.
                </p>
                <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', fontWeight: 700, lineHeight: 1.8, marginBottom: '2.5rem' }}>
                   I'm on a mission to bring this tool into many more schools to truly support learning. By joining the mission, you aren't just getting a tool; you're helping bridge the gap for students everywhere.
@@ -212,8 +212,8 @@ export default function Home() {
             <div style={{ flex: '1 1 400px', position: 'relative' }}>
                <div className="glass" style={{ padding: '3.5rem', borderRadius: '48px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem' }}>
-                     <div style={{ padding: '10px', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '12px' }}>
-                        <Activity size={24} color="var(--brand)" />
+                     <div style={{ padding: '4px', background: 'rgba(var(--brand-rgb), 0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+                        <img src="/logo.png" style={{ width: '32px', height: '32px', objectFit: 'cover' }} alt="Logo" />
                      </div>
                      <div>
                         <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Your Team Hub</div>
@@ -402,8 +402,8 @@ export default function Home() {
       </main>
 
       <footer style={{ padding: '8rem var(--p-safe)', borderTop: '1px solid var(--border)', textAlign: 'center', background: 'var(--bg-sub)' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '2rem', fontWeight: 900, justifyContent: 'center', marginBottom: '2rem', letterSpacing: '-0.04em' }}>
-            <Activity size={36} color="var(--brand)" /> GroupFlow
+         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '2.5rem', fontWeight: 900, justifyContent: 'center', marginBottom: '2.5rem', letterSpacing: '-0.04em' }}>
+            <img src="/logo.png" style={{ width: '56px', height: '56px', borderRadius: '14px' }} alt="Logo" /> GroupFlow2026
          </div>
          <p style={{ color: 'var(--text-main)', fontWeight: 700, fontSize: '1.2rem', marginBottom: '0.75rem' }}>Built by Sospeter • Mission 2026</p>
          <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', maxWidth: '650px', margin: '0 auto 4rem', lineHeight: 1.6 }}>

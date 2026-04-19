@@ -47,7 +47,7 @@ function buildWebhookPayload(event: Stripe.Event) {
       stripeSubscriptionId: session.subscription?.toString() ?? null,
       userId: session.metadata?.user_id ?? session.client_reference_id ?? null,
       plan: session.metadata?.plan ?? 'pro',
-      productLabel: session.metadata?.product_label ?? 'GroupFlow pre-registration',
+      productLabel: session.metadata?.product_label ?? 'GroupFlow2026 pre-registration',
       amountTotal: session.amount_total ?? null,
       currency: session.currency ?? null,
       mode: session.mode ?? 'payment',

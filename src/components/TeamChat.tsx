@@ -226,14 +226,14 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
      
      setUploading(true)
      const fileName = `${groupId}/chat-${Date.now()}-${file.name}`
-     const { error: uploadError } = await supabase.storage.from('groupflow_assets').upload(fileName, file)
+     const { error: uploadError } = await supabase.storage.from('GroupFlow2026_assets').upload(fileName, file)
      
      if (uploadError) {
         setUploading(false)
         return
      }
 
-     const { data: publicUrlData } = supabase.storage.from('groupflow_assets').getPublicUrl(fileName)
+     const { data: publicUrlData } = supabase.storage.from('GroupFlow2026_assets').getPublicUrl(fileName)
      await handleSendMessage(
         null,
         '',

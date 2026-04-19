@@ -32,7 +32,6 @@ export async function createCheckoutSession({
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     // PRIORITIZE Apple Pay / Google Pay via automatic detection
-    // Stripe handles SCA (3D Secure) automatically by default.
     mode: isSubscription ? 'subscription' : 'payment',
     customer_email: email,
     line_items: [
@@ -40,7 +39,7 @@ export async function createCheckoutSession({
         price_data: {
           currency: 'usd',
           product_data: {
-            name: metadata.product_name || 'GroupFlow Flux Provision',
+            name: metadata.product_name || 'GroupFlow2026 Flux Provision',
             description: metadata.description || 'Academic Resource Exchange',
           },
           unit_amount: amountToCharge,

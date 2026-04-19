@@ -1,6 +1,6 @@
-# GroupFlow: Engineering Terminal & Academic Ledger
+# GroupFlow2026: Engineering Terminal & Academic Ledger
 
-GroupFlow is a high-fidelity collaboration platform built for technical teams to track, verify, and visualize academic contributions. It replaces generic project management with a structured **Identity Protocol** that bridges coursework with professional engineering readiness.
+GroupFlow2026 is a high-fidelity collaboration platform built for technical teams to track, verify, and visualize academic contributions. It replaces generic project management with a structured **Identity Protocol** that bridges coursework with professional engineering readiness.
 
 ## Core Systems
 

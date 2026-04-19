@@ -395,7 +395,7 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
     }
     // Fallback to localStorage if available (client-side only)
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('groupflow_palette')
+      const saved = localStorage.getItem('groupflow2026_palette')
       if (saved) return PALETTES.find(p => p.name === saved) || PALETTES[0]
     }
     return PALETTES[0]
@@ -440,7 +440,7 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
       }
 
       setCurrentPalette(palette)
-      localStorage.setItem('groupflow_palette', name) 
+      localStorage.setItem('groupflow2026_palette', name) 
       const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await supabase.from('profiles').update({ 
@@ -455,8 +455,8 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
 
   const handleSetCustomBg = async (url: string | null) => {
     setCustomBg(url)
-    if (url) localStorage.setItem('groupflow_bg', url)
-    else localStorage.removeItem('groupflow_bg')
+    if (url) localStorage.setItem('groupflow2026_bg', url)
+    else localStorage.removeItem('groupflow2026_bg')
     
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {

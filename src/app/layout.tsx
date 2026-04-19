@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './prestige.css';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
-  title: 'GroupFlow - Automating Accountability',
+  title: 'GroupFlow2026 - Automating Accountability',
   description: 'A Data-Driven Collaboration Platform for Mitigating Social Loafing',
   icons: {
     icon: '/favicon.png',

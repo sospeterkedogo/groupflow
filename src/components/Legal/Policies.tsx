@@ -19,7 +19,7 @@ const PolicyContainer = ({ title, children, onClose }: { title: string, children
 export const PrivacyPolicy = ({ onClose }: { onClose: () => void }) => (
   <PolicyContainer title="Privacy Policy" onClose={onClose}>
     <h3>1. Data Collection</h3>
-    <p>GroupFlow collects the minimum data required to facilitate educational collaboration. This includes your email, full name, and school ID. We do not sell your data to third parties.</p>
+    <p>GroupFlow2026 collects the minimum data required to facilitate educational collaboration. This includes your email, full name, and school ID. We do not sell your data to third parties.</p>
     
     <h3>2. Usage Data</h3>
     <p>We log technical velocity and collaboration metrics to provide verifiable effort scores for your projects. This data is visible to your assigned group members and instructors.</p>
@@ -32,7 +32,7 @@ export const PrivacyPolicy = ({ onClose }: { onClose: () => void }) => (
 export const TermsOfService = ({ onClose }: { onClose: () => void }) => (
   <PolicyContainer title="Terms of Service" onClose={onClose}>
     <h3>1. Academic Integrity</h3>
-    <p>GroupFlow is designed to promote honest collaboration. By using this service, you agree to submit only your original work and accurately report your contributions.</p>
+    <p>GroupFlow2026 is designed to promote honest collaboration. By using this service, you agree to submit only your original work and accurately report your contributions.</p>
     
     <h3>2. Acceptable Use</h3>
     <p>Users must not use the platform for harassment, data scraping, or any activity that compromises the validity scoring node.</p>
