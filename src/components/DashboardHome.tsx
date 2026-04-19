@@ -39,16 +39,21 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   // 0. BLAZING SPEED CACHE: Perceptive hydration
   useEffect(() => {
     if (!groupId) return
-    const cachedGroup = localStorage.getItem(`gf_cache_group_${groupId}`)
-    const cachedStats = localStorage.getItem(`gf_cache_stats_${groupId}`)
-    
-    if (cachedGroup) setGroup(JSON.parse(cachedGroup))
-    if (cachedStats) {
-      const stats = JSON.parse(cachedStats)
-      setPersonalTaskCount(stats.personal || 0)
-      setTotalBacklog(stats.backlog || 0)
-      setProjectProgress(stats.progress || 0)
-      setProgressLabel(stats.label || 'Synchronizing...')
+    try {
+      const cachedGroup = localStorage.getItem(`gf_cache_group_${groupId}`)
+      const cachedStats = localStorage.getItem(`gf_cache_stats_${groupId}`)
+      
+      if (cachedGroup) setGroup(JSON.parse(cachedGroup))
+      if (cachedStats) {
+        const stats = JSON.parse(cachedStats)
+        setPersonalTaskCount(stats.personal || 0)
+        setTotalBacklog(stats.backlog || 0)
+        setProjectProgress(stats.progress || 0)
+        setProgressLabel(stats.label || 'Synchronizing...')
+      }
+    } catch (e) {
+      console.warn('Cache hydration failed defensively:', e)
+      // Carry on silently, real data will fetch
     }
   }, [groupId])
 

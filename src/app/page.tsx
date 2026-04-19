@@ -6,14 +6,18 @@ import {
   ArrowRight, Zap, Shield, Users, Activity, BarChart3, 
   ChevronRight, Globe, Layers, HelpCircle, CheckCircle, 
   Lock, Trash2, Milestone, BookOpen, Fingerprint, Sparkles, Award,
-  ChevronDown, Search, Code, Smartphone, LayoutGrid, Info
+  ChevronDown, Search, Code, Smartphone, LayoutGrid, Info, Menu, X
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import PricingSection from '@/components/PricingSection'
+import UserCount from '@/components/UserCount'
+import CookieBanner from '@/components/CookieBanner'
+import { MessageSquarePlus } from 'lucide-react'
 
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   
   const features = [
@@ -251,8 +255,11 @@ export default function Home() {
              <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>GroupFlow</span>
           </div>
 
-          {/* Architectural Navigation */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Architectural Navigation - Desktop Only */}
+          <nav 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            className="hide-mobile-flex"
+          >
             {Object.keys(navMenus).map((key) => (
               <div 
                 key={key} 
@@ -359,8 +366,35 @@ export default function Home() {
           </nav>
         </div>
 
-        {/* Global Utilities & Authentication */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        {/* Global Utilities & Authentication - Desktop Only */}
+        <div 
+          style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+          className="hide-mobile-flex"
+        >
+          <a 
+             href="mailto:support@groupflow2026.com" 
+             title="Send Feedback"
+             style={{ 
+               background: 'rgba(16, 185, 129, 0.05)', 
+               border: '1px solid rgba(16, 185, 129, 0.1)', 
+               borderRadius: '6px', 
+               padding: '0.4rem 0.6rem', 
+               color: '#10b981',
+               display: 'flex',
+               alignItems: 'center',
+               gap: '0.5rem',
+               cursor: 'pointer',
+               transition: 'all 0.2s ease',
+               textDecoration: 'none',
+               fontSize: '0.75rem',
+               fontWeight: 600
+             }}
+             onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)')}
+             onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)')}
+          >
+             <MessageSquarePlus size={14} /> Feedback
+          </a>
+
           <button 
              className="nav-util-btn"
              style={{ 
@@ -390,7 +424,7 @@ export default function Home() {
             onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
           >
-             <Code size={16} /> 1.2k
+             <Code size={16} /> <UserCount />
           </Link>
 
           <div style={{ height: '20px', width: '1px', background: '#222222' }} />
@@ -415,12 +449,84 @@ export default function Home() {
             Start Project
           </Link>
         </div>
+
+        {/* Mobile Menu Toggle */}
+        <button 
+          className="mobile-only-flex"
+          style={{ background: 'none', border: 'none', color: '#f3f4f6', cursor: 'pointer', padding: '0.5rem' }}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                top: '64px',
+                background: '#0a0a0a',
+                zIndex: 2000,
+                padding: '2rem',
+                overflowY: 'auto'
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                {Object.keys(navMenus).map((key) => (
+                  <div key={key}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280', marginBottom: '1rem' }}>
+                      {(navMenus as any)[key].label}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {(navMenus as any)[key].categories.flatMap((cat: any) => cat.items).map((item: any) => (
+                        <Link 
+                          key={item.id}
+                          href={
+                              item.id === 'kanban' ? '/product/intelligence' :
+                              item.id === 'sync' ? '/product/sync' :
+                              item.id === 'roadmap' ? '/product/roadmap' :
+                              item.id === 'research' ? '/solutions/scholars' :
+                              item.id === 'teams' ? '/solutions/teams' :
+                              item.id === 'enterprise' ? '/solutions/enterprise' :
+                              item.id === 'mission' ? '/docs/vision' :
+                              item.id === 'achievements' ? '/docs/impact' :
+                              item.id === 'help' ? '/docs' :
+                              '/login?signup=true'
+                            }
+                          style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <div style={{ color: '#10b981' }}>{item.icon}</div>
+                          <div style={{ color: '#f3f4f6', fontWeight: 600 }}>{item.title}</div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <div style={{ paddingTop: '1rem', borderTop: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                   <Link href="/docs" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Documentation</Link>
+                   <Link href="/login" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Sign in</Link>
+                   <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Start Project</Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main style={{ padding: '8rem 0', position: 'relative', zIndex: 10 }}>
         
         {/* Unified Architectural HERO */}
-        <section style={{ textAlign: 'center', marginBottom: '10rem', padding: '0 2rem' }}>
+        <section 
+          style={{ textAlign: 'center', padding: '0 2rem' }}
+          className="hero-section-mobile"
+        >
            
            <div style={{ 
              display: 'inline-flex', 
@@ -430,17 +536,17 @@ export default function Home() {
              background: 'rgba(16, 185, 129, 0.08)', 
              borderRadius: '6px', 
              color: '#10b981',
-             fontSize: '0.75rem',
+             fontSize: '0.7rem',
              fontWeight: 700,
              textTransform: 'uppercase',
              letterSpacing: '0.05em',
-             marginBottom: '2.5rem',
+             marginBottom: '1.5rem',
              border: '1px solid rgba(16, 185, 129, 0.2)'
-           }}>
-             <Sparkles size={14} /> Technical synchronization protocol active
+           }} className="hero-badge">
+             <Sparkles size={14} /> Technical sync active
            </div>
            
-           <h1 style={{ marginBottom: '1.5rem', color: '#f3f4f6', fontSize: 'clamp(2.5rem, 7vw, 4.5rem)', maxWidth: '1000px', margin: '0 auto 2rem', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+           <h1 style={{ marginBottom: '1.5rem', color: '#f3f4f6', maxWidth: '1000px', margin: '0 auto 2rem', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.1 }} className="hero-title">
              Unified Academic <br />
              <span style={{ 
                 background: 'linear-gradient(90deg, #10b981 0%, #f3f4f6 100%)',
@@ -452,7 +558,10 @@ export default function Home() {
            
            <p style={{ color: '#9ca3af', maxWidth: '750px', margin: '0 auto 4rem', fontWeight: 400, fontSize: '1.125rem', lineHeight: 1.6 }}>
               Professionalizing research output through real-time state persistence, verified contribution logging, and cross-departmental peer networking. 
-              <span style={{ display: 'block', marginTop: '1.25rem', color: '#10b981', fontWeight: 700, fontSize: '0.875rem', letterSpacing: '0.1em' }}>RECOGNITION FOR EVERY CONTRIBUTOR</span>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1.25rem', color: '#10b981', fontWeight: 700, fontSize: '0.875rem', letterSpacing: '0.1em' }}>
+                <span style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981', animation: 'pulse 1.5s infinite' }} />
+                RECOGNITION FOR EVERY CONTRIBUTOR • LIVE ARCHIVE
+              </span>
            </p>
 
            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -628,6 +737,8 @@ export default function Home() {
          </div>
       </footer>
 
+      <CookieBanner />
+
       <style jsx>{`
         .fluid-h1 { line-height: 1.05; letter-spacing: -0.05em; }
         .hover-lift { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease, border-color 0.4s ease; }
@@ -649,14 +760,43 @@ export default function Home() {
           .floating-element { display: block !important; }
         }
 
-        .floating-element {
-          animation: float 6s ease-in-out infinite;
-        }
-
         @keyframes float {
           0% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-20px) rotate(2deg); }
           100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @media (max-width: 1024px) {
+          .hide-mobile-flex { display: none !important; }
+          .mobile-only-flex { display: flex !important; }
+          
+          .hero-section-mobile {
+            padding-top: 4rem !important;
+            padding-bottom: 6rem !important;
+            margin-bottom: 4rem !important;
+          }
+
+          .hero-title {
+            font-size: clamp(2.2rem, 8vw, 3.5rem) !important;
+          }
+
+          .hero-badge {
+            margin-bottom: 1.5rem !important;
+          }
+        }
+
+        @media (min-width: 1025px) {
+          .mobile-only-flex { display: none !important; }
+          
+          .hero-section-mobile {
+            padding-top: 8rem !important;
+            padding-bottom: 10rem !important;
+            margin-bottom: 10rem !important;
+          }
+
+          .hero-title {
+            font-size: clamp(3rem, 7vw, 4.5rem) !important;
+          }
         }
       `}</style>
     </div>
