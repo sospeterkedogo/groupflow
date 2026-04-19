@@ -4,13 +4,29 @@ import './prestige.css';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import PWARegistry from '../components/PWARegistry';
+import type { Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'GroupFlow2026 - Automating Accountability',
-  description: 'A Data-Driven Collaboration Platform for Mitigating Social Loafing',
+  title: 'GroupFlow Elite Exchange',
+  description: 'Protocol-Driven Academic Collaboration Platform',
   icons: {
     icon: '/favicon.png',
+    apple: '/pwa-icon-512.png',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Elite Exchange',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#10b981',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -23,6 +39,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         {/* Wrap all children in NotificationProvider for global access */}
         <NotificationProvider>
+          <PWARegistry />
           {children}
           <Analytics />
           <SpeedInsights />
