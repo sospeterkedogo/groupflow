@@ -1,93 +1,69 @@
-﻿import { NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/utils/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { checkBotId } from 'botid/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
 
-export async function GET(_req: Request) {
-  // BotID Verification
-  const verification = await checkBotId()
-  if (verification.isBot) {
-    return new NextResponse('Automated request intercepted. Only verified scholars may export archives.', { status: 403 })
-  }
+export const dynamic = 'force-dynamic'
 
-  try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return new NextResponse('Unauthorized Pipeline', { status: 401 })
-    }
-
-    // 1. Fetch Master Profile
-    const { data: profile } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
-
-    // 2. Fetch Supervised Tasks (using PostgreSQL Array contains logic)
-    const { data: tasks } = await supabase.from('tasks').select('*').contains('assignees', [user.id])
-    
-    // 3. Fetch Delivered Evidence Pipeline
-    const { data: artifacts } = await supabase.from('artifacts').select('*').eq('uploaded_by', user.id)
-
-    // Assemble "Takeout" Package
-    const exportData = {
-      version: '1.0.0',
-      exported_at: new Date().toISOString(),
-      identity: profile,
-      execution_log: tasks || [],
-      evidence_ledger: artifacts || []
-    }
-
-    // Deliver as JSON Blob
-    return new NextResponse(JSON.stringify(exportData, null, 2), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="Espeezy-archive-${user.id}.json"`
-      }
-    })
-
-  } catch (err: unknown) {
-    console.error("Export Engine Failure:", err instanceof Error ? err.message : err)
-    return new NextResponse('Server Fault: export failed', { status: 500 })
-  }
+async function requireAdmin() {
+  const supabase = await createServerSupabaseClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) return null
+  const svc = await createAdminClient()
+  const { data: profile } = await svc.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') return null
+  return { user, svc }
 }
 
-export async function DELETE(_req: Request) {
-  // BotID Verification
-  const verification = await checkBotId()
-  if (verification.isBot) {
-    return new NextResponse('Automated termination request intercepted. Only verified scholars may obliterate their identity.', { status: 403 })
+// PATCH /api/admin/agents/[id] — update agent status, system_prompt, or capabilities
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await requireAdmin()
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id } = await params
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  const body = await req.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+
+  const allowed = ['status', 'system_prompt', 'capabilities', 'name', 'specialisation', 'role']
+  const updates: Record<string, unknown> = {}
+  for (const key of allowed) {
+    if (key in body) updates[key] = body[key]
   }
 
-  try {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return new NextResponse('Unauthorized Pipeline', { status: 401 })
-    }
-
-    // Initialize Admin Client
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    
-    if (!serviceRoleKey) {
-       return new NextResponse('Critical Architecture Fault: Missing Service Role Key bounds to perform global trace deletion.', { status: 500 })
-    }
-
-    const adminClient = createAdminClient(supabaseUrl, serviceRoleKey)
-
-    // 1. Permanently Obliterate Auth Bounds (This automatically cascades via Database RLS policies deleting the profile)
-    const { error } = await adminClient.auth.admin.deleteUser(user.id)
-    
-    if (error) {
-       return new NextResponse(`Admin Deletion Fault: ${error.message}`, { status: 400 })
-    }
-
-    // Successfully purged.
-    return new NextResponse('Account successfully terminated.', { status: 200 })
-
-  } catch (err: unknown) {
-    console.error("Termination Engine Failure:", err instanceof Error ? err.message : err)
-    return new NextResponse('Server Fault: deletion failed', { status: 500 })
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
   }
+
+  const { data, error } = await auth.svc
+    .from('agents')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ agent: data })
+}
+
+// DELETE /api/admin/agents/[id] — remove an agent
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await requireAdmin()
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id } = await params
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  const { error } = await auth.svc
+    .from('agents')
+    .delete()
+    .eq('id', id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
 }
