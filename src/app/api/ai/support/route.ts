@@ -39,13 +39,16 @@ export async function POST(req: NextRequest) {
   // Rate limit: max 20 AI messages per hour per user
   const svc = await createAdminClient()
   const oneHourAgo = new Date(Date.now() - 3600000).toISOString()
-  const { count } = await svc
+  const { count: aiMsgCount } = await svc
     .from('support_messages')
     .select('id', { count: 'exact', head: true })
     .eq('sender', 'ai')
     .gte('created_at', oneHourAgo)
-    // Approximate rate limit via ticket_id or just count AI messages for this session
     .limit(1)
+
+  if (typeof aiMsgCount === 'number' && aiMsgCount >= 20) {
+    return NextResponse.json({ error: 'AI rate limit reached. Please try again in an hour.' }, { status: 429 })
+  }
 
   // Build message array for OpenAI
   const chatMessages = [

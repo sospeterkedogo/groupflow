@@ -7,7 +7,7 @@ export async function GET() {
     const { data, error } = await supabase.rpc('get_donation_total')
     if (error) throw error
     return NextResponse.json(data ?? { total_cents: 0, count: 0 })
-  } catch (_) {
+  } catch {
     return NextResponse.json({ total_cents: 0, count: 0 })
   }
 }

@@ -79,8 +79,8 @@ Schema:
     await supabase.from('ai_usage').insert([{ profile_id: user.id, action: 'skirmish_generation' }])
 
     return new NextResponse(JSON.stringify({ questions }), { status: 200 })
-  } catch (err: any) {
-    console.error('Quiz Gen Error:', err)
+  } catch (err: unknown) {
+    console.error('Quiz Gen Error:', err instanceof Error ? err.message : err)
     return new NextResponse(JSON.stringify({ error: 'Failed to synthesize skirmish data.' }), { status: 500 })
   }
 }

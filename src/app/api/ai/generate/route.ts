@@ -71,7 +71,8 @@ export async function POST(req: Request) {
     await supabase.from('ai_usage').insert([{ profile_id: user.id, action: 'task_description' }])
 
     return new NextResponse(JSON.stringify({ description: text }), { status: 200 })
-  } catch (err: any) {
-    return new NextResponse(JSON.stringify({ error: err.message || 'AI generation failed.' }), { status: 500 })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'AI generation failed.'
+    return new NextResponse(JSON.stringify({ error: msg }), { status: 500 })
   }
 }

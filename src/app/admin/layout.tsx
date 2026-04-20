@@ -4,6 +4,7 @@ import { ProfileProvider } from '@/context/ProfileContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
+import type { Profile } from '@/types/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,7 @@ export default async function AdminLayout({
   return (
     <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
       <GlobalLoadingProvider>
-        <ProfileProvider userId={user.id} initialProfile={profile as any}>
+        <ProfileProvider userId={user.id} initialProfile={profile as Profile | null}>
            <NotificationProvider>
              {children}
            </NotificationProvider>

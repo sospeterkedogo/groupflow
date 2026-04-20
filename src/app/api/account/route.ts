@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { checkBotId } from 'botid/server'
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   // BotID Verification
   const verification = await checkBotId()
   if (verification.isBot) {
@@ -45,13 +45,13 @@ export async function GET(req: Request) {
       }
     })
 
-  } catch (err: any) {
-    console.error("Export Engine Failure:", err)
-    return new NextResponse(`Server Fault: ${err.message}`, { status: 500 })
+  } catch (err: unknown) {
+    console.error("Export Engine Failure:", err instanceof Error ? err.message : err)
+    return new NextResponse('Server Fault: export failed', { status: 500 })
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(_req: Request) {
   // BotID Verification
   const verification = await checkBotId()
   if (verification.isBot) {
@@ -86,8 +86,8 @@ export async function DELETE(req: Request) {
     // Successfully purged.
     return new NextResponse('Account successfully terminated.', { status: 200 })
 
-  } catch (err: any) {
-    console.error("Termination Engine Failure:", err)
-    return new NextResponse(`Server Fault: ${err.message}`, { status: 500 })
+  } catch (err: unknown) {
+    console.error("Termination Engine Failure:", err instanceof Error ? err.message : err)
+    return new NextResponse('Server Fault: deletion failed', { status: 500 })
   }
 }

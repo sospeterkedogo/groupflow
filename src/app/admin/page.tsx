@@ -6,23 +6,16 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useProfile } from '@/context/ProfileContext'
 import { 
   ShieldCheck, 
-  Users, 
   Activity, 
-  Settings, 
-  Lock, 
   ArrowRight,
-  TrendingUp,
   AlertCircle,
   CreditCard,
-  Layers,
   Search,
   Key,
-  Database,
   Globe,
   RefreshCw,
   UserCheck,
   UserMinus,
-  Download
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -30,11 +23,8 @@ import AgentControlCentre from '@/components/AgentControlCentre'
 import AdminExtras from '@/components/AdminExtras'
 import type { Profile } from '@/types/database'
 import { 
-  BarChart, 
-  Bar, 
   XAxis, 
   YAxis, 
-  CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
   AreaChart, 
@@ -53,7 +43,7 @@ export default function AdminDashboard() {
   const [recentUsers, setRecentUsers] = useState<Partial<Profile>[]>([])
   const [loading, setLoading] = useState(true)
   const [systemLogs, setSystemLogs] = useState<{t: string, m: string}[]>([])
-  const [config, setConfig] = useState<Record<string, { value: any, is_active: boolean }>>({})
+  const [config, setConfig] = useState<Record<string, { value: string | number | boolean | Record<string, string>; is_active: boolean }>>({})
   const [savingConfig, setSavingConfig] = useState(false)
   
   const [launchConfig, setLaunchConfig] = useState({
@@ -66,7 +56,7 @@ export default function AdminDashboard() {
   })
   const [preregCount, setPreregCount] = useState(0)
   const [savingLaunchConfig, setSavingLaunchConfig] = useState(false)
-  const [launchConfigLoaded, setLaunchConfigLoaded] = useState(false)
+  const [_launchConfigLoaded, setLaunchConfigLoaded] = useState(false)
 
   // 0. Mock Log Generator for Terminal Feel
   useEffect(() => {
@@ -111,7 +101,7 @@ export default function AdminDashboard() {
       .limit(8)
 
     const { data: platformConfig } = await supabase.from('platform_config').select('*')
-    const configMap = platformConfig?.reduce((acc: Record<string, any>, item: { key: string }) => ({ ...acc, [item.key]: item }), {})
+    const configMap = platformConfig?.reduce((acc: Record<string, { key: string; value: string | number | boolean | Record<string, string>; is_active: boolean }>, item: { key: string; value: string | number | boolean | Record<string, string>; is_active: boolean }) => ({ ...acc, [item.key]: item }), {})
 
     setStats({
       users: totalUsers || 0,
@@ -178,7 +168,7 @@ export default function AdminDashboard() {
       } else {
         addToast('Save Failed', 'Could not update launch configuration.', 'error')
       }
-    } catch (_) {
+    } catch {
       addToast('Network Error', 'Failed to save configuration.', 'error')
     }
     setSavingLaunchConfig(false)
@@ -206,7 +196,7 @@ export default function AdminDashboard() {
     }
   }
 
-  const updatePlatformConfig = async (key: string, updates: any) => {
+  const updatePlatformConfig = async (key: string, updates: Record<string, string | number | boolean | Record<string, string>>) => {
     setSavingConfig(true)
     const { error } = await supabase
       .from('platform_config')
@@ -305,7 +295,7 @@ export default function AdminDashboard() {
     )
   }
 
-  const totalLifetime = stats.premium
+  const _totalLifetime = stats.premium
 
   const mainBanner = config?.main_banner
   const announcement = config?.global_announcement
@@ -352,8 +342,8 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  <input 
                    type="text" 
-                   value={mainBanner?.value?.text || ''} 
-                   onChange={(e) => setConfig({ ...config, main_banner: { ...mainBanner, value: { ...mainBanner.value, text: e.target.value } } })}
+                   value={(mainBanner?.value as Record<string, string>)?.text || ''} 
+                   onChange={(e) => setConfig({ ...config, main_banner: { ...mainBanner, value: { ...(mainBanner?.value as Record<string, string>), text: e.target.value } } })}
                    placeholder="Marquee Message..." 
                    style={{ width: '100%', padding: '0.75rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.85rem' }}
                  />
@@ -378,8 +368,8 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  <input 
                    type="text" 
-                   value={announcement?.value?.message || ''} 
-                   onChange={(e) => setConfig({ ...config, global_announcement: { ...announcement, value: { ...announcement.value, message: e.target.value } } })}
+                   value={(announcement?.value as Record<string, string>)?.message || ''} 
+                   onChange={(e) => setConfig({ ...config, global_announcement: { ...announcement, value: { ...(announcement?.value as Record<string, string>), message: e.target.value } } })}
                    placeholder="Breaking Announcement..." 
                    style={{ width: '100%', padding: '0.75rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.85rem' }}
                  />

@@ -5,16 +5,11 @@ import { NotificationProvider } from '../components/NotificationProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import PWARegistry from '../components/PWARegistry';
-import dynamic from 'next/dynamic';
 import SessionGuard from '@/components/SessionGuard';
 import { ConnectivityProvider } from '@/context/ConnectivityContext';
 import ToasterModeManager from '@/components/ToasterModeManager';
+import ClientShell from '@/components/ClientShell';
 import type { Viewport } from 'next';
-
-// Lazy-load non-critical shell elements — keeps JS off the critical path
-const CookieBanner = dynamic(() => import('../components/CookieBanner'), { ssr: false });
-const PromoBanner = dynamic(() => import('../components/PromoBanner'), { ssr: false });
-const GlobalAnnouncement = dynamic(() => import('../components/GlobalAnnouncement'), { ssr: false });
 
 export const metadata: Metadata = {
   title: 'Espeezy - Team Projects Made Simple',
@@ -58,10 +53,8 @@ export default function RootLayout({
           <NotificationProvider>
             <PWARegistry />
             {children}
-            <PromoBanner />
-            <CookieBanner />
+            <ClientShell />
             <SessionGuard />
-            <GlobalAnnouncement />
             <Analytics />
             <SpeedInsights />
           </NotificationProvider>

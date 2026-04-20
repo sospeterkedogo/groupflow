@@ -71,8 +71,8 @@ Respond ONLY with a JSON object:
     const result = JSON.parse(data?.choices?.[0]?.message?.content)
 
     return new NextResponse(JSON.stringify(result), { status: 200 })
-  } catch (err: any) {
-    console.error('Grading Error:', err)
+  } catch (err: unknown) {
+    console.error('Grading Error:', err instanceof Error ? err.message : err)
     return new NextResponse(JSON.stringify({ error: 'Evaluation failed.' }), { status: 500 })
   }
 }

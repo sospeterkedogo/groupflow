@@ -5,7 +5,7 @@ import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' })
 
 // POST /api/hustle/connect — create Stripe Connect onboarding link
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 }
 
 // GET /api/hustle/connect — check Connect account status
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
