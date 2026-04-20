@@ -16,7 +16,7 @@ export async function GET(_req: Request) {
 
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
     if (!user) {
       return new NextResponse('Unauthorized Pipeline', { status: 401 })
@@ -64,7 +64,7 @@ export async function DELETE(_req: Request) {
 
   try {
     const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
     if (!user) {
       return new NextResponse('Unauthorized Pipeline', { status: 401 })

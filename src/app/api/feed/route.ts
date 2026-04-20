@@ -7,7 +7,7 @@ const PAGE_SIZE = 20
 export async function GET(req: NextRequest) {
   // Auth check must use primary (cookie-aware)
   const authClient = await createServerSupabaseClient()
-  const { data: { user } } = await authClient.auth.getUser()
+  const { data: { user } } = await authClient.auth.getUser().catch(() => ({ data: { user: null } }))
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Check account is active

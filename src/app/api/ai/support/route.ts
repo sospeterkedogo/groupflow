@@ -23,7 +23,7 @@ Keep responses concise and friendly. Use markdown formatting where helpful.`
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { messages, ticket_id } = await req.json()

@@ -117,3 +117,17 @@ export async function createServerSupabaseClient() {
   )
 }
 
+// ─── SAFE AUTH HELPER ─────────────────────────────────────────────────────────
+// Wraps getUser() so a network error (ENOTFOUND, fetch failed, etc.) returns
+// null instead of throwing — preventing unhandled 500s on API routes.
+// Usage: const user = await getAuthUser(); if (!user) return 401;
+export async function getAuthUser() {
+  try {
+    const client = await createServerSupabaseClient()
+    const { data: { user } } = await client.auth.getUser()
+    return user
+  } catch {
+    return null
+  }
+}
+
