@@ -4,10 +4,13 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, SafeAreaView, Ale
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
-// Since this is purely a read-only live demo, we hardcode the ENV keys here 
-// using the same keys from your Next.js purely for the Mobile Viva Expo environment.
-const supabaseUrl = 'https://othntbcrtmemavfsslrb.supabase.co';
-const supabaseAnonKey = 'sb_publishable_zZqG4OGyIYfmQad2vecvPA_9r7N_EX3';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing required environment variables: EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY. Copy mobile-app/.env.example to mobile-app/.env and fill in your values.');
+}
+
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const COLUMNS = ['To Do', 'In Progress', 'In Review', 'Done'];
