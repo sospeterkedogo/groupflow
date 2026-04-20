@@ -118,47 +118,52 @@ export default function SettingsPage() {
   }
 
   const fetchUserData = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      // 1. Meta-Information (Linked Identities)
-      const identities = user.identities || []
-      setIsGithubLinked(identities.some(id => id.provider === 'github'))
-      setIsGoogleLinked(identities.some(id => id.provider === 'google'))
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        // 1. Meta-Information (Linked Identities)
+        const identities = user.identities || []
+        setIsGithubLinked(identities.some(id => id.provider === 'github'))
+        setIsGoogleLinked(identities.some(id => id.provider === 'google'))
 
-      // 2. Profile and Dependent Data
-      const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
-      
-      if (data) {
-        setFullName(data.full_name || '')
-        setCourseName(data.course_name || '')
-        setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
-        setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
-        setRank(data.rank || 'Senior')
-        setBadgesCount(data.badges_count ?? 0)
-        setTagline(data.tagline || '')
-        setBiography(data.biography || '')
-        setStack(data.stack || '')
-        setAvatarUrl(data.avatar_url || '')
-        setPhoneNumber(data.phone_number || '')
-        setCountryCode(data.country_code || '')
-        setIsEncrypted(data.groups?.is_encrypted || false)
-        setProtectAvatar(data.protect_avatar || false)
-        setIsPhoneVerified(data.is_phone_verified || false)
-        setManualAvatarUrl(data.manual_avatar_url || null)
+        // 2. Profile and Dependent Data
+        const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
         
-        // Parallelize Secondary Context Fetches
-        const contextFetches = []
-        if (data.id) contextFetches.push(fetchJoinRequests(data.id))
-        if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
-        
-        await Promise.all(contextFetches)
-        
-        if (profile && !profile.groups && data.groups) {
-          setProfile(data)
+        if (data) {
+          setFullName(data.full_name || '')
+          setCourseName(data.course_name || '')
+          setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
+          setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
+          setRank(data.rank || 'Senior')
+          setBadgesCount(data.badges_count ?? 0)
+          setTagline(data.tagline || '')
+          setBiography(data.biography || '')
+          setStack(data.stack || '')
+          setAvatarUrl(data.avatar_url || '')
+          setPhoneNumber(data.phone_number || '')
+          setCountryCode(data.country_code || '')
+          setIsEncrypted(data.groups?.is_encrypted || false)
+          setProtectAvatar(data.protect_avatar || false)
+          setIsPhoneVerified(data.is_phone_verified || false)
+          setManualAvatarUrl(data.manual_avatar_url || null)
+          
+          // Parallelize Secondary Context Fetches
+          const contextFetches = []
+          if (data.id) contextFetches.push(fetchJoinRequests(data.id))
+          if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
+          
+          await Promise.all(contextFetches)
+          
+          if (profile && !profile.groups && data.groups) {
+            setProfile(data)
+          }
         }
       }
+    } catch (err) {
+      console.error('[settings] fetchUserData error:', err)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const fetchTeam = async (groupId: string) => {

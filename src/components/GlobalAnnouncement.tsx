@@ -9,41 +9,26 @@ export default function GlobalAnnouncement() {
   const [isClient, setIsClient] = useState(false)
   const [config, setConfig] = useState<any>(null)
   const [isVisible, setIsVisible] = useState(true)
-  // Use a ref to prevent React StrictMode double-subscription errors:
-  // StrictMode mounts→unmounts→mounts in dev; the cleanup removes the channel
-  // before the second mount, so using a unique channel name per effect avoids
-  // "cannot add postgres_changes callbacks after subscribe()" errors.
-  const mountIdRef = useRef(0)
+  // Guard against React StrictMode double-effect: only fetch once
+  const fetchedRef = useRef(false)
 
   useEffect(() => {
     setIsClient(true)
-    mountIdRef.current += 1
-    const mountId = mountIdRef.current
+    if (fetchedRef.current) return
+    fetchedRef.current = true
 
     const supabase = createBrowserSupabaseClient()
 
-    // 1. Initial Fetch
-    const fetchConfig = async () => {
-      const { data } = await supabase
-        .from('platform_config')
-        .select('*')
-        .eq('key', 'global_announcement')
-        .single()
-      
-      if (data) setConfig(data)
-    }
-    fetchConfig()
-
-    // 2. Real-time Subscription — unique channel name per mount avoids double-subscribe error
-    const channel = supabase
-      .channel(`announcement_sync_${mountId}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'platform_config', filter: 'key=eq.global_announcement' }, (payload) => {
-        setConfig(payload.new)
-        setIsVisible(true) // Re-show on new updates
+    // One-time fetch — no realtime subscription to avoid StrictMode double-subscribe errors
+    // (The Supabase singleton client throws "cannot add postgres_changes callbacks after subscribe()")
+    supabase
+      .from('platform_config')
+      .select('*')
+      .eq('key', 'global_announcement')
+      .single()
+      .then(({ data }) => {
+        if (data) setConfig(data)
       })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
   }, [])
 
   if (!isClient || !isVisible || !config?.is_active) return null

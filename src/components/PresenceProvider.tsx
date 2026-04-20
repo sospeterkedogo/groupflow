@@ -35,6 +35,9 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
 
   // Anti-spam notification cache: maps userId to timestamp
   const lastNotified = useRef<Map<string, number>>(new Map())
+  // High-concurrency throttle: only update UI every 750ms during bursts
+  const syncThrottle = useRef<NodeJS.Timeout | null>(null)
+  const pendingState = useRef<{ online: Set<string>, typing: Set<string> } | null>(null)
 
   const setTypingStatus = useCallback(async (isTyping: boolean) => {
     if (!channel || !userId) return
@@ -60,9 +63,6 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
     })
 
     // High-concurrency throttle: only update UI every 750ms during bursts
-    const syncThrottle = useRef<NodeJS.Timeout | null>(null)
-    const pendingState = useRef<{ online: Set<string>, typing: Set<string> } | null>(null)
-
     const processSync = () => {
       const state = newChannel.presenceState() as PresenceState
       const onlineIds = new Set<string>()
