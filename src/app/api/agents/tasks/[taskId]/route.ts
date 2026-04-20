@@ -4,14 +4,15 @@ import { createAdminClient } from '@/utils/supabase/server';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/agents/tasks/[agentId]
+ * GET /api/agents/tasks/[taskId]
  * Returns pending/in_progress tasks for the given agent.
+ * The [taskId] segment accepts either an agent UUID or agent name.
  * Used by automated agent workers to poll for their next assignment.
  * Requires the X-Agent-Key header to match AGENT_API_KEY env var.
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ agentId: string }> }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   // Lightweight API-key auth (agents don't have browser sessions)
   const apiKey = req.headers.get('x-agent-key');
@@ -19,7 +20,7 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { agentId } = await params;
+  const { taskId: agentId } = await params;
   if (!agentId) {
     return NextResponse.json({ error: 'agentId required' }, { status: 400 });
   }
