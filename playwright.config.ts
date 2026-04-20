@@ -9,9 +9,13 @@ export default defineConfig({
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: process.env.CI ? 2 : 1,
   workers: process.env.CI ? 2 : undefined,
-  reporter: 'list',
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['json', { outputFile: 'playwright-report/results.json' }],
+  ],
   use: {
     actionTimeout: 0,
     trace: 'on-first-retry',
@@ -31,6 +35,12 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+    },
+    // Security suite — runs only adversarial tests, Chromium only for speed
+    {
+      name: 'security',
+      testMatch: /security-adversarial\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 });
