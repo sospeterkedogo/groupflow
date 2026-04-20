@@ -25,11 +25,17 @@ export default function Home() {
   // Client-side guard: Bounce authenticated users back to dashboard
   useEffect(() => {
     const checkUser = async () => {
-      const supabase = createBrowserSupabaseClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        router.replace('/dashboard')
-      } else {
+      try {
+        const supabase = createBrowserSupabaseClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          router.replace('/dashboard')
+        } else {
+          setCheckingAuth(false)
+        }
+      } catch {
+        // If Supabase is unavailable (e.g. during tests or network failure),
+        // render the landing page rather than staying in a loading spinner indefinitely.
         setCheckingAuth(false)
       }
     }

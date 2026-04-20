@@ -311,6 +311,7 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
               </p>
               <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {[
+                  'Bank-Level Safety Matrix',
                   'Priority AI Feedback Protocols',
                   'Unlimited Multi-Project Groups',
                   'Deep Visual Customization Engine',
