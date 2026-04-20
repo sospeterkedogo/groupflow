@@ -46,11 +46,33 @@ const ANON_KEY = ENV['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || process.env.NEXT_PUBLIC
 const SERVICE_ROLE_KEY = ENV['SUPABASE_SERVICE_ROLE_KEY'] || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const LIVEBLOCKS_SECRET_KEY = ENV['LIVEBLOCKS_SECRET_KEY'] || process.env.LIVEBLOCKS_SECRET_KEY || ''
 
+const missingEnvVars = [
+  !SUPABASE_URL && 'NEXT_PUBLIC_SUPABASE_URL',
+  !ANON_KEY && 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  !SERVICE_ROLE_KEY && 'SUPABASE_SERVICE_ROLE_KEY',
+  !LIVEBLOCKS_SECRET_KEY && 'LIVEBLOCKS_SECRET_KEY',
+].filter(Boolean) as string[]
+
+let envValidationError = ''
+if (missingEnvVars.length > 0) {
+  envValidationError = `Missing required env vars for tests/full-user-journey.spec.ts: ${missingEnvVars.join(', ')}`
+} else {
+  try {
+    new URL(SUPABASE_URL)
+  } catch {
+    envValidationError = `Invalid NEXT_PUBLIC_SUPABASE_URL for tests/full-user-journey.spec.ts: ${SUPABASE_URL}`
+  }
+}
+
+test.beforeAll(() => {
+  test.skip(!!envValidationError, envValidationError)
+})
+
 // ── Cookie key used by @supabase/ssr + supabase-js (confirmed from source) ────
 // supabase-js SupabaseClient.js: `sb-${baseUrl.hostname.split(".")[0]}-auth-token`
 // Value encoding: @supabase/ssr cookieEncoding="base64url" → "base64-" + base64url(json)
-const PROJECT_REF = new URL(SUPABASE_URL).hostname.split('.')[0]
-const COOKIE_KEY = `sb-${PROJECT_REF}-auth-token`
+const PROJECT_REF = envValidationError ? '' : new URL(SUPABASE_URL).hostname.split('.')[0]
+const COOKIE_KEY = PROJECT_REF ? `sb-${PROJECT_REF}-auth-token` : ''
 const MAX_CHUNK_SIZE = 3180 // from @supabase/ssr chunker.js (URL-encoded length)
 
 // ── Sign in via Supabase REST API and inject session cookies ─────────
