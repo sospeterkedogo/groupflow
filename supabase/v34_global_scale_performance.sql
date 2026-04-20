@@ -5,17 +5,11 @@
 -- ============================================================
 
 -- ── profiles ─────────────────────────────────────────────────────────────────
--- Username lookups (profile pages, @mentions)
-CREATE INDEX IF NOT EXISTS idx_profiles_username
-  ON profiles (username) WHERE username IS NOT NULL;
-
--- Account status filter (active user checks in API routes)
-CREATE INDEX IF NOT EXISTS idx_profiles_account_status
-  ON profiles (account_status);
-
--- Full-text search on name + bio
+-- NOTE: idx_profiles_username and idx_profiles_account_status are created by
+-- v35_platform_expansion.sql which also adds those columns. Run v35 first.
+-- FTS index uses only base-schema columns that exist before v35.
 CREATE INDEX IF NOT EXISTS idx_profiles_fts
-  ON profiles USING gin(to_tsvector('english', coalesce(full_name, '') || ' ' || coalesce(username, '') || ' ' || coalesce(tagline, '')));
+  ON profiles USING gin(to_tsvector('english', coalesce(full_name, '') || ' ' || coalesce(tagline, '')));
 
 -- ── posts / feed ──────────────────────────────────────────────────────────────
 -- Primary feed cursor: author + created_at (DESC) for infinite scroll
