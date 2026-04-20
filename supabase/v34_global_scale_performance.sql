@@ -6,88 +6,88 @@
 
 -- ── profiles ─────────────────────────────────────────────────────────────────
 -- Username lookups (profile pages, @mentions)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_username
+CREATE INDEX IF NOT EXISTS idx_profiles_username
   ON profiles (username) WHERE username IS NOT NULL;
 
 -- Account status filter (active user checks in API routes)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_account_status
+CREATE INDEX IF NOT EXISTS idx_profiles_account_status
   ON profiles (account_status);
 
 -- Full-text search on name + bio
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_fts
+CREATE INDEX IF NOT EXISTS idx_profiles_fts
   ON profiles USING gin(to_tsvector('english', coalesce(full_name, '') || ' ' || coalesce(username, '') || ' ' || coalesce(tagline, '')));
 
 -- ── posts / feed ──────────────────────────────────────────────────────────────
 -- Primary feed cursor: author + created_at (DESC) for infinite scroll
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_posts_feed_cursor
+CREATE INDEX IF NOT EXISTS idx_posts_feed_cursor
   ON posts (created_at DESC) WHERE is_deleted = false;
 
 -- Per-group feed
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_posts_group_feed
+CREATE INDEX IF NOT EXISTS idx_posts_group_feed
   ON posts (group_id, created_at DESC) WHERE is_deleted = false AND group_id IS NOT NULL;
 
 -- Author feed (profile page)
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_posts_author_feed
+CREATE INDEX IF NOT EXISTS idx_posts_author_feed
   ON posts (author_id, created_at DESC) WHERE is_deleted = false;
 
 -- ── post_reactions ────────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_post_reactions_post
+CREATE INDEX IF NOT EXISTS idx_post_reactions_post
   ON post_reactions (post_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_post_reactions_user_post
+CREATE INDEX IF NOT EXISTS idx_post_reactions_user_post
   ON post_reactions (user_id, post_id);
 
 -- ── post_comments ─────────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_post_comments_post
+CREATE INDEX IF NOT EXISTS idx_post_comments_post
   ON post_comments (post_id, created_at ASC);
 
 -- ── tasks (hustle / side-hustle) ──────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_tasks_status_created
+CREATE INDEX IF NOT EXISTS idx_tasks_status_created
   ON tasks (status, created_at DESC);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_tasks_created_by
+CREATE INDEX IF NOT EXISTS idx_tasks_created_by
   ON tasks (created_by, created_at DESC);
 
 -- GIN index for array containment search on assignees
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_tasks_assignees_gin
+CREATE INDEX IF NOT EXISTS idx_tasks_assignees_gin
   ON tasks USING gin(assignees);
 
 -- ── notifications ─────────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notifications_user_unread
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread
   ON notifications (user_id, created_at DESC) WHERE is_read = false;
 
 -- ── user_connections ──────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_connections_user_a
+CREATE INDEX IF NOT EXISTS idx_connections_user_a
   ON user_connections (user_a_id, status);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_connections_user_b
+CREATE INDEX IF NOT EXISTS idx_connections_user_b
   ON user_connections (user_b_id, status);
 
 -- ── groups ────────────────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_groups_slug
+CREATE INDEX IF NOT EXISTS idx_groups_slug
   ON groups (slug) WHERE slug IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_groups_created_by
+CREATE INDEX IF NOT EXISTS idx_groups_created_by
   ON groups (created_by);
 
 -- ── group_members ─────────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_group_members_user
+CREATE INDEX IF NOT EXISTS idx_group_members_user
   ON group_members (user_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_group_members_group_role
+CREATE INDEX IF NOT EXISTS idx_group_members_group_role
   ON group_members (group_id, role);
 
 -- ── pre_registrations ─────────────────────────────────────────────────────────
 -- Dedup by email (most common write path at launch)
-CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS idx_preregistrations_email_unique
+CREATE UNIQUE INDEX IF NOT EXISTS idx_preregistrations_email_unique
   ON pre_registrations (email);
 
 -- ── student_verifications ─────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_student_verifications_user_year
+CREATE INDEX IF NOT EXISTS idx_student_verifications_user_year
   ON student_verifications (user_id, academic_year, status);
 
 -- ── certificates ─────────────────────────────────────────────────────────────
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_certificates_user
+CREATE INDEX IF NOT EXISTS idx_certificates_user
   ON certificates (user_id) WHERE revoked = false;
 
 -- ── Postgres connection pool tuning ──────────────────────────────────────────
