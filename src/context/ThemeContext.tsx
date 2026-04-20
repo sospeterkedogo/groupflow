@@ -395,7 +395,7 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
     }
     // Fallback to system preference if no localStorage
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('flowspace_palette')
+      const saved = localStorage.getItem('espeezy_palette')
       if (saved) {
         const found = PALETTES.find(p => p.name === saved)
         if (found) return found
@@ -447,7 +447,7 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
       }
 
       setCurrentPalette(palette)
-      localStorage.setItem('flowspace_palette', name) 
+      localStorage.setItem('espeezy_palette', name) 
       const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await supabase.from('profiles').update({ 
@@ -462,8 +462,8 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
 
   const handleSetCustomBg = async (url: string | null) => {
     setCustomBg(url)
-    if (url) localStorage.setItem('flowspace_bg', url)
-    else localStorage.removeItem('flowspace_bg')
+    if (url) localStorage.setItem('espeezy_bg', url)
+    else localStorage.removeItem('espeezy_bg')
     
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {

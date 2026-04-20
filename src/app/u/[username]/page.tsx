@@ -26,7 +26,7 @@ export default async function UserProfilePage({ params }: { params: { username: 
         <h1 style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.03em', margin: '0 0 0.3rem', color: '#F3F4F6' }}>{profile.full_name}</h1>
         <p style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', color: '#10B981', fontWeight: 700 }}>@{profile.username}</p>
         {profile.role === 'admin' && (
-          <span style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981', fontSize: '0.65rem', fontWeight: 900, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>flowspace.app Team</span>
+          <span style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981', fontSize: '0.65rem', fontWeight: 900, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>espeezy.com Team</span>
         )}
         {profile.bio && (
           <p style={{ margin: '1rem 0 0', fontSize: '0.88rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: 440, marginLeft: 'auto', marginRight: 'auto' }}>{profile.bio}</p>

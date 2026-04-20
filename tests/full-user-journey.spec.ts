@@ -1,6 +1,6 @@
 ﻿/**
  * ════════════════════════════════════════════════════════════════════
- * FLOWSPACE 2026 — FULL USER JOURNEY E2E TEST
+ * ESPEEZY 2026 — FULL USER JOURNEY E2E TEST
  * ════════════════════════════════════════════════════════════════════
  *
  * Covers the complete lifecycle of a real user:
@@ -236,7 +236,7 @@ async function createTask(
 // ════════════════════════════════════════════════════════════════════
 //  MAIN TEST
 // ════════════════════════════════════════════════════════════════════
-test.describe('FlowSpace — Full User Journey', () => {
+test.describe('Espeezy — Full User Journey', () => {
   test.setTimeout(300_000)
 
   // Ensure download dir exists
@@ -552,7 +552,7 @@ test.describe('FlowSpace — Full User Journey', () => {
     // ── FINAL REPORT ────────────────────────────────────────────────
     console.log(`
 ╔═══════════════════════════════════════════════════╗
-║  FLOWSPACE E2E FULL JOURNEY — PASSED              ║
+║  ESPEEZY E2E FULL JOURNEY — PASSED              ║
 ║                                                   ║
 ║  User:        ${EMAIL.padEnd(33)} ║
 ║  Team:        ${TEAM_NAME.padEnd(33)} ║

@@ -17,7 +17,7 @@ const PromoBanner = dynamic(() => import('../components/PromoBanner'), { ssr: fa
 const GlobalAnnouncement = dynamic(() => import('../components/GlobalAnnouncement'), { ssr: false });
 
 export const metadata: Metadata = {
-  title: 'FlowSpace - Team Projects Made Simple',
+  title: 'Espeezy - Team Projects Made Simple',
   description: 'The easiest way for students to work together on group projects.',
   icons: {
     icon: '/favicon.png',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'FlowSpace',
+    title: 'Espeezy',
   },
 };
 

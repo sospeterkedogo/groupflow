@@ -1,6 +1,6 @@
 ﻿#!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
-# flowspace.app — VPS Bootstrap Script
+# espeezy.com — VPS Bootstrap Script
 # Run once on a fresh Ubuntu 22.04/24.04 VPS as root or with sudo.
 #
 # What it does:
@@ -8,26 +8,26 @@
 #   2. Installs Docker + Docker Compose v2
 #   3. Installs useful dev tools (git, tmux, zsh, fzf, nano, curl, jq)
 #   4. Creates a non-root deploy user `deploy`
-#   5. Clones the repo to /opt/flowspace
+#   5. Clones the repo to /opt/espeezy
 #   6. Creates a placeholder .env.local (you fill it in)
 #   7. Starts the full dev stack (Next.js + Caddy)
 #   8. Configures UFW firewall
 #   9. Sets up a systemd service so the stack auto-starts on reboot
 #
 # Usage:
-#   wget -qO- https://raw.githubusercontent.com/sospeterkedogo/flowspace/main/scripts/vps-bootstrap.sh | sudo bash
+#   wget -qO- https://raw.githubusercontent.com/sospeterkedogo/espeezy/main/scripts/vps-bootstrap.sh | sudo bash
 #
 #   Or after cloning:
 #   sudo bash scripts/vps-bootstrap.sh
 #
 # After running, you MUST:
-#   1. Paste your .env.local into /opt/flowspace/.env.local
-#   2. Set CADDY_DOMAIN in /opt/flowspace/.env.docker
+#   1. Paste your .env.local into /opt/espeezy/.env.local
+#   2. Set CADDY_DOMAIN in /opt/espeezy/.env.docker
 #   3. Add agent SSH public keys to /home/deploy/.ssh/authorized_keys
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
-REPO="https://github.com/sospeterkedogo/flowspace.git"
-APP_DIR="/opt/flowspace"
+REPO="https://github.com/sospeterkedogo/espeezy.git"
+APP_DIR="/opt/espeezy"
 DEPLOY_USER="deploy"
 
 # ── Colours ────────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ info()    { echo -e "${GREEN}[INFO]${NC} $*"; }
 warn()    { echo -e "${YELLOW}[WARN]${NC} $*"; }
 section() { echo -e "\n${GREEN}══════════════════════════════════════════${NC}"; echo -e "${GREEN} $*${NC}"; echo -e "${GREEN}══════════════════════════════════════════${NC}"; }
 
-section "flowspace.app VPS Bootstrap"
+section "espeezy.com VPS Bootstrap"
 
 # ── 1. System update ───────────────────────────────────────────────────────────
 info "Updating system packages..."
@@ -99,7 +99,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
 # ── App URL ───────────────────────────────────────────────────────────────────
-NEXT_PUBLIC_APP_URL=https://dev.flowspace.app
+NEXT_PUBLIC_APP_URL=https://dev.espeezy.com
 
 # ── OpenAI ────────────────────────────────────────────────────────────────────
 OPENAI_API_KEY=sk-proj-...
@@ -117,7 +117,7 @@ if [ ! -f "$APP_DIR/.env.docker" ]; then
   cat > "$APP_DIR/.env.docker" <<'DOCKERENV'
 # Domain for Caddy auto-HTTPS. Change to your real domain.
 # For raw IP access: set to your VPS IP (no HTTPS, HTTP only)
-CADDY_DOMAIN=dev.flowspace.app
+CADDY_DOMAIN=dev.espeezy.com
 DOCKERENV
   chown $DEPLOY_USER:$DEPLOY_USER "$APP_DIR/.env.docker"
 fi
@@ -144,10 +144,10 @@ info "Enabling unattended security upgrades..."
 dpkg-reconfigure -f noninteractive unattended-upgrades
 
 # ── 11. Systemd service for auto-restart on reboot ────────────────────────────
-info "Creating systemd service: flowspace-dev..."
-cat > /etc/systemd/system/flowspace-dev.service <<SYSTEMD
+info "Creating systemd service: espeezy-dev..."
+cat > /etc/systemd/system/espeezy-dev.service <<SYSTEMD
 [Unit]
-Description=flowspace.app Dev Stack
+Description=espeezy.com Dev Stack
 Requires=docker.service
 After=docker.service network-online.target
 
@@ -166,27 +166,27 @@ WantedBy=multi-user.target
 SYSTEMD
 
 systemctl daemon-reload
-systemctl enable flowspace-dev
+systemctl enable espeezy-dev
 info "Systemd service enabled. Stack will auto-start on every reboot."
 
 # ── 12. Useful aliases for deploy user ───────────────────────────────────────
 cat >> /home/$DEPLOY_USER/.zshrc <<'ALIASES'
 
-# ── flowspace.app shortcuts ────────────────────────────────────────────────────
-alias cs-up="cd /opt/flowspace && docker compose -f docker-compose.dev.yml up -d"
-alias cs-down="cd /opt/flowspace && docker compose -f docker-compose.dev.yml down"
-alias cs-logs="cd /opt/flowspace && docker compose -f docker-compose.dev.yml logs -f app"
-alias cs-restart="cd /opt/flowspace && docker compose -f docker-compose.dev.yml restart app"
-alias cs-rebuild="cd /opt/flowspace && docker compose -f docker-compose.dev.yml up -d --build app"
-alias cs-pull="cd /opt/flowspace && git pull origin main"
-alias cs-shell="docker exec -it flowspace_app sh"
-alias cs-status="docker compose -f /opt/flowspace/docker-compose.dev.yml ps"
+# ── espeezy.com shortcuts ────────────────────────────────────────────────────
+alias cs-up="cd /opt/espeezy && docker compose -f docker-compose.dev.yml up -d"
+alias cs-down="cd /opt/espeezy && docker compose -f docker-compose.dev.yml down"
+alias cs-logs="cd /opt/espeezy && docker compose -f docker-compose.dev.yml logs -f app"
+alias cs-restart="cd /opt/espeezy && docker compose -f docker-compose.dev.yml restart app"
+alias cs-rebuild="cd /opt/espeezy && docker compose -f docker-compose.dev.yml up -d --build app"
+alias cs-pull="cd /opt/espeezy && git pull origin main"
+alias cs-shell="docker exec -it espeezy_app sh"
+alias cs-status="docker compose -f /opt/espeezy/docker-compose.dev.yml ps"
 ALIASES
 
 chown $DEPLOY_USER:$DEPLOY_USER /home/$DEPLOY_USER/.zshrc
 
 # ── 13. Start the stack ───────────────────────────────────────────────────────
-section "Starting flowspace.app dev stack..."
+section "Starting espeezy.com dev stack..."
 cd "$APP_DIR"
 
 if [ -s "$APP_DIR/.env.local" ] && ! grep -q "YOUR_PROJECT" "$APP_DIR/.env.local"; then
@@ -196,7 +196,7 @@ if [ -s "$APP_DIR/.env.local" ] && ! grep -q "YOUR_PROJECT" "$APP_DIR/.env.local
   echo "  docker compose -f $APP_DIR/docker-compose.dev.yml logs -f app"
 else
   warn "Skipping stack start — .env.local has placeholder values."
-  warn "Edit $APP_DIR/.env.local then run: sudo systemctl start flowspace-dev"
+  warn "Edit $APP_DIR/.env.local then run: sudo systemctl start espeezy-dev"
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
@@ -210,7 +210,7 @@ echo "  Next steps:"
 echo "  1. Paste your real .env.local values into $APP_DIR/.env.local"
 echo "  2. Set CADDY_DOMAIN in $APP_DIR/.env.docker"
 echo "  3. Add agent SSH public keys to /home/$DEPLOY_USER/.ssh/authorized_keys"
-echo "  4. Run: sudo systemctl start flowspace-dev"
+echo "  4. Run: sudo systemctl start espeezy-dev"
 echo ""
 echo "  SSH access (share with agents):"
 echo "    ssh $DEPLOY_USER@$(curl -s ifconfig.me 2>/dev/null || hostname -I | awk '{print $1}')"

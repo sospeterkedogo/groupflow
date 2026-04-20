@@ -1,4 +1,4 @@
-﻿# Contributing to FlowSpace
+﻿# Contributing to Espeezy
 
 ## Test-Driven Development (TDD) Workflow
 
@@ -31,4 +31,4 @@ All new features and bug fixes **must** be accompanied by tests written before i
 
 ---
 
-Thank you for helping make FlowSpace reliable and robust!
+Thank you for helping make Espeezy reliable and robust!

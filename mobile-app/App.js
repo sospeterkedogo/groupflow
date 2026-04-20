@@ -60,7 +60,7 @@ export default function App() {
        // Attempt to sync to cloud if online
        await supabase.from('tasks').update({ status: newStatus }).eq('id', task.id);
     } else {
-       Alert.alert('Offline Mode', 'Task advanced locally. Will synchronize with FlowSpace cloud when connection is restored.');
+       Alert.alert('Offline Mode', 'Task advanced locally. Will synchronize with Espeezy cloud when connection is restored.');
     }
   };
 
@@ -69,7 +69,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>FlowSpace Sprint</Text>
+        <Text style={styles.headerTitle}>Espeezy Sprint</Text>
         <Text style={[styles.statusBadge, isOffline ? styles.bgDanger : styles.bgSuccess]}>
           {isOffline ? 'OFFLINE (Cached)' : 'ONLINE'}
         </Text>

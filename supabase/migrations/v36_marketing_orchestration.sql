@@ -33,6 +33,6 @@ USING (
 INSERT INTO platform_config (key, value, is_active)
 VALUES 
     ('main_banner', '{"text": "30% OFF ALL CLEARANCE TIERS", "code": "ELITE30", "expiry": "August 31st"}', true),
-    ('global_announcement', '{"title": "Institutional Upgrade", "message": "FlowSpace nodes have been upgraded to Bank-Level Security.", "style": "elite"}', false),
+    ('global_announcement', '{"title": "Institutional Upgrade", "message": "Espeezy nodes have been upgraded to Bank-Level Security.", "style": "elite"}', false),
     ('promo_logic', '{"discount_percent": 30, "is_global": true}', true)
 ON CONFLICT (key) DO NOTHING;

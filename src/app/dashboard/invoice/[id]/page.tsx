@@ -106,7 +106,7 @@ function HustlePage() {
       <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
         <AlertTriangle size={15} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />
         <p style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>
-          <strong style={{ color: '#EF4444' }}>Platform Policy:</strong> flowspace.app keeps 10% of every transaction as a platform fee. Violations, fraud, or disputes may result in <strong>permanent account deactivation</strong> with no appeal.
+          <strong style={{ color: '#EF4444' }}>Platform Policy:</strong> espeezy.com keeps 10% of every transaction as a platform fee. Violations, fraud, or disputes may result in <strong>permanent account deactivation</strong> with no appeal.
         </p>
       </div>
 

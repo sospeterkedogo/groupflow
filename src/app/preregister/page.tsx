@@ -110,7 +110,7 @@ export default function PreRegisterPage() {
     launch_date: '2025-09-01T00:00:00.000Z',
     launch_message: 'Something big is coming. Join 5 million students shaping the future of collaborative education.',
     preregister_goal: '5000000',
-    brand_name: 'FlowSpace',
+    brand_name: 'Espeezy',
   })
   const [registeredCount, setRegisteredCount] = useState(0)
   const [configLoaded, setConfigLoaded] = useState(false)

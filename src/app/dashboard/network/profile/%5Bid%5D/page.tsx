@@ -255,7 +255,7 @@ export default function StudentProfilePage() {
                  <div style={{ marginBottom: '1.5rem' }}>
                     <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.5rem' }}>Scholar Identity</h4>
                     <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85 }}>
-                      {member.biography || `An active scholar in the FlowSpace network, specializing in ${member.course_name || 'their academic field'}.`}
+                      {member.biography || `An active scholar in the Espeezy network, specializing in ${member.course_name || 'their academic field'}.`}
                     </p>
                  </div>
               </div>

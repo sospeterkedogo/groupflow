@@ -97,7 +97,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
             <div style={{ padding: '1rem', background: 'rgba(26, 115, 232, 0.1)', color: 'var(--brand)', borderRadius: '16px', display: 'inline-flex', marginBottom: '1.5rem' }}>
               <ShieldCheck size={32} />
             </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to FlowSpace</h1>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to Espeezy</h1>
             <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Let&apos;s set up your profile. What name should we show in the dashboard?</p>
             
             <div className="form-group">

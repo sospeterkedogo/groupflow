@@ -1,5 +1,5 @@
 ﻿# ──────────────────────────────────────────────────────────────────────────────
-# flowspace.app — Cloud Dev Stack
+# espeezy.com — Cloud Dev Stack
 #
 # Services:
 #   app    → Next.js dev server with hot reload (port 3000)
@@ -11,11 +11,11 @@
 #   docker compose -f docker-compose.dev.yml restart app
 #
 # Environment:
-#   Copy .env.local to /opt/flowspace/.env.local before starting.
-#   Set CADDY_DOMAIN env var to your domain (e.g. dev.flowspace.app)
+#   Copy .env.local to /opt/espeezy/.env.local before starting.
+#   Set CADDY_DOMAIN env var to your domain (e.g. dev.espeezy.com)
 #   or leave unset for plain HTTP on the VPS IP.
 # ──────────────────────────────────────────────────────────────────────────────
-name: flowspace-dev
+name: espeezy-dev
 
 services:
   # ── Next.js dev server ────────────────────────────────────────────────────
@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: flowspace_app
+    container_name: espeezy_app
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -56,7 +56,7 @@ services:
   # ── Caddy — auto-HTTPS reverse proxy ─────────────────────────────────────
   caddy:
     image: caddy:2-alpine
-    container_name: flowspace_caddy
+    container_name: espeezy_caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -81,11 +81,11 @@ services:
   # Uncomment if you push Docker images to a registry instead of bind-mounting
   # watchtower:
   #   image: containrrr/watchtower
-  #   container_name: flowspace_watchtower
+  #   container_name: espeezy_watchtower
   #   restart: unless-stopped
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
-  #   command: --interval 60 --cleanup flowspace_app
+  #   command: --interval 60 --cleanup espeezy_app
 
 volumes:
   node_modules:

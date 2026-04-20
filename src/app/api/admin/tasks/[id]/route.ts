@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       amount: Math.round(amount_cents),
       currency: 'usd',
       destination: recipient.stripe_account_id,
-      description: note ?? 'Admin payout from flowspace.app',
+      description: note ?? 'Admin payout from espeezy.com',
       metadata: {
         admin_id: user.id,
         recipient_id,

@@ -8,7 +8,7 @@ interface Message { role: 'user' | 'assistant'; content: string }
 export default function SupportChat() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi! I\'m the flowspace.app support assistant. How can I help you today? 👋' }
+    { role: 'assistant', content: 'Hi! I\'m the espeezy.com support assistant. How can I help you today? 👋' }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,7 +38,7 @@ export default function SupportChat() {
         const { reply } = await res.json()
         setMessages(prev => [...prev, { role: 'assistant', content: reply }])
       } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Please try again or contact support@flowspace.app.' }])
+        setMessages(prev => [...prev, { role: 'assistant', content: 'Something went wrong. Please try again or contact support@espeezy.com.' }])
       }
     } finally {
       setLoading(false)
@@ -55,7 +55,7 @@ export default function SupportChat() {
     }).catch(() => {})
     setMessages(prev => [...prev, {
       role: 'assistant',
-      content: 'I\'ve created a support ticket and a human agent will get back to you within 24 hours. You can also email support@flowspace.app directly.'
+      content: 'I\'ve created a support ticket and a human agent will get back to you within 24 hours. You can also email support@espeezy.com directly.'
     }])
   }
 
@@ -89,7 +89,7 @@ export default function SupportChat() {
           {/* Header */}
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(16,185,129,0.08)' }}>
             <div>
-              <p style={{ margin: 0, fontWeight: 900, fontSize: '0.88rem', color: '#F3F4F6' }}>flowspace.app Support</p>
+              <p style={{ margin: 0, fontWeight: 900, fontSize: '0.88rem', color: '#F3F4F6' }}>espeezy.com Support</p>
               <p style={{ margin: 0, fontSize: '0.7rem', color: '#10B981' }}>● AI-powered · usually instant</p>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>

@@ -71,7 +71,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
            <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
               <Image src="/logo.png" width={20} height={20} alt="Logo" priority style={{ objectFit: 'contain' }} />
            </div>
-           <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>FlowSpace</span>
+           <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>Espeezy</span>
         </div>
 
         {/* Architectural Navigation - Desktop Only */}
@@ -192,7 +192,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
         className="hide-mobile-flex"
       >
         <a 
-           href="mailto:support@flowspace.com" 
+           href="mailto:support@espeezy.com" 
            title="Send Feedback"
            style={{ 
              background: 'rgba(16, 185, 129, 0.05)', 
@@ -240,7 +240,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
         </Link>
 
         <Link 
-          href="https://github.com/sospeterkedogo/flowspace" 
+          href="https://github.com/sospeterkedogo/espeezy" 
           target="_blank"
           style={{ color: '#9ca3af', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')}

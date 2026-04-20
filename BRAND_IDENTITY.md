@@ -1,5 +1,5 @@
 ﻿# BRAND IDENTITY — OFFICIAL BUSINESS DOCUMENTATION
-# FlowSpace (Working Title) → Final Brand Selection Required
+# Espeezy (Working Title) → Final Brand Selection Required
 
 ---
 
@@ -34,7 +34,7 @@ a stylised double-arrow forming a meeting point. Works on dark and light backgro
 **Domain:** flowdesk.app / flowdesk.io  
 **Tagline:** *"Your team. Your work. Your credit."*  
 **Identity:** Evokes a workspace — a "desk" where collaboration flows naturally. Approachable,
-productivity-oriented, and pairs well with the existing FlowSpace brand DNA.  
+productivity-oriented, and pairs well with the existing Espeezy brand DNA.  
 **Logo Concept:** Rounded wordmark. Flowing underline that transitions from a muted start colour
 to brand-green. Simple, instantly legible at small sizes (favicon, app icon).  
 **Personality:** Approachable. Organised. Productive. Empowering.  
@@ -43,7 +43,7 @@ to brand-green. Simple, instantly legible at small sizes (favicon, app icon).
 ---
 
 ### Option 4 — **COLLAB.SPACE** / **COLLABSPACE**
-**Domain:** flowspace.app / flowspace.io  
+**Domain:** espeezy.com / espeezy.com  
 **Tagline:** *"One space. Every contribution. Perfect clarity."*  
 **Identity:** Direct, self-describing, strong for SEO. Immediately communicates function.
 Less abstract than options 1–3; excellent for institutional procurement conversations.  
@@ -132,8 +132,8 @@ government education grants, LMS partnerships).
 | GitHub          | Code collaboration                  | We extend to all work types (design, writing, research) |
 
 ### School / Nile Integration Statement
-> "FlowSpace integrates natively with Nile and other institutional LMS platforms via LTI 1.3.
-> Students log in with their existing institutional credentials. Educators see FlowSpace
+> "Espeezy integrates natively with Nile and other institutional LMS platforms via LTI 1.3.
+> Students log in with their existing institutional credentials. Educators see Espeezy
 > contribution data directly alongside their Nile gradebook. No duplicate accounts.
 > No IT configuration. 15-minute setup per institution."
 

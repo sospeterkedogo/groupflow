@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://flowspace.app'
+    const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -33,8 +33,8 @@ export async function POST(req: Request) {
             unit_amount: amount,
             product_data: {
               name: featureTag
-                ? `FlowSpace — ${featureTag}`
-                : 'FlowSpace — Mission Support Donation',
+                ? `Espeezy — ${featureTag}`
+                : 'Espeezy — Mission Support Donation',
               description:
                 'Your contribution funds free, equitable education tools for students worldwide.',
               images: [`${origin}/assets/og-image.png`],

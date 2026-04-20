@@ -49,7 +49,7 @@ const TOPICS = [
   },
   { 
     id: 'institutional', 
-    name: 'FlowSpace Protocols', 
+    name: 'Espeezy Protocols', 
     icon: Terminal, 
     color: 'var(--accent)',
     description: "Deep dive into the app's advanced governance."

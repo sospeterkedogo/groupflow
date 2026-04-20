@@ -1,6 +1,6 @@
 ﻿{
   "meta": {
-    "title": "FlowSpace - Proyectos en Equipo Simplificados",
+    "title": "Espeezy - Proyectos en Equipo Simplificados",
     "description": "La forma más fácil para que los estudiantes trabajen juntos en proyectos grupales."
   },
   "nav": {
@@ -16,16 +16,16 @@
     "badge": "Hecho para Estudiantes",
     "headline1": "La forma simple de",
     "headline2": "trabajar en equipo.",
-    "subtitle": "FlowSpace ayuda a los equipos de estudiantes a mantenerse organizados, compartir crédito y cumplir plazos — juntos.",
+    "subtitle": "Espeezy ayuda a los equipos de estudiantes a mantenerse organizados, compartir crédito y cumplir plazos — juntos.",
     "ctaStart": "Comenzar Gratis",
     "ctaLearn": "Saber Más"
   },
   "mission": {
-    "badge": "La Misión de FlowSpace",
+    "badge": "La Misión de Espeezy",
     "title": "Reconocimiento justo por tu",
     "titleHighlight": "Trabajo Duro.",
     "goal1Title": "Meta 01: Visibilidad",
-    "goal1Desc": "FlowSpace se asegura de que el esfuerzo de todos cuente. Mantenemos un registro claro de cada tarea para que recibas el crédito que mereces.",
+    "goal1Desc": "Espeezy se asegura de que el esfuerzo de todos cuente. Mantenemos un registro claro de cada tarea para que recibas el crédito que mereces.",
     "goal2Title": "Meta 02: Compañeros",
     "goal2Desc": "Nuestro objetivo es hacer el trabajo en grupo fácil y sin estrés, uniendo a los estudiantes para tener éxito en cada proyecto.",
     "viewMission": "Ver Nuestra Misión"
@@ -51,7 +51,7 @@
   "pricing": {
     "badge": "Elige tu plan",
     "title": "Apoya la Misión",
-    "subtitle": "Tu apoyo mantiene FlowSpace funcionando y mejorando. Cada nivel desbloquea herramientas poderosas.",
+    "subtitle": "Tu apoyo mantiene Espeezy funcionando y mejorando. Cada nivel desbloquea herramientas poderosas.",
     "proName": "Pro",
     "proPrice": "£4.99",
     "proPeriod": "/mes",
@@ -79,7 +79,7 @@
     "badge": "Preguntas Frecuentes",
     "title": "Preguntas Frecuentes",
     "subtitle": "Protocolos y declaraciones de misión.",
-    "q1": "¿Cómo puedo apoyar FlowSpace?",
+    "q1": "¿Cómo puedo apoyar Espeezy?",
     "a1": "Puedes apoyar este proyecto actualizando a Pro (£4.99/mes) o Premium (£14.99/mes) o asegurando un Acceso Vitalicio Fundador por £99.",
     "q2": "¿Qué es el 'Orbit Gateway'?",
     "a2": "Es nuestro portal de seguridad institucional que utiliza rutas secretas dinámicas y verificación TOTP.",
@@ -87,8 +87,8 @@
     "a3": "Utilizamos cifrado multicapa y registros de auditoría institucional.",
     "q4": "¿Puedo eliminar mi cuenta?",
     "a4": "Por supuesto. Puedes eliminar permanentemente tu cuenta con un solo clic cuando quieras.",
-    "q5": "¿Quién está detrás de FlowSpace?",
-    "a5": "Creé FlowSpace para ayudar a los equipos de estudiantes a sentirse más apoyados y reconocidos."
+    "q5": "¿Quién está detrás de Espeezy?",
+    "a5": "Creé Espeezy para ayudar a los equipos de estudiantes a sentirse más apoyados y reconocidos."
   },
   "footer": {
     "builtBy": "Creado por Sospeter • Líder del Proyecto",
@@ -96,12 +96,12 @@
     "signIn": "Iniciar sesión",
     "privacy": "Política de Privacidad",
     "terms": "Términos Globales",
-    "copyright": "© 2026 FlowSpace. Todos los derechos reservados."
+    "copyright": "© 2026 Espeezy. Todos los derechos reservados."
   },
   "auth": {
     "loginTitle": "Bienvenido de vuelta",
-    "loginSubtitle": "Inicia sesión en tu cuenta de FlowSpace",
-    "signupTitle": "Únete a FlowSpace",
+    "loginSubtitle": "Inicia sesión en tu cuenta de Espeezy",
+    "signupTitle": "Únete a Espeezy",
     "signupSubtitle": "Empieza a colaborar con tu equipo",
     "email": "Correo electrónico",
     "password": "Contraseña",

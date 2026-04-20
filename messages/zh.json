@@ -1,6 +1,6 @@
 ﻿{
   "meta": {
-    "title": "FlowSpace - 团队项目简化平台",
+    "title": "Espeezy - 团队项目简化平台",
     "description": "学生们合作完成小组项目的最简单方式。"
   },
   "nav": {
@@ -16,16 +16,16 @@
     "badge": "专为学生打造",
     "headline1": "团队协作的",
     "headline2": "简单方式。",
-    "subtitle": "FlowSpace 帮助学生团队保持组织有序、共享功劳并按时完成任务 — 共同努力。",
+    "subtitle": "Espeezy 帮助学生团队保持组织有序、共享功劳并按时完成任务 — 共同努力。",
     "ctaStart": "免费开始",
     "ctaLearn": "了解更多"
   },
   "mission": {
-    "badge": "FlowSpace 使命",
+    "badge": "Espeezy 使命",
     "title": "对您付出的",
     "titleHighlight": "辛勤工作给予公正认可。",
     "goal1Title": "目标 01：可见性",
-    "goal1Desc": "FlowSpace 确保每个人的努力都得到认可。我们为每项任务保留清晰记录，让您获得应有的功劳。",
+    "goal1Desc": "Espeezy 确保每个人的努力都得到认可。我们为每项任务保留清晰记录，让您获得应有的功劳。",
     "goal2Title": "目标 02：团队合作",
     "goal2Desc": "我们的目标是让小组工作变得轻松无压力，让学生团结一致，在每个项目上取得成功。",
     "viewMission": "查看我们的使命"
@@ -51,7 +51,7 @@
   "pricing": {
     "badge": "选择您的方案",
     "title": "支持使命",
-    "subtitle": "您的支持让 FlowSpace 持续运行和改进。每个层级都为您的团队解锁强大工具。",
+    "subtitle": "您的支持让 Espeezy 持续运行和改进。每个层级都为您的团队解锁强大工具。",
     "proName": "专业版",
     "proPrice": "£4.99",
     "proPeriod": "/月",
@@ -79,7 +79,7 @@
     "badge": "技术常见问题",
     "title": "技术常见问题",
     "subtitle": "协议和使命声明。",
-    "q1": "我如何支持 FlowSpace？",
+    "q1": "我如何支持 Espeezy？",
     "a1": "您可以通过升级到专业版（£4.99/月）或高级版（£14.99/月）或以 £99 获取创始人终身访问来支持此项目。",
     "q2": "什么是「轨道网关」？",
     "a2": "这是我们的机构级安全门户，使用动态密钥路由和 TOTP 验证。",
@@ -87,8 +87,8 @@
     "a3": "我们使用多层加密和机构审计日志。",
     "q4": "我可以删除我的账户吗？",
     "a4": "当然可以。您可以随时一键永久删除您的账户和所有项目信息。",
-    "q5": "FlowSpace 背后是谁？",
-    "a5": "我创建了 FlowSpace，以帮助学生团队在小组工作中感到更多支持和认可。"
+    "q5": "Espeezy 背后是谁？",
+    "a5": "我创建了 Espeezy，以帮助学生团队在小组工作中感到更多支持和认可。"
   },
   "footer": {
     "builtBy": "由 Sospeter 构建 • 项目负责人",
@@ -96,12 +96,12 @@
     "signIn": "登录",
     "privacy": "隐私政策",
     "terms": "全球条款",
-    "copyright": "© 2026 FlowSpace. 保留所有权利。"
+    "copyright": "© 2026 Espeezy. 保留所有权利。"
   },
   "auth": {
     "loginTitle": "欢迎回来",
-    "loginSubtitle": "登录您的 FlowSpace 账户",
-    "signupTitle": "加入 FlowSpace",
+    "loginSubtitle": "登录您的 Espeezy 账户",
+    "signupTitle": "加入 Espeezy",
     "signupSubtitle": "开始与您的团队协作",
     "email": "电子邮件地址",
     "password": "密码",

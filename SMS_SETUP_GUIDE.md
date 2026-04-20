@@ -1,6 +1,6 @@
 ﻿# Supabase Phone Authentication Setup Guide
 
-This guide provides step-by-step instructions to resolve the "unsupported phone provider" error and successfully implement SMS-based login for FlowSpace.
+This guide provides step-by-step instructions to resolve the "unsupported phone provider" error and successfully implement SMS-based login for Espeezy.
 
 ## 1. Local Development: Use "Test Phone Numbers" (Zero Cost)
 Supabase provides a built-in way to test phone authentication without actually sending an SMS or paying for a provider like Twilio.

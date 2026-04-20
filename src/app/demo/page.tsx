@@ -55,7 +55,7 @@ export default function DemoPage() {
               <div style={{ padding: '6px', background: 'var(--brand)', borderRadius: '10px' }}>
                  <Activity size={20} color="white" />
               </div>
-              <span style={{ fontWeight: 900, fontSize: '1.25rem' }}>FlowSpace Demo</span>
+              <span style={{ fontWeight: 900, fontSize: '1.25rem' }}>Espeezy Demo</span>
            </Link>
            <Link href="/login" className="btn btn-primary btn-sm btn-inline" style={{ width: 'auto' }}>Create Account</Link>
         </div>
@@ -128,7 +128,7 @@ export default function DemoPage() {
            <div>
               <h3 style={{ margin: '0 0 0.5rem', fontWeight: 800 }}>About this Academic Sandbox</h3>
               <p style={{ color: 'var(--text-sub)', fontSize: '0.95rem', margin: 0, lineHeight: 1.6 }}>
-                FlowSpace is part of a 2026 research module focusing on <strong>Fair Group Work</strong>. 
+                Espeezy is part of a 2026 research module focusing on <strong>Fair Group Work</strong>. 
                 In this demo environment, database writes are disabled. Full features like real-time activity tracking, 
                 Score Extraction, and Work History are available in the authenticated platform.
               </p>

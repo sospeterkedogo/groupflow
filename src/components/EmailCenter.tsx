@@ -27,7 +27,7 @@ export default function EmailCenter({
       {
         id: '1',
         subject: '⚠️ Milestone Alert: Deadline Approaching',
-        from: 'FlowSpace AI Autopilot',
+        from: 'Espeezy AI Autopilot',
         content: `Greetings ${profile?.full_name || 'Collaborator'},\n\nOur temporal sensors indicate that 3 tasks in your group are due within the next 48 hours. Please sync with your team to ensure the velocity remains optimal.`,
         timestamp: new Date(Date.now() - 3600000).toISOString(),
         hasAttachment: false,
@@ -81,7 +81,7 @@ export default function EmailCenter({
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(22)
     doc.setFont("helvetica", "bold")
-    doc.text("FlowSpace AUDIT REPORT", 20, 25)
+    doc.text("Espeezy AUDIT REPORT", 20, 25)
     
     // Body Text
     doc.setTextColor(80, 80, 80)
@@ -135,9 +135,9 @@ export default function EmailCenter({
     // Footer
     doc.setFontSize(8)
     doc.setTextColor(150, 150, 150)
-    doc.text("This document is a verifiable project snapshot. Integrity verified by FlowSpace Protocol.", 20, 280)
+    doc.text("This document is a verifiable project snapshot. Integrity verified by Espeezy Protocol.", 20, 280)
     
-    doc.save(`FlowSpace_Audit_${new Date().toISOString().split('T')[0]}.pdf`)
+    doc.save(`Espeezy_Audit_${new Date().toISOString().split('T')[0]}.pdf`)
   }
 
   return (
@@ -220,7 +220,7 @@ export default function EmailCenter({
                           <FileText size={24} />
                        </div>
                        <div>
-                          <div style={{ fontWeight: 700 }}>FlowSpace_Audit_Report.pdf</div>
+                          <div style={{ fontWeight: 700 }}>Espeezy_Audit_Report.pdf</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-sub)' }}>Signed PDF Document • 1.2 MB</div>
                        </div>
                     </div>

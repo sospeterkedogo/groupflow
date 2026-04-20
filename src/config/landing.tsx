@@ -48,7 +48,7 @@ export const features = [
 
 export const faqs = [
   {
-    q: "How can I support FlowSpace?",
+    q: "How can I support Espeezy?",
     a: "You can support this project by upgrading to Pro (£4.99/mo) or Premium (£14.99/mo) or securing a Founder Lifetime Access for £99. Your contribution directly funds the high-performance infrastructure required for global academic excellence."
   },
   {
@@ -64,8 +64,8 @@ export const faqs = [
     a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
   },
   {
-    q: "Who is behind FlowSpace?",
-    a: "I created FlowSpace to help student teams feel more supported and recognized during group work."
+    q: "Who is behind Espeezy?",
+    a: "I created Espeezy to help student teams feel more supported and recognized during group work."
   }
 ]
 
@@ -112,7 +112,7 @@ export const navMenus = {
       {
         label: 'Our Project',
         items: [
-          { id: 'mission', title: 'Our Mission', desc: 'Learn why we started FlowSpace.', icon: <Fingerprint size={18} />, href: '/#mission' },
+          { id: 'mission', title: 'Our Mission', desc: 'Learn why we started Espeezy.', icon: <Fingerprint size={18} />, href: '/#mission' },
           { id: 'achievements', title: 'Community Impact', desc: 'See how we help students worldwide.', icon: <Award size={18} />, href: '/#faq' }
         ]
       },

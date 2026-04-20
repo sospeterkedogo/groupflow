@@ -63,7 +63,7 @@ export default function RoadmapPage() {
 
         <section style={{ padding: '6rem', background: '#111', borderRadius: '32px', border: '1px solid #222', textAlign: 'center' }}>
            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem' }}>Map your next project.</h2>
-           <p style={{ marginBottom: '3rem', color: '#9ca3af' }}>Join 1,200+ students using the FlowSpace Roadmap protocol.</p>
+           <p style={{ marginBottom: '3rem', color: '#9ca3af' }}>Join 1,200+ students using the Espeezy Roadmap protocol.</p>
            <Link href="/login?signup=true" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem 3rem', borderRadius: '12px', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
               Launch Roadmap <ArrowRight size={20} />
            </Link>

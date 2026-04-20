@@ -90,7 +90,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     if (!isSDKReady || !profile?.spotify_access_token) return
 
     const newPlayer = new window.Spotify.Player({
-      name: 'FlowSpace Web Player',
+      name: 'Espeezy Web Player',
       getOAuthToken: (cb: (token: string) => void) => {
         // Here we could handle token expiration check
         cb(profile.spotify_access_token!)

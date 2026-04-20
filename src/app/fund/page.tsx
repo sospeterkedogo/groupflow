@@ -25,7 +25,7 @@ const FUND_FEATURES = [
     need: '$14,000',
     tag: 'Integrations',
     why: 'Official LTI 1.3 certification costs $3,500 per platform. Dedicated integration engineers, sandbox environments, and compliance audits for each LMS (Canvas, Blackboard, Moodle, Nile) require real budget.',
-    deliverable: 'One-click grade sync, single sign-on from your institution, automatic assignment import into FlowSpace.',
+    deliverable: 'One-click grade sync, single sign-on from your institution, automatic assignment import into Espeezy.',
   },
   {
     icon: <Globe size={22} />,
@@ -57,7 +57,7 @@ const FUND_FEATURES = [
     need: '$35,000',
     tag: 'Mobile',
     why: 'Apple Developer Program ($99/yr), Google Play ($25 once), but more critically — native app development, code signing, TestFlight cycles, and App Store review processes require dedicated engineering sprints and device testing budgets.',
-    deliverable: 'Full FlowSpace experience on mobile with push notifications, offline mode, camera document capture, and real-time sync.',
+    deliverable: 'Full Espeezy experience on mobile with push notifications, offline mode, camera document capture, and real-time sync.',
   },
   {
     icon: <ShieldCheck size={22} />,
@@ -82,7 +82,7 @@ const PRESETS = [5, 10, 25, 50, 100, 250]
 
 // ─── Donor testimonials (placeholder) ────────────────────────────────────────
 const TESTIMONIALS = [
-  { name: 'Dr. Amara N., University of Lagos', text: 'FlowSpace is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade.' },
+  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade.' },
   { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
   { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
 ]
@@ -157,7 +157,7 @@ export default function FundPage() {
           <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Sparkles size={16} color="white" />
           </div>
-          <span style={{ fontWeight: 950, fontSize: '1rem', color: 'white', letterSpacing: '-0.03em' }}>FlowSpace</span>
+          <span style={{ fontWeight: 950, fontSize: '1rem', color: 'white', letterSpacing: '-0.03em' }}>Espeezy</span>
         </Link>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <Link href="/preregister" style={{ padding: '0.5rem 1.25rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.8rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>Pre-Register</Link>
@@ -182,7 +182,7 @@ export default function FundPage() {
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 1 }}
           style={{ color: 'rgba(255,255,255,0.5)', maxWidth: '620px', margin: '0 auto 3rem', fontSize: 'clamp(0.95rem, 2vw, 1.15rem)', lineHeight: 1.65 }}>
-          FlowSpace is free for every student — always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
+          Espeezy is free for every student — always. But building world-class infrastructure, AI features, and institutional integrations requires real resources. Every contribution, however small, directly ships features.
         </motion.p>
 
         {/* Stats */}
@@ -368,10 +368,10 @@ export default function FundPage() {
             <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, var(--brand) 0%, #059669 100%)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Sparkles size={13} color="white" />
             </div>
-            <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>FlowSpace</span>
+            <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>Espeezy</span>
           </Link>
           <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-            © {new Date().getFullYear()} FlowSpace · All rights reserved · <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</Link> · <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</Link>
+            © {new Date().getFullYear()} Espeezy · All rights reserved · <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</Link> · <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</Link>
           </p>
         </div>
       </footer>

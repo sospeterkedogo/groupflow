@@ -41,7 +41,7 @@ export async function GET(req: Request) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="FlowSpace-archive-${user.id}.json"`
+        'Content-Disposition': `attachment; filename="Espeezy-archive-${user.id}.json"`
       }
     })
 

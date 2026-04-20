@@ -25,7 +25,7 @@ export default function TeamsPage() {
             <span style={{ color: '#10b981' }}>for student teams.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', marginBottom: '4rem' }}>
-            FlowSpace eliminates the overhead of managing academic groups. We provide a single source of truth 
+            Espeezy eliminates the overhead of managing academic groups. We provide a single source of truth 
             for tasks, timelines, and communications, enabling teams to focus on research quality.
           </p>
         </section>

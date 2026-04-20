@@ -228,14 +228,14 @@ export default function TeamChat({ groupId, user }: { groupId: string, user: Pro
      
      setUploading(true)
      const fileName = `${groupId}/chat-${Date.now()}-${file.name}`
-     const { error: uploadError } = await supabase.storage.from('FlowSpace_assets').upload(fileName, file)
+     const { error: uploadError } = await supabase.storage.from('Espeezy_assets').upload(fileName, file)
      
      if (uploadError) {
         setUploading(false)
         return
      }
 
-     const { data: publicUrlData } = supabase.storage.from('FlowSpace_assets').getPublicUrl(fileName)
+     const { data: publicUrlData } = supabase.storage.from('Espeezy_assets').getPublicUrl(fileName)
      await handleSendMessage(
         null,
         '',

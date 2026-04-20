@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Create onboarding link
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://flowspace.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
     refresh_url: `${appUrl}/dashboard/hustle/connect?refresh=1`,

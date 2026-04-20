@@ -1,5 +1,5 @@
 ﻿# ──────────────────────────────────────────────────────────────────────────────
-# flowspace.app — Cloud Dev Container
+# espeezy.com — Cloud Dev Container
 # Next.js 14 · Node 20 Alpine · Hot Reload via volume mount
 # ──────────────────────────────────────────────────────────────────────────────
 FROM node:20-alpine AS dev

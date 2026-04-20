@@ -18,7 +18,7 @@ INSERT INTO public.app_config (key, value, description) VALUES
     ('launch_message', 'Something big is coming. Join 5 million students shaping the future of collaborative education.', 'Hero message shown on the pre-registration page'),
     ('preregister_goal', '5000000', 'Pre-registration target count'),
     ('preregister_open', 'true', 'Whether pre-registration is currently accepting signups'),
-    ('brand_name', 'FlowSpace', 'Current platform brand name'),
+    ('brand_name', 'Espeezy', 'Current platform brand name'),
     ('platform_version', '2.0.0', 'Next major version to be released')
 ON CONFLICT (key) DO NOTHING;
 

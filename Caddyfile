@@ -1,8 +1,8 @@
 ﻿# ──────────────────────────────────────────────────────────────────────────────
-# flowspace.app — Caddyfile
+# espeezy.com — Caddyfile
 #
 # Set env var CADDY_DOMAIN before starting:
-#   export CADDY_DOMAIN=dev.flowspace.app
+#   export CADDY_DOMAIN=dev.espeezy.com
 #   docker compose -f docker-compose.dev.yml up -d
 #
 # For a raw IP (no domain), set CADDY_DOMAIN to your VPS IP.

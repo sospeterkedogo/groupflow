@@ -1,5 +1,5 @@
 ﻿# COMPREHENSIVE PRODUCT ROADMAP
-## FlowSpace Platform — Full Build-Out Plan
+## Espeezy Platform — Full Build-Out Plan
 ### Two-Party Action Plan: Copilot (AI Engine) + Lead Engineer (Orchestrator)
 
 ---

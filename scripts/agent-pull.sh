@@ -1,19 +1,19 @@
 ﻿#!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
-# flowspace.app — Agent Sync Script
+# espeezy.com — Agent Sync Script
 #
 # Agents (GitHub Copilot, Claude, etc.) SSH in and run this script to pull
 # the latest code. Next.js hot-reload picks up changes instantly via the
 # volume mount — no container restart needed.
 #
 # Usage:
-#   ssh deploy@YOUR_VPS_IP "bash /opt/flowspace/scripts/agent-pull.sh"
+#   ssh deploy@YOUR_VPS_IP "bash /opt/espeezy/scripts/agent-pull.sh"
 #
 #   Or from inside the VPS:
 #   cs-pull  (alias set up by vps-bootstrap.sh)
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
-APP_DIR="/opt/flowspace"
+APP_DIR="/opt/espeezy"
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 info() { echo -e "${GREEN}[agent-sync]${NC} $*"; }
@@ -50,13 +50,13 @@ fi
 # Check if node_modules is stale (package.json changed)
 if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.*json"; then
   warn "package.json changed — reinstalling deps inside container..."
-  docker exec flowspace_app npm ci --prefer-offline
+  docker exec espeezy_app npm ci --prefer-offline
   info "Dependencies updated."
 fi
 
 # Hot reload is automatic via WATCHPACK_POLLING — no restart needed.
 # But if the app container crashed, bring it back up.
-RUNNING=$(docker inspect --format='{{.State.Running}}' flowspace_app 2>/dev/null || echo "false")
+RUNNING=$(docker inspect --format='{{.State.Running}}' espeezy_app 2>/dev/null || echo "false")
 if [ "$RUNNING" != "true" ]; then
   warn "App container is not running — restarting stack..."
   docker compose -f "$APP_DIR/docker-compose.dev.yml" up -d

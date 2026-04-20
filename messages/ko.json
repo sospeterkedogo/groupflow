@@ -1,6 +1,6 @@
 ﻿{
   "meta": {
-    "title": "FlowSpace - 팀 프로젝트를 간단하게",
+    "title": "Espeezy - 팀 프로젝트를 간단하게",
     "description": "학생들이 그룹 프로젝트에서 함께 협력하는 가장 쉬운 방법."
   },
   "nav": {
@@ -16,16 +16,16 @@
     "badge": "학생을 위해 만들어진",
     "headline1": "팀으로 일하는",
     "headline2": "간단한 방법.",
-    "subtitle": "FlowSpace는 학생 팀이 체계적으로 유지하고, 공로를 공유하고, 마감일을 지킬 수 있도록 돕습니다 — 함께.",
+    "subtitle": "Espeezy는 학생 팀이 체계적으로 유지하고, 공로를 공유하고, 마감일을 지킬 수 있도록 돕습니다 — 함께.",
     "ctaStart": "무료로 시작하기",
     "ctaLearn": "더 알아보기"
   },
   "mission": {
-    "badge": "FlowSpace 미션",
+    "badge": "Espeezy 미션",
     "title": "당신의",
     "titleHighlight": "노력에 대한 공정한 인정.",
     "goal1Title": "목표 01: 가시성",
-    "goal1Desc": "FlowSpace는 모든 사람의 노력이 인정받도록 합니다. 당신이 받아야 할 공로를 얻을 수 있도록 모든 작업의 명확한 기록을 유지합니다.",
+    "goal1Desc": "Espeezy는 모든 사람의 노력이 인정받도록 합니다. 당신이 받아야 할 공로를 얻을 수 있도록 모든 작업의 명확한 기록을 유지합니다.",
     "goal2Title": "목표 02: 팀원",
     "goal2Desc": "그룹 작업을 쉽고 스트레스 없이 만들고, 학생들이 모든 프로젝트에서 성공할 수 있도록 함께하는 것이 목표입니다.",
     "viewMission": "미션 보기"
@@ -51,7 +51,7 @@
   "pricing": {
     "badge": "플랜 선택",
     "title": "미션 지원",
-    "subtitle": "당신의 지원이 FlowSpace를 운영하고 개선하는 데 도움이 됩니다. 각 티어는 팀을 위한 강력한 도구를 잠금 해제합니다.",
+    "subtitle": "당신의 지원이 Espeezy를 운영하고 개선하는 데 도움이 됩니다. 각 티어는 팀을 위한 강력한 도구를 잠금 해제합니다.",
     "proName": "프로",
     "proPrice": "£4.99",
     "proPeriod": "/월",
@@ -79,7 +79,7 @@
     "badge": "기술 FAQ",
     "title": "기술 FAQ",
     "subtitle": "프로토콜과 미션 성명.",
-    "q1": "FlowSpace을 어떻게 지원할 수 있나요?",
+    "q1": "Espeezy을 어떻게 지원할 수 있나요?",
     "a1": "프로(£4.99/월) 또는 프리미엄(£14.99/월)으로 업그레이드하거나 £99에 창립자 평생 액세스를 확보하여 이 프로젝트를 지원할 수 있습니다.",
     "q2": "'Orbit Gateway'는 무엇인가요?",
     "a2": "동적 비밀 경로와 TOTP 인증을 사용하는 기관급 보안 포털입니다.",
@@ -87,8 +87,8 @@
     "a3": "다층 암호화와 기관 감사 로그를 사용합니다.",
     "q4": "계정을 삭제할 수 있나요?",
     "a4": "물론입니다. 원할 때 언제든지 한 번의 클릭으로 계정과 모든 프로젝트 정보를 영구적으로 삭제할 수 있습니다.",
-    "q5": "FlowSpace 뒤에는 누가 있나요?",
-    "a5": "그룹 작업 중에 학생 팀이 더 많은 지원과 인정을 받을 수 있도록 FlowSpace을 만들었습니다."
+    "q5": "Espeezy 뒤에는 누가 있나요?",
+    "a5": "그룹 작업 중에 학생 팀이 더 많은 지원과 인정을 받을 수 있도록 Espeezy을 만들었습니다."
   },
   "footer": {
     "builtBy": "Sospeter 제작 • 프로젝트 리드",
@@ -96,12 +96,12 @@
     "signIn": "로그인",
     "privacy": "개인정보 처리방침",
     "terms": "글로벌 이용약관",
-    "copyright": "© 2026 FlowSpace. 모든 권리 보유."
+    "copyright": "© 2026 Espeezy. 모든 권리 보유."
   },
   "auth": {
     "loginTitle": "다시 오신 것을 환영합니다",
-    "loginSubtitle": "FlowSpace 계정에 로그인하세요",
-    "signupTitle": "FlowSpace에 참가",
+    "loginSubtitle": "Espeezy 계정에 로그인하세요",
+    "signupTitle": "Espeezy에 참가",
     "signupSubtitle": "팀과의 협업을 시작하세요",
     "email": "이메일 주소",
     "password": "비밀번호",

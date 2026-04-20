@@ -457,7 +457,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Brand Name</label>
-              <input type="text" value={launchConfig.brand_name} placeholder="FlowSpace"
+              <input type="text" value={launchConfig.brand_name} placeholder="Espeezy"
                 onChange={e => setLaunchConfig(p => ({ ...p, brand_name: e.target.value }))}
                 style={{ width: '100%', padding: '0.875rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }} />
             </div>

@@ -18,9 +18,9 @@ const docsContent: Record<string, { title: string, icon: any, content: string, e
     eli12: "It's like setting up a new base in a game. You create your character (profile), find your team, and start your first mission!"
   },
   'installation': {
-    title: 'Setting up FlowSpace',
+    title: 'Setting up Espeezy',
     icon: <Box size={40} />,
-    content: 'How to deploy the FlowSpace client for your team.',
+    content: 'How to deploy the Espeezy client for your team.',
     eli12: "Just like installing a new game on your phone, you just need to sign in and you are ready to go. No complicated wires!"
   },
   'features/kanban': {
@@ -86,7 +86,7 @@ const docsContent: Record<string, { title: string, icon: any, content: string, e
   'impact': {
     title: 'Impact Stats',
     icon: <BarChart size={40} />,
-    content: 'Measuring global contribution metrics of the FlowSpace community.',
+    content: 'Measuring global contribution metrics of the Espeezy community.',
     eli12: "A scoreboard for the whole world! It shows how many thousands of students are working together right now."
   }
 }

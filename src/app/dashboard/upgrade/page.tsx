@@ -16,7 +16,7 @@ export default function UpgradePage() {
             Support this project to <span style={{ color: 'var(--brand)' }}>reach more schools</span>
           </h1>
           <p style={{ maxWidth: '680px', color: 'rgba(255,255,255,0.8)', fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.4 }}>
-            I am building FlowSpace to solve real operational problems for student teams. Your upgrade directly funds infrastructure and new feature development.
+            I am building Espeezy to solve real operational problems for student teams. Your upgrade directly funds infrastructure and new feature development.
           </p>
         </div>
 

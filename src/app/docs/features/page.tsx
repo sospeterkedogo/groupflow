@@ -43,7 +43,7 @@ export default function FeaturesDocs() {
     {
       icon: <MessageSquare size={24} />,
       title: 'Team Chat',
-      eli12: "Instant messaging built right into your project. You can talk to your team without ever leaving FlowSpace."
+      eli12: "Instant messaging built right into your project. You can talk to your team without ever leaving Espeezy."
     },
     {
       icon: <Zap size={24} />,
@@ -71,10 +71,10 @@ export default function FeaturesDocs() {
     <div className="docs-content">
       <div style={{ marginBottom: '4rem' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: '1.5rem' }}>
-          All FlowSpace Features
+          All Espeezy Features
         </h1>
         <p style={{ fontSize: '1.1rem', color: '#9ca3af', lineHeight: 1.6 }}>
-          Explore every capability of the FlowSpace ecosystem. We've explained everything in simple terms 
+          Explore every capability of the Espeezy ecosystem. We've explained everything in simple terms 
           to make sure your whole team can get started quickly.
         </p>
       </div>

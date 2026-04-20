@@ -39,7 +39,7 @@ export async function createCheckoutSession({
         price_data: {
           currency: 'usd',
           product_data: {
-            name: metadata.product_name || 'FlowSpace Flux Provision',
+            name: metadata.product_name || 'Espeezy Flux Provision',
             description: metadata.description || 'Academic Resource Exchange',
           },
           unit_amount: amountToCharge,

@@ -55,14 +55,14 @@ export default function Home() {
              >✕</button>
              
              <div style={{ display: 'inline-flex', padding: '6px 14px', background: 'rgba(var(--brand-rgb), 0.1)', color: 'var(--brand)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 950, marginBottom: '1.25rem', letterSpacing: '2px', border: '1px solid rgba(var(--brand-rgb), 0.2)' }}>
-                THE FLOWSPACE MISSION
+                THE ESPEEZY MISSION
              </div>
 
              <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '-0.04em', color: 'white', lineHeight: 1.1 }}>Fair recognition for your <br /><span style={{ color: 'var(--brand)' }}>Hard Work.</span></h2>
                           <div style={{ display: 'grid', gap: '2rem', fontSize: '1rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.6)' }}>
                 <div>
                    <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal 01: Visibility</strong>
-                   FlowSpace makes sure everyone's hard work counts. We keep a clear record of every task so you get the credit you deserve.
+                   Espeezy makes sure everyone's hard work counts. We keep a clear record of every task so you get the credit you deserve.
                 </div>
                 <div>
                    <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal 02: Teammates</strong>
@@ -101,7 +101,7 @@ export default function Home() {
            { icon: <LayoutGrid size={20} />, label: 'Kanban', href: '/product/intelligence' },
            { icon: <Activity size={20} />, label: 'Analytics', href: '/product/roadmap' },
            { icon: <Users size={20} />, label: 'Network', href: '/solutions/teams' },
-           { icon: <Code size={20} />, label: 'GitHub', href: 'https://github.com/sospeterkedogo/flowspace' }
+           { icon: <Code size={20} />, label: 'GitHub', href: 'https://github.com/sospeterkedogo/espeezy' }
          ].map((tool, i) => (
            <Link 
              key={i}

@@ -2,7 +2,7 @@
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'FlowSpace Elite Exchange',
+    name: 'Espeezy Elite Exchange',
     short_name: 'Elite Exchange',
     description: 'Protocol-Driven Academic Collaboration Platform',
     start_url: '/',

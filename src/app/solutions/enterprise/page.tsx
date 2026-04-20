@@ -25,7 +25,7 @@ export default function EnterprisePage() {
             <span style={{ color: '#10b981' }}>at scale.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', marginBottom: '4rem' }}>
-            FlowSpace Enterprise provides departments and universities with the administrative visibility and security 
+            Espeezy Enterprise provides departments and universities with the administrative visibility and security 
             necessary to manage thousands of concurrent academic collaborations.
           </p>
         </section>
