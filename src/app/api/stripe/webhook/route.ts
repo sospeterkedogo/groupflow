@@ -1,7 +1,8 @@
-import Stripe from 'stripe'
+﻿import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
 import { start } from 'workflow/api'
 import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
+import { createAdminClient } from '@/utils/supabase/server'
 
 export const runtime = 'nodejs'
 
@@ -22,6 +23,15 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (error: any) {
     return new NextResponse(`Stripe webhook verification failed: ${error.message}`, { status: 400 })
+  }
+
+  // Handle donation separately — does not go through payment workflow
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session
+    if (session.metadata?.type === 'donation') {
+      await handleDonationWebhook(session)
+      return new NextResponse('Donation recorded', { status: 200 })
+    }
   }
 
   const payload = buildWebhookPayload(event)
@@ -47,7 +57,7 @@ function buildWebhookPayload(event: Stripe.Event) {
       stripeSubscriptionId: session.subscription?.toString() ?? null,
       userId: session.metadata?.user_id ?? session.client_reference_id ?? null,
       plan: session.metadata?.plan ?? 'pro',
-      productLabel: session.metadata?.product_label ?? 'GroupFlow2026 pre-registration',
+      productLabel: session.metadata?.product_label ?? 'FlowSpace pre-registration',
       amountTotal: session.amount_total ?? null,
       currency: session.currency ?? null,
       mode: session.mode ?? 'payment',
@@ -75,4 +85,27 @@ function buildWebhookPayload(event: Stripe.Event) {
   }
 
   return null
+}
+
+async function handleDonationWebhook(session: Stripe.Checkout.Session) {
+  try {
+    const supabase = await createAdminClient()
+    const meta = session.metadata ?? {}
+    await supabase.from('donations').upsert({
+      stripe_session_id: session.id,
+      stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
+      amount_cents: session.amount_total ?? 0,
+      currency: session.currency ?? 'usd',
+      donor_email: meta.is_anonymous === 'true' ? null : (meta.donor_email || session.customer_email || null),
+      donor_name: meta.is_anonymous === 'true' ? null : (meta.donor_name || null),
+      message: meta.message || null,
+      feature_tag: meta.feature_tag || 'general',
+      is_anonymous: meta.is_anonymous === 'true',
+      status: session.payment_status === 'paid' ? 'completed' : 'pending',
+      completed_at: session.payment_status === 'paid' ? new Date().toISOString() : null,
+      metadata: meta,
+    }, { onConflict: 'stripe_session_id' })
+  } catch (err) {
+    console.error('[webhook] donation upsert error:', err)
+  }
 }

@@ -13,7 +13,7 @@ interface LandingFAQProps {
 
 export default function LandingFAQ({ faqs }: LandingFAQProps) {
   return (
-    <section style={{ padding: '10rem 2rem', background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+    <section id="faq" style={{ padding: '10rem 2rem', background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
              <h2 style={{ fontSize: '2rem', fontWeight: 700, color: '#f3f4f6', letterSpacing: '-0.02em' }}>Technical FAQ</h2>

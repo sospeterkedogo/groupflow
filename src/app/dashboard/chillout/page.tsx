@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -49,7 +49,7 @@ const TOPICS = [
   },
   { 
     id: 'institutional', 
-    name: 'GroupFlow2026 Protocols', 
+    name: 'FlowSpace Protocols', 
     icon: Terminal, 
     color: 'var(--accent)',
     description: "Deep dive into the app's advanced governance."

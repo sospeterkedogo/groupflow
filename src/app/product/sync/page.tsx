@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ export default function SyncPage() {
             <span style={{ color: '#10b981' }}>collaborative state.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', margin: '0 auto 4rem' }}>
-            GroupFlow's sync engine utilizes a peer-to-peer relay protocol to ensure that every team action—from a chat message 
+            FlowSpace's sync engine utilizes a peer-to-peer relay protocol to ensure that every team action—from a chat message 
             to a presence update—is propagated across your whole team in milliseconds.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>

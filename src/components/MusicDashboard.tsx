@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { Search, Play, Plus, Music, Disc } from 'lucide-react'
@@ -89,7 +89,7 @@ export default function MusicDashboard() {
         }}>
           <Disc size={24} color="#fbbf24" />
           <div style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700 }}>
-            Since you're on a Spotify Free account, playback will open in your external Spotify app rather than inside GroupFlow.
+            Since you're on a Spotify Free account, playback will open in your external Spotify app rather than inside FlowSpace.
           </div>
         </div>
       )}

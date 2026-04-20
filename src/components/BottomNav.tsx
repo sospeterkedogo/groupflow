@@ -9,7 +9,9 @@ import {
   UserCircle, 
   Settings,
   Bell,
-  TrendingUp
+  TrendingUp,
+  Rss,
+  DollarSign
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
@@ -23,10 +25,10 @@ export default function BottomNav() {
 
   const navLinks = [
     { name: 'Board', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Inbox', path: '/dashboard/notifications', icon: Bell },
+    { name: 'Feed', path: '/feed', icon: Rss },
+    { name: 'Hustle', path: '/dashboard/hustle', icon: DollarSign },
     { name: 'Network', path: '/dashboard/network', icon: Users },
-    { name: 'Share', path: '/dashboard/marketplace', icon: TrendingUp },
-    { name: 'Admin', path: '/dashboard/upgrade', icon: Settings },
+    { name: 'Inbox', path: '/dashboard/notifications', icon: Bell },
   ]
 
   const handleNav = (path: string, name: string) => {

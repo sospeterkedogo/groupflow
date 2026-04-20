@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ export default function ScholarsPage() {
             <span style={{ color: '#10b981' }}>individual researcher.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', marginBottom: '4rem' }}>
-            GroupFlow provides independent scholars with the architectural framework needed to manage complex 
+            FlowSpace provides independent scholars with the architectural framework needed to manage complex 
             academic outputs with professional-grade verification protocols.
           </p>
         </section>

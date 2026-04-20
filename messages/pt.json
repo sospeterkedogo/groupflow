@@ -1,6 +1,6 @@
-{
+﻿{
   "meta": {
-    "title": "GroupFlow - Projetos em Equipe Simplificados",
+    "title": "FlowSpace - Projetos em Equipe Simplificados",
     "description": "A maneira mais fácil para estudantes colaborarem em projetos em grupo."
   },
   "nav": {
@@ -16,16 +16,16 @@
     "badge": "Feito para Estudantes",
     "headline1": "A maneira simples de",
     "headline2": "trabalhar em equipe.",
-    "subtitle": "GroupFlow ajuda equipes de estudantes a se manterem organizadas, compartilhar créditos e cumprir prazos — juntos.",
+    "subtitle": "FlowSpace ajuda equipes de estudantes a se manterem organizadas, compartilhar créditos e cumprir prazos — juntos.",
     "ctaStart": "Começar Gratuitamente",
     "ctaLearn": "Saiba Mais"
   },
   "mission": {
-    "badge": "A Missão GroupFlow",
+    "badge": "A Missão FlowSpace",
     "title": "Reconhecimento justo pelo seu",
     "titleHighlight": "Trabalho Duro.",
     "goal1Title": "Meta 01: Visibilidade",
-    "goal1Desc": "GroupFlow garante que o esforço de todos seja reconhecido. Mantemos um registro claro de cada tarefa para que você receba o crédito que merece.",
+    "goal1Desc": "FlowSpace garante que o esforço de todos seja reconhecido. Mantemos um registro claro de cada tarefa para que você receba o crédito que merece.",
     "goal2Title": "Meta 02: Companheiros de Equipe",
     "goal2Desc": "Nosso objetivo é tornar o trabalho em grupo fácil e sem estresse, unindo estudantes para ter sucesso em cada projeto.",
     "viewMission": "Ver Nossa Missão"
@@ -51,7 +51,7 @@
   "pricing": {
     "badge": "Escolha seu plano",
     "title": "Apoie a Missão",
-    "subtitle": "Seu apoio mantém o GroupFlow funcionando e melhorando. Cada nível desbloqueia ferramentas poderosas.",
+    "subtitle": "Seu apoio mantém o FlowSpace funcionando e melhorando. Cada nível desbloqueia ferramentas poderosas.",
     "proName": "Pro",
     "proPrice": "£4.99",
     "proPeriod": "/mês",
@@ -79,7 +79,7 @@
     "badge": "FAQ Técnico",
     "title": "FAQ Técnico",
     "subtitle": "Protocolos e declarações de missão.",
-    "q1": "Como posso apoiar o GroupFlow2026?",
+    "q1": "Como posso apoiar o FlowSpace?",
     "a1": "Você pode apoiar este projeto fazendo upgrade para Pro (£4.99/mês) ou Premium (£14.99/mês) ou garantindo um Acesso Fundador Vitalício por £99.",
     "q2": "O que é o 'Orbit Gateway'?",
     "a2": "É nosso portal de segurança institucional que utiliza rotas secretas dinâmicas e verificação TOTP.",
@@ -87,8 +87,8 @@
     "a3": "Utilizamos criptografia multicamada e logs de auditoria institucional.",
     "q4": "Posso excluir minha conta?",
     "a4": "Claro. Você pode excluir permanentemente sua conta com um único clique quando quiser.",
-    "q5": "Quem está por trás do GroupFlow2026?",
-    "a5": "Criei o GroupFlow2026 para ajudar equipes de estudantes a se sentirem mais apoiadas e reconhecidas."
+    "q5": "Quem está por trás do FlowSpace?",
+    "a5": "Criei o FlowSpace para ajudar equipes de estudantes a se sentirem mais apoiadas e reconhecidas."
   },
   "footer": {
     "builtBy": "Criado por Sospeter • Líder do Projeto",
@@ -96,12 +96,12 @@
     "signIn": "Entrar",
     "privacy": "Política de Privacidade",
     "terms": "Termos Globais",
-    "copyright": "© 2026 GroupFlow. Todos os direitos reservados."
+    "copyright": "© 2026 FlowSpace. Todos os direitos reservados."
   },
   "auth": {
     "loginTitle": "Bem-vindo de volta",
-    "loginSubtitle": "Entre na sua conta GroupFlow",
-    "signupTitle": "Junte-se ao GroupFlow",
+    "loginSubtitle": "Entre na sua conta FlowSpace",
+    "signupTitle": "Junte-se ao FlowSpace",
     "signupSubtitle": "Comece a colaborar com sua equipe",
     "email": "Endereço de e-mail",
     "password": "Senha",

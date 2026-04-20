@@ -1,8 +1,8 @@
-import type { MetadataRoute } from 'next'
+﻿import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'GroupFlow Elite Exchange',
+    name: 'FlowSpace Elite Exchange',
     short_name: 'Elite Exchange',
     description: 'Protocol-Driven Academic Collaboration Platform',
     start_url: '/',

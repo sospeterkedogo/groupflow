@@ -45,7 +45,7 @@ export function isValidLocale(code: string): code is LocaleCode {
 }
 
 export function isRTL(code: string): boolean {
-  return rtlLocales.includes(code as LocaleCode)
+  return (rtlLocales as string[]).includes(code)
 }
 
 export function getLocaleInfo(code: string) {

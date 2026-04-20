@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -6,11 +6,10 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { 
   X, UserCircle, ShieldCheck, Mail, Target, Award, Hash, 
   GraduationCap, Calendar, UserPlus, Check, MessageSquare, 
-  Video, Info, Clock, ChevronLeft, ExternalLink, Activity
+  Video, Info, Clock, ChevronLeft, ExternalLink, Activity, Terminal
 } from 'lucide-react'
 import Link from 'next/link'
 import { Profile } from '@/types/database'
-import ChatRoom from '@/components/ChatRoom'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 export default function StudentProfilePage() {
@@ -56,17 +55,19 @@ export default function StudentProfilePage() {
     if (profile) {
       setMember(profile as any)
       if (user) {
-        const { data: conn } = await supabase
+        // Check if there is ANY accepted connection or a pending one sent by me
+        const { data: conns } = await supabase
           .from('user_connections')
-          .select('status')
-          .eq('user_id', user.id)
-          .eq('target_id', studentId)
-          .single()
+          .select('id, user_id, target_id, status')
+          .or(`and(user_id.eq.${user.id},target_id.eq.${studentId}),and(user_id.eq.${studentId},target_id.eq.${user.id})`)
 
-        if (conn?.status === 'pending') {
-          setConnectionStatus('pending')
-        } else if (conn && (conn.status === 'connected' || conn.status === 'accepted')) {
+        const connection = conns?.find(c => c.status === 'connected' || c.status === 'accepted')
+        const pendingSentByMe = conns?.find(c => c.user_id === user.id && c.status === 'pending')
+
+        if (connection) {
           setConnectionStatus('connected')
+        } else if (pendingSentByMe) {
+          setConnectionStatus('pending')
         } else {
           setConnectionStatus('idle')
         }
@@ -80,7 +81,6 @@ export default function StudentProfilePage() {
     if (!me || !member || connectionStatus !== 'idle') return
 
     await withLoading(async () => {
-      // 1. Create a pending connection row
       const { error: connError } = await supabase
         .from('user_connections')
         .upsert({ 
@@ -89,12 +89,8 @@ export default function StudentProfilePage() {
           status: 'pending' 
         }, { onConflict: 'user_id,target_id' })
 
-      if (connError) {
-        console.error('Connection Request Failure:', connError)
-        throw connError
-      }
+      if (connError) throw connError
 
-      // 2. Insert notification
       await supabase.from('notifications').insert({
         user_id: member.id,
         type: 'connection_request',
@@ -106,8 +102,8 @@ export default function StudentProfilePage() {
       setConnectionStatus('pending')
       
       showConfirmation({
-        title: 'Request Transmitted',
-        message: `Your connection request has been securely sent to ${member.full_name?.split(' ')[0]}. They will be notified immediately.`,
+        title: 'Request Sent',
+        message: `Your connection request has been sent to ${member.full_name?.split(' ')[0]}.`,
         type: 'success',
         onConfirm: () => {}
       })
@@ -117,7 +113,7 @@ export default function StudentProfilePage() {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <div className="spinner" style={{ border: '3px solid var(--border)', borderTop: '3px solid var(--brand)', borderRadius: '50%', width: '32px', height: '32px', animation: 'spin 1s linear infinite' }} />
+        <div className="spinner-mini" style={{ width: '32px', height: '32px', borderTopColor: 'var(--brand)' }} />
       </div>
     )
   }
@@ -125,223 +121,173 @@ export default function StudentProfilePage() {
   if (!member) {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-        <h2 style={{ fontWeight: 800 }}>Student Not Found</h2>
-        <Link href="/dashboard/network" className="btn btn-secondary" style={{ width: 'auto', marginTop: '1rem' }}>Back to Network</Link>
+        <h2 style={{ fontWeight: 800 }}>Scholar Not Identified</h2>
+        <Link href="/dashboard/network" className="btn btn-secondary btn-inline" style={{ marginTop: '1rem' }}>Back to Network</Link>
       </div>
     )
   }
 
-  const sortedRoomId = [me?.id, member.id].sort().join('_')
-
   return (
-    <div style={{ maxWidth: '100%', width: '1000px', margin: '0 auto', padding: '0 var(--p-safe) 5rem', animation: 'fadeIn 0.5s ease-out' }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 var(--p-safe) 5rem', animation: 'fadeIn 0.5s ease-out' }}>
       
-      {/* Simplified Mobile Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', marginTop: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', marginTop: '1rem' }}>
         <button 
           onClick={() => router.back()}
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '0.7rem', cursor: 'pointer', color: 'var(--text-main)', boxShadow: 'var(--shadow-sm)' }}
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-main)' }}
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={20} />
         </button>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 950, margin: 0, letterSpacing: '-0.03em' }}>
-            {member.full_name?.split(' ')[0]}'s Profile
-          </h1>
-        </div>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0 }}>Scholar Transcript</h1>
       </div>
 
-      <div className="profile-main-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 340px) 1fr', gap: '2rem' }}>
+      <div className="profile-main-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: '1.5rem' }}>
         
-        {/* Profile Essence Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ background: 'var(--surface)', borderRadius: '32px', border: '1px solid var(--border)', padding: '2rem', textAlign: 'center', boxShadow: 'var(--shadow-lg)', position: 'relative', overflow: 'hidden' }}>
-            {/* Subtle Gradient Background */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(180deg, rgba(var(--brand-rgb), 0.05) 0%, transparent 100%)' }} />
-            
-            <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0.5rem auto 1.5rem' }}>
-              <div style={{ width: '100%', height: '100%', borderRadius: '42px', background: 'var(--bg-sub)', border: '4px solid var(--surface)', boxShadow: 'var(--shadow-xl)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.5rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 1rem' }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-sub)', border: '3px solid var(--surface)', boxShadow: 'var(--shadow-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {member.avatar_url ? (
                   <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <UserCircle size={80} color="var(--text-sub)" />
+                  <UserCircle size={60} color="var(--text-sub)" />
                 )}
               </div>
-              <div style={{ position: 'absolute', bottom: '8px', right: '8px', width: '22px', height: '22px', borderRadius: '50%', background: 'var(--success)', border: '4px solid var(--surface)', boxShadow: 'var(--shadow-sm)' }} />
+              <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '14px', height: '14px', borderRadius: '50%', background: 'var(--success)', border: '2px solid var(--surface)' }} />
             </div>
 
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 950, marginBottom: '0.25rem', letterSpacing: '-0.02em' }}>{member.full_name}</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '0.25rem' }}>{member.full_name}</h2>
             {member.tagline && (
-              <div style={{ fontSize: '0.9rem', color: 'var(--brand)', fontWeight: 800, marginBottom: '0.5rem', fontStyle: 'italic' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--brand)', fontWeight: 800, fontStyle: 'italic', marginBottom: '1rem' }}>
                 "{member.tagline}"
-              </div>
+              </p>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--brand)' }}>
-                 <ShieldCheck size={16} />
-                 <span style={{ fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{member.rank || 'Active Student'}</span>
-              </div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-sub)' }}>
-                Member since {new Date(member.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 800 }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: connectionStatus === 'connected' ? 'var(--success)' : 'var(--text-sub)', boxShadow: connectionStatus === 'connected' ? '0 0 8px var(--success)' : 'none' }} />
-                <span style={{ color: connectionStatus === 'connected' ? 'var(--success)' : 'var(--text-sub)' }}>
-                  {connectionStatus === 'connected' ? 'Connection established' : `Last seen ${formatRelativeTime(member.last_seen || null)}`}
-                </span>
-              </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '1.25rem' }}>
+               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: 'var(--text-sub)', fontSize: '0.75rem', fontWeight: 700 }}>
+                  <ShieldCheck size={14} color="var(--brand)" /> 
+                  {member.rank || 'Scholar'}
+               </div>
+               <div style={{ color: 'var(--text-sub)', fontSize: '0.7rem', fontWeight: 600 }}>
+                 Last active {formatRelativeTime(member.last_seen || null)}
+               </div>
             </div>
 
             <button 
               onClick={handleConnect}
               disabled={connectionStatus !== 'idle'}
-              style={{ 
-                width: '100%', padding: '1.1rem', borderRadius: '18px', border: 'none', 
-                background: connectionStatus === 'idle' ? 'var(--brand)' : 'var(--bg-sub)', 
-                color: connectionStatus === 'idle' ? 'white' : 'var(--text-sub)',
-                fontWeight: 900, fontSize: '1rem', cursor: connectionStatus === 'idle' ? 'pointer' : 'default',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-                boxShadow: connectionStatus === 'idle' ? '0 10px 25px rgba(var(--brand-rgb), 0.25)' : 'none',
-                transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)'
-              }}
-              className="action-button-main"
+              className="btn btn-primary"
+              style={{ fontSize: '0.9rem', padding: '0.75rem' }}
             >
-              {connectionStatus === 'connected' ? <Check size={20} /> : connectionStatus === 'pending' ? <Clock size={20} /> : <UserPlus size={20} />}
-              {connectionStatus === 'connected' ? 'Connection Live' : connectionStatus === 'pending' ? 'Awaiting approval' : 'Add to Network'}
+              {connectionStatus === 'connected' ? <Check size={18} /> : connectionStatus === 'pending' ? <Clock size={18} /> : <UserPlus size={18} />}
+              {connectionStatus === 'connected' ? 'Connected' : connectionStatus === 'pending' ? 'Pending' : 'Connect'}
             </button>
           </div>
 
-          {/* Refactored 3-Tile Action Matrix */}
-          <div className="action-matrix-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
              {[
-               { id: 'info', icon: Target, label: 'Stats', color: 'var(--brand)' },
-               { id: 'chat', icon: MessageSquare, label: 'Message', color: 'var(--success)', disabled: connectionStatus !== 'connected', nav: true },
-               { id: 'accomplishments', icon: Award, label: 'Badges', color: '#f59e0b' }
+               { id: 'info', icon: Info, label: 'Stats' },
+               { id: 'chat', icon: MessageSquare, label: 'Chat', disabled: connectionStatus !== 'connected' },
+               { id: 'accomplishments', icon: Award, label: 'Badges' }
              ].map((item) => (
                <button
                  key={item.id}
-                 onClick={async () => {
+                 onClick={() => {
                    if (item.disabled) return;
-                   if (item.id === 'chat') {
-                     await withLoading(async () => {
-                        await new Promise(r => setTimeout(r, 800));
-                        router.push(`/dashboard/network/chat/${studentId}`);
-                     }, 'Connecting to Secure Line...');
-                   } else {
-                     setActiveTab(item.id as any);
-                   }
+                   if (item.id === 'chat') router.push(`/dashboard/network/chat/${studentId}`);
+                   else setActiveTab(item.id as any);
                  }}
                  style={{ 
-                   borderRadius: '20px', border: activeTab === item.id ? `2px solid ${item.color}` : '1px solid var(--border)',
-                   background: activeTab === item.id ? 'var(--surface)' : 'var(--surface)',
-                   color: activeTab === item.id ? item.color : item.disabled ? 'var(--text-sub)' : 'var(--text-main)',
-                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                   cursor: item.disabled ? 'not-allowed' : 'pointer',
-                   fontWeight: 900, fontSize: '0.75rem', opacity: item.disabled ? 0.4 : 1,
-                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                   padding: '1rem 0',
-                   boxShadow: activeTab === item.id ? `0 8px 20px -4px ${item.color}33` : 'var(--shadow-sm)'
+                   borderRadius: '12px', border: activeTab === item.id ? '2px solid var(--brand)' : '1px solid var(--border)',
+                   background: activeTab === item.id ? 'var(--bg-sub)' : 'var(--surface)',
+                   color: activeTab === item.id ? 'var(--brand)' : 'var(--text-sub)',
+                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem',
+                   padding: '0.75rem 0', fontSize: '0.7rem', fontWeight: 800, cursor: item.disabled ? 'not-allowed' : 'pointer',
+                   opacity: item.disabled ? 0.4 : 1, transition: 'all 0.2s'
                  }}
-                 className="matrix-btn"
                >
-                 <div style={{ padding: '0.6rem', borderRadius: '12px', background: activeTab === item.id ? `${item.color}15` : 'var(--bg-sub)', color: item.color }}>
-                    <item.icon size={18} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-                 </div>
+                 <item.icon size={16} />
                  {item.label}
                </button>
              ))}
           </div>
         </div>
 
-        {/* Dynamic Detail Content */}
-        <div style={{ minWidth: 0 }}>
-          <div className="detail-panel" style={{ background: 'var(--surface)', borderRadius: '36px', border: '1px solid var(--border)', padding: '2.5rem', boxShadow: 'var(--shadow-xl)', minHeight: '100%' }}>
-             {activeTab === 'info' && (
-                <div style={{ animation: 'slideUp 0.4s ease-out' }}>
-                   <div style={{ marginBottom: '2.5rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.02em', marginBottom: '1rem' }}>Specialist Overview</h3>
-                      <div style={{ padding: '1.25rem', background: 'var(--bg-sub)', borderRadius: '22px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                         <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                            <GraduationCap size={20} />
+        <div style={{ background: 'var(--surface)', borderRadius: '16px', border: '1px solid var(--border)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)' }}>
+           {activeTab === 'info' && (
+              <div className="page-fade">
+                 <div style={{ marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '0.75rem' }}>Scholar Overview</h3>
+                    <div style={{ padding: '1rem', background: 'var(--bg-sub)', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                       <GraduationCap size={18} color="var(--brand)" />
+                       <div>
+                          <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Current Track</div>
+                          <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>{member.course_name || 'Independent Scholar'}</div>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                       <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Score</div>
+                       <div style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--brand)' }}>{member.total_score}</div>
+                    </div>
+                    <div style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                       <div style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Grad Year</div>
+                       <div style={{ fontSize: '0.9rem', fontWeight: 800, marginTop: '0.4rem' }}>{member.completion_year || 'N/A'}</div>
+                    </div>
+                 </div>
+
+                 {member.stack && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                       <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.5rem' }}>
+                          <Terminal size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Technical Arsenal
+                       </h4>
+                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                          {member.stack.split(',').map((tech, idx) => (
+                             <span key={idx} style={{ padding: '0.3rem 0.6rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)' }}>
+                                {tech.trim()}
+                             </span>
+                          ))}
+                       </div>
+                    </div>
+                 )}
+
+                 <div style={{ marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.5rem' }}>Scholar Identity</h4>
+                    <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85 }}>
+                      {member.biography || `An active scholar in the FlowSpace network, specializing in ${member.course_name || 'their academic field'}.`}
+                    </p>
+                 </div>
+              </div>
+           )}
+
+           {activeTab === 'accomplishments' && (
+              <div className="page-fade">
+                 <h3 style={{ fontSize: '1rem', fontWeight: 900, marginBottom: '1.25rem' }}>Verified Credentials</h3>
+                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                    {member.badges_count && member.badges_count > 0 ? (
+                      [...Array(member.badges_count)].map((_, i) => (
+                         <div key={i} style={{ background: 'var(--bg-sub)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border)', textAlign: 'center' }}>
+                            <Award size={24} color="#f59e0b" style={{ marginBottom: '0.5rem' }} />
+                            <div style={{ fontWeight: 800, fontSize: '0.75rem' }}>Verified</div>
                          </div>
-                         <div>
-                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-sub)', textTransform: 'uppercase' }}>Current Protocol</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 850 }}>{member.course_name || 'System Analyst'}</div>
-                         </div>
+                      ))
+                    ) : (
+                      <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 1rem', background: 'var(--bg-sub)', borderRadius: '12px', opacity: 0.5 }}>
+                         <Award size={40} style={{ marginBottom: '0.5rem' }} />
+                         <p style={{ fontWeight: 700, fontSize: '0.85rem' }}>No credentials earned yet.</p>
                       </div>
-                   </div>
-
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2.5rem' }}>
-                      <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Authority Score</div>
-                         <div style={{ fontSize: '2.25rem', fontWeight: 950, color: 'var(--text-main)', letterSpacing: '-0.03em' }}>{member.total_score}</div>
-                      </div>
-                      <div style={{ background: 'rgba(var(--brand-rgb), 0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--border)' }}>
-                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-sub)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Project Cycle</div>
-                         <div style={{ fontSize: '1.1rem', fontWeight: 900, marginTop: '0.5rem' }}>Class of {member.completion_year || '2026'}</div>
-                      </div>
-                   </div>
-
-                   <div style={{ marginBottom: '2rem' }}>
-                      <h4 style={{ fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>Personnel Dossier</h4>
-                      <p style={{ fontSize: '1.1rem', lineHeight: 1.6, color: 'var(--text-main)', opacity: 0.85, whiteSpace: 'pre-wrap' }}>
-                        {member.biography || `An active specialist in the GroupFlow network, focusing on modular systems and distributed collaborative synchronization.`}
-                      </p>
-                   </div>
-
-                   <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-sub)' }}>
-                         <ShieldCheck size={18} />
-                         <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Contact details are private</span>
-                      </div>
-                   </div>
-                </div>
-             )}
-
-             {activeTab === 'accomplishments' && (
-                <div style={{ animation: 'slideUp 0.4s ease-out' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: 950, letterSpacing: '-0.02em', margin: 0 }}>Student Badges</h3>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 900, background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '10px', color: 'var(--text-sub)' }}>
-                         {member.badges_count || 0} TOTAL
-                      </span>
-                   </div>
-
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}>
-                      {member.badges_count && member.badges_count > 0 ? (
-                        [...Array(member.badges_count)].map((_, i) => (
-                           <div key={i} style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: '28px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                              <div style={{ width: '54px', height: '54px', background: 'var(--surface)', borderRadius: '18px', margin: '0 auto 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', boxShadow: 'var(--shadow-sm)' }}>
-                                 <Award size={28} />
-                              </div>
-                              <div style={{ fontWeight: 900, fontSize: '0.85rem' }}>Verified</div>
-                           </div>
-                        ))
-                      ) : (
-                        <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-sub)', borderRadius: '24px', opacity: 0.5 }}>
-                           <Award size={48} style={{ marginBottom: '1rem' }} />
-                           <p style={{ fontWeight: 700 }}>No badges earned yet.</p>
-                        </div>
-                      )}
-                   </div>
-                </div>
-             )}
-          </div>
+                    )}
+                 </div>
+              </div>
+           )}
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .matrix-btn:active { transform: scale(0.95); }
-        .hover-link:hover { opacity: 0.7; transform: translateX(4px); transition: all 0.2s; }
-        @media (max-width: 900px) {
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 800px) {
           .profile-main-layout { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 600px) {
-          .detail-panel { padding: 1.5rem !important; border-radius: 28px !important; }
-          .stat-plate { padding: 1rem !important; }
         }
       `}</style>
     </div>

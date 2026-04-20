@@ -1,6 +1,6 @@
-/**
+﻿/**
  * ════════════════════════════════════════════════════════════════════
- * GROUPFLOW 2026 — FULL USER JOURNEY E2E TEST
+ * FLOWSPACE 2026 — FULL USER JOURNEY E2E TEST
  * ════════════════════════════════════════════════════════════════════
  *
  * Covers the complete lifecycle of a real user:
@@ -104,7 +104,7 @@ async function injectSession(
     }])
   } else {
     // Split into chunks: key.0, key.1, ... (base64url chars are URL-safe, no %XX escapes)
-    const cookiesToAdd: Parameters<typeof context.addCookies>[0] = []
+    const cookiesToAdd: Parameters<typeof context.addCookies>[0][number][] = []
     let remaining = encoded
     let idx = 0
     while (remaining.length > 0) {
@@ -236,7 +236,7 @@ async function createTask(
 // ════════════════════════════════════════════════════════════════════
 //  MAIN TEST
 // ════════════════════════════════════════════════════════════════════
-test.describe('GroupFlow2026 — Full User Journey', () => {
+test.describe('FlowSpace — Full User Journey', () => {
   test.setTimeout(300_000)
 
   // Ensure download dir exists
@@ -552,7 +552,7 @@ test.describe('GroupFlow2026 — Full User Journey', () => {
     // ── FINAL REPORT ────────────────────────────────────────────────
     console.log(`
 ╔═══════════════════════════════════════════════════╗
-║  GROUPFLOW E2E FULL JOURNEY — PASSED              ║
+║  FLOWSPACE E2E FULL JOURNEY — PASSED              ║
 ║                                                   ║
 ║  User:        ${EMAIL.padEnd(33)} ║
 ║  Team:        ${TEAM_NAME.padEnd(33)} ║

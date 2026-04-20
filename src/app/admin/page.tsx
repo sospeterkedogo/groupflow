@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -24,7 +24,10 @@ import {
   UserMinus,
   Download
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useNotifications } from '@/components/NotificationProvider'
+import AgentControlCentre from '@/components/AgentControlCentre'
+import AdminExtras from '@/components/AdminExtras'
 import type { Profile } from '@/types/database'
 import { 
   BarChart, 
@@ -40,6 +43,9 @@ import {
 
 export default function AdminDashboard() {
   const { profile, loading: profileLoading } = useProfile()
+  const router = useRouter()
+  const supabase = createBrowserSupabaseClient()
+  const { addToast } = useNotifications()
   const [isVerified, setIsVerified] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [verifying, setVerifying] = useState(false)
@@ -50,9 +56,17 @@ export default function AdminDashboard() {
   const [config, setConfig] = useState<Record<string, { value: any, is_active: boolean }>>({})
   const [savingConfig, setSavingConfig] = useState(false)
   
-  const router = useRouter()
-  const supabase = createBrowserSupabaseClient()
-  const { addToast } = useNotifications()
+  const [launchConfig, setLaunchConfig] = useState({
+    launch_date: '',
+    launch_message: '',
+    preregister_goal: '',
+    preregister_open: 'true',
+    brand_name: '',
+    platform_version: '',
+  })
+  const [preregCount, setPreregCount] = useState(0)
+  const [savingLaunchConfig, setSavingLaunchConfig] = useState(false)
+  const [launchConfigLoaded, setLaunchConfigLoaded] = useState(false)
 
   // 0. Mock Log Generator for Terminal Feel
   useEffect(() => {
@@ -130,7 +144,47 @@ export default function AdminDashboard() {
     }
   }, [isVerified, supabase, addToast])
 
-  // 3. Orchestrator Controls
+  // 3. Load launch config + pre-reg count
+  useEffect(() => {
+    if (isVerified) {
+      const loadLaunchConfig = async () => {
+        try {
+          const [cfgRes, countRes] = await Promise.all([
+            fetch('/api/admin/launch-config'),
+            fetch('/api/preregister'),
+          ])
+          const { config: cfg } = await cfgRes.json()
+          const { count } = await countRes.json()
+          if (cfg) setLaunchConfig(prev => ({ ...prev, ...cfg }))
+          setPreregCount(count ?? 0)
+        } catch (_) {}
+        setLaunchConfigLoaded(true)
+      }
+      loadLaunchConfig()
+    }
+  }, [isVerified])
+
+  const saveLaunchConfig = async () => {
+    setSavingLaunchConfig(true)
+    try {
+      const updates = Object.entries(launchConfig).map(([key, value]) => ({ key, value }))
+      const res = await fetch('/api/admin/launch-config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+      if (res.ok) {
+        addToast('Launch Config Saved', 'Pre-registration page updated live.', 'success')
+      } else {
+        addToast('Save Failed', 'Could not update launch configuration.', 'error')
+      }
+    } catch (_) {
+      addToast('Network Error', 'Failed to save configuration.', 'error')
+    }
+    setSavingLaunchConfig(false)
+  }
+
+  // 4. Orchestrator Controls
   const handleUserAction = async (userId: string, action: 'unlock' | 'upgrade' | 'ban') => {
     addToast('Orchestration Command Sent', `Executing ${action} on node ${userId.slice(0, 8)}...`, 'success')
     
@@ -363,6 +417,102 @@ export default function AdminDashboard() {
 
         </div>
 
+        {/* ── Launch Command Center ──────────────────────────────────────────── */}
+        <div style={{ marginBottom: '3rem', padding: '2.5rem', background: '#0a0a0a', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                <Globe size={18} style={{ color: '#10b981' }} />
+                <span style={{ fontSize: '0.7rem', fontWeight: 900, color: '#10b981', textTransform: 'uppercase', letterSpacing: '3px' }}>Launch Command Center</span>
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 950, margin: 0, letterSpacing: '-0.03em' }}>Pre-Registration &amp; Launch Control</h2>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', marginTop: '0.4rem' }}>Changes reflect live on <a href="/preregister" target="_blank" style={{ color: '#10b981', textDecoration: 'none' }}>/preregister</a> immediately after saving.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ textAlign: 'center', padding: '1rem 1.5rem', background: '#000', border: '1px solid #222', borderRadius: '16px' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 950, color: '#10b981', letterSpacing: '-0.05em' }}>{preregCount.toLocaleString()}</div>
+                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Pre-Registrations</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '1rem 1.5rem', background: '#000', border: '1px solid #222', borderRadius: '16px' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 950, color: 'white', letterSpacing: '-0.05em' }}>
+                  {launchConfig.preregister_goal ? parseInt(launchConfig.preregister_goal).toLocaleString() : '5,000,000'}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '1rem 1.5rem', background: '#000', border: '1px solid #222', borderRadius: '16px' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 950, color: launchConfig.preregister_open === 'true' ? '#10b981' : '#ef4444', letterSpacing: '-0.03em' }}>
+                  {launchConfig.preregister_open === 'true' ? 'OPEN' : 'CLOSED'}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Registration</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Launch Date (ISO 8601)</label>
+              <input type="datetime-local" value={launchConfig.launch_date ? launchConfig.launch_date.slice(0, 16) : ''}
+                onChange={e => setLaunchConfig(p => ({ ...p, launch_date: new Date(e.target.value).toISOString() }))}
+                style={{ width: '100%', padding: '0.875rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.9rem', boxSizing: 'border-box', colorScheme: 'dark' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Brand Name</label>
+              <input type="text" value={launchConfig.brand_name} placeholder="FlowSpace"
+                onChange={e => setLaunchConfig(p => ({ ...p, brand_name: e.target.value }))}
+                style={{ width: '100%', padding: '0.875rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Pre-Registration Goal</label>
+              <input type="number" value={launchConfig.preregister_goal} placeholder="5000000"
+                onChange={e => setLaunchConfig(p => ({ ...p, preregister_goal: e.target.value }))}
+                style={{ width: '100%', padding: '0.875rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Platform Version</label>
+              <input type="text" value={launchConfig.platform_version} placeholder="2.0.0"
+                onChange={e => setLaunchConfig(p => ({ ...p, platform_version: e.target.value }))}
+                style={{ width: '100%', padding: '0.875rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.9rem', boxSizing: 'border-box' }} />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.5rem' }}>Hero Launch Message (shown on /preregister)</label>
+            <textarea value={launchConfig.launch_message} rows={3}
+              onChange={e => setLaunchConfig(p => ({ ...p, launch_message: e.target.value }))}
+              placeholder="Something big is coming. Join 5 million students shaping the future of collaborative education."
+              style={{ width: '100%', padding: '0.875rem', background: '#000', border: '1px solid #333', borderRadius: '12px', color: 'white', fontSize: '0.9rem', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+          </div>
+
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <button onClick={saveLaunchConfig} disabled={savingLaunchConfig}
+              style={{ padding: '0.875rem 2rem', background: '#10b981', color: 'black', borderRadius: '14px', fontWeight: 950, border: 'none', cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {savingLaunchConfig ? 'SAVING...' : '⚡ DEPLOY LAUNCH CONFIG'}
+            </button>
+            <button onClick={() => setLaunchConfig(p => ({ ...p, preregister_open: p.preregister_open === 'true' ? 'false' : 'true' }))}
+              style={{ padding: '0.875rem 1.5rem', background: '#111', border: `1px solid ${launchConfig.preregister_open === 'true' ? '#ef4444' : '#10b981'}`, color: launchConfig.preregister_open === 'true' ? '#ef4444' : '#10b981', borderRadius: '14px', fontWeight: 950, cursor: 'pointer', fontSize: '0.85rem' }}>
+              {launchConfig.preregister_open === 'true' ? 'CLOSE REGISTRATION' : 'OPEN REGISTRATION'}
+            </button>
+            <a href="/preregister" target="_blank"
+              style={{ padding: '0.875rem 1.5rem', background: '#111', border: '1px solid #222', color: 'rgba(255,255,255,0.5)', borderRadius: '14px', fontWeight: 700, textDecoration: 'none', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              VIEW PAGE ↗
+            </a>
+            <a href="/fund" target="_blank"
+              style={{ padding: '0.875rem 1.5rem', background: '#111', border: '1px solid #222', color: 'rgba(255,255,255,0.5)', borderRadius: '14px', fontWeight: 700, textDecoration: 'none', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              FUND PAGE ↗
+            </a>
+          </div>
+        </div>
+
+        {/* ── Agent Control Centre ──────────────────────────────────────────── */}
+        <div style={{ marginBottom: '3rem', padding: '2.5rem', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '32px' }}>
+          <AgentControlCentre />
+        </div>
+
+        {/* ── Platform Operations ──────────────────────────────────────────── */}
+        <div style={{ marginBottom: '3rem', padding: '2.5rem', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '32px' }}>
+          <AdminExtras />
+        </div>
+
         {/* Business Intelligence Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
            
@@ -441,11 +591,11 @@ export default function AdminDashboard() {
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                            {user.role === 'banned' ? (
-                             <button onClick={() => handleUserAction(user.id, 'unlock')} className="action-btn" title="Unlock Account"><UserCheck size={18} /></button>
+                             <button onClick={() => handleUserAction(user.id!, 'unlock')} className="action-btn" title="Unlock Account"><UserCheck size={18} /></button>
                            ) : (
                              <>
-                               <button onClick={() => handleUserAction(user.id, 'upgrade')} className="action-btn" title="Elevate to Premium"><ArrowRight size={18} /></button>
-                               <button onClick={() => handleUserAction(user.id, 'ban')} className="action-btn danger" title="Terminate Session"><UserMinus size={18} /></button>
+                               <button onClick={() => handleUserAction(user.id!, 'upgrade')} className="action-btn" title="Elevate to Premium"><ArrowRight size={18} /></button>
+                               <button onClick={() => handleUserAction(user.id!, 'ban')} className="action-btn danger" title="Terminate Session"><UserMinus size={18} /></button>
                              </>
                            )}
                         </div>

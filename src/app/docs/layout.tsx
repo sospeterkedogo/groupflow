@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import Link from 'next/link'
@@ -56,7 +56,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', color: '#f3f4f6' }}>
             <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px' }} />
-            <span style={{ fontWeight: 700, fontSize: '1rem' }}>GroupFlow <span style={{ color: '#666', fontWeight: 500 }}>Docs</span></span>
+            <span style={{ fontWeight: 700, fontSize: '1rem' }}>FlowSpace <span style={{ color: '#666', fontWeight: 500 }}>Docs</span></span>
           </Link>
         </div>
 

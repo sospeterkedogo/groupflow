@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
@@ -304,7 +304,7 @@ export default function MarketplacePage() {
               </div>
               <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '1rem' }}>Welcome to the Exchange</h2>
               <p style={{ color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '1rem' }}>
-                GroupFlow2026's internal marketplace is designed for students to share hardware, textbooks, and resources securely. 
+                FlowSpace's internal marketplace is designed for students to share hardware, textbooks, and resources securely. 
                 Coordinate swaps at academic safe-zones and process payments via Stripe or Cash.
               </p>
               

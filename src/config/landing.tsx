@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { Layers, Users, Zap, Shield, Milestone, Award, LayoutGrid, BookOpen, Globe, Fingerprint, HelpCircle } from 'lucide-react'
 
 export const features = [
@@ -48,7 +48,7 @@ export const features = [
 
 export const faqs = [
   {
-    q: "How can I support GroupFlow2026?",
+    q: "How can I support FlowSpace?",
     a: "You can support this project by upgrading to Pro (£4.99/mo) or Premium (£14.99/mo) or securing a Founder Lifetime Access for £99. Your contribution directly funds the high-performance infrastructure required for global academic excellence."
   },
   {
@@ -64,8 +64,8 @@ export const faqs = [
     a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
   },
   {
-    q: "Who is behind GroupFlow2026?",
-    a: "I created GroupFlow2026 to help student teams feel more supported and recognized during group work."
+    q: "Who is behind FlowSpace?",
+    a: "I created FlowSpace to help student teams feel more supported and recognized during group work."
   }
 ]
 
@@ -76,14 +76,14 @@ export const navMenus = {
       {
         label: 'Tools',
         items: [
-          { id: 'kanban', title: 'Smart Kanban', desc: 'Manage your tasks with real-time updates.', icon: <LayoutGrid size={18} /> },
-          { id: 'sync', title: 'Team Sync', desc: 'Keep everyone on the same page, always.', icon: <Zap size={18} /> }
+          { id: 'kanban', title: 'Smart Kanban', desc: 'Manage your tasks with real-time updates.', icon: <LayoutGrid size={18} />, href: '/#features' },
+          { id: 'sync', title: 'Team Sync', desc: 'Keep everyone on the same page, always.', icon: <Zap size={18} />, href: '/#features' }
         ]
       },
       {
         label: 'Planning',
         items: [
-          { id: 'roadmap', title: 'Project Timeline', desc: 'See your deadlines in a clear visual way.', icon: <Milestone size={18} /> }
+          { id: 'roadmap', title: 'Project Timeline', desc: 'See your deadlines in a clear visual way.', icon: <Milestone size={18} />, href: '/#features' }
         ]
       }
     ]
@@ -94,14 +94,14 @@ export const navMenus = {
       {
         label: 'Users',
         items: [
-          { id: 'research', title: 'Individual Students', desc: 'Track your work and get credit for what you do.', icon: <BookOpen size={18} /> },
-          { id: 'teams', title: 'Study Groups', desc: 'Collaborate easily with your whole class.', icon: <Users size={18} /> }
+          { id: 'research', title: 'Individual Students', desc: 'Track your work and get credit for what you do.', icon: <BookOpen size={18} />, href: '/#mission' },
+          { id: 'teams', title: 'Study Groups', desc: 'Collaborate easily with your whole class.', icon: <Users size={18} />, href: '/#mission' }
         ]
       },
       {
         label: 'Organizations',
         items: [
-          { id: 'enterprise', title: 'University Clubs', desc: 'Manage large student groups with ease.', icon: <Globe size={18} /> }
+          { id: 'enterprise', title: 'University Clubs', desc: 'Manage large student groups with ease.', icon: <Globe size={18} />, href: '/#mission' }
         ]
       }
     ]
@@ -112,14 +112,14 @@ export const navMenus = {
       {
         label: 'Our Project',
         items: [
-          { id: 'mission', title: 'Our Mission', desc: 'Learn why we started GroupFlow.', icon: <Fingerprint size={18} /> },
-          { id: 'achievements', title: 'Community Impact', desc: 'See how we help students worldwide.', icon: <Award size={18} /> }
+          { id: 'mission', title: 'Our Mission', desc: 'Learn why we started FlowSpace.', icon: <Fingerprint size={18} />, href: '/#mission' },
+          { id: 'achievements', title: 'Community Impact', desc: 'See how we help students worldwide.', icon: <Award size={18} />, href: '/#faq' }
         ]
       },
       {
         label: 'Need Help?',
         items: [
-          { id: 'help', title: 'Help Center', desc: 'Guides and tips to help you get started.', icon: <HelpCircle size={18} /> }
+          { id: 'help', title: 'Help Center', desc: 'Guides and tips to help you get started.', icon: <HelpCircle size={18} />, href: '/docs' }
         ]
       }
     ]

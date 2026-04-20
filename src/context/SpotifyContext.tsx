@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
@@ -90,25 +90,25 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     if (!isSDKReady || !profile?.spotify_access_token) return
 
     const newPlayer = new window.Spotify.Player({
-      name: 'GroupFlow Web Player',
-      getOAuthToken: (cb) => {
+      name: 'FlowSpace Web Player',
+      getOAuthToken: (cb: (token: string) => void) => {
         // Here we could handle token expiration check
         cb(profile.spotify_access_token!)
       },
       volume: 0.5
     })
 
-    newPlayer.addListener('ready', ({ device_id }) => {
+    newPlayer.addListener('ready', ({ device_id }: { device_id: string }) => {
       console.log('Spotify Player ready with Device ID', device_id)
       setDeviceId(device_id)
     })
 
-    newPlayer.addListener('not_ready', ({ device_id }) => {
+    newPlayer.addListener('not_ready', ({ device_id }: { device_id: string }) => {
       console.log('Device ID has gone offline', device_id)
       setDeviceId(null)
     })
 
-    newPlayer.addListener('player_state_changed', (state) => {
+    newPlayer.addListener('player_state_changed', (state: Spotify.PlaybackState) => {
       if (!state) return
       setPlaybackState(state)
 
@@ -123,11 +123,11 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    newPlayer.addListener('initialization_error', ({ message }) => {
+    newPlayer.addListener('initialization_error', ({ message }: { message: string }) => {
       console.error('Spotify Init Error:', message)
     })
 
-    newPlayer.addListener('authentication_error', ({ message }) => {
+    newPlayer.addListener('authentication_error', ({ message }: { message: string }) => {
       console.error('Spotify Auth Error:', message)
       // Trigger token refresh maybe?
     })

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
@@ -395,7 +395,7 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
     }
     // Fallback to system preference if no localStorage
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('groupflow2026_palette')
+      const saved = localStorage.getItem('flowspace_palette')
       if (saved) {
         const found = PALETTES.find(p => p.name === saved)
         if (found) return found
@@ -447,7 +447,7 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
       }
 
       setCurrentPalette(palette)
-      localStorage.setItem('groupflow2026_palette', name) 
+      localStorage.setItem('flowspace_palette', name) 
       const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await supabase.from('profiles').update({ 
@@ -462,8 +462,8 @@ export const ThemeProvider = ({ children, initialTheme, userPlan }: { children: 
 
   const handleSetCustomBg = async (url: string | null) => {
     setCustomBg(url)
-    if (url) localStorage.setItem('groupflow2026_bg', url)
-    else localStorage.removeItem('groupflow2026_bg')
+    if (url) localStorage.setItem('flowspace_bg', url)
+    else localStorage.removeItem('flowspace_bg')
     
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {

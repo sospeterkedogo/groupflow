@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 
 test.describe('Critical Path E2E', () => {
   test('Landing page loads', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/GroupFlow/i);
+    await expect(page).toHaveTitle(/FlowSpace/i);
   });
 
   test('User can sign up and sign in', async ({ page }) => {

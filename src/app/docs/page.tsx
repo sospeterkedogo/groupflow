@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -13,10 +13,10 @@ export default function DocsHome() {
           color: '#10b981', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, 
           marginBottom: '1rem', letterSpacing: '1px' 
         }}>
-           THE GroupFlow ARCHIVE
+           THE FlowSpace ARCHIVE
         </div>
         <h1 style={{ fontSize: '3rem', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: '1.5rem', color: '#f3f4f6' }}>
-          Welcome to the GroupFlow Documentation.
+          Welcome to the FlowSpace Documentation.
         </h1>
         <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '700px' }}>
           The official technical guide for students, researchers, and technical leads. 
@@ -37,20 +37,20 @@ export default function DocsHome() {
       </section>
 
       <section style={{ marginBottom: '4rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Explaining GroupFlow (ELI12)</h2>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Explaining FlowSpace (ELI12)</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
            <div style={{ padding: '1.5rem', background: '#111', borderRadius: '12px', border: '1px solid #222' }}>
               <div style={{ color: '#10b981', marginBottom: '1rem' }}><Sparkles size={24} /></div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>What is it?</h3>
               <p style={{ fontSize: '0.9rem', color: '#6b7280', margin: 0, lineHeight: 1.6 }}>
-                Think of GroupFlow as a super-powered school project app. It's a place where you and your friends can work together on a technical project without ever losing your work.
+                Think of FlowSpace as a super-powered school project app. It's a place where you and your friends can work together on a technical project without ever losing your work.
               </p>
            </div>
            <div style={{ padding: '1.5rem', background: '#111', borderRadius: '12px', border: '1px solid #222' }}>
               <div style={{ color: '#10b981', marginBottom: '1rem' }}><BookOpen size={24} /></div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Why use it?</h3>
               <p style={{ fontSize: '0.9rem', color: '#6b7280', margin: 0, lineHeight: 1.6 }}>
-                Shared Google Docs can get messy. GroupFlow uses professional tools (like Kanban and Roadmaps) to make sure everyone knows exactly what to do and when to do it.
+                Shared Google Docs can get messy. FlowSpace uses professional tools (like Kanban and Roadmaps) to make sure everyone knows exactly what to do and when to do it.
               </p>
            </div>
         </div>

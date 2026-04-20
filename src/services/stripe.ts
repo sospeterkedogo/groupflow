@@ -1,4 +1,4 @@
-import Stripe from 'stripe'
+﻿import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-11-15',
@@ -39,7 +39,7 @@ export async function createCheckoutSession({
         price_data: {
           currency: 'usd',
           product_data: {
-            name: metadata.product_name || 'GroupFlow2026 Flux Provision',
+            name: metadata.product_name || 'FlowSpace Flux Provision',
             description: metadata.description || 'Academic Resource Exchange',
           },
           unit_amount: amountToCharge,

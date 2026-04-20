@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -16,7 +16,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const supabase = createBrowserSupabaseClient()
+  const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -31,6 +31,18 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
 
     return () => subscription.unsubscribe()
   }, [supabase])
+
+  // Smooth-scroll to a hash anchor; falls back to normal navigation for full paths
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setActiveDropdown(null)
+    setIsMobileMenuOpen(false)
+    if (href.startsWith('/#')) {
+      e.preventDefault()
+      const id = href.slice(2) // strip '/#'
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <header 
@@ -59,7 +71,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
            <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
               <Image src="/logo.png" width={20} height={20} alt="Logo" priority style={{ objectFit: 'contain' }} />
            </div>
-           <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>GroupFlow</span>
+           <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>FlowSpace</span>
         </div>
 
         {/* Architectural Navigation - Desktop Only */}
@@ -132,18 +144,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                             {category.items.map((item: NavItem) => (
                               <Link 
                                 key={item.id}
-                                href={
-                                  item.id === 'kanban' ? '/product/intelligence' :
-                                  item.id === 'sync' ? '/product/sync' :
-                                  item.id === 'roadmap' ? '/product/roadmap' :
-                                  item.id === 'research' ? '/solutions/scholars' :
-                                  item.id === 'teams' ? '/solutions/teams' :
-                                  item.id === 'enterprise' ? '/solutions/enterprise' :
-                                  item.id === 'mission' ? '/docs/vision' :
-                                  item.id === 'achievements' ? '/docs/impact' :
-                                  item.id === 'help' ? '/docs' :
-                                  '/login?signup=true'
-                                }
+                                href={item.href}
                                 className="nav-link-pro"
                                 style={{
                                   padding: '0.75rem',
@@ -154,7 +155,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                                   textDecoration: 'none',
                                   transition: 'background 0.2s ease'
                                 }}
-                                onClick={() => setActiveDropdown(null)}
+                                onClick={(e) => handleNavClick(e, item.href)}
                               >
                                 <div style={{ color: '#10b981', marginTop: '0.1rem' }}>{item.icon}</div>
                                 <div style={{ flex: 1 }}>
@@ -173,15 +174,11 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
             </div>
           ))}
           <Link 
-            href="#pricing" 
+            href="/#pricing" 
             style={{ padding: '0.5rem 0.75rem', color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', textDecoration: 'none', transition: 'color 0.2s ease' }} 
             onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')} 
             onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
-            onClick={(e) => {
-              e.preventDefault();
-              const el = document.getElementById('pricing');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
+            onClick={(e) => handleNavClick(e, '/#pricing')}
           >
             Pricing
           </Link>
@@ -195,7 +192,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
         className="hide-mobile-flex"
       >
         <a 
-           href="mailto:support@groupflow2026.com" 
+           href="mailto:support@flowspace.com" 
            title="Send Feedback"
            style={{ 
              background: 'rgba(16, 185, 129, 0.05)', 
@@ -218,9 +215,9 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
            <MessageSquarePlus size={14} /> Feedback
         </a>
 
-        <button 
+        <Link
+           href="/docs"
            className="nav-util-btn"
-           onClick={() => alert("Opening search and help... (Cmd+K triggered)")}
            style={{ 
              background: 'rgba(255,255,255,0.03)', 
              border: '1px solid #222222', 
@@ -232,17 +229,18 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
              alignItems: 'center',
              gap: '3rem',
              cursor: 'pointer',
-             transition: 'all 0.2s ease'
+             transition: 'all 0.2s ease',
+             textDecoration: 'none'
            }}
         >
            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Search size={14} /> Search...
            </div>
            <div style={{ padding: '2px 4px', background: '#222222', borderRadius: '4px', fontSize: '0.65rem' }}>⌘K</div>
-        </button>
+        </Link>
 
         <Link 
-          href="https://github.com/sospeterkedogo/groupflow" 
+          href="https://github.com/sospeterkedogo/flowspace" 
           target="_blank"
           style={{ color: '#9ca3af', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = '#f3f4f6')}
@@ -332,20 +330,9 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
                     {navMenus[key].categories.flatMap((cat: NavCategory) => cat.items).map((item: NavItem) => (
                       <Link 
                         key={item.id}
-                        href={
-                            item.id === 'kanban' ? '/product/intelligence' :
-                            item.id === 'sync' ? '/product/sync' :
-                            item.id === 'roadmap' ? '/product/roadmap' :
-                            item.id === 'research' ? '/solutions/scholars' :
-                            item.id === 'teams' ? '/solutions/teams' :
-                            item.id === 'enterprise' ? '/solutions/enterprise' :
-                            item.id === 'mission' ? '/docs/vision' :
-                            item.id === 'achievements' ? '/docs/impact' :
-                            item.id === 'help' ? '/docs' :
-                            '/login?signup=true'
-                          }
+                        href={item.href}
                         style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        onClick={(e) => handleNavClick(e, item.href)}
                       >
                         <div style={{ color: '#10b981' }}>{item.icon}</div>
                         <div style={{ color: '#f3f4f6', fontWeight: 600 }}>{item.title}</div>

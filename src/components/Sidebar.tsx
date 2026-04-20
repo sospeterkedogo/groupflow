@@ -23,7 +23,9 @@ import {
   ShieldCheck,
   Lock,
   Wifi,
-  WifiOff
+  WifiOff,
+  Rss,
+  DollarSign
 } from 'lucide-react'
 import { useConnectivity } from '@/context/ConnectivityContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -118,6 +120,8 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Feed', path: '/feed', icon: Rss },
+    { name: 'Hustle', path: '/dashboard/hustle', icon: DollarSign },
     { name: 'Teammates', path: '/dashboard/network', icon: Users },
     { name: 'Resources', path: '/dashboard/marketplace', icon: TrendingUp },
     { name: 'Jukebox', path: '/dashboard/music', icon: Music },
@@ -167,7 +171,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontWeight: 950, color: 'var(--text-main)', fontSize: '1.1rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
-              Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+              Flow<span style={{ color: 'var(--brand)' }}>Space</span>
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '2px' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 6px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />
@@ -213,7 +217,7 @@ export default function Sidebar({ user }: SidebarProps) {
           {isOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
               <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontWeight: 950, fontSize: '1.25rem', color: 'var(--text-main)', letterSpacing: '-0.04em', flexShrink: 0 }}>
-                Group<span style={{ color: 'var(--brand)' }}>Flow</span>
+                Flow<span style={{ color: 'var(--brand)' }}>Space</span>
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '4px 10px', background: 'var(--surface)', borderRadius: '10px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)', flexShrink: 0 }}>
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isOnline ? 'var(--success)' : 'var(--text-sub)', boxShadow: isOnline ? '0 0 8px var(--success)' : 'none' }} className={isOnline ? 'pulse-pill' : ''} />

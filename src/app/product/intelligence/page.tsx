@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import Link from 'next/link'
@@ -27,7 +27,7 @@ export default function IntelligencePage() {
             <span style={{ color: '#10b981' }}>management protocol.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', marginBottom: '4rem' }}>
-            The Kanban Project Intelligence engine is the heart of GroupFlow. It transform static task lists into a living, 
+            The Kanban Project Intelligence engine is the heart of FlowSpace. It transform static task lists into a living, 
             breathing representation of your contribution history with real-time state persistence.
           </p>
           <Link href="/login?signup=true" style={{ 

@@ -9,22 +9,28 @@ const WINDOW_MS = 60 * 1000 // 1 minute
 export default async function proxy(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for') || 'anonymous'
   const now = Date.now()
-  
+
+  // Skip rate limiting in local dev — Next.js internal requests share the
+  // same IP ('anonymous') and easily exceed the cap on localhost.
+  const isDev = process.env.NODE_ENV === 'development'
+
   // Rate Limit Check
-  const rateLimit = rateLimitMap.get(ip)
-  if (!rateLimit || now > rateLimit.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + WINDOW_MS })
-  } else {
-    rateLimit.count++
-    if (rateLimit.count > LIMIT) {
-      return new NextResponse('Too Many Requests - Identity verification rate limit exceeded.', { 
-        status: 429,
-        headers: {
-          'Retry-After': Math.ceil((rateLimit.resetAt - now) / 1000).toString(),
-          'X-RateLimit-Limit': LIMIT.toString(),
-          'X-RateLimit-Remaining': '0'
-        }
-      })
+  const rateLimit = !isDev ? rateLimitMap.get(ip) : undefined
+  if (!isDev) {
+    if (!rateLimit || now > rateLimit.resetAt) {
+      rateLimitMap.set(ip, { count: 1, resetAt: now + WINDOW_MS })
+    } else {
+      rateLimit.count++
+      if (rateLimit.count > LIMIT) {
+        return new NextResponse('Too Many Requests - Identity verification rate limit exceeded.', {
+          status: 429,
+          headers: {
+            'Retry-After': Math.ceil((rateLimit.resetAt - now) / 1000).toString(),
+            'X-RateLimit-Limit': LIMIT.toString(),
+            'X-RateLimit-Remaining': '0'
+          }
+        })
+      }
     }
   }
 
@@ -46,9 +52,11 @@ export default async function proxy(request: NextRequest) {
     // but we add a generic session-check here.
   }
   
-  // Inject Headers for transparency
-  response.headers.set('X-RateLimit-Limit', LIMIT.toString())
-  response.headers.set('X-RateLimit-Remaining', (LIMIT - (rateLimit?.count || 1)).toString())
+  // Inject Headers for transparency (only in production where rate limiting is active)
+  if (!isDev) {
+    response.headers.set('X-RateLimit-Limit', LIMIT.toString())
+    response.headers.set('X-RateLimit-Remaining', (LIMIT - (rateLimit?.count || 1)).toString())
+  }
   
   return response
 }

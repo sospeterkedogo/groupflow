@@ -5,6 +5,7 @@ export interface NavItem {
   title: string;
   desc: string;
   icon: React.ReactNode;
+  href: string;
 }
 
 export interface NavCategory {

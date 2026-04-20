@@ -1,20 +1,23 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import './globals.css';
 import './prestige.css';
 import { NotificationProvider } from '../components/NotificationProvider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import PWARegistry from '../components/PWARegistry';
-import CookieBanner from '../components/CookieBanner';
+import dynamic from 'next/dynamic';
 import SessionGuard from '@/components/SessionGuard';
-import PromoBanner from '@/components/PromoBanner';
-import GlobalAnnouncement from '@/components/GlobalAnnouncement';
 import { ConnectivityProvider } from '@/context/ConnectivityContext';
 import ToasterModeManager from '@/components/ToasterModeManager';
 import type { Viewport } from 'next';
 
+// Lazy-load non-critical shell elements — keeps JS off the critical path
+const CookieBanner = dynamic(() => import('../components/CookieBanner'), { ssr: false });
+const PromoBanner = dynamic(() => import('../components/PromoBanner'), { ssr: false });
+const GlobalAnnouncement = dynamic(() => import('../components/GlobalAnnouncement'), { ssr: false });
+
 export const metadata: Metadata = {
-  title: 'GroupFlow - Team Projects Made Simple',
+  title: 'FlowSpace - Team Projects Made Simple',
   description: 'The easiest way for students to work together on group projects.',
   icons: {
     icon: '/favicon.png',
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'GroupFlow',
+    title: 'FlowSpace',
   },
 };
 
@@ -42,13 +45,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Critical preconnects — reduce first-auth latency */}
+        <link rel="preconnect" href="https://othntbcrtmemavfsslrb.supabase.co" />
+        <link rel="dns-prefetch" href="https://othntbcrtmemavfsslrb.supabase.co" />
+        <link rel="preconnect" href="https://accounts.google.com" />
+        <link rel="dns-prefetch" href="https://lh3.googleusercontent.com" />
+      </head>
       <body suppressHydrationWarning>
-        <PromoBanner />
         <ConnectivityProvider>
           <ToasterModeManager />
           <NotificationProvider>
             <PWARegistry />
             {children}
+            <PromoBanner />
             <CookieBanner />
             <SessionGuard />
             <GlobalAnnouncement />

@@ -1,6 +1,6 @@
-{
+﻿{
   "meta": {
-    "title": "GroupFlow - チームプロジェクトを簡単に",
+    "title": "FlowSpace - チームプロジェクトを簡単に",
     "description": "学生がグループプロジェクトで協力するための最も簡単な方法。"
   },
   "nav": {
@@ -16,16 +16,16 @@
     "badge": "学生のために作られた",
     "headline1": "チームで働く",
     "headline2": "シンプルな方法。",
-    "subtitle": "GroupFlowは学生チームが整理され、功績を共有し、締め切りを守るのを助けます — 一緒に。",
+    "subtitle": "FlowSpaceは学生チームが整理され、功績を共有し、締め切りを守るのを助けます — 一緒に。",
     "ctaStart": "無料で始める",
     "ctaLearn": "詳しく見る"
   },
   "mission": {
-    "badge": "GroupFlowのミッション",
+    "badge": "FlowSpaceのミッション",
     "title": "あなたの",
     "titleHighlight": "努力への公正な評価。",
     "goal1Title": "目標01：可視性",
-    "goal1Desc": "GroupFlowは全員の努力が認められることを保証します。あなたが deserveするクレジットを得られるよう、各タスクの明確な記録を保持します。",
+    "goal1Desc": "FlowSpaceは全員の努力が認められることを保証します。あなたが deserveするクレジットを得られるよう、各タスクの明確な記録を保持します。",
     "goal2Title": "目標02：チームメイト",
     "goal2Desc": "グループワークを簡単でストレスフリーにし、学生が全てのプロジェクトで成功するために協力することを目指しています。",
     "viewMission": "ミッションを見る"
@@ -51,7 +51,7 @@
   "pricing": {
     "badge": "プランを選択",
     "title": "ミッションを支援",
-    "subtitle": "あなたのサポートがGroupFlowの運営と改善を維持します。各ティアがチームの強力なツールを解放します。",
+    "subtitle": "あなたのサポートがFlowSpaceの運営と改善を維持します。各ティアがチームの強力なツールを解放します。",
     "proName": "プロ",
     "proPrice": "£4.99",
     "proPeriod": "/月",
@@ -79,7 +79,7 @@
     "badge": "技術FAQ",
     "title": "技術FAQ",
     "subtitle": "プロトコルとミッションステートメント。",
-    "q1": "GroupFlow2026をどのようにサポートできますか？",
+    "q1": "FlowSpaceをどのようにサポートできますか？",
     "a1": "Pro（£4.99/月）またはPremium（£14.99/月）にアップグレードするか、£99で創設者ライフタイムアクセスを確保することでこのプロジェクトをサポートできます。",
     "q2": "'Orbit Gateway'とは何ですか？",
     "a2": "動的シークレットルートとTOTP認証を使用した機関グレードのセキュリティポータルです。",
@@ -87,8 +87,8 @@
     "a3": "多層暗号化と機関監査ログを使用しています。",
     "q4": "アカウントを削除できますか？",
     "a4": "もちろんです。いつでもワンクリックでアカウントとすべてのプロジェクト情報を永久に削除できます。",
-    "q5": "GroupFlow2026の背後にいるのは誰ですか？",
-    "a5": "グループワーク中に学生チームがより支援され認められると感じられるようにGroupFlow2026を作りました。"
+    "q5": "FlowSpaceの背後にいるのは誰ですか？",
+    "a5": "グループワーク中に学生チームがより支援され認められると感じられるようにFlowSpaceを作りました。"
   },
   "footer": {
     "builtBy": "Sospeter作成 • プロジェクトリード",
@@ -96,12 +96,12 @@
     "signIn": "サインイン",
     "privacy": "プライバシーポリシー",
     "terms": "グローバル利用規約",
-    "copyright": "© 2026 GroupFlow. 全権利留保。"
+    "copyright": "© 2026 FlowSpace. 全権利留保。"
   },
   "auth": {
     "loginTitle": "おかえりなさい",
-    "loginSubtitle": "GroupFlowアカウントにサインイン",
-    "signupTitle": "GroupFlowに参加",
+    "loginSubtitle": "FlowSpaceアカウントにサインイン",
+    "signupTitle": "FlowSpaceに参加",
     "signupSubtitle": "チームとのコラボレーションを始める",
     "email": "メールアドレス",
     "password": "パスワード",

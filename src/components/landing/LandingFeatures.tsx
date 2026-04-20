@@ -14,7 +14,7 @@ interface LandingFeaturesProps {
 
 export default function LandingFeatures({ features }: LandingFeaturesProps) {
   return (
-    <section style={{ padding: '10rem 2rem' }}>
+    <section id="features" style={{ padding: '10rem 2rem' }}>
        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
              <div style={{ color: '#10b981', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Architectural Capabilities</div>

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { checkBotId } from 'botid/server'
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   try {
     const { question, correctAnswer, userResponse } = await req.json()
     
-    const prompt = `Act as the Master Librarian of the GroupFlow2026 Archives. 
+    const prompt = `Act as the Master Librarian of the FlowSpace Archives. 
 You are evaluating a scholar's attempt to synthesize knowledge during a high-stakes Academic Skirmish.
 
 Question: "${question}"
