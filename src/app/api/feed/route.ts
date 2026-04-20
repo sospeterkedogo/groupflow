@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
+import { createServerSupabaseClient, createAdminClient, createReadClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
 const PAGE_SIZE = 20
 
 export async function GET(req: NextRequest) {
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Auth check must use primary (cookie-aware)
+  const authClient = await createServerSupabaseClient()
+  const { data: { user } } = await authClient.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const cursor = searchParams.get('cursor')
   const filter = searchParams.get('filter') ?? 'public'  // public | connections | group
+
+  // READ: route to nearest regional replica for sub-20ms latency
+  const supabase = createReadClient()
 
   let query = supabase
     .from('posts')

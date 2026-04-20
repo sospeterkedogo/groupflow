@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
+import { createServerSupabaseClient, createAdminClient, createReadClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 // GET /api/hustle/tasks — list tasks (with filters)
 export async function GET(req: NextRequest) {
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  // Auth check via primary
+  const authClient = await createServerSupabaseClient()
+  const { data: { user } } = await authClient.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
@@ -16,7 +17,8 @@ export async function GET(req: NextRequest) {
   const cursor = searchParams.get('cursor')
   const PAGE_SIZE = 20
 
-  const svc = await createAdminClient()
+  // READ: route to nearest regional replica
+  const svc = createReadClient()
 
   let query = svc
     .from('hustle_tasks')
