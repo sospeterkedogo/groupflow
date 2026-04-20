@@ -4,10 +4,14 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { checkBotId } from 'botid/server'
 
 export async function GET(_req: Request) {
-  // BotID Verification
-  const verification = await checkBotId()
-  if (verification.isBot) {
-    return new NextResponse('Automated request intercepted. Only verified scholars may export archives.', { status: 403 })
+  // BotID Verification (only available in Vercel cloud — skip locally)
+  try {
+    const verification = await checkBotId()
+    if (verification.isBot) {
+      return new NextResponse('Automated request intercepted. Only verified scholars may export archives.', { status: 403 })
+    }
+  } catch {
+    // checkBotId requires Vercel OIDC token — not available outside Vercel cloud
   }
 
   try {

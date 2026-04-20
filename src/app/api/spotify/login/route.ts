@@ -6,7 +6,7 @@ export async function GET() {
   const redirect_uri = process.env.SPOTIFY_REDIRECT_URI
 
   if (!client_id || !redirect_uri) {
-    return NextResponse.json({ error: 'Spotify configuration missing' }, { status: 500 })
+    return NextResponse.json({ error: 'Spotify integration not enabled' }, { status: 401 })
   }
 
   const scope = [

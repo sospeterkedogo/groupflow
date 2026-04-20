@@ -1,39 +1,67 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
-// ─── TIERED RATE LIMITS ───────────────────────────────────────────────────────
-// Each tier has its own bucket: auth brute-force gets tightest limits.
+// ─── DISTRIBUTED RATE LIMITING ────────────────────────────────────────────────
+// Uses Upstash Redis sliding-window when UPSTASH_REDIS_REST_URL is configured
+// (production / all Vercel regions). Falls back to in-process buckets for local dev.
+// Upstash Redis is globally replicated — rate limits are consistent across all
+// Vercel edge regions simultaneously.
 
 interface RateBucket { count: number; resetAt: number }
+const _localBuckets = new Map<string, RateBucket>()
 
-const globalBuckets = new Map<string, RateBucket>()   // 60 req/min per IP (all routes)
-const authBuckets   = new Map<string, RateBucket>()   // 10 req/min per IP (auth routes)
-const apiBuckets    = new Map<string, RateBucket>()   // 30 req/min per IP (API routes)
-const adminBuckets  = new Map<string, RateBucket>()   // 5 req/min per IP (admin routes)
-
-function checkRate(
-  store: Map<string, RateBucket>,
+async function checkRateLimit(
   key: string,
   limit: number,
-  windowMs: number
-): { allowed: boolean; remaining: number; resetAt: number } {
+  windowSecs: number
+): Promise<{ allowed: boolean; remaining: number; resetAt: number; retryAfter: number }> {
+  const redisUrl  = process.env.UPSTASH_REDIS_REST_URL
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (redisUrl && redisToken) {
+    // ── Upstash sliding-window via REST API (edge-compatible, no Node.js SDK) ──
+    const now   = Math.floor(Date.now() / 1000)
+    const slot  = Math.floor(now / windowSecs)
+    const rKey  = `rl:${key}:${slot}`
+    const resetAt = (slot + 1) * windowSecs
+
+    const res = await fetch(`${redisUrl}/pipeline`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([
+        ['INCR', rKey],
+        ['EXPIRE', rKey, windowSecs + 5],
+      ]),
+    }).catch(() => null)
+
+    if (res?.ok) {
+      const [[, count]] = (await res.json()) as [[string, number]]
+      const remaining = Math.max(limit - count, 0)
+      return {
+        allowed: count <= limit,
+        remaining,
+        resetAt: resetAt * 1000,
+        retryAfter: resetAt - now,
+      }
+    }
+    // Redis unavailable — fail open (don't block real users if Redis is down)
+    return { allowed: true, remaining: limit, resetAt: Date.now() + windowSecs * 1000, retryAfter: windowSecs }
+  }
+
+  // ── In-process fallback (local dev / single instance) ──────────────────────
   const now = Date.now()
-  const entry = store.get(key)
+  const entry = _localBuckets.get(key)
   if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs })
-    return { allowed: true, remaining: limit - 1, resetAt: now + windowMs }
+    _localBuckets.set(key, { count: 1, resetAt: now + windowSecs * 1000 })
+    return { allowed: true, remaining: limit - 1, resetAt: now + windowSecs * 1000, retryAfter: windowSecs }
   }
   entry.count++
-  return {
-    allowed: entry.count <= limit,
-    remaining: Math.max(limit - entry.count, 0),
-    resetAt: entry.resetAt,
-  }
+  const remaining = Math.max(limit - entry.count, 0)
+  const retryAfter = Math.ceil((entry.resetAt - now) / 1000)
+  return { allowed: entry.count <= limit, remaining, resetAt: entry.resetAt, retryAfter }
 }
 
 // ─── CSP NONCE-FREE POLICY ────────────────────────────────────────────────────
-// Strict but compatible with Next.js inline scripts needed for hydration.
-
 const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel-insights.com",
@@ -48,81 +76,69 @@ const CSP = [
   "upgrade-insecure-requests",
 ].join('; ')
 
+// ─── REDIRECT PARAM CONSTANTS ─────────────────────────────────────────────────
+const REDIRECT_PARAMS   = ['next', 'redirect', 'redirectTo', 'to', 'returnTo', 'url', 'return']
+const SENSITIVE_PREFIXES = ['/login', '/auth', '/api/auth']
+
 export default async function proxy(request: NextRequest) {
   const ip = (request.headers.get('x-forwarded-for') ?? 'anonymous').split(',')[0].trim()
   const { pathname } = request.nextUrl
   const isDev = process.env.NODE_ENV === 'development'
 
+  // ── 1. Block TRACE/TRACK ──────────────────────────────────────────────────
+  if (request.method === 'TRACE' || request.method === 'TRACK') {
+    return new NextResponse('Method Not Allowed', { status: 405 })
+  }
+
+  // ── 2. Strip open-redirect params BEFORE rate limiting ───────────────────
+  if (SENSITIVE_PREFIXES.some(p => pathname.startsWith(p))) {
+    const cloned = request.nextUrl.clone()
+    let stripped = false
+    for (const param of REDIRECT_PARAMS) {
+      const val = cloned.searchParams.get(param)
+      if (val && (/^https?:/i.test(val) || val.startsWith('//') || /^javascript:/i.test(val))) {
+        cloned.searchParams.delete(param)
+        stripped = true
+      }
+    }
+    if (stripped) return NextResponse.redirect(cloned)
+  }
+
+  // ── 3. Distributed rate limiting (production only) ───────────────────────
   if (!isDev) {
-    // ── Admin: 5 req/min ──────────────────────────────────────────────────────
+    let tier: { key: string; limit: number; window: number; label: string }
+
     if (pathname.startsWith('/api/admin') || pathname.startsWith('/admin')) {
-      const rl = checkRate(adminBuckets, ip, 5, 60_000)
-      if (!rl.allowed) {
-        return new NextResponse('Too Many Requests', {
-          status: 429,
-          headers: {
-            'Retry-After': Math.ceil((rl.resetAt - Date.now()) / 1000).toString(),
-            'X-RateLimit-Limit': '5',
-            'X-RateLimit-Remaining': '0',
-          },
-        })
-      }
+      tier = { key: `admin:${ip}`, limit: 30, window: 60, label: 'admin' }
+    } else if (pathname.startsWith('/auth') || pathname.startsWith('/api/auth') || pathname.startsWith('/login')) {
+      tier = { key: `auth:${ip}`, limit: 20, window: 60, label: 'auth' }
+    } else if (pathname.startsWith('/api')) {
+      tier = { key: `api:${ip}`, limit: 120, window: 60, label: 'api' }
+    } else {
+      tier = { key: `global:${ip}`, limit: 600, window: 60, label: 'global' }
     }
 
-    // ── Auth routes: 10 req/min ───────────────────────────────────────────────
-    else if (pathname.startsWith('/auth') || pathname.startsWith('/api/auth') || pathname.startsWith('/login')) {
-      const rl = checkRate(authBuckets, ip, 10, 60_000)
-      if (!rl.allowed) {
-        return new NextResponse('Too Many Requests — authentication rate limit exceeded.', {
-          status: 429,
-          headers: {
-            'Retry-After': Math.ceil((rl.resetAt - Date.now()) / 1000).toString(),
-            'X-RateLimit-Limit': '10',
-            'X-RateLimit-Remaining': '0',
-          },
-        })
-      }
-    }
-
-    // ── General API: 30 req/min ───────────────────────────────────────────────
-    else if (pathname.startsWith('/api')) {
-      const rl = checkRate(apiBuckets, ip, 30, 60_000)
-      if (!rl.allowed) {
-        return new NextResponse('Too Many Requests', {
-          status: 429,
-          headers: {
-            'Retry-After': Math.ceil((rl.resetAt - Date.now()) / 1000).toString(),
-            'X-RateLimit-Limit': '30',
-            'X-RateLimit-Remaining': '0',
-          },
-        })
-      }
-    }
-
-    // ── Global: 120 req/min ───────────────────────────────────────────────────
-    else {
-      const rl = checkRate(globalBuckets, ip, 120, 60_000)
-      if (!rl.allowed) {
-        return new NextResponse('Too Many Requests', {
-          status: 429,
-          headers: { 'Retry-After': '60', 'X-RateLimit-Limit': '120', 'X-RateLimit-Remaining': '0' },
-        })
-      }
+    const rl = await checkRateLimit(tier.key, tier.limit, tier.window)
+    if (!rl.allowed) {
+      return new NextResponse('Too Many Requests', {
+        status: 429,
+        headers: {
+          'Retry-After': rl.retryAfter.toString(),
+          'X-RateLimit-Limit': tier.limit.toString(),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': Math.floor(rl.resetAt / 1000).toString(),
+        },
+      })
     }
   }
 
-  // ── Block oversized request bodies early ─────────────────────────────────
+  // ── 4. Block oversized bodies ─────────────────────────────────────────────
   const contentLength = parseInt(request.headers.get('content-length') ?? '0', 10)
   if (contentLength > 500_000) {
     return new NextResponse('Payload Too Large', { status: 413 })
   }
 
-  // ── Block TRACE/TRACK methods (XST attack vector) ─────────────────────────
-  if (['TRACE', 'TRACK'].includes(request.method)) {
-    return new NextResponse('Method Not Allowed', { status: 405 })
-  }
-
-  // ── Institutional guard: protect admin & terminal ─────────────────────────
+  // ── 5. Protect admin & terminal pages ────────────────────────────────────
   if (pathname.startsWith('/terminal') || pathname.startsWith('/admin')) {
     const supabaseSession = request.cookies.get('sb-access-token')
     if (!supabaseSession) {
@@ -130,17 +146,24 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // ── Handle session refresh (Supabase) ─────────────────────────────────────
+  // ── 6. Supabase session refresh ───────────────────────────────────────────
   const response = await updateSession(request)
 
-  // ── Inject security headers on all responses ──────────────────────────────
+  // ── 7. Security + performance headers ────────────────────────────────────
   response.headers.set('Content-Security-Policy', CSP)
   response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('X-Frame-Options', pathname.startsWith('/api') ? 'DENY' : 'SAMEORIGIN')
+  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()')
   response.headers.set('X-DNS-Prefetch-Control', 'off')
   response.headers.delete('X-Powered-By')
+
+  // Cache public pages at the edge (CDN) — revalidated every 60s, stale up to 5min
+  if (!pathname.startsWith('/api') && !pathname.startsWith('/dashboard') &&
+      !pathname.startsWith('/admin') && request.method === 'GET') {
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+  }
 
   return response
 }

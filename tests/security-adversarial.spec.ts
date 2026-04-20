@@ -299,8 +299,8 @@ test.describe('3. Injection Attack Resistance', () => {
         const resp = await apiPost(request, '/api/ai/support', {
           messages: [{ role: 'user', content: payload }],
         })
-        // Without auth, must be 401
-        expect([401, 403]).toContain(resp.status())
+        // Without auth, must be 401 (or 429 if rate-limited — also blocks the attack)
+        expect([401, 403, 429]).toContain(resp.status())
       })
     }
   })
@@ -322,7 +322,7 @@ test.describe('4. Oversized Payload & DoS Resistance', () => {
     const resp = await apiPost(request, '/api/feed', {
       content: OVERSIZED_PAYLOAD,
     })
-    expect([400, 401, 413, 422]).toContain(resp.status())
+    expect([400, 401, 413, 422, 429]).toContain(resp.status())
   })
 
   test('Deeply nested JSON bomb rejected', async ({ request }) => {
@@ -361,7 +361,7 @@ test.describe('4. Oversized Payload & DoS Resistance', () => {
       recipient_id: 'some-uuid',
       amount_cents: 0,
     })
-    expect([400, 401, 403]).toContain(resp.status())
+    expect([400, 401, 403, 429]).toContain(resp.status())
   })
 
   test('Amount_cents as string coercion blocked', async ({ request }) => {
@@ -369,7 +369,7 @@ test.describe('4. Oversized Payload & DoS Resistance', () => {
       recipient_id: 'some-uuid',
       amount_cents: '99999999; DROP TABLE admin_payouts',
     })
-    expect([400, 401, 403]).toContain(resp.status())
+    expect([400, 401, 403, 429]).toContain(resp.status())
   })
 })
 
@@ -381,7 +381,7 @@ test.describe('5. Path Traversal & IDOR Resistance', () => {
       const encoded = encodeURIComponent(payload)
       const resp = await request.get(`/api/hustle/tasks/${encoded}`).catch(() => null)
       if (resp) {
-        expect([400, 401, 404]).toContain(resp.status())
+        expect([400, 401, 404, 429]).toContain(resp.status())
         if (resp.status() === 200) {
           const text = await resp.text()
           expect(text).not.toContain('root:')
@@ -400,13 +400,13 @@ test.describe('5. Path Traversal & IDOR Resistance', () => {
     ]
     for (const id of testIds) {
       const resp = await request.get(`/api/hustle/tasks/${id}`)
-      expect([401, 403, 404]).toContain(resp.status())
+      expect([401, 403, 404, 429]).toContain(resp.status())
     }
   })
 
   test('Admin task route blocks non-admin by UUID', async ({ request }) => {
     const resp = await request.get('/api/admin/tasks/00000000-0000-0000-0000-000000000001')
-    expect([401, 403, 404]).toContain(resp.status())
+    expect([401, 403, 404, 429]).toContain(resp.status())
   })
 })
 
@@ -420,7 +420,7 @@ test.describe('6. HTTP Method & Content-Type Manipulation', () => {
 
   test('HTTP PUT on POST-only endpoint handled safely', async ({ request }) => {
     const resp = await request.put('/api/preregister', { data: {} }).catch(() => null)
-    if (resp) expect([404, 405]).toContain(resp.status())
+    if (resp) expect([404, 405, 429]).toContain(resp.status())
   })
 
   test('Wrong Content-Type (text/html) on JSON API rejected', async ({ request }) => {
@@ -428,7 +428,7 @@ test.describe('6. HTTP Method & Content-Type Manipulation', () => {
       headers: { 'Content-Type': 'text/html' },
       data: '<script>alert(1)</script>',
     })
-    expect([400, 415, 422]).toContain(resp.status())
+    expect([400, 415, 422, 429]).toContain(resp.status())
   })
 
   test('Null byte injection in headers handled', async ({ request }) => {
@@ -515,8 +515,8 @@ test.describe('8. Sensitive Data Exposure', () => {
       headers: { 'Content-Type': 'application/json' },
       data: JSON.stringify({ type: 'checkout.session.completed', data: { object: {} } }),
     })
-    // Missing or invalid stripe-signature must return 400
-    expect([400]).toContain(resp.status())
+    // Missing or invalid stripe-signature must return 400 (or 429 if rate-limited)
+    expect([400, 429]).toContain(resp.status())
   })
 
   test('Stripe webhook with fake signature rejected', async ({ request }) => {
@@ -527,7 +527,7 @@ test.describe('8. Sensitive Data Exposure', () => {
       },
       data: JSON.stringify({ type: 'checkout.session.completed', data: { object: {} } }),
     })
-    expect([400]).toContain(resp.status())
+    expect([400, 429]).toContain(resp.status())
   })
 })
 

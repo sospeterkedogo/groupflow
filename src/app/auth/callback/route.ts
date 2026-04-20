@@ -22,8 +22,13 @@ export async function GET(request: Request) {
       // Check if this is a password recovery flow
       const { data: { user } } = await supabase.auth.getUser()
       const isRecovery = searchParams.get('type') === 'recovery' || !user?.last_sign_in_at
-      
-      const redirectPath = isRecovery ? '/auth/reset-password' : next
+
+      // Validate redirect path — must be a relative path on same origin (open redirect prevention)
+      const rawNext = next
+      const isSafeRedirect = rawNext.startsWith('/') && !rawNext.startsWith('//') && !rawNext.includes(':')
+      const safePath = isSafeRedirect ? rawNext : '/dashboard'
+
+      const redirectPath = isRecovery ? '/auth/reset-password' : safePath
       const redirectUrl = new URL(redirectPath, origin).toString()
       return NextResponse.redirect(redirectUrl)
     }

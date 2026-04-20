@@ -6,15 +6,19 @@ import { createAdminClient } from '@/utils/supabase/server'
 
 export const runtime = 'nodejs'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2022-11-15',
-})
-
 export async function POST(req: Request) {
   const signature = req.headers.get('stripe-signature')
   if (!signature) {
     return new NextResponse('Missing Stripe signature', { status: 400 })
   }
+
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    return new NextResponse('Stripe not configured', { status: 400 })
+  }
+
+  // Lazy init: avoid module-level throw when STRIPE_SECRET_KEY is unset
+  const stripe = new Stripe(stripeKey, { apiVersion: '2022-11-15' })
 
   const rawBody = Buffer.from(await req.arrayBuffer())
 

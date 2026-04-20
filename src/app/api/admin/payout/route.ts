@@ -20,9 +20,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { recipient_id, amount_cents, note } = await req.json()
-  if (!recipient_id || !amount_cents || amount_cents < 100) {
-    return NextResponse.json({ error: 'recipient_id and amount_cents (min $1) required' }, { status: 400 })
+  const body = await req.json().catch(() => null)
+  const { recipient_id, amount_cents, note } = body ?? {}
+
+  // Validate recipient_id is a proper UUID
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!recipient_id || !UUID_RE.test(String(recipient_id))) {
+    return NextResponse.json({ error: 'Invalid recipient_id: must be a valid UUID' }, { status: 400 })
+  }
+
+  // Validate amount_cents: must be a positive integer >= 100, no string coercion, no overflow
+  const parsedAmount = Number(amount_cents)
+  if (
+    !amount_cents ||
+    typeof amount_cents !== 'number' ||
+    !Number.isFinite(parsedAmount) ||
+    !Number.isInteger(parsedAmount) ||
+    parsedAmount < 100 ||
+    parsedAmount > 10_000_000_00 // max $10M
+  ) {
+    return NextResponse.json({ error: 'amount_cents must be a positive integer >= 100 (min $1)' }, { status: 400 })
   }
 
   const { data: recipient } = await svc

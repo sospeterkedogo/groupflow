@@ -1,13 +1,32 @@
 {
   "framework": "nextjs",
-  "regions": ["iad1", "lhr1", "syd1", "sin1", "cdg1"],
+  "regions": [
+    "iad1",
+    "lhr1",
+    "syd1",
+    "sin1",
+    "cdg1",
+    "bom1",
+    "gru1",
+    "hnd1",
+    "icn1",
+    "kix1",
+    "sfo1",
+    "cle1",
+    "dub1"
+  ],
+  "crons": [
+    { "path": "/api/cron/expire-verifications", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/health-check", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/promo-email", "schedule": "0 9 * * 1" }
+  ],
   "functions": {
     "src/app/api/stripe/**": { "maxDuration": 30, "memory": 1024 },
     "src/app/api/admin/**": { "maxDuration": 60, "memory": 3008 },
-    "src/app/api/ai/**": { "maxDuration": 60, "memory": 3008 },
-    "src/app/api/feed/**": { "maxDuration": 15, "memory": 512 },
-    "src/app/api/hustle/**": { "maxDuration": 30, "memory": 1024 },
-    "src/app/api/**": { "maxDuration": 15, "memory": 512 }
+    "src/app/api/ai/**":    { "maxDuration": 60, "memory": 3008 },
+    "src/app/api/feed/**":  { "maxDuration": 15, "memory": 512 },
+    "src/app/api/hustle/**":{ "maxDuration": 30, "memory": 1024 },
+    "src/app/api/**":       { "maxDuration": 15, "memory": 512 }
   },
   "headers": [
     {
@@ -49,12 +68,10 @@
       "headers": [
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Vary", "value": "Accept-Encoding, Accept-Language" }
       ]
     }
-  ],
-  "crons": [
-    { "path": "/api/cron/health-check", "schedule": "*/5 * * * *" },
-    { "path": "/api/cron/promo-email", "schedule": "0 9 * * 1" }
   ]
 }
+

@@ -69,32 +69,18 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        // Redirect to login if on landing page and not authenticated
-        window.location.href = `/login?redirect=/dashboard/upgrade&plan=${plan}`
+        // Redirect to login then back to checkout interstitial
+        const returnUrl = `/checkout?plan=${plan}${discountActive ? `&coupon=${coupon}` : ''}`
+        window.location.href = `/login?redirect=${encodeURIComponent(returnUrl)}`
         return
       }
 
-      const userId = user.id
-      const promoParam = discountActive ? `&prefilled_promo_code=${coupon}` : ''
-
-      // 2. Direct Stripe Links for instant availability (Always Online)
-      if (plan === 'pro') {
-        window.location.href = `https://buy.stripe.com/5kQcN5clSbLa5CU0f67wA04?client_reference_id=${userId}${promoParam}`
-        return
-      }
-
-      if (plan === 'premium') {
-        window.location.href = `https://buy.stripe.com/00wcN55Xu16w4yQe5W7wA06?client_reference_id=${userId}${promoParam}`
-        return
-      }
-
-      if (plan === 'lifetime') {
-        // Updated Real Stripe Lifetime Link
-        window.location.href = `https://buy.stripe.com/8x2aEXdpWbLa1mEge47wA05?client_reference_id=${userId}${promoParam}`
-        return
-      }
-    } catch (err: any) {
-      setError(err.message || 'Checkout initiation failed.')
+      // 2. Route through pre-checkout interstitial for a PayPal-style review step
+      const params = new URLSearchParams({ plan, uid: user.id })
+      if (discountActive && coupon) params.set('coupon', coupon)
+      window.location.href = `/checkout?${params.toString()}`
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Checkout initiation failed.')
     } finally {
       setLoadingPlan(null)
     }

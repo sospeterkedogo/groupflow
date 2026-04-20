@@ -6,6 +6,20 @@ export const dynamic = 'force-dynamic'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' })
 
+// GET /api/admin/tasks/[id] — admin fetch task by id
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const svc = await createAdminClient()
+  const { data: adminProfile } = await svc.from('profiles').select('role').eq('id', user.id).single()
+  if (adminProfile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const { id } = await params
+  const { data, error } = await svc.from('hustle_tasks').select('*').eq('id', id).single()
+  if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json(data)
+}
+
 // POST /api/admin/payout — admin sends money to a user
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
