@@ -155,7 +155,7 @@ export default function AgentControlCentre() {
 
   async function submitOrchestrateCmd() {
     if (orchestrateCmd.trim().length < 10) {
-      setError('Command must be at least 10 characters')
+      setError('Command must be at least 10 characters so agents have enough detail to work with')
       return
     }
     setOrchestrating(true); setError(''); setOrchestrateResult(null)
@@ -166,12 +166,12 @@ export default function AgentControlCentre() {
         body: JSON.stringify({ command: orchestrateCmd }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error ?? 'Orchestration failed'); return }
+      if (!res.ok) { setError(data.error ?? 'Failed to create tasks. Please refine your command and try again.'); return }
       setOrchestrateResult(data)
       setOrchestrateCmd('')
       await load()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Network error')
+      setError(e instanceof Error ? e.message : 'Network error: unable to reach the orchestration service. Please check your connection and try again.')
     } finally {
       setOrchestrating(false)
     }
