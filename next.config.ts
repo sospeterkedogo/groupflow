@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
 
   experimental: {},
 
+  // Silence the Next.js 16 Turbopack "webpack config but no turbopack config"
+  // warning so the default Turbopack production build succeeds cleanly.
+  turbopack: {},
+
   // ── Image optimisation ───────────────────────────────────────────────────
   images: {
     formats: ['image/avif', 'image/webp'],

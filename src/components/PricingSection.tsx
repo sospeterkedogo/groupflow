@@ -27,15 +27,17 @@ export default function PricingSection({ showTitle = true, isLanding = false }: 
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const { count: lifetimeCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('subscription_plan', 'lifetime')
-
-      const { count: proTotal } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('subscription_plan', 'pro')
+      // Fetch both counts in parallel to halve latency
+      const [{ count: lifetimeCount }, { count: proTotal }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('subscription_plan', 'lifetime'),
+        supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('subscription_plan', 'pro'),
+      ])
 
       setLifetimeSeatsUsed(lifetimeCount || 0)
       setProCount(proTotal || 0)

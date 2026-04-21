@@ -9,14 +9,22 @@ import {
 } from 'lucide-react'
 import { features, faqs, navMenus } from '@/config/landing'
 
-// Component Imports
-import PricingSection from '@/components/PricingSection'
+// Component Imports — above-the-fold components load synchronously for fast LCP;
+// heavy below-the-fold sections are code-split via dynamic imports to keep the
+// initial JS bundle small and Time-to-Interactive low.
+import dynamic from 'next/dynamic'
+
+// Critical path (immediately visible): keep synchronous
 import LandingHeader from '@/components/landing/LandingHeader'
 import LandingHero from '@/components/landing/LandingHero'
-import LandingMission from '@/components/landing/LandingMission'
-import LandingFeatures from '@/components/landing/LandingFeatures'
-import LandingFAQ from '@/components/landing/LandingFAQ'
-import LandingFooter from '@/components/landing/LandingFooter'
+
+// Below-the-fold / interaction-only: deferred until needed
+const LandingMission  = dynamic(() => import('@/components/landing/LandingMission'))
+const LandingFeatures = dynamic(() => import('@/components/landing/LandingFeatures'))
+const LandingFAQ      = dynamic(() => import('@/components/landing/LandingFAQ'))
+const PricingSection  = dynamic(() => import('@/components/PricingSection'))
+const LandingDonate   = dynamic(() => import('@/components/landing/LandingDonate'))
+const LandingFooter   = dynamic(() => import('@/components/landing/LandingFooter'))
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -141,6 +149,9 @@ export default function Home() {
         <section id="pricing" style={{ padding: '10rem 2rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
            <PricingSection isLanding={true} />
         </section>
+
+        {/* SUPPORT / DONATION SECTION */}
+        <LandingDonate />
 
         {/* FINAL UNIFIED CTA */}
         <section style={{ padding: 'clamp(5rem, 15vw, 12rem) 2rem', textAlign: 'center', position: 'relative' }}>
