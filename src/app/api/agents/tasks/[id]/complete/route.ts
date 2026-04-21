@@ -20,20 +20,20 @@ const CompleteSchema = z.object({
 });
 
 /**
- * POST /api/agents/tasks/[taskId]/complete
+ * POST /api/agents/tasks/[id]/complete
  * Called by an agent worker when a task is finished.
  * Stores artifacts, updates status, and increments agent task count.
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ taskId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const apiKey = req.headers.get('x-agent-key');
   if (!apiKey || apiKey !== process.env.AGENT_API_KEY) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { taskId } = await params;
+  const { id: taskId } = await params;
   if (!taskId) {
     return NextResponse.json({ error: 'taskId required' }, { status: 400 });
   }
