@@ -35,8 +35,8 @@ test.describe('Institutional Guards & Secret Gateway', () => {
   test('Landing Page Tiered Features visibility', async ({ page }) => {
     await page.goto('/');
     
-    // Verify "Bank-Level Safety Matrix" is showcased
-    await expect(page.locator('text=Bank-Level Safety Matrix')).toBeVisible();
+    // Verify "Secure & Safe" feature card is showcased
+    await expect(page.locator('text=Secure & Safe')).toBeVisible();
     
     // Verify "Founder Lifetime Access" in FAQ
     await expect(page.locator('text=Founder Lifetime Access')).toBeVisible();
