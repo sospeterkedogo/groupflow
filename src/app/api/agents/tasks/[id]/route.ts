@@ -29,7 +29,7 @@ export async function GET(
 
   // Resolve agent name → id if a name was passed instead of UUID
   let resolvedId = agentIdOrName;
-  if (!/^[0-9a-fA-F-]{36}$/.test(agentIdOrName)) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(agentIdOrName)) {
     const { data: agent } = await admin
       .from('agents')
       .select('id')
