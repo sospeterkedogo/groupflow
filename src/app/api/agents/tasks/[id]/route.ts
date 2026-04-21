@@ -20,20 +20,20 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id: agentId } = await params;
-  if (!agentId) {
+  const { id: agentIdOrName } = await params;
+  if (!agentIdOrName) {
     return NextResponse.json({ error: 'agentId required' }, { status: 400 });
   }
 
   const admin = await createAdminClient();
 
   // Resolve agent name → id if a name was passed instead of UUID
-  let resolvedId = agentId;
-  if (!/^[0-9a-f-]{36}$/.test(agentId)) {
+  let resolvedId = agentIdOrName;
+  if (!/^[0-9a-fA-F-]{36}$/.test(agentIdOrName)) {
     const { data: agent } = await admin
       .from('agents')
       .select('id')
-      .ilike('name', agentId)
+      .ilike('name', agentIdOrName)
       .single();
     if (!agent) {
       return NextResponse.json({ error: 'Agent not found' }, { status: 404 });

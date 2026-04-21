@@ -22,6 +22,7 @@ const CompleteSchema = z.object({
 /**
  * POST /api/agents/tasks/[id]/complete
  * Called by an agent worker when a task is finished.
+ * The [id] segment must be a valid task UUID.
  * Stores artifacts, updates status, and increments agent task count.
  */
 export async function POST(
