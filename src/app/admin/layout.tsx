@@ -4,6 +4,7 @@ import { ProfileProvider } from '@/context/ProfileContext'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { GlobalLoadingProvider } from '@/components/GlobalLoadingProvider'
+import AdminSidebar from '@/components/AdminSidebar'
 import type { Profile } from '@/types/auth'
 
 export const dynamic = 'force-dynamic'
@@ -15,6 +16,7 @@ export default async function AdminLayout({
 }) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
+    .catch(() => ({ data: { user: null } }))
 
   if (!user) {
     redirect('/login?redirect=/admin')
@@ -41,7 +43,12 @@ export default async function AdminLayout({
       <GlobalLoadingProvider>
         <ProfileProvider userId={user.id} initialProfile={profile as Profile | null}>
            <NotificationProvider>
-             {children}
+             <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)' }}>
+               <AdminSidebar adminEmail={user.email ?? ''} adminName={profile?.full_name ?? 'Admin'} />
+               <main style={{ flex: 1, overflowY: 'auto' }}>
+                 {children}
+               </main>
+             </div>
            </NotificationProvider>
         </ProfileProvider>
       </GlobalLoadingProvider>
