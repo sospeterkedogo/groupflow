@@ -3,14 +3,15 @@ import Stripe from 'stripe'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2022-11-15',
+  apiVersion: '2026-03-25.dahlia' as any,
 })
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabaseClient()
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+    .catch(() => ({ data: { user: null } }))
 
-  if (userError || !user) {
+  if (!user) {
     return new NextResponse(JSON.stringify({ error: 'Authentication required.' }), { status: 401 })
   }
 

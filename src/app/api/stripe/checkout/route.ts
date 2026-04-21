@@ -3,9 +3,17 @@ import Stripe from 'stripe'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { checkBotId } from 'botid/server'
 
+export const dynamic = 'force-dynamic'
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2022-11-15',
+  apiVersion: '2026-03-25.dahlia' as any,
 })
+
+const PLAN_CONFIG: Record<string, { priceEnvKey: string; mode: 'subscription' | 'payment'; label: string }> = {
+  pro:      { priceEnvKey: 'STRIPE_PRICE_PRO_ID',      mode: 'subscription', label: 'Pro Scholar — $9/month' },
+  premium:  { priceEnvKey: 'STRIPE_PRICE_PREMIUM_ID',  mode: 'subscription', label: 'Premium Scholar — $19/month' },
+  lifetime: { priceEnvKey: 'STRIPE_PRICE_LIFETIME_ID', mode: 'payment',      label: 'Lifetime Founding Scholar — $149' },
+}
 
 export async function POST(req: Request) {
   // BotID Verification
@@ -17,32 +25,42 @@ export async function POST(req: Request) {
   }
 
   const supabase = await createServerSupabaseClient()
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+    .catch(() => ({ data: { user: null } }))
 
-  if (userError || !user) {
+  if (!user) {
     return new NextResponse(JSON.stringify({ error: 'Authentication required.' }), { status: 401 })
   }
 
-  const { plan } = await req.json()
-  const selectedPlan = plan === 'premium' ? 'premium' : 'pro'
-  const isSubscription = selectedPlan === 'pro'
+  const body = await req.json().catch(() => ({}))
+  const planKey = String(body?.plan ?? 'pro').toLowerCase()
+  const config = PLAN_CONFIG[planKey]
 
-  const priceId = isSubscription
+  if (!config) {
+    return new NextResponse(JSON.stringify({ error: 'Invalid plan selected.' }), { status: 422 })
+  }
+
+  const priceId = process.env[config.priceEnvKey]
+  // Fallback: legacy env keys for backwards compatibility
+  const fallbackPriceId = planKey === 'pro'
     ? process.env.STRIPE_PRICE_SUBSCRIPTION_ID
-    : process.env.STRIPE_PRICE_ONE_TIME_ID
+    : planKey === 'lifetime'
+    ? process.env.STRIPE_PRICE_ONE_TIME_ID
+    : undefined
 
+  const resolvedPriceId = priceId ?? fallbackPriceId
   const successUrl = process.env.STRIPE_SUCCESS_URL
   const cancelUrl = process.env.STRIPE_CANCEL_URL
 
-  if (!priceId || !successUrl || !cancelUrl) {
+  if (!resolvedPriceId || !successUrl || !cancelUrl) {
     return new NextResponse(JSON.stringify({ error: 'Stripe is not configured correctly.' }), { status: 500 })
   }
 
   try {
     const session = await stripe.checkout.sessions.create({
-      mode: isSubscription ? 'subscription' : 'payment',
+      mode: config.mode,
       payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: resolvedPriceId, quantity: 1 }],
       customer_email: user.email ?? undefined,
       success_url: successUrl,
       cancel_url: cancelUrl,
@@ -50,9 +68,9 @@ export async function POST(req: Request) {
       allow_promotion_codes: true,
       metadata: {
         user_id: user.id,
-        plan: selectedPlan,
-        product_label: isSubscription ? 'Pro Mission Support' : 'Premium Mission Support'
-      }
+        plan: planKey,
+        product_label: config.label,
+      },
     })
 
     if (!session.url) {

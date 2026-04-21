@@ -4,7 +4,7 @@ import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' as any })
 
 // POST /api/admin/payout — admin sends money to a user
 export async function POST(req: NextRequest) {

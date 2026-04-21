@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   }
 
   // Lazy init: avoid module-level throw when STRIPE_SECRET_KEY is unset
-  const stripe = new Stripe(stripeKey, { apiVersion: '2022-11-15' })
+  const stripe = new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as any })
 
   const rawBody = Buffer.from(await req.arrayBuffer())
 
