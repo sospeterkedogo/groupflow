@@ -29,6 +29,14 @@ import { ClientSideSuspense } from "@liveblocks/react";
 
 const COLUMNS: TaskStatus[] = ['To Do', 'In Progress', 'In Review', 'Done']
 
+// Minimum drag duration (ms) before a drop is accepted.
+// Prevents accidental fast flicks and ensures intentional placement.
+const MIN_DRAG_MS = 150
+
+// How long the lock-snap animation class stays active (ms).
+// Slightly longer than the CSS animation (0.45s / 450ms) to ensure full playback.
+const LOCK_SNAP_DURATION_MS = 500
+
 export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanBoardProps) {
   if (!groupId) return <div>Invalid Group</div>;
 
@@ -270,9 +278,9 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     const taskId = e.dataTransfer.getData('taskId')
     if (!taskId) return
 
-    // Throttle: require at least 150ms drag duration for accuracy
+    // Throttle: require intentional drag before accepting the drop
     const elapsed = Date.now() - dragStartTimeRef.current
-    if (elapsed < 150) {
+    if (elapsed < MIN_DRAG_MS) {
       setDraggingCardId(null)
       return
     }
@@ -281,7 +289,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
     // Trigger lock-snap animation on the landing card
     setDroppingTaskId(taskId)
-    setTimeout(() => setDroppingTaskId(null), 550)
+    setTimeout(() => setDroppingTaskId(null), LOCK_SNAP_DURATION_MS)
 
     // Haptic feedback on mobile
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
@@ -330,12 +338,15 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       if (targetTask && targetTask.assignees) {
         distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error('Score Distribution error', err))
       }
-      // Mini confetti burst on task completion
+      // Mini confetti burst on task completion — colors resolved from CSS variables
+      const brandColor = typeof document !== 'undefined'
+        ? getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#10b981'
+        : '#10b981'
       confetti({
         particleCount: 35,
         spread: 50,
         origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
-        colors: ['#10b981', '#34d399', '#6ee7b7', '#ffffff'],
+        colors: [brandColor, '#34d399', '#6ee7b7', '#ffffff'],
         scalar: 0.9,
         ticks: 60
       })
@@ -834,8 +845,8 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
         .kanban-card-title { font-weight: 700; font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.25rem; line-height: 1.3; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes lock-snap {
-          0%   { transform: scale(1.06) translateY(-5px); box-shadow: 0 0 0 3px var(--brand), 0 14px 32px rgba(var(--brand-rgb), 0.35); }
-          35%  { transform: scale(0.96) translateY(3px); box-shadow: 0 0 0 5px rgba(var(--brand-rgb), 0.3), 0 2px 8px rgba(0,0,0,0.15); }
+          0%   { transform: scale(1.06) translateY(-5px); box-shadow: 0 0 0 3px var(--brand), var(--shadow-xl); }
+          35%  { transform: scale(0.96) translateY(3px); box-shadow: 0 0 0 5px rgba(var(--brand-rgb), 0.3), var(--shadow-sm); }
           60%  { transform: scale(1.02) translateY(-1px); box-shadow: 0 0 0 2px rgba(var(--brand-rgb), 0.5); }
           80%  { transform: scale(0.99) translateY(0); box-shadow: 0 0 0 1px rgba(var(--brand-rgb), 0.25); }
           100% { transform: scale(1) translateY(0); box-shadow: none; }
