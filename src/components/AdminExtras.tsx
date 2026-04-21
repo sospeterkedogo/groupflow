@@ -26,6 +26,15 @@ interface FeedbackRow {
   profile?: { full_name: string; email: string }
 }
 
+interface Campaign {
+  id: string; title: string; subject: string; status: string
+  sent_count: number; created_at: string; sent_at?: string
+}
+
+interface ServerError {
+  id: number; route?: string; method?: string; message: string; stack?: string; created_at: string
+}
+
 const supabase = createBrowserSupabaseClient()
 
 export default function AdminExtras() {
@@ -46,7 +55,6 @@ export default function AdminExtras() {
   const [sendingPayout, setSendingPayout] = useState(false)
 
   // Email campaign state
-  interface Campaign { id: string; title: string; subject: string; status: string; sent_count: number; created_at: string; sent_at?: string }
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [campaignTitle, setCampaignTitle] = useState('')
   const [campaignSubject, setCampaignSubject] = useState('')
@@ -56,7 +64,6 @@ export default function AdminExtras() {
   const [campaignMsg, setCampaignMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   // Server error log state
-  interface ServerError { id: number; route?: string; method?: string; message: string; stack?: string; created_at: string }
   const [serverErrors, setServerErrors] = useState<ServerError[]>([])
   const [errorsLoading, setErrorsLoading] = useState(false)
   const [expandedError, setExpandedError] = useState<number | null>(null)
@@ -132,7 +139,6 @@ export default function AdminExtras() {
           subject: campaignSubject,
           preview: campaignPreview,
           html_body: campaignBody,
-          text_body: campaignBody.replace(/<[^>]+>/g, ''),
         }),
       })
       const data = await res.json()

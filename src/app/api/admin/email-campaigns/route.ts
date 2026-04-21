@@ -6,6 +6,8 @@ import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
+const DEFAULT_NOTIFICATION_MESSAGE = 'New announcement from Espeezy.'
+
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -71,7 +73,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 })
   }
 
-  const { title, subject, preview, html_body, text_body } = parsed.data
+  const { title, subject, preview, html_body, text_body: rawTextBody } = parsed.data
+  // Derive plain-text fallback on the server so the client never has to strip HTML
+  const text_body = rawTextBody ?? html_body.replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim()
   const admin = adminClient()
 
   // 1. Insert campaign as 'sending'
@@ -133,7 +137,7 @@ export async function POST(req: Request) {
       user_id: r.id,
       type: 'marketing',
       title: subject,
-      message: preview ?? text_body?.slice(0, 160) ?? 'New announcement from Espeezy.',
+      message: preview ?? text_body?.slice(0, 160) ?? DEFAULT_NOTIFICATION_MESSAGE,
       link: null,
       read: false,
     }))
