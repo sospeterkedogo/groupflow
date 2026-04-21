@@ -15,7 +15,7 @@ const SUPPORTED_LOCALES = locales.filter((l) => SUPPORTED_LOCALE_CODES.has(l.cod
 function readCookieLocale(): LocaleCode | null {
   if (typeof document === 'undefined') return null
   const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/)
-  const val = match?.[1]
+  const val = match ? decodeURIComponent(match[1]) : undefined
   return val && isValidLocale(val) ? val : null
 }
 
@@ -47,7 +47,7 @@ export default function LanguageSelector() {
   }, [open])
 
   const setLocale = (code: LocaleCode) => {
-    document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000; SameSite=Lax`
+    document.cookie = `NEXT_LOCALE=${encodeURIComponent(code)}; path=/; max-age=31536000; SameSite=Lax`
     setOpen(false)
     window.location.reload()
   }
@@ -57,7 +57,7 @@ export default function LanguageSelector() {
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
       <button
-        aria-label={`Language: ${currentInfo.name}. Click to change`}
+        aria-label={`Current language: ${currentInfo.name}, click to change`}
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((o) => !o)}

@@ -6,6 +6,8 @@ import { z } from 'zod'
 export const dynamic = 'force-dynamic'
 
 const DEFAULT_NOTIFICATION_MESSAGE = 'New announcement from Espeezy.'
+// Cap the per-address error sample returned to the client to avoid huge payloads
+const MAX_ERROR_SAMPLE_SIZE = 10
 
 // ── Auth helper ──────────────────────────────────────────────────────────────
 async function requireAdmin() {
@@ -188,13 +190,12 @@ export async function POST(req: Request) {
     }, { status: 500 })
   }
 
-  // Return a bounded summary — not the full per-address error list
-  const MAX_ERRORS = 10
+  // Return a bounded sample — not the full per-address error list
   return NextResponse.json({
     campaign_id: campaign.id,
     sent_count: sentCount,
     total_recipients: list.length,
     errors_count: errors.length,
-    errors: errors.length > 0 ? errors.slice(0, MAX_ERRORS) : undefined,
+    errors: errors.length > 0 ? errors.slice(0, MAX_ERROR_SAMPLE_SIZE) : undefined,
   })
 }
