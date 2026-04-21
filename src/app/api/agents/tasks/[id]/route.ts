@@ -7,6 +7,8 @@ export const dynamic = 'force-dynamic';
  * GET /api/agents/tasks/[id]
  * Returns pending/in_progress tasks for the given agent.
  * The [id] segment accepts either an agent UUID or agent name.
+ * Note: Unlike POST /[id]/complete which requires a task UUID, this endpoint
+ * accepts an agent UUID or agent name to look up the agent's assigned tasks.
  * Used by automated agent workers to poll for their next assignment.
  * Requires the X-Agent-Key header to match AGENT_API_KEY env var.
  */
@@ -22,7 +24,7 @@ export async function GET(
 
   const { id: agentIdOrName } = await params;
   if (!agentIdOrName) {
-    return NextResponse.json({ error: 'agentId required' }, { status: 400 });
+    return NextResponse.json({ error: 'agent identifier required' }, { status: 400 });
   }
 
   const admin = await createAdminClient();
