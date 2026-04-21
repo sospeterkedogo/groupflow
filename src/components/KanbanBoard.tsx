@@ -595,7 +595,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                       transition={{ type: 'spring', stiffness: 380, damping: 28 }}
                       className={`kanban-card ${draggingOther ? 'remote-dragging' : ''} ${isLanding ? 'kanban-card-landing' : ''}`}
                       draggable
-                      onDragStart={(e) => handleDragStart(e as React.DragEvent<HTMLDivElement>, task.id)}
+                      onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent<HTMLDivElement>, task.id)}
                       onDragEnd={handleDragEnd}
                       onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
                       style={{

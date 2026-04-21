@@ -206,8 +206,15 @@ export default function LandingDonate() {
 
                   {/* Custom amount */}
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontWeight: 700, fontSize: '0.9rem' }}>$</span>
+                    <label
+                      htmlFor="custom-donation-amount"
+                      style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}
+                    >
+                      Custom donation amount in US dollars
+                    </label>
+                    <span aria-hidden="true" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontWeight: 700, fontSize: '0.9rem' }}>$</span>
                     <input
+                      id="custom-donation-amount"
                       type="number"
                       min="1"
                       step="0.01"

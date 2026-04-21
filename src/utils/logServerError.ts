@@ -2,18 +2,12 @@
  * logServerError — write an unhandled server error to public.server_error_log
  * using the service-role client so RLS is bypassed.
  *
+ * Only import this module from server-side code (API routes, Server Actions).
  * Call this inside catch blocks in API routes where you want errors to
  * surface on the admin dashboard.
  */
 
-import { createClient } from '@supabase/supabase-js'
-
-function getAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return null
-  return createClient(url, key)
-}
+import { createAdminClient } from '@/utils/supabase/server'
 
 export interface ErrorLogPayload {
   route?: string
@@ -26,8 +20,7 @@ export interface ErrorLogPayload {
 
 export async function logServerError(payload: ErrorLogPayload): Promise<void> {
   try {
-    const admin = getAdminClient()
-    if (!admin) return
+    const admin = await createAdminClient()
 
     await admin.from('server_error_log').insert({
       route:    payload.route   ?? null,

@@ -111,12 +111,17 @@ export default function AdminExtras() {
 
   const loadServerErrors = useCallback(async () => {
     setErrorsLoading(true)
-    const res = await fetch('/api/admin/server-errors')
-    if (res.ok) {
+    try {
+      const res = await fetch('/api/admin/server-errors')
+      if (!res.ok) throw new Error(`Failed to load server errors (${res.status})`)
       const json = await res.json()
       setServerErrors(json.errors ?? [])
+    } catch (e) {
+      setServerErrors([])
+      console.error('loadServerErrors:', (e as Error).message)
+    } finally {
+      setErrorsLoading(false)
     }
-    setErrorsLoading(false)
   }, [])
 
   useEffect(() => {

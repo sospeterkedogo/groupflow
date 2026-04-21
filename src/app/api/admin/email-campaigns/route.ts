@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/utils/supabase/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
 import { sendEmail } from '@/services/email'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
 const DEFAULT_NOTIFICATION_MESSAGE = 'New announcement from Espeezy.'
-
-function adminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, key)
-}
 
 // ── Auth helper ──────────────────────────────────────────────────────────────
 async function requireAdmin() {
@@ -21,12 +14,15 @@ async function requireAdmin() {
     .catch(() => ({ data: { user: null } }))
   if (!user) return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileErr } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single()
 
+  if (profileErr) {
+    return { user: null, error: NextResponse.json({ error: 'Failed to verify permissions', details: profileErr.message }, { status: 500 }) }
+  }
   if (profile?.role !== 'admin') {
     return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
@@ -38,7 +34,7 @@ export async function GET() {
   const { error } = await requireAdmin()
   if (error) return error
 
-  const admin = adminClient()
+  const admin = await createAdminClient()
   const { data, error: dbErr } = await admin
     .from('marketing_campaigns')
     .select('id, title, subject, status, sent_count, created_at, sent_at')
@@ -58,6 +54,12 @@ const CampaignSchema = z.object({
   text_body: z.string().optional(),
 })
 
+interface Recipient {
+  id: string
+  email: string
+  full_name: string | null
+}
+
 // ── POST /api/admin/email-campaigns ─────────────────────────────────────────
 export async function POST(req: Request) {
   const { user, error: authErr } = await requireAdmin()
@@ -76,7 +78,7 @@ export async function POST(req: Request) {
   const { title, subject, preview, html_body, text_body: rawTextBody } = parsed.data
   // Derive plain-text fallback on the server so the client never has to strip HTML
   const text_body = rawTextBody ?? html_body.replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim()
-  const admin = adminClient()
+  const admin = await createAdminClient()
 
   // 1. Insert campaign as 'sending'
   const { data: campaign, error: insertErr } = await admin
@@ -94,13 +96,21 @@ export async function POST(req: Request) {
   }
 
   // 2. Fetch all opted-in users (marketing_emails = true)
-  const { data: recipients } = await admin
+  const { data: recipients, error: recipientsErr } = await admin
     .from('profiles')
     .select('id, email, full_name')
     .eq('marketing_emails', true)
     .not('email', 'is', null)
 
-  const list = recipients ?? []
+  if (recipientsErr) {
+    await admin
+      .from('marketing_campaigns')
+      .update({ status: 'failed' })
+      .eq('id', campaign.id)
+    return NextResponse.json({ error: recipientsErr.message ?? 'Failed to fetch recipients' }, { status: 500 })
+  }
+
+  const list = (recipients ?? []) as Recipient[]
   let sentCount = 0
   const errors: string[] = []
 
@@ -143,21 +153,48 @@ export async function POST(req: Request) {
     }))
     // Insert in chunks to stay within PostgREST request size limits
     for (let i = 0; i < notifRows.length; i += 500) {
-      await admin.from('notifications').insert(notifRows.slice(i, i + 500))
+      const { error: notifErr } = await admin.from('notifications').insert(notifRows.slice(i, i + 500))
+      if (notifErr) {
+        // Notification insert failed — still mark campaign sent but surface the error
+        await admin
+          .from('marketing_campaigns')
+          .update({ status: 'sent', sent_count: sentCount, sent_at: new Date().toISOString() })
+          .eq('id', campaign.id)
+        return NextResponse.json({
+          error: 'Emails sent but notifications failed',
+          details: notifErr.message,
+          campaign_id: campaign.id,
+          sent_count: sentCount,
+          total_recipients: list.length,
+        }, { status: 500 })
+      }
     }
   }
 
   // 5. Mark campaign sent
   const finalStatus = errors.length === list.length && list.length > 0 ? 'failed' : 'sent'
-  await admin
+  const { error: finalUpdateErr } = await admin
     .from('marketing_campaigns')
     .update({ status: finalStatus, sent_count: sentCount, sent_at: new Date().toISOString() })
     .eq('id', campaign.id)
 
+  if (finalUpdateErr) {
+    return NextResponse.json({
+      error: 'Failed to update campaign status',
+      details: finalUpdateErr.message,
+      campaign_id: campaign.id,
+      sent_count: sentCount,
+      total_recipients: list.length,
+    }, { status: 500 })
+  }
+
+  // Return a bounded summary — not the full per-address error list
+  const MAX_ERRORS = 10
   return NextResponse.json({
     campaign_id: campaign.id,
     sent_count: sentCount,
     total_recipients: list.length,
-    errors: errors.length > 0 ? errors : undefined,
+    errors_count: errors.length,
+    errors: errors.length > 0 ? errors.slice(0, MAX_ERRORS) : undefined,
   })
 }
