@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
@@ -15,6 +15,7 @@ import { distributeTaskScore } from '@/app/dashboard/actions'
 import TeamChat from './TeamChat'
 import { logActivity } from '@/utils/logging'
 import MemberProfileModal from './MemberProfileModal'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   RoomProvider,
   useStorage,
@@ -78,6 +79,12 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedMember, setSelectedMember] = useState<Profile | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Drag UX state
+  const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
+  const [droppingTaskId, setDroppingTaskId] = useState<string | null>(null)
+  const [activeDragColumn, setActiveDragColumn] = useState<TaskStatus | null>(null)
+  const dragStartTimeRef = useRef<number>(0)
 
   // 0. BLAZING SPEED CACHE: Load from LocalStorage for instant perception
   useEffect(() => {
@@ -220,20 +227,29 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   // Collaborative Handlers (Liveblocks)
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId)
+    e.dataTransfer.effectAllowed = 'move'
+    dragStartTimeRef.current = Date.now()
+    setDraggingCardId(taskId)
     updateMyPresence({ draggingTaskId: taskId });
   }
 
   const handleDragEnd = () => {
+    setDraggingCardId(null)
+    setActiveDragColumn(null)
     updateMyPresence({ draggingTaskId: null });
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, col: TaskStatus) => {
     e.preventDefault()
-    e.currentTarget.classList.add('drag-over')
+    e.dataTransfer.dropEffect = 'move'
+    setActiveDragColumn(col)
   }
 
   const handleDragLeave = (e: React.DragEvent) => {
-    e.currentTarget.classList.remove('drag-over')
+    // Only clear when leaving the column entirely, not a child element
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setActiveDragColumn(null)
+    }
   }
 
   const moveTask = useMutation(({ storage }, taskId: string, newStatus: TaskStatus) => {
@@ -249,10 +265,28 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
     e.preventDefault()
-    e.currentTarget.classList.remove('drag-over')
+    setActiveDragColumn(null)
 
     const taskId = e.dataTransfer.getData('taskId')
     if (!taskId) return
+
+    // Throttle: require at least 150ms drag duration for accuracy
+    const elapsed = Date.now() - dragStartTimeRef.current
+    if (elapsed < 150) {
+      setDraggingCardId(null)
+      return
+    }
+
+    setDraggingCardId(null)
+
+    // Trigger lock-snap animation on the landing card
+    setDroppingTaskId(taskId)
+    setTimeout(() => setDroppingTaskId(null), 550)
+
+    // Haptic feedback on mobile
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([40, 15, 25])
+    }
 
     // Track this update as pending to avoid "snap-back" during reconciliation
     setPendingUpdates(prev => new Set(prev).add(taskId))
@@ -296,6 +330,15 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       if (targetTask && targetTask.assignees) {
         distributeTaskScore(taskId, targetTask.assignees).catch(err => console.error('Score Distribution error', err))
       }
+      // Mini confetti burst on task completion
+      confetti({
+        particleCount: 35,
+        spread: 50,
+        origin: { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight },
+        colors: ['#10b981', '#34d399', '#6ee7b7', '#ffffff'],
+        scalar: 0.9,
+        ticks: 60
+      })
     }
 
     if (currentUserProfile || profile) {
@@ -508,9 +551,12 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
       <div className="kanban-board scroll-x-allowed">
         {COLUMNS.map((col) => (
-          <div key={col} className="kanban-column">
+          <div
+            key={col}
+            className={`kanban-column ${activeDragColumn === col ? 'kanban-column-active' : ''}`}
+          >
             <div className="kanban-column-header">
-              {col}
+              <span>{col}</span>
               <span className="badge" style={{ backgroundColor: 'var(--bg-sub)', color: 'var(--text-sub)' }}>
                 {filteredTasks.filter((t: Task) => t.status === col).length}
               </span>
@@ -518,27 +564,36 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
             <div
               className="kanban-task-list"
-              onDragOver={handleDragOver}
+              onDragOver={(e) => handleDragOver(e, col)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col)}
             >
-              {tasksByStatus[col].map((task: Task) => {
-                const draggingOther = othersDragging.find(o => o.presence?.draggingTaskId === task.id)
+              <AnimatePresence mode="popLayout" initial={false}>
+                {tasksByStatus[col].map((task: Task) => {
+                  const draggingOther = othersDragging.find(o => o.presence?.draggingTaskId === task.id)
+                  const isLanding = droppingTaskId === task.id
+                  const isDraggingThis = draggingCardId === task.id
 
-                return (
-                  <div
-                    key={task.id}
-                    className={`kanban-card ${draggingOther ? 'remote-dragging' : ''}`}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, task.id)}
-                    onDragEnd={handleDragEnd}
-                    onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
-                     style={{
-                       position: 'relative',
-                       border: draggingOther ? '2px solid var(--brand)' : '1px solid var(--border)',
-                       padding: '0.5rem'
-                     }}
-                   >
+                  return (
+                    <motion.div
+                      key={task.id}
+                      layoutId={task.id}
+                      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                      animate={{ opacity: isDraggingThis ? 0.45 : 1, y: 0, scale: isDraggingThis ? 1.02 : 1, rotate: isDraggingThis ? 1.5 : 0 }}
+                      exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18 } }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                      className={`kanban-card ${draggingOther ? 'remote-dragging' : ''} ${isLanding ? 'kanban-card-landing' : ''}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e as React.DragEvent<HTMLDivElement>, task.id)}
+                      onDragEnd={handleDragEnd}
+                      onClick={() => { setSelectedTask(task); setIsModalOpen(true); }}
+                      style={{
+                        position: 'relative',
+                        border: draggingOther ? '2px solid var(--brand)' : '1px solid var(--border)',
+                        padding: '0.5rem',
+                        cursor: isDraggingThis ? 'grabbing' : 'grab',
+                      }}
+                    >
                     {draggingOther && (
                       <div style={{
                         position: 'absolute',
@@ -680,9 +735,10 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )
               })}
+              </AnimatePresence>
             </div>
           </div>
         ))}
@@ -722,13 +778,72 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
           .kanban-board { display: flex; overflow-x: auto; padding-bottom: 1rem; }
           .kanban-column { flex: 0 0 calc(90vw); }
         }
-        .kanban-column { background: var(--bg-main); border-radius: var(--radius); padding: 0.5rem; display: flex; flex-direction: column; gap: var(--gap-md); border: 1px solid var(--border); }
-        .kanban-column-header { font-weight: 850; font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); display: flex; justify-content: space-between; padding: 0.4rem; border-bottom: 2px solid var(--border); margin-bottom: 0.25rem; }
-        .kanban-task-list { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; min-height: 150px; }
-        .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.5rem; cursor: grab; transition: all 0.2s; box-shadow: var(--shadow-sm); }
-        .kanban-card:hover { transform: translateY(-2px); border-color: var(--brand); }
+        .kanban-column {
+          background: var(--bg-main);
+          border-radius: var(--radius);
+          padding: 0.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: var(--gap-md);
+          border: 1px solid var(--border);
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .kanban-column-active {
+          border-color: var(--brand) !important;
+          background: rgba(var(--brand-rgb), 0.03) !important;
+          box-shadow: 0 0 0 2px rgba(var(--brand-rgb), 0.15), inset 0 0 20px rgba(var(--brand-rgb), 0.04) !important;
+        }
+        .kanban-column-header {
+          font-weight: 850;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          color: var(--text-sub);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.4rem;
+          border-bottom: 2px solid var(--border);
+          margin-bottom: 0.25rem;
+        }
+        .kanban-task-list {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+          min-height: 150px;
+          padding: 0.25rem;
+          border-radius: 8px;
+          transition: background 0.2s ease;
+        }
+        .kanban-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: 0.5rem;
+          cursor: grab;
+          box-shadow: var(--shadow-sm);
+          user-select: none;
+          -webkit-user-select: none;
+        }
+        .kanban-card:hover {
+          border-color: var(--brand);
+          box-shadow: 0 4px 16px rgba(var(--brand-rgb), 0.15), var(--shadow-sm);
+          transform: translateY(-2px);
+          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
         .kanban-card-title { font-weight: 700; font-size: 0.9rem; color: var(--text-main); margin-bottom: 0.25rem; line-height: 1.3; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes lock-snap {
+          0%   { transform: scale(1.06) translateY(-5px); box-shadow: 0 0 0 3px var(--brand), 0 14px 32px rgba(var(--brand-rgb), 0.35); }
+          35%  { transform: scale(0.96) translateY(3px); box-shadow: 0 0 0 5px rgba(var(--brand-rgb), 0.3), 0 2px 8px rgba(0,0,0,0.15); }
+          60%  { transform: scale(1.02) translateY(-1px); box-shadow: 0 0 0 2px rgba(var(--brand-rgb), 0.5); }
+          80%  { transform: scale(0.99) translateY(0); box-shadow: 0 0 0 1px rgba(var(--brand-rgb), 0.25); }
+          100% { transform: scale(1) translateY(0); box-shadow: none; }
+        }
+        .kanban-card-landing {
+          animation: lock-snap 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+          pointer-events: none;
+        }
         .remote-dragging { pointer-events: none; opacity: 0.7; filter: grayscale(0.5); }
       `}</style>
     </div>
