@@ -34,7 +34,7 @@ export async function updateSession(request: NextRequest) {
   // https://supabase.com/docs/guides/auth/server-side/nextjs
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
 
   // Protected page prefixes — redirect unauthenticated browser requests to /login.
   // API routes and public pages handle their own auth and must NOT be redirected here.
