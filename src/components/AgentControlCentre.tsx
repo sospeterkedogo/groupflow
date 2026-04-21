@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   Bot, Plus, Trash2, Play, Pause, RefreshCw, ChevronDown, ChevronUp,
   CheckCircle2, Circle, Clock, AlertCircle, Zap, Server, Layout,
-  ArrowRight, X, Save, ExternalLink
+  ArrowRight, X, Save, RotateCcw, Terminal, Send
 } from 'lucide-react'
 
 type AgentStatus = 'active' | 'paused' | 'training'
@@ -73,14 +73,14 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
   critical: '#EF4444',
 }
 
-const TASK_COLUMNS: TaskStatus[] = ['not_started', 'in_progress', 'review', 'done']
+const TASK_COLUMNS: TaskStatus[] = ['not_started', 'in_progress', 'review', 'done', 'blocked']
 
 export default function AgentControlCentre() {
   const router = useRouter()
   const [agents, setAgents] = useState<Agent[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'agents' | 'board' | 'new-agent' | 'new-task'>('agents')
+  const [view, setView] = useState<'agents' | 'board' | 'new-agent' | 'new-task' | 'orchestrate'>('agents')
   const [expandedAgent, setExpandedAgent] = useState<string | null>(null)
   const [expandedTask, setExpandedTask] = useState<string | null>(null)
 
@@ -97,6 +97,11 @@ export default function AgentControlCentre() {
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Orchestrate command
+  const [orchestrateCmd, setOrchestrateCmd] = useState('')
+  const [orchestrating, setOrchestrating] = useState(false)
+  const [orchestrateResult, setOrchestrateResult] = useState<{ tasks_created: number; plan: { task_id: string; title: string; agent: string }[] } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -137,6 +142,39 @@ export default function AgentControlCentre() {
     if (!confirm('Delete this task?')) return
     await fetch(`/api/admin/tasks/${id}`, { method: 'DELETE' })
     setTasks(prev => prev.filter(t => t.id !== id))
+  }
+
+  async function retryTask(task: Task) {
+    await fetch(`/api/admin/tasks/${task.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'not_started' }),
+    })
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'not_started' } : t))
+  }
+
+  async function submitOrchestrateCmd() {
+    if (orchestrateCmd.trim().length < 10) {
+      setError('Command must be at least 10 characters so agents have enough detail to work with')
+      return
+    }
+    setOrchestrating(true); setError(''); setOrchestrateResult(null)
+    try {
+      const res = await fetch('/api/agents/orchestrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: orchestrateCmd }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Failed to create tasks. Please refine your command and try again.'); return }
+      setOrchestrateResult(data)
+      setOrchestrateCmd('')
+      await load()
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Network error: unable to reach the orchestration service. Please check your connection and try again.')
+    } finally {
+      setOrchestrating(false)
+    }
   }
 
   async function moveTask(task: Task, status: TaskStatus) {
@@ -216,7 +254,7 @@ export default function AgentControlCentre() {
           </span>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {(['agents', 'board'] as const).map(v => (
+          {(['agents', 'board', 'orchestrate'] as const).map(v => (
             <button key={v} onClick={() => setView(v)} style={{
               padding: '0.4rem 0.9rem', borderRadius: '6px', border: '1px solid',
               borderColor: view === v ? '#10B981' : 'rgba(255,255,255,0.1)',
@@ -225,7 +263,7 @@ export default function AgentControlCentre() {
               fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.06em',
               textTransform: 'uppercase', cursor: 'pointer',
             }}>
-              {v === 'agents' ? 'Agents' : 'Task Board'}
+              {v === 'agents' ? 'Agents' : v === 'board' ? 'Task Board' : 'Orchestrate'}
             </button>
           ))}
           <button onClick={() => { setView('new-task'); setError('') }} style={{
@@ -302,7 +340,7 @@ export default function AgentControlCentre() {
       {/* TASK BOARD VIEW */}
       {view === 'board' && (
         <div style={{ overflowX: 'auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(220px, 1fr))', gap: '1rem', minWidth: '880px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(200px, 1fr))', gap: '1rem', minWidth: '1050px' }}>
             {TASK_COLUMNS.map(col => (
               <div key={col}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -322,6 +360,7 @@ export default function AgentControlCentre() {
                       expanded={expandedTask === task.id}
                       onExpand={() => setExpandedTask(expandedTask === task.id ? null : task.id)}
                       onMove={moveTask}
+                      onRetry={retryTask}
                       onDelete={deleteTask}
                     />
                   ))}
@@ -334,6 +373,72 @@ export default function AgentControlCentre() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ORCHESTRATE VIEW */}
+      {view === 'orchestrate' && (
+        <div style={{ maxWidth: '640px' }}>
+          <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+              <Terminal size={16} color="#10B981" />
+              <h3 style={{ margin: 0, fontWeight: 900, letterSpacing: '-0.02em', fontSize: '1rem' }}>Orchestrate Command</h3>
+            </div>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.55 }}>
+              Describe what needs to be built. The orchestrator will decompose your command into tasks and assign them to the right agents.
+            </p>
+            <textarea
+              value={orchestrateCmd}
+              onChange={e => setOrchestrateCmd(e.target.value)}
+              rows={4}
+              placeholder="e.g. Build a new API route and UI page for user notifications with database migration and Playwright tests"
+              style={{ ...inputStyle, resize: 'vertical', marginBottom: '0.75rem' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.7rem', color: orchestrateCmd.trim().length < 10 ? '#EF4444' : 'rgba(255,255,255,0.3)' }}>
+                {orchestrateCmd.trim().length} / 2000 chars (min 10)
+              </span>
+              <button
+                onClick={submitOrchestrateCmd}
+                disabled={orchestrating || orchestrateCmd.trim().length < 10}
+                style={{
+                  padding: '0.55rem 1.25rem', background: '#10B981', border: 'none', borderRadius: '8px',
+                  color: '#000', fontWeight: 900, fontSize: '0.8rem', letterSpacing: '0.06em',
+                  textTransform: 'uppercase', cursor: (orchestrating || orchestrateCmd.trim().length < 10) ? 'not-allowed' : 'pointer',
+                  opacity: (orchestrating || orchestrateCmd.trim().length < 10) ? 0.5 : 1,
+                  display: 'flex', alignItems: 'center', gap: '0.4rem',
+                }}
+              >
+                <Send size={13} /> {orchestrating ? 'Dispatching...' : 'Dispatch'}
+              </button>
+            </div>
+          </div>
+
+          {orchestrateResult && (
+            <div style={{ background: '#0d1a12', border: '1px solid #10B98140', borderRadius: '12px', padding: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <CheckCircle2 size={15} color="#10B981" />
+                <span style={{ fontWeight: 900, fontSize: '0.85rem', color: '#10B981' }}>
+                  {orchestrateResult.tasks_created} task{orchestrateResult.tasks_created !== 1 ? 's' : ''} created
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {orchestrateResult.plan.map((t, i) => (
+                  <div key={t.task_id} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.78rem' }}>
+                    <span style={{ color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace', minWidth: '1.2rem' }}>{i + 1}.</span>
+                    <span style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '4px', padding: '1px 6px', fontSize: '0.68rem', color: 'rgba(255,255,255,0.45)', fontWeight: 700 }}>{t.agent}</span>
+                    <span style={{ color: '#E5E7EB' }}>{t.title}</span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => { setOrchestrateResult(null); setView('board') }}
+                style={{ marginTop: '1rem', padding: '0.4rem 0.9rem', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'rgba(255,255,255,0.55)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <ArrowRight size={11} /> View Task Board
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -489,15 +594,22 @@ function AgentCard({ agent, taskCount, expanded, onExpand, onToggle, onDelete }:
   )
 }
 
-function TaskCard({ task, expanded, onExpand, onMove, onDelete }: {
+function TaskCard({ task, expanded, onExpand, onMove, onRetry, onDelete }: {
   task: Task; expanded: boolean
   onExpand: () => void
   onMove: (task: Task, status: TaskStatus) => void
+  onRetry: (task: Task) => void
   onDelete: (id: string) => void
 }) {
-  const nextStatus = TASK_COLUMNS[TASK_COLUMNS.indexOf(task.status) + 1] as TaskStatus | undefined
+  const isBlocked = task.status === 'blocked'
+  const isDone = task.status === 'done'
+  const nextIdx = TASK_COLUMNS.indexOf(task.status) + 1
+  const nextStatusCandidate = nextIdx < TASK_COLUMNS.length ? TASK_COLUMNS[nextIdx] : undefined
+  const nextStatus = (!isBlocked && !isDone && nextStatusCandidate && nextStatusCandidate !== 'blocked')
+    ? nextStatusCandidate
+    : undefined
   return (
-    <div style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px', overflow: 'hidden' }}>
+    <div style={{ background: '#0d0d0d', border: `1px solid ${isBlocked ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '8px', overflow: 'hidden' }}>
       <div style={{ padding: '0.75rem', cursor: 'pointer' }} onClick={onExpand}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
           <div style={{ marginTop: '1px', flexShrink: 0 }}>
@@ -525,7 +637,15 @@ function TaskCard({ task, expanded, onExpand, onMove, onDelete }: {
             <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.75rem', lineHeight: 1.6 }}>{task.description}</p>
           )}
           <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.75rem' }}>
-            {nextStatus && (
+            {isBlocked ? (
+              <button onClick={() => onRetry(task)} style={{
+                flex: 1, padding: '0.35rem', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)',
+                borderRadius: '5px', color: '#10B981', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem',
+              }}>
+                <RotateCcw size={11} /> Retry
+              </button>
+            ) : nextStatus ? (
               <button onClick={() => onMove(task, nextStatus)} style={{
                 flex: 1, padding: '0.35rem', background: '#10B98115', border: '1px solid #10B98130',
                 borderRadius: '5px', color: '#10B981', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer',
@@ -533,7 +653,7 @@ function TaskCard({ task, expanded, onExpand, onMove, onDelete }: {
               }}>
                 <ArrowRight size={11} /> {nextStatus.replace('_', ' ')}
               </button>
-            )}
+            ) : null}
             <button onClick={() => onDelete(task.id)} style={{
               padding: '0.35rem 0.5rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)',
               borderRadius: '5px', color: '#EF4444', cursor: 'pointer',

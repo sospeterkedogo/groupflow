@@ -1,4 +1,3 @@
-import { withWorkflow } from 'workflow/next'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -7,6 +6,10 @@ const nextConfig: NextConfig = {
 
 
   experimental: {},
+
+  // Silence the Next.js 16 Turbopack "webpack config but no turbopack config"
+  // warning so the default Turbopack production build succeeds cleanly.
+  turbopack: {},
 
   // ── Image optimisation ───────────────────────────────────────────────────
   images: {
@@ -53,19 +56,14 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // ── Webpack: tree-shake lucide-react (massive bundle reduction) ──────────
-  webpack(config, { isServer }) {
-    if (!isServer) {
-      // Replace heavy packages with lighter alternatives where possible
-      config.resolve.alias = {
-        ...config.resolve.alias,
-      }
-    }
+  // Explicit webpack config ensures Next.js uses webpack (not Turbopack) for
+  // production builds, avoiding workspace-root inference issues.
+  webpack(config) {
     return config
   },
 
   typescript: { ignoreBuildErrors: false },
 }
 
-export default withWorkflow(nextConfig, { workflows: { lazyDiscovery: true } })
+export default nextConfig
 

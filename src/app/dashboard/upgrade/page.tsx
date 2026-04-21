@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import PricingSection from '@/components/PricingSection'
 import { Sparkles } from 'lucide-react'

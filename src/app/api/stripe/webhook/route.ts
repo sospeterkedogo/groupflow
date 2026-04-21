@@ -1,4 +1,4 @@
-﻿import Stripe from 'stripe'
+import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
 import { start } from 'workflow/api'
 import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'

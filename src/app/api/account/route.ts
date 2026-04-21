@@ -1,4 +1,4 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { checkBotId } from 'botid/server'
@@ -22,14 +22,12 @@ export async function GET(_req: Request) {
       return new NextResponse('Unauthorized Pipeline', { status: 401 })
     }
 
-    // 1. Fetch Master Profile
-    const { data: profile } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
-
-    // 2. Fetch Supervised Tasks (using PostgreSQL Array contains logic)
-    const { data: tasks } = await supabase.from('tasks').select('*').contains('assignees', [user.id])
-    
-    // 3. Fetch Delivered Evidence Pipeline
-    const { data: artifacts } = await supabase.from('artifacts').select('*').eq('uploaded_by', user.id)
+    // Fetch all data concurrently — avoids 3× sequential round-trips
+    const [{ data: profile }, { data: tasks }, { data: artifacts }] = await Promise.all([
+      supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single(),
+      supabase.from('tasks').select('*').contains('assignees', [user.id]),
+      supabase.from('artifacts').select('*').eq('uploaded_by', user.id),
+    ])
 
     // Assemble "Takeout" Package
     const exportData = {

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { ChevronDown, Search, Code, Menu, X, MessageSquarePlus } from 'lucide-react'
 import { NavMenus, NavCategory, NavItem } from '@/types/landing'
+import LanguageSelector from '@/components/LanguageSelector'
 
 interface LandingHeaderProps {
   navMenus: NavMenus
@@ -215,6 +216,8 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
            <MessageSquarePlus size={14} /> Feedback
         </a>
 
+        <LanguageSelector />
+
         <Link
            href="/docs"
            className="nav-util-btn"
@@ -343,6 +346,7 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
               ))}
               <div style={{ paddingTop: '1rem', borderTop: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                  <Link href="/docs" style={{ color: '#f3f4f6', textDecoration: 'none', fontWeight: 600 }} onClick={() => setIsMobileMenuOpen(false)}>Help Center</Link>
+                 <LanguageSelector />
                  {user ? (
                    <Link href="/dashboard" style={{ background: '#10b981', color: '#0a0a0a', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontWeight: 700, textDecoration: 'none' }} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
                  ) : (

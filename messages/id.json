@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": { "title": "Espeezy - Proyek Tim Disederhanakan", "description": "Cara termudah bagi mahasiswa untuk bekerja sama dalam proyek kelompok." },
   "nav": { "features": "Fitur", "pricing": "Harga", "solutions": "Solusi", "login": "Masuk", "getStarted": "Mulai", "dashboard": "Dasbor", "feedback": "Kirim Masukan" },
   "hero": { "badge": "Dibuat untuk Mahasiswa", "headline1": "Cara sederhana untuk", "headline2": "bekerja sebagai tim.", "subtitle": "Espeezy membantu tim mahasiswa tetap terorganisir, berbagi kredit, dan memenuhi tenggat waktu — bersama.", "ctaStart": "Mulai Gratis", "ctaLearn": "Pelajari Lebih Lanjut" },

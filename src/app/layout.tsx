@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import './prestige.css';
 import { NotificationProvider } from '../components/NotificationProvider';
@@ -15,8 +15,11 @@ export const metadata: Metadata = {
   title: 'Espeezy - Team Projects Made Simple',
   description: 'The easiest way for students to work together on group projects.',
   icons: {
-    icon: '/favicon.png',
-    apple: '/pwa-icon-512.png',
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
   appleWebApp: {
     capable: true,

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { LayoutDashboard, Calendar, History, Activity, Zap, TrendingUp, Award, UserCircle, AlertCircle, Info } from 'lucide-react'

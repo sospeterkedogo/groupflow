@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": { "title": "Espeezy - Dự án Nhóm Đơn giản", "description": "Cách dễ nhất để sinh viên cùng nhau làm việc trên các dự án nhóm." },
   "nav": { "features": "Tính năng", "pricing": "Giá cả", "solutions": "Giải pháp", "login": "Đăng nhập", "getStarted": "Bắt đầu", "dashboard": "Bảng điều khiển", "feedback": "Gửi phản hồi" },
   "hero": { "badge": "Dành cho Sinh viên", "headline1": "Cách đơn giản để", "headline2": "làm việc nhóm.", "subtitle": "Espeezy giúp các nhóm sinh viên duy trì tổ chức, chia sẻ công nhận và đáp ứng thời hạn — cùng nhau.", "ctaStart": "Bắt đầu Miễn phí", "ctaLearn": "Tìm hiểu thêm" },

@@ -25,7 +25,8 @@ import {
   Wifi,
   WifiOff,
   Rss,
-  DollarSign
+  DollarSign,
+  Heart
 } from 'lucide-react'
 import { useConnectivity } from '@/context/ConnectivityContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -377,6 +378,41 @@ export default function Sidebar({ user }: SidebarProps) {
             <Lock size={10} />
           </div>
         </div>
+
+        {/* SUPPORT THE DEVS */}
+        {isOpen && (
+          <div style={{ padding: '0 1rem 0.5rem' }}>
+            <Link
+              href="/fund"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                padding: '0.625rem 1rem',
+                borderRadius: '12px',
+                background: 'rgba(16,185,129,0.06)',
+                border: '1px solid rgba(16,185,129,0.15)',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(16,185,129,0.12)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(16,185,129,0.3)' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(16,185,129,0.06)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(16,185,129,0.15)' }}
+            >
+              <Heart size={14} color="var(--brand)" />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-0.01em' }}>Support the Devs</div>
+                <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.25)', fontWeight: 600 }}>Even $5 keeps a feature alive</div>
+              </div>
+            </Link>
+          </div>
+        )}
+        {!isOpen && (
+          <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', justifyContent: 'center' }}>
+            <Link href="/fund" title="Support the Devs" style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'var(--brand)' }}>
+              <Heart size={16} />
+            </Link>
+          </div>
+        )}
 
         {/* Footer / User Profile */}
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

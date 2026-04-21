@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": { "title": "Espeezy - Takım Projelerini Kolaylaştır", "description": "Öğrencilerin grup projelerinde birlikte çalışmasının en kolay yolu." },
   "nav": { "features": "Özellikler", "pricing": "Fiyatlandırma", "solutions": "Çözümler", "login": "Giriş Yap", "getStarted": "Başla", "dashboard": "Gösterge Paneli", "feedback": "Geri Bildirim Gönder" },
   "hero": { "badge": "Öğrenciler İçin Yapıldı", "headline1": "Ekip olarak çalışmanın", "headline2": "basit yolu.", "subtitle": "Espeezy, öğrenci ekiplerinin organize kalmasına, krediyi paylaşmasına ve son tarihlere uymasına yardımcı olur — birlikte.", "ctaStart": "Ücretsiz Başla", "ctaLearn": "Daha Fazla Öğren" },

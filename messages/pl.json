@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": { "title": "Espeezy - Projekty zespołowe uproszczone", "description": "Najłatwiejszy sposób dla studentów na współpracę przy projektach grupowych." },
   "nav": { "features": "Funkcje", "pricing": "Cennik", "solutions": "Rozwiązania", "login": "Zaloguj się", "getStarted": "Zacznij", "dashboard": "Panel", "feedback": "Wyślij opinię" },
   "hero": { "badge": "Stworzone dla Studentów", "headline1": "Prosty sposób na", "headline2": "pracę w zespole.", "subtitle": "Espeezy pomaga zespołom studenckim być zorganizowanymi, dzielić się zasługami i dotrzymywać terminów — razem.", "ctaStart": "Zacznij za Darmo", "ctaLearn": "Dowiedz się więcej" },

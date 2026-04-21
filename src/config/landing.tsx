@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import { Layers, Users, Zap, Shield, Milestone, Award, LayoutGrid, BookOpen, Globe, Fingerprint, HelpCircle } from 'lucide-react'
 
 export const features = [
