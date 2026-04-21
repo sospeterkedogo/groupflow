@@ -84,6 +84,22 @@ export default async function proxy(request: NextRequest) {
   const ip = (request.headers.get('x-forwarded-for') ?? 'anonymous').split(',')[0].trim()
   const { pathname } = request.nextUrl
   const isDev = process.env.NODE_ENV === 'development'
+  const hostHeader = (request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '').split(':')[0].toLowerCase()
+
+  const canonicalHost = (() => {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com').host.toLowerCase()
+    } catch {
+      return 'espeezy.com'
+    }
+  })()
+
+  if (!isDev && hostHeader && hostHeader === `www.${canonicalHost}`) {
+    const target = request.nextUrl.clone()
+    target.protocol = 'https:'
+    target.host = canonicalHost
+    return NextResponse.redirect(target, 308)
+  }
 
   // ── 1. Block TRACE/TRACK ──────────────────────────────────────────────────
   if (request.method === 'TRACE' || request.method === 'TRACK') {
@@ -146,8 +162,26 @@ export default async function proxy(request: NextRequest) {
     }
   }
 
-  // ── 6. Supabase session refresh ───────────────────────────────────────────
-  const response = await updateSession(request)
+  // ── 6. Supabase session refresh (fail-open for public availability) ──────
+  // If Supabase/session refresh fails, keep public pages online so marketing
+  // and business-verification crawlers can still access the site.
+  let response: NextResponse
+  try {
+    response = await updateSession(request)
+  } catch {
+    const isProtected = pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/admin') ||
+      pathname.startsWith('/profile') ||
+      pathname.startsWith('/settings') ||
+      pathname.startsWith('/terminal') ||
+      pathname.startsWith('/id')
+
+    if (isProtected) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    response = NextResponse.next({ request })
+  }
 
   // ── 7. Security + performance headers ────────────────────────────────────
   response.headers.set('Content-Security-Policy', CSP)
