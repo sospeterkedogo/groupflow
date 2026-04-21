@@ -1,32 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * GET /api/agents/tasks/[agentId]
- * Returns pending/in_progress tasks for the given agent.
- * Used by automated agent workers to poll for their next assignment.
- * Requires the X-Agent-Key header to match AGENT_API_KEY env var.
- */
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ agentId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  // Lightweight API-key auth (agents don't have browser sessions)
   const apiKey = req.headers.get('x-agent-key');
   if (!apiKey || apiKey !== process.env.AGENT_API_KEY) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { agentId } = await params;
+  const { id: agentId } = await params;
   if (!agentId) {
     return NextResponse.json({ error: 'agentId required' }, { status: 400 });
   }
 
   const admin = await createAdminClient();
 
-  // Resolve agent name → id if a name was passed instead of UUID
   let resolvedId = agentId;
   if (!/^[0-9a-f-]{36}$/.test(agentId)) {
     const { data: agent } = await admin
@@ -52,7 +44,6 @@ export async function GET(
     created_at: string;
   }
 
-  // Fetch tasks assigned to this agent that are ready to work on
   const { data: rawTasks, error } = await admin
     .from('agent_tasks')
     .select('id, title, description, priority, status, depends_on, output_artifacts, logs, created_at')
@@ -67,8 +58,6 @@ export async function GET(
   }
 
   const tasks = (rawTasks ?? []) as AgentTask[];
-
-  // Filter out tasks whose dependencies aren't done yet
   const allDependencyIds = [...new Set(tasks.flatMap(t => t.depends_on ?? []))];
   let completedDeps: string[] = [];
 
@@ -81,10 +70,9 @@ export async function GET(
     completedDeps = (doneTasks as { id: string }[] | null)?.map(t => t.id) ?? [];
   }
 
-  const readyTasks = tasks.filter(task => {
-    const deps = task.depends_on ?? [];
-    return deps.every(depId => completedDeps.includes(depId));
-  });
+  const readyTasks = tasks.filter(task =>
+    (task.depends_on ?? []).every(depId => completedDeps.includes(depId))
+  );
 
   return NextResponse.json({ tasks: readyTasks, total: readyTasks.length });
 }
