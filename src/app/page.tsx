@@ -16,6 +16,7 @@ import LandingHero from '@/components/landing/LandingHero'
 import LandingMission from '@/components/landing/LandingMission'
 import LandingFeatures from '@/components/landing/LandingFeatures'
 import LandingFAQ from '@/components/landing/LandingFAQ'
+import LandingDonate from '@/components/landing/LandingDonate'
 import LandingFooter from '@/components/landing/LandingFooter'
 
 export default function Home() {
@@ -141,6 +142,9 @@ export default function Home() {
         <section id="pricing" style={{ padding: '10rem 2rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
            <PricingSection isLanding={true} />
         </section>
+
+        {/* SUPPORT / DONATION SECTION */}
+        <LandingDonate />
 
         {/* FINAL UNIFIED CTA */}
         <section style={{ padding: 'clamp(5rem, 15vw, 12rem) 2rem', textAlign: 'center', position: 'relative' }}>
