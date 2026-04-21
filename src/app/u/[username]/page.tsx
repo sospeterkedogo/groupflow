@@ -1,14 +1,15 @@
-﻿import { createAdminClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-export default async function UserProfilePage({ params }: { params: { username: string } }) {
+export default async function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params
   const svc = await createAdminClient()
   const { data: profile } = await svc
     .from('profiles')
     .select('id, full_name, username, avatar_url, bio, role, subscription_plan, created_at, account_status')
-    .eq('username', params.username)
+    .eq('username', username)
     .single()
 
   if (!profile || profile.account_status === 'deactivated') notFound()

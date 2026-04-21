@@ -1,4 +1,4 @@
-﻿{
+{
   "meta": { "title": "Espeezy - Teamprosjekter forenklet", "description": "Den enkleste måten for studenter å samarbeide om gruppeprosjekter." },
   "nav": { "features": "Funksjoner", "pricing": "Priser", "solutions": "Løsninger", "login": "Logg inn", "getStarted": "Kom i gang", "dashboard": "Instrumentbord", "feedback": "Send tilbakemelding" },
   "hero": { "badge": "Laget for studenter", "headline1": "Den enkle måten å", "headline2": "jobbe som et team.", "subtitle": "Espeezy hjelper studentteam med å holde seg organisert, dele æren og overholde frister — sammen.", "ctaStart": "Kom i gang gratis", "ctaLearn": "Lær mer" },

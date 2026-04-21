@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import './prestige.css';
 import { NotificationProvider } from '../components/NotificationProvider';

@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'espeezy-v1';
+const CACHE_NAME = 'espeezy-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/favicon.png',

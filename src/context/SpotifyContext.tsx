@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
