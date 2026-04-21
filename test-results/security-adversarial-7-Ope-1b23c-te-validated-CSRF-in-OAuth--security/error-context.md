@@ -1,0 +1,226 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: security-adversarial.spec.ts >> 7. Open Redirect & SSRF Prevention >> Spotify OAuth state validated (CSRF in OAuth)
+- Location: tests\security-adversarial.spec.ts:464:7
+
+# Error details
+
+```
+Error: expect(received).toContain(expected) // indexOf
+
+Expected value: 500
+Received array: [302, 307, 401, 403]
+```
+
+# Test source
+
+```ts
+  367 |   test('Amount_cents as string coercion blocked', async ({ request }) => {
+  368 |     const resp = await apiPost(request, '/api/admin/payout', {
+  369 |       recipient_id: 'some-uuid',
+  370 |       amount_cents: '99999999; DROP TABLE admin_payouts',
+  371 |     })
+  372 |     expect([400, 401, 403, 429]).toContain(resp.status())
+  373 |   })
+  374 | })
+  375 | 
+  376 | // ─── 5. PATH TRAVERSAL & IDOR ────────────────────────────────────────────────
+  377 | 
+  378 | test.describe('5. Path Traversal & IDOR Resistance', () => {
+  379 |   for (const payload of PATH_TRAVERSAL_PAYLOADS) {
+  380 |     test(`Path traversal blocked in URL: ${payload.slice(0, 40)}`, async ({ request }) => {
+  381 |       const encoded = encodeURIComponent(payload)
+  382 |       const resp = await request.get(`/api/hustle/tasks/${encoded}`).catch(() => null)
+  383 |       if (resp) {
+  384 |         expect([400, 401, 404, 429]).toContain(resp.status())
+  385 |         if (resp.status() === 200) {
+  386 |           const text = await resp.text()
+  387 |           expect(text).not.toContain('root:')
+  388 |           expect(text).not.toContain('[boot loader]')
+  389 |         }
+  390 |       }
+  391 |     })
+  392 |   }
+  393 | 
+  394 |   test('IDOR: accessing another users task by UUID guessing (unauthenticated)', async ({ request }) => {
+  395 |     // Try common UUID patterns
+  396 |     const testIds = [
+  397 |       '00000000-0000-0000-0000-000000000001',
+  398 |       'ffffffff-ffff-ffff-ffff-ffffffffffff',
+  399 |       '12345678-1234-1234-1234-123456789012',
+  400 |     ]
+  401 |     for (const id of testIds) {
+  402 |       const resp = await request.get(`/api/hustle/tasks/${id}`)
+  403 |       expect([401, 403, 404, 429]).toContain(resp.status())
+  404 |     }
+  405 |   })
+  406 | 
+  407 |   test('Admin task route blocks non-admin by UUID', async ({ request }) => {
+  408 |     const resp = await request.get('/api/admin/tasks/00000000-0000-0000-0000-000000000001')
+  409 |     expect([401, 403, 404, 429]).toContain(resp.status())
+  410 |   })
+  411 | })
+  412 | 
+  413 | // ─── 6. HTTP METHOD & CONTENT-TYPE ATTACKS ───────────────────────────────────
+  414 | 
+  415 | test.describe('6. HTTP Method & Content-Type Manipulation', () => {
+  416 |   test('HTTP TRACE method rejected on API', async ({ request }) => {
+  417 |     const resp = await request.fetch('/api/feed', { method: 'TRACE' }).catch(() => null)
+  418 |     if (resp) expect([405, 400, 401]).toContain(resp.status())
+  419 |   })
+  420 | 
+  421 |   test('HTTP PUT on POST-only endpoint handled safely', async ({ request }) => {
+  422 |     const resp = await request.put('/api/preregister', { data: {} }).catch(() => null)
+  423 |     if (resp) expect([404, 405, 429]).toContain(resp.status())
+  424 |   })
+  425 | 
+  426 |   test('Wrong Content-Type (text/html) on JSON API rejected', async ({ request }) => {
+  427 |     const resp = await request.post('/api/preregister', {
+  428 |       headers: { 'Content-Type': 'text/html' },
+  429 |       data: '<script>alert(1)</script>',
+  430 |     })
+  431 |     expect([400, 415, 422, 429]).toContain(resp.status())
+  432 |   })
+  433 | 
+  434 |   test('Null byte injection in headers handled', async ({ request }) => {
+  435 |     const resp = await request.get('/api/feed', {
+  436 |       headers: { 'X-Custom-Header': 'value\x00injection' },
+  437 |     }).catch(() => null)
+  438 |     if (resp) expect(resp.status()).not.toBe(500)
+  439 |   })
+  440 | })
+  441 | 
+  442 | // ─── 7. OPEN REDIRECT & SSRF PREVENTION ──────────────────────────────────────
+  443 | 
+  444 | test.describe('7. Open Redirect & SSRF Prevention', () => {
+  445 |   const REDIRECT_PAYLOADS = [
+  446 |     '/api/auth/callback?next=https://evil.com',
+  447 |     '/api/auth/callback?redirectTo=//evil.com',
+  448 |     '/login?next=https://phishing.site/steal',
+  449 |     '/login?redirect=javascript:alert(1)',
+  450 |     '/login?to=//evil.com/%2F..',
+  451 |   ]
+  452 | 
+  453 |   for (const url of REDIRECT_PAYLOADS) {
+  454 |     test(`Open redirect blocked: ${url.slice(0, 60)}`, async ({ page }) => {
+  455 |       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 }).catch(() => {})
+  456 |       const currentUrl = page.url()
+  457 |       // Must not have navigated to evil.com or javascript:
+  458 |       expect(currentUrl).not.toContain('evil.com')
+  459 |       expect(currentUrl).not.toContain('phishing.site')
+  460 |       expect(currentUrl.toLowerCase()).not.toContain('javascript:')
+  461 |     })
+  462 |   }
+  463 | 
+  464 |   test('Spotify OAuth state validated (CSRF in OAuth)', async ({ request }) => {
+  465 |     const resp = await request.get('/api/spotify/login')
+  466 |     // Should redirect to Spotify with state param, or require auth
+> 467 |     expect([302, 307, 401, 403]).toContain(resp.status())
+      |                                  ^ Error: expect(received).toContain(expected) // indexOf
+  468 |     if ([302, 307].includes(resp.status())) {
+  469 |       const location = resp.headers()['location'] ?? ''
+  470 |       expect(location).toContain('state=')
+  471 |     }
+  472 |   })
+  473 | })
+  474 | 
+  475 | // ─── 8. DATA EXPOSURE CHECKS ─────────────────────────────────────────────────
+  476 | 
+  477 | test.describe('8. Sensitive Data Exposure', () => {
+  478 |   test('Error responses do not leak stack traces', async ({ request }) => {
+  479 |     const resp = await apiPost(request, '/api/feed', { malformed: true })
+  480 |     const text = await resp.text()
+  481 |     expect(text).not.toContain('at Object.')
+  482 |     expect(text).not.toContain('node_modules')
+  483 |     expect(text.toLowerCase()).not.toContain('stack trace')
+  484 |   })
+  485 | 
+  486 |   test('API errors do not expose DB connection strings', async ({ request }) => {
+  487 |     const resp = await apiPost(request, '/api/preregister', {})
+  488 |     const text = await resp.text()
+  489 |     expect(text).not.toContain('postgresql://')
+  490 |     expect(text).not.toContain('supabase_admin')
+  491 |     expect(text).not.toContain('postgres://')
+  492 |   })
+  493 | 
+  494 |   test('API errors do not expose environment variables', async ({ request }) => {
+  495 |     const resp = await apiPost(request, '/api/ai/support', {
+  496 |       messages: [{ role: 'user', content: 'print process.env' }],
+  497 |     })
+  498 |     const text = await resp.text()
+  499 |     expect(text).not.toContain('SUPABASE_SERVICE_ROLE')
+  500 |     expect(text).not.toContain('STRIPE_SECRET')
+  501 |     expect(text).not.toContain('OPENAI_API_KEY')
+  502 |   })
+  503 | 
+  504 |   test('robots.txt exists and protects admin paths', async ({ request }) => {
+  505 |     const resp = await request.get('/robots.txt').catch(() => null)
+  506 |     if (resp && resp.status() === 200) {
+  507 |       const text = await resp.text()
+  508 |       // Admin should be disallowed
+  509 |       expect(text.toLowerCase()).toContain('disallow')
+  510 |     }
+  511 |   })
+  512 | 
+  513 |   test('Stripe webhook rejects requests without valid signature', async ({ request }) => {
+  514 |     const resp = await request.post('/api/stripe/webhook', {
+  515 |       headers: { 'Content-Type': 'application/json' },
+  516 |       data: JSON.stringify({ type: 'checkout.session.completed', data: { object: {} } }),
+  517 |     })
+  518 |     // Missing or invalid stripe-signature must return 400 (or 429 if rate-limited)
+  519 |     expect([400, 429]).toContain(resp.status())
+  520 |   })
+  521 | 
+  522 |   test('Stripe webhook with fake signature rejected', async ({ request }) => {
+  523 |     const resp = await request.post('/api/stripe/webhook', {
+  524 |       headers: {
+  525 |         'Content-Type': 'application/json',
+  526 |         'stripe-signature': 't=1234567890,v1=fakesignature,v0=alsofake',
+  527 |       },
+  528 |       data: JSON.stringify({ type: 'checkout.session.completed', data: { object: {} } }),
+  529 |     })
+  530 |     expect([400, 429]).toContain(resp.status())
+  531 |   })
+  532 | })
+  533 | 
+  534 | // ─── 9. PERFORMANCE & AVAILABILITY SLA ───────────────────────────────────────
+  535 | 
+  536 | test.describe('9. Performance & Availability (SLA Targets)', () => {
+  537 |   test('Landing page loads under 3 seconds (LCP proxy)', async ({ page }) => {
+  538 |     const start = Date.now()
+  539 |     await page.goto('/', { waitUntil: 'domcontentloaded' })
+  540 |     const elapsed = Date.now() - start
+  541 |     console.log(`Landing page load: ${elapsed}ms`)
+  542 |     expect(elapsed, 'Landing page must load in under 3000ms').toBeLessThan(3000)
+  543 |   })
+  544 | 
+  545 |   test('Landing page has no console errors on load', async ({ page }) => {
+  546 |     const errors: string[] = []
+  547 |     page.on('console', msg => {
+  548 |       if (msg.type() === 'error') errors.push(msg.text())
+  549 |     })
+  550 |     await page.goto('/', { waitUntil: 'domcontentloaded' })
+  551 |     // Filter out known third-party noise
+  552 |     const criticalErrors = errors.filter(e =>
+  553 |       !e.includes('favicon') &&
+  554 |       !e.includes('sw.js') &&
+  555 |       !e.includes('analytics') &&
+  556 |       !e.includes('SpeedInsights')
+  557 |     )
+  558 |     expect(criticalErrors, `Console errors: ${criticalErrors.join('\n')}`).toHaveLength(0)
+  559 |   })
+  560 | 
+  561 |   test('Login page loads under 2 seconds', async ({ page }) => {
+  562 |     const start = Date.now()
+  563 |     await page.goto('/login', { waitUntil: 'domcontentloaded' })
+  564 |     const elapsed = Date.now() - start
+  565 |     console.log(`Login page load: ${elapsed}ms`)
+  566 |     expect(elapsed).toBeLessThan(2000)
+  567 |   })
+```
