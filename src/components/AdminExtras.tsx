@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import {
   Users, AlertTriangle, Activity, MessageSquare, DollarSign,
-  Search, Loader2, CheckCircle, XCircle, Ban, Send
+  Search, Loader2, CheckCircle, XCircle, Ban, Send, Mail, ShieldAlert
 } from 'lucide-react'
 
-type AdminTab = 'users' | 'activity' | 'feedback' | 'payout'
+type AdminTab = 'users' | 'activity' | 'feedback' | 'payout' | 'email' | 'errors'
 
 interface UserRow {
   id: string; full_name: string; email: string
@@ -45,6 +45,22 @@ export default function AdminExtras() {
   const [payoutSuccess, setPayoutSuccess] = useState('')
   const [sendingPayout, setSendingPayout] = useState(false)
 
+  // Email campaign state
+  interface Campaign { id: string; title: string; subject: string; status: string; sent_count: number; created_at: string; sent_at?: string }
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [campaignTitle, setCampaignTitle] = useState('')
+  const [campaignSubject, setCampaignSubject] = useState('')
+  const [campaignPreview, setCampaignPreview] = useState('')
+  const [campaignBody, setCampaignBody] = useState('')
+  const [sendingCampaign, setSendingCampaign] = useState(false)
+  const [campaignMsg, setCampaignMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  // Server error log state
+  interface ServerError { id: number; route?: string; method?: string; message: string; stack?: string; created_at: string }
+  const [serverErrors, setServerErrors] = useState<ServerError[]>([])
+  const [errorsLoading, setErrorsLoading] = useState(false)
+  const [expandedError, setExpandedError] = useState<number | null>(null)
+
   const loadUsers = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
@@ -78,11 +94,61 @@ export default function AdminExtras() {
     setLoading(false)
   }, [])
 
+  const loadCampaigns = useCallback(async () => {
+    const res = await fetch('/api/admin/email-campaigns')
+    if (res.ok) {
+      const json = await res.json()
+      setCampaigns(json.campaigns ?? [])
+    }
+  }, [])
+
+  const loadServerErrors = useCallback(async () => {
+    setErrorsLoading(true)
+    const res = await fetch('/api/admin/server-errors')
+    if (res.ok) {
+      const json = await res.json()
+      setServerErrors(json.errors ?? [])
+    }
+    setErrorsLoading(false)
+  }, [])
+
   useEffect(() => {
     if (tab === 'users') loadUsers()
     else if (tab === 'activity') loadActivity()
     else if (tab === 'feedback') loadFeedback()
-  }, [tab, loadUsers, loadActivity, loadFeedback])
+    else if (tab === 'email') loadCampaigns()
+    else if (tab === 'errors') loadServerErrors()
+  }, [tab, loadUsers, loadActivity, loadFeedback, loadCampaigns, loadServerErrors])
+
+  async function sendCampaign() {
+    if (!campaignTitle || !campaignSubject || !campaignBody) return
+    setSendingCampaign(true); setCampaignMsg(null)
+    try {
+      const res = await fetch('/api/admin/email-campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: campaignTitle,
+          subject: campaignSubject,
+          preview: campaignPreview,
+          html_body: campaignBody,
+          text_body: campaignBody.replace(/<[^>]+>/g, ''),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCampaignMsg({ ok: false, text: data.error ?? 'Failed to send campaign' })
+      } else {
+        setCampaignMsg({ ok: true, text: `✓ Sent to ${data.sent_count} of ${data.total_recipients} recipients.` })
+        setCampaignTitle(''); setCampaignSubject(''); setCampaignPreview(''); setCampaignBody('')
+        loadCampaigns()
+      }
+    } catch (e) {
+      setCampaignMsg({ ok: false, text: (e as Error).message })
+    } finally {
+      setSendingCampaign(false)
+    }
+  }
 
   async function setAccountStatus(userId: string, status: 'active' | 'suspended' | 'deactivated') {
     setActionLoading(userId)
@@ -127,6 +193,8 @@ export default function AdminExtras() {
     { key: 'activity', label: 'Activity Log', icon: <Activity size={14} /> },
     { key: 'feedback', label: 'User Feedback', icon: <MessageSquare size={14} /> },
     { key: 'payout', label: 'Admin Payout', icon: <DollarSign size={14} /> },
+    { key: 'email', label: 'Email Marketing', icon: <Mail size={14} /> },
+    { key: 'errors', label: 'Error Log', icon: <ShieldAlert size={14} /> },
   ]
 
   return (
@@ -282,6 +350,134 @@ export default function AdminExtras() {
               {sendingPayout ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
               Send Payout
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Email Marketing ─── */}
+      {tab === 'email' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          {/* Compose form */}
+          <div style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#F3F4F6', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Mail size={16} style={{ color: '#10B981' }} /> Compose Campaign
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)' }}>
+              Only users who have opted in to Marketing Emails will receive this. They will also get a persistent in-app notification.
+            </p>
+            {campaignMsg && (
+              <div style={{ borderRadius: '8px', padding: '0.6rem 0.9rem', fontSize: '0.82rem', background: campaignMsg.ok ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: campaignMsg.ok ? '#10B981' : '#EF4444' }}>{campaignMsg.text}</div>
+            )}
+            <div>
+              <label style={labelStyle}>Campaign Title (internal)</label>
+              <input value={campaignTitle} onChange={e => setCampaignTitle(e.target.value)} placeholder="e.g. April Newsletter" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Email Subject</label>
+              <input value={campaignSubject} onChange={e => setCampaignSubject(e.target.value)} placeholder="e.g. Big updates at Espeezy 🚀" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Preview Text (optional)</label>
+              <input value={campaignPreview} onChange={e => setCampaignPreview(e.target.value)} placeholder="Short summary shown in inbox…" maxLength={200} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Email Body (HTML supported)</label>
+              <textarea
+                value={campaignBody}
+                onChange={e => setCampaignBody(e.target.value)}
+                placeholder={'<h2>Hi there!</h2>\n<p>We have exciting news for you...</p>'}
+                rows={8}
+                style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
+              />
+            </div>
+            <button
+              onClick={sendCampaign}
+              disabled={!campaignTitle || !campaignSubject || !campaignBody || sendingCampaign}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                background: '#10B981', border: 'none', borderRadius: '10px', color: '#000',
+                fontWeight: 900, fontSize: '0.85rem', padding: '0.85rem', cursor: 'pointer',
+                opacity: (!campaignTitle || !campaignSubject || !campaignBody || sendingCampaign) ? 0.5 : 1,
+              }}
+            >
+              {sendingCampaign ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={14} />}
+              {sendingCampaign ? 'Sending…' : 'Send to All Opted-In Users'}
+            </button>
+          </div>
+
+          {/* Campaign history */}
+          <div style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 900, color: '#F3F4F6' }}>Campaign History</h3>
+              <button onClick={loadCampaigns} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '6px', padding: '4px 10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 700 }}>Refresh</button>
+            </div>
+            {campaigns.length === 0 && <div style={{ textAlign: 'center', padding: '3rem 0', color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>No campaigns yet</div>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {campaigns.map(c => (
+                <div key={c.id} style={{ background: '#111', borderRadius: '8px', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#E5E7EB', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</div>
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.subject}</div>
+                    <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', marginTop: '4px' }}>
+                      {c.sent_at ? new Date(c.sent_at).toLocaleDateString() : new Date(c.created_at).toLocaleDateString()} · {c.sent_count} sent
+                    </div>
+                  </div>
+                  <span style={{ flexShrink: 0, fontSize: '0.65rem', fontWeight: 900, padding: '2px 8px', borderRadius: '5px', textTransform: 'uppercase',
+                    background: c.status === 'sent' ? 'rgba(16,185,129,0.1)' : c.status === 'failed' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                    color: c.status === 'sent' ? '#10B981' : c.status === 'failed' ? '#EF4444' : '#F59E0B' }}>
+                    {c.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Error Log ─── */}
+      {tab === 'errors' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}>
+              Most recent 100 internal server errors. Copy the message and paste it into Copilot to fix.
+            </p>
+            <button onClick={loadServerErrors} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '6px', padding: '4px 10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' }}>Refresh</button>
+          </div>
+          {errorsLoading && <div style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.3)' }}><Loader2 size={22} style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }} /></div>}
+          {!errorsLoading && serverErrors.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '3rem', background: '#0d0d0d', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+              🟢 No errors logged
+            </div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {serverErrors.map(e => (
+              <div key={e.id} style={{ background: '#0d0d0d', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '10px', padding: '0.9rem 1.1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '0.35rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {e.route && <span style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '4px', padding: '1px 6px', fontFamily: 'monospace', fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)' }}>{e.method ?? 'GET'} {e.route}</span>}
+                    <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)' }}>{new Date(e.created_at).toLocaleString()}</span>
+                  </div>
+                  <button
+                    onClick={() => setExpandedError(expandedError === e.id ? null : e.id)}
+                    style={{ background: 'none', border: 'none', fontSize: '0.7rem', color: 'var(--brand, #10B981)', cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' }}
+                  >
+                    {expandedError === e.id ? 'Hide stack' : 'Full stack'}
+                  </button>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+                  <code style={{ flex: 1, fontSize: '0.8rem', color: '#EF4444', background: 'rgba(239,68,68,0.05)', borderRadius: '6px', padding: '0.4rem 0.6rem', display: 'block', wordBreak: 'break-all' }}>{e.message}</code>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(e.stack ? `${e.message}\n\n${e.stack}` : e.message)}
+                    style={{ flexShrink: 0, background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '6px', padding: '4px 10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: 700 }}
+                  >
+                    Copy
+                  </button>
+                </div>
+                {expandedError === e.id && e.stack && (
+                  <pre style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', background: '#080808', borderRadius: '6px', padding: '0.75rem', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{e.stack}</pre>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
