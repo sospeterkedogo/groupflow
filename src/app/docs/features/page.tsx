@@ -100,7 +100,7 @@ export default function FeaturesDocs() {
           borderRadius: '12px', textDecoration: 'none', fontWeight: 900,
           boxShadow: '0 10px 30px rgba(16, 185, 129, 0.2)'
         }}>
-          Try these features now
+          Try now
         </Link>
       </div>
     </div>
