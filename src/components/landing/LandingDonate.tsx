@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Heart, Lock, Sparkles, Zap, Coffee, Star } from 'lucide-react'
 import Link from 'next/link'
+import { createDonationCheckout } from '@/services/donations'
 
 const PRESETS = [5, 10, 25, 50]
 
@@ -12,6 +13,18 @@ const IMPACT_STATS = [
   { icon: <Heart size={14} />, label: 'Students served', value: '12,000+' },
   { icon: <Coffee size={14} />, label: 'Late-night commits', value: '∞' },
 ]
+
+const ambientGlowStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '10%',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: '700px',
+  height: '400px',
+  background: 'radial-gradient(ellipse, rgba(16,185,129,0.06) 0%, transparent 70%)',
+  filter: 'blur(60px)',
+  pointerEvents: 'none',
+}
 
 export default function LandingDonate() {
   const [selectedPreset, setSelectedPreset] = useState<number | null>(10)
@@ -40,19 +53,11 @@ export default function LandingDonate() {
     }
     setSubmitting(true)
     try {
-      const res = await fetch('/api/stripe/donate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountCents, featureTag: 'general', isAnonymous: false }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.url) {
-        setSubmitError(data.error ?? 'Could not start checkout. Please try again.')
-      } else {
-        window.location.href = data.url
-      }
-    } catch {
-      setSubmitError('Network error. Please check your connection.')
+      const url = await createDonationCheckout({ amountCents, featureTag: 'general', isAnonymous: false })
+      window.location.href = url
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Network error. Please check your connection.'
+      setSubmitError(message)
     }
     setSubmitting(false)
   }
@@ -69,7 +74,7 @@ export default function LandingDonate() {
       }}
     >
       {/* Ambient glow */}
-      <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: '700px', height: '400px', background: 'radial-gradient(ellipse, rgba(16,185,129,0.06) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+      <div style={ambientGlowStyle} />
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         {/* Header */}
