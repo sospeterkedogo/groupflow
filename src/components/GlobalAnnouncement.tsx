@@ -5,9 +5,18 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, X, Shield, Activity, Globe } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
+interface AnnouncementConfig {
+  key: string
+  is_active: boolean
+  value: {
+    title: string
+    message: string
+    style: 'elite' | 'alert'
+  }
+}
+
 export default function GlobalAnnouncement() {
-  const [isClient, setIsClient] = useState(false)
-  const [config, setConfig] = useState<any>(null)
+  const [config, setConfig] = useState<AnnouncementConfig | null>(null)
   const [isVisible, setIsVisible] = useState(true)
   // Use a ref to prevent React StrictMode double-subscription errors:
   // StrictMode mounts→unmounts→mounts in dev; the cleanup removes the channel
@@ -16,7 +25,6 @@ export default function GlobalAnnouncement() {
   const mountIdRef = useRef(0)
 
   useEffect(() => {
-    setIsClient(true)
     mountIdRef.current += 1
     const mountId = mountIdRef.current
 
@@ -34,18 +42,12 @@ export default function GlobalAnnouncement() {
     }
     fetchConfig()
 
-    // 2. Real-time Subscription — unique channel name per mount avoids double-subscribe error
-    const channel = supabase
-      .channel(`announcement_sync_${mountId}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'platform_config', filter: 'key=eq.global_announcement' }, (payload) => {
-        setConfig(payload.new)
-        setIsVisible(true) // Re-show on new updates
-      })
-      .subscribe()
+    
 
-    return () => { supabase.removeChannel(channel) }
+  
   }, [])
 
+  const isClient = typeof window !== 'undefined'
   if (!isClient || !isVisible || !config?.is_active) return null
 
   const { title, message, style } = config.value || { title: 'Institutional Update', message: '', style: 'elite' }
