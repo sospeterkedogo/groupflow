@@ -26,7 +26,7 @@ export function ConnectivityProvider({ children }: { children: React.ReactNode }
     }
 
     const updateConnection = () => {
-      // @ts-ignore - navigator.connection is not in all typings
+      // @ts-expect-error - navigator.connection is not in all typings
       const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection
       if (conn) {
         setEffectiveType(conn.effectiveType)
@@ -36,7 +36,7 @@ export function ConnectivityProvider({ children }: { children: React.ReactNode }
     window.addEventListener('online', updateStatus)
     window.addEventListener('offline', updateStatus)
     
-    // @ts-ignore
+    // @ts-expect-error - navigator.connection is not in all typings
     const conn = navigator.connection
     if (conn) {
       conn.addEventListener('change', updateConnection)

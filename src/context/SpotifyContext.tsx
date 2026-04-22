@@ -1,9 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
-import { createBrowserSupabaseClient } from '@/utils/supabase/client'
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useProfile } from './ProfileContext'
-import { useNotifications } from '@/components/NotificationProvider'
 
 interface SpotifyContextType {
   player: Spotify.Player | null
@@ -24,13 +22,11 @@ const SpotifyContext = createContext<SpotifyContextType | undefined>(undefined)
 
 export function SpotifyProvider({ children }: { children: ReactNode }) {
   const { profile } = useProfile()
-  const { addToast } = useNotifications()
   const [player, setPlayer] = useState<Spotify.Player | null>(null)
   const [deviceId, setDeviceId] = useState<string | null>(null)
   const [playbackState, setPlaybackState] = useState<Spotify.PlaybackState | null>(null)
   const [isSDKReady, setIsSDKReady] = useState(false)
   const [isPremium, setIsPremium] = useState<boolean | null>(null)
-  const supabase = createBrowserSupabaseClient()
 
   // 0. Fetch Spotify Profile (Inclusive check for Premium)
   useEffect(() => {
@@ -50,24 +46,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     fetchSpotifyProfile()
   }, [profile?.spotify_access_token])
 
-  // 1. Refresh Token Logic
-  const refreshSpotifyToken = useCallback(async () => {
-    if (!profile?.id) return null
-
-    try {
-      const response = await fetch('/api/spotify/refresh', {
-        method: 'POST',
-        body: JSON.stringify({ userId: profile.id })
-      })
-      const data = await response.json()
-      return data.access_token
-    } catch (err) {
-      console.error('Failed to refresh Spotify token:', err)
-      return null
-    }
-  }, [profile?.id])
-
-  // 2. Load Spotify SDK
+  // 1. Load Spotify SDK
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -102,7 +81,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       setDeviceId(device_id)
     })
 
-    newPlayer.addListener('not_ready', ({ device_id }: { device_id: string }) => {
+    newPlayer.addListener('not_ready', () => {
       setDeviceId(null)
     })
 
@@ -111,7 +90,15 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       setPlaybackState(state)
 
       // Broadcast to Presence via window trick
-      ;(window as any)._spotify_presence = {
+      interface SpotifyPresence {
+        isPlaying: boolean
+        trackUri: string
+        trackName: string
+        artistName: string
+        progressMs: number
+        timestamp: number
+      }
+      ;(window as unknown as Window & { _spotify_presence: SpotifyPresence })._spotify_presence = {
         isPlaying: !state.paused,
         trackUri: state.track_window.current_track.uri,
         trackName: state.track_window.current_track.name,
@@ -131,10 +118,10 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     })
 
     newPlayer.connect()
-    setPlayer(newPlayer)
 
     return () => {
       newPlayer.disconnect()
+      setPlayer(null)
     }
   }, [isSDKReady, profile?.spotify_access_token])
 

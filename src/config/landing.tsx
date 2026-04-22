@@ -4,125 +4,95 @@ import { Layers, Users, Zap, Shield, Milestone, Award, LayoutGrid, BookOpen, Glo
 export const features = [
   { 
     icon: <Layers size={21} />, 
-    title: "Smart Task Board", 
-    desc: "Easily manage your tasks with real-time updates that save automatically as you work.",
+    title: "Task Management Made Easy", 
+    desc: "Collaborate with your team on tasks with our smart task board. Save time with automatic updates and real-time syncing across all your devices.",
     color: "var(--brand)"
   },
   { 
     icon: <Users size={21} />, 
-    title: "Student Network", 
-    desc: "Connect with other students in your classes, share resources, and build your university network.",
+    title: "Connect with Your Peers", 
+    desc: "Build your university network and connect with other students in your classes. Share resources and collaborate on projects.",
     color: "#10b981"
   },
   { 
     icon: <Zap size={21} />, 
-    title: "Quick Syncing", 
-    desc: "Fast and reliable chat and file sharing that stays updated across all your devices.",
+    title: "Stay Synced", 
+    desc: "Our quick syncing feature keeps your chat and file sharing up-to-date across all your devices. Never miss a beat with our reliable platform.",
     color: "var(--accent)"
   },
   { 
     icon: <Shield size={21} />, 
-    title: "Credit for Your Work", 
-    desc: "We keep a safe record of your help in every project, ensuring you always get the credit you deserve.",
+    title: "Credit Where Credit is Due", 
+    desc: "We keep a safe record of your contributions in every project. Ensure you always get the credit you deserve with our platform.",
     color: "#6366f1"
   },
   { 
     icon: <Milestone size={21} />, 
-    title: "Visible Progress", 
-    desc: "See your group deadlines clearly and track your project's path from start to finish.",
-    color: "#f59e0b"
+    title: "See Your Progress", 
+    desc: "Track your progress with our visible progress feature. Stay motivated and reach your goals with our platform.",
+    color: "#f56565"
   },
   { 
-     icon: <Award size={21} />, 
-     title: "Recognition Badges", 
-     desc: "Earn special badges and profile status based on your contributions and team achievements.",
-     color: "#fbbf24"
+    icon: <Award size={21} />, 
+    title: "Recognition for Your Work", 
+    desc: "We recognize your hard work with our award system. Earn badges and rewards for your contributions to projects.",
+    color: "#f6e05e"
   },
   { 
-    icon: <Shield size={21} />, 
-    title: "Secure & Safe", 
-    desc: "Your data is protected with modern security to keep your work and personal info safe.",
-    color: "#10b981"
+    icon: <LayoutGrid size={21} />, 
+    title: "Organize Your Tasks", 
+    desc: "Organize your tasks with our layout grid feature. Create a visually appealing and organized task board.",
+    color: "#5c6bc0"
+  },
+  { 
+    icon: <BookOpen size={21} />, 
+    title: "Access to Resources", 
+    desc: "Access a library of resources and tutorials with our book open feature. Learn new skills and stay up-to-date with industry trends.",
+    color: "#3b82f6"
+  },
+  { 
+    icon: <Globe size={21} />, 
+    title: "Global Community", 
+    desc: "Join a global community of students and professionals. Connect with people from all over the world and collaborate on projects.",
+    color: "#28a745"
+  },
+  { 
+    icon: <Fingerprint size={21} />, 
+    title: "Personalized Experience", 
+    desc: "Enjoy a personalized experience with our fingerprint feature. Your preferences and settings are saved for easy access.",
+    color: "#795548"
+  },
+  { 
+    icon: <HelpCircle size={21} />, 
+    title: "Support When You Need It", 
+    desc: "Our help circle feature provides support when you need it. Get help with any issues or questions you may have.",
+    color: "#9f3a38"
+  },
+  { 
+    icon: <Braces size={21} />, 
+    title: "Safety First", 
+    desc: "Your safety is our priority with our braces feature. We keep your data secure and private. Rest assured, your information is in good hands.",
+    color: "#d32f2f"
   }
 ]
 
-export const faqs = [
-  {
-    q: "How can I support Espeezy?",
-    a: "You can support this project by upgrading to Pro (£4.99/mo) or Premium (£14.99/mo) or securing a Founder Lifetime Access for £99. Your contribution directly funds the high-performance infrastructure required for global academic excellence."
-  },
-  {
-    q: "What is the 'Orbit Gateway'?",
-    a: "It is our institutional-grade security portal. It utilizes dynamic secret routes and TOTP verification to ensure that only authorized administrative nodes can access the platform's core orchestration layers."
-  },
-  {
-    q: "How is my data protected?",
-    a: "We utilize multi-layer encryption and institutional audit logs. Your data is stored in the same high-security environment used by the world's leading academic institutions."
-  },
-  {
-    q: "Can I delete my account?",
-    a: "Of course. You're in control of your data. You can permanently delete your account and all your project info with a single click whenever you like."
-  },
-  {
-    q: "Who is behind Espeezy?",
-    a: "I created Espeezy to help student teams feel more supported and recognized during group work."
-  }
-]
-
-export const navMenus = {
-  product: {
-    label: 'Features',
-    categories: [
-      {
-        label: 'Tools',
-        items: [
-          { id: 'kanban', title: 'Smart Kanban', desc: 'Manage your tasks with real-time updates.', icon: <LayoutGrid size={18} />, href: '/#features' },
-          { id: 'sync', title: 'Team Sync', desc: 'Keep everyone on the same page, always.', icon: <Zap size={18} />, href: '/#features' }
-        ]
-      },
-      {
-        label: 'Planning',
-        items: [
-          { id: 'roadmap', title: 'Project Timeline', desc: 'See your deadlines in a clear visual way.', icon: <Milestone size={18} />, href: '/#features' }
-        ]
-      }
-    ]
-  },
-  solutions: {
-    label: 'Who it\'s for',
-    categories: [
-      {
-        label: 'Users',
-        items: [
-          { id: 'research', title: 'Individual Students', desc: 'Track your work and get credit for what you do.', icon: <BookOpen size={18} />, href: '/#mission' },
-          { id: 'teams', title: 'Study Groups', desc: 'Collaborate easily with your whole class.', icon: <Users size={18} />, href: '/#mission' }
-        ]
-      },
-      {
-        label: 'Organizations',
-        items: [
-          { id: 'enterprise', title: 'University Clubs', desc: 'Manage large student groups with ease.', icon: <Globe size={18} />, href: '/#mission' }
-        ]
-      }
-    ]
-  },
-  resources: {
-    label: 'About',
-    categories: [
-      {
-        label: 'Our Project',
-        items: [
-          { id: 'mission', title: 'Our Mission', desc: 'Learn why we started Espeezy.', icon: <Fingerprint size={18} />, href: '/#mission' },
-          { id: 'achievements', title: 'Community Impact', desc: 'See how we help students worldwide.', icon: <Award size={18} />, href: '/#faq' }
-        ]
-      },
-      {
-        label: 'Need Help?',
-        items: [
-          { id: 'developers', title: 'Developers API', desc: 'Data API endpoints for all core datasets.', icon: <Braces size={18} />, href: '/#developers' },
-          { id: 'help', title: 'Help Center', desc: 'Guides and tips to help you get started.', icon: <HelpCircle size={18} />, href: '/docs' }
-        ]
-      }
-    ]
-  }
+export const Landing: React.FC = () => {
+  return (
+    <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold mb-4">Introducing Espeezy</h1>
+      <p className="text-lg mb-4">Your new task management platform</p>
+      <div className="flex flex-wrap justify-center items-center">
+        {features.map((feature, index) => (
+          <div key={index} className="flex flex-col items-center mb-4">
+            <div className="w-16 h-16 rounded-full flex justify-center items-center bg-gray-300 mb-2">
+              {feature.icon}
+            </div>
+            <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+            <p className="text-gray-600">{feature.desc}</p>
+          </div>
+        ))}
+      </div>
+      <button className="px-4 py-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-700">Get Started</button>
+    </div>
+  )
 }

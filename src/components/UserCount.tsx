@@ -23,7 +23,15 @@ export default function UserCount() {
   }
 
   useEffect(() => {
-    fetchCount()
+    let mounted = true
+
+    const initializeCount = async () => {
+      if (mounted) {
+        await fetchCount()
+      }
+    }
+
+    initializeCount()
 
     // Realtime subscription to profiles table
     const channel = supabase
@@ -32,19 +40,24 @@ export default function UserCount() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'profiles' },
         () => {
-          fetchCount()
+          if (mounted) {
+            fetchCount()
+          }
         }
       )
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'profiles' },
         () => {
-          fetchCount()
+          if (mounted) {
+            fetchCount()
+          }
         }
       )
       .subscribe()
 
     return () => {
+      mounted = false
       supabase.removeChannel(channel)
     }
   }, [])

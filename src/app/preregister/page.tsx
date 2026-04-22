@@ -112,8 +112,6 @@ export default function PreRegisterPage() {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('hero')
 
   // Load launch config + count
   useEffect(() => {
@@ -316,7 +314,7 @@ export default function PreRegisterPage() {
 
                     <button type="submit" disabled={submitting}
                       style={{ width: '100%', padding: '0.95rem', borderRadius: '10px', background: submitting ? 'rgba(16,185,129,0.5)' : 'var(--brand)', color: 'white', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: submitting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}>
-                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist — It's Free</>}
+                      {submitting ? 'Registering…' : <><Mail size={16} /> Join the Waitlist — It&apos;s Free</>}
                     </button>
 
                     <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
@@ -367,7 +365,7 @@ export default function PreRegisterPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
             <div style={{ display: 'inline-flex', padding: '5px 14px', background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '100px', marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>What's Coming in V2</span>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>What&apos;s Coming in V2</span>
             </div>
             <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.05, marginBottom: '1rem' }}>
               Built for the next era of education.

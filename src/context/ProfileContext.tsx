@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { PersistentCache } from '@/utils/cache'
 import { Profile } from '@/types/auth'
@@ -30,7 +30,7 @@ export function ProfileProvider({
   const [loading, setLoading] = useState(!initialProfile && !profile)
   const supabase = createBrowserSupabaseClient()
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     const { data } = await supabase
       .from('profiles')
       .select('*, groups(*)')
@@ -40,15 +40,24 @@ export function ProfileProvider({
       setProfile(data)
       PersistentCache.set(`profile_${userId}`, data, 3600000) // 1 Hour TTL
     }
-  }
+  }, [supabase, userId])
 
   useEffect(() => {
     if (!userId) return
 
-    // Ensure we have current data if initial was partial or missing (crucially check for 'id')
-    if (!profile || !profile.id) {
-      refreshProfile().finally(() => setLoading(false))
+    let isMounted = true
+
+    const initializeProfile = async () => {
+      // Ensure we have current data if initial was partial or missing (crucially check for 'id')
+      if (!profile || !profile.id) {
+        await refreshProfile()
+      }
+      if (isMounted) {
+        setLoading(false)
+      }
     }
+
+    initializeProfile()
 
     // Subscribe to REALTIME changes for the current user profile
     const channel = supabase
@@ -61,17 +70,20 @@ export function ProfileProvider({
           table: 'profiles',
           filter: `id=eq.${userId}`
         },
-        (payload) => {
+        () => {
           // Instead of raw overprinting, trigger a full joined refetch
-          refreshProfile()
+          if (isMounted) {
+            refreshProfile()
+          }
         }
       )
       .subscribe()
 
     return () => {
+      isMounted = false
       supabase.removeChannel(channel)
     }
-  }, [userId])
+  }, [userId, profile, refreshProfile, supabase])
 
   return (
     <ProfileContext.Provider value={{ profile, loading, refreshProfile, setProfile }}>

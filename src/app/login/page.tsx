@@ -1,14 +1,15 @@
 "use client"
 
 import { useMemo, useState, useEffect } from 'react'
+import Image from 'next/image'
 import { signup, login } from './actions'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
 import { BookOpen, User, Lock, ExternalLink } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { detectCountry, getFlagComponent, getUnicodeFlag } from '@/utils/geo'
-import { Phone, Hash as HashIcon, ArrowLeft } from 'lucide-react'
+import { detectCountry } from '@/utils/geo'
+import { Phone, Hash as HashIcon } from 'lucide-react'
 
 function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAccepted: boolean }) {
   const { pending } = useFormStatus()
@@ -38,7 +39,6 @@ function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const error = searchParams.get('error')
-  const [isResetting, setIsResetting] = useState(false)
   const [resetMessage, setResetMessage] = useState<string | null>(null)
   const [authTab, setAuthTab] = useState<'email' | 'phone'>(searchParams.get('method') === 'phone' ? 'phone' : 'email')
   const [email, setEmail] = useState('')
@@ -53,6 +53,7 @@ function LoginContent() {
   const [sendingOtp, setSendingOtp] = useState(false)
   const [country, setCountry] = useState<string | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
+  const [isResetting, setIsResetting] = useState(false)
 
   // Client-side guard: Bounce authenticated users back to dashboard
   useEffect(() => {
@@ -68,9 +69,15 @@ function LoginContent() {
     checkUser()
   }, [router])
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     // Basic reset logic placeholder to prevent crash
-    setResetMessage("Password reset link sent to " + email)
+    setIsResetting(true)
+    setAuthError(null)
+    // TODO: Implement actual password reset via Supabase
+    setTimeout(() => {
+      setResetMessage("Password reset link sent to " + email)
+      setIsResetting(false)
+    }, 1000)
   }
 
   // Real-time password strength evaluation
@@ -167,8 +174,6 @@ function LoginContent() {
     else router.replace('/dashboard')
     setSendingOtp(false)
   }
-
-  const Flag = getFlagComponent(country)
 
   if (checkingAuth) {
     return (
@@ -318,7 +323,7 @@ function LoginContent() {
                 <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)' }}>Phone Number</label>
                 <div style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: '0.5rem', width: '24px', height: '16px' }}>
-                    {Flag ? <Flag /> : <Phone size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />}
+                    <Phone size={18} style={{ color: 'rgba(255,255,255,0.4)' }} />
                   </div>
                   <input
                     className="form-input"
@@ -431,7 +436,7 @@ function LoginContent() {
                   color: '#1a1a1b'
                 }}
               >
-                <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '18px', height: '18px' }} />
+                <Image src="https://www.google.com/favicon.ico" alt="Google" width={18} height={18} />
                 Continue with Google
               </button>
 

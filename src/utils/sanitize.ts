@@ -23,7 +23,6 @@ const MAX_UUID_LENGTH = 36
 
 /** Strip null bytes and control characters that break DB queries */
 export function stripControlChars(value: string): string {
-  // eslint-disable-next-line no-control-regex
   return value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
 }
 

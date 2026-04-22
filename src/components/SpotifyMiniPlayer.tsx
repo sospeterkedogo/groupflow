@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { useSpotify } from '@/context/SpotifyContext'
 import { Play, Pause, SkipForward, SkipBack, Music, Volume2, Users } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -87,7 +88,7 @@ export default function SpotifyMiniPlayer() {
             }}
           >
             {currentTrack?.album.images[0]?.url ? (
-              <img src={currentTrack.album.images[0].url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+              <Image src={currentTrack.album.images[0].url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" fill />
             ) : (
               <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Music size={24} color="#666" />
