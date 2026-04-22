@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
 import {
-  Settings, Save, CheckCircle2, Shield, Download, Trash2,
+  Settings, Save, CheckCircle2, Shield, Trash2,
   Key, AlertTriangle, X, Palette as PaletteIcon,
-  Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
-  UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
+  Image as ImageIcon, User, MapPin,
+  UserMinus, Eye, ShieldAlert, Activity as PulseIcon, History, Mail,
   Calendar, CreditCard, ArrowUpRight, Award, Sparkles, Lock, Search, MessageSquare, Phone, Globe
 } from 'lucide-react'
 import { detectCountry, getFlagComponent } from '@/utils/geo'
@@ -26,7 +25,6 @@ import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
 
 export default function SettingsPage() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabName>('identity')
   const { profile, refreshProfile, setProfile } = useProfile()
   const [fullName, setFullName] = useState('')
@@ -34,7 +32,6 @@ export default function SettingsPage() {
   const [enrollmentYear, setEnrollmentYear] = useState<number>(new Date().getFullYear())
   const [completionYear, setCompletionYear] = useState<number>(new Date().getFullYear() + 3)
   const [rank, setRank] = useState('Senior')
-  const [badgesCount, setBadgesCount] = useState(0)
   const [tagline, setTagline] = useState('')
   const [biography, setBiography] = useState('')
   const [stack, setStack] = useState('')
@@ -79,26 +76,11 @@ export default function SettingsPage() {
   const [otp, setOtp] = useState('')
   const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verifying'>('idle')
   const [protectAvatar, setProtectAvatar] = useState(false)
-  const [manualAvatarUrl, setManualAvatarUrl] = useState<string | null>(null)
-  const [isToasterMode, setIsToasterMode] = useState(false)
+  const [isToasterMode, setIsToasterMode] = useState(() =>
+    typeof window !== 'undefined' && localStorage.getItem('gf_toaster_mode') === 'true'
+  )
 
   const supabase = createBrowserSupabaseClient()
-
-  useEffect(() => {
-    // Sync Toaster Mode from local storage
-    if (typeof window !== 'undefined') {
-      setIsToasterMode(localStorage.getItem('gf_toaster_mode') === 'true')
-    }
-    
-    // Parallelize top-level metadata fetches
-    const initializeData = async () => {
-      await Promise.all([
-        fetchUserData(),
-        fetchGroups()
-      ])
-    }
-    initializeData()
-  }, [])
 
   const fetchGroups = async () => {
     const { data } = await supabase.from('groups').select('*').order('name')
@@ -115,6 +97,11 @@ export default function SettingsPage() {
     if (data) {
       setSentRequests(Array.from(new Set(data.map((row: { group_id: string }) => row.group_id))))
     }
+  }
+
+  const fetchTeam = async (groupId: string) => {
+    const { data } = await supabase.from('profiles').select('*').eq('group_id', groupId)
+    if (data) setTeamMembers(data)
   }
 
   const fetchUserData = async () => {
@@ -134,7 +121,6 @@ export default function SettingsPage() {
         setEnrollmentYear(data.enrollment_year || new Date().getFullYear())
         setCompletionYear(data.completion_year || new Date().getFullYear() + 3)
         setRank(data.rank || 'Senior')
-        setBadgesCount(data.badges_count ?? 0)
         setTagline(data.tagline || '')
         setBiography(data.biography || '')
         setStack(data.stack || '')
@@ -144,7 +130,6 @@ export default function SettingsPage() {
         setIsEncrypted(data.groups?.is_encrypted || false)
         setProtectAvatar(data.protect_avatar || false)
         setIsPhoneVerified(data.is_phone_verified || false)
-        setManualAvatarUrl(data.manual_avatar_url || null)
         
         // Parallelize Secondary Context Fetches
         const contextFetches = []
@@ -161,10 +146,17 @@ export default function SettingsPage() {
     setLoading(false)
   }
 
-  const fetchTeam = async (groupId: string) => {
-    const { data } = await supabase.from('profiles').select('*').eq('group_id', groupId)
-    if (data) setTeamMembers(data)
-  }
+  useEffect(() => {
+    // Parallelize top-level metadata fetches
+    const initializeData = async () => {
+      await Promise.all([
+        fetchUserData(),
+        fetchGroups()
+      ])
+    }
+    initializeData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -250,8 +242,8 @@ export default function SettingsPage() {
       const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber })
       if (error) throw error
       addToast('Code Dispatched', 'Verification shard sent to your communication device.', 'success')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err))
       setOtpStep('idle')
     }
   }
@@ -271,8 +263,8 @@ export default function SettingsPage() {
       setOtpStep('idle')
       addToast('Identity Verified', 'Phone connection successfully linked to your node.', 'success')
       refreshProfile()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err))
       setOtpStep('sent')
     }
   }
@@ -309,14 +301,13 @@ export default function SettingsPage() {
         updateData.manual_avatar_url = publicUrl
         await supabase.from('profiles').update(updateData).eq('id', profile.id)
         setAvatarUrl(publicUrl)
-        setManualAvatarUrl(publicUrl)
       } else {
         await setCustomBg(publicUrl)
       }
       refreshProfile()
       addToast('Visuals Updated', 'Your appearance settings have been synchronized across all project hubs.', 'success')
-    } catch (err: any) {
-      setError("Upload failed: " + err.message)
+    } catch (err: unknown) {
+      setError("Upload failed: " + (err instanceof Error ? err.message : String(err)))
     } finally {
       setUploadingAvatar(false)
       setUploadingBg(false)
@@ -361,8 +352,8 @@ export default function SettingsPage() {
         }
       })
       if (error) throw error
-    } catch (err: any) {
-      setError(`Identity Linkage Failure: ${err.message}`)
+    } catch (err: unknown) {
+      setError(`Identity Linkage Failure: ${err instanceof Error ? err.message : String(err)}`)
       setSaving(false)
     }
   }
@@ -409,8 +400,8 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error(data.error || 'Account termination failed')
       await supabase.auth.signOut()
       window.location.href = '/login'
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err))
       setIsDeleting(false)
       setIsDeleteModalOpen(false)
     }
@@ -424,8 +415,8 @@ export default function SettingsPage() {
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Portal creation failed')
       window.location.href = result.url
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err))
       setLoadingPortal(false)
     }
   }
@@ -572,8 +563,8 @@ export default function SettingsPage() {
                       if (profile) {
                         logActivity(profile.id, profile.group_id || 'system', 'setting_updated', `Submitted feedback: ${feedbackCategory}`, { category: feedbackCategory })
                       }
-                    } catch (err: any) {
-                      addToast('Submission Failed', err.message || 'Something went wrong', 'error')
+                    } catch (err: unknown) {
+                      addToast('Submission Failed', err instanceof Error ? err.message : 'Something went wrong', 'error')
                     } finally {
                       setSubmittingFeedback(false)
                     }
@@ -601,7 +592,7 @@ export default function SettingsPage() {
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
                   {profile.subscription_plan 
-                    ? `Active since ${new Date(profile.subscription_started_at || Date.now()).toLocaleDateString()}` 
+                    ? `Active since ${profile.subscription_started_at ? new Date(profile.subscription_started_at).toLocaleDateString() : 'recently'}` 
                     : 'Unlock professional project features.'}
                 </p>
               </div>
@@ -832,7 +823,7 @@ export default function SettingsPage() {
                   zIndex: 1
                 }}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={avatarUrl} alt={fullName || 'Profile photo'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <User size={32} color="var(--text-sub)" />
                   )}
@@ -1045,7 +1036,7 @@ export default function SettingsPage() {
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', overflow: 'hidden' }}>
-                      {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={20} style={{ margin: '10px' }} />}
+                      {member.avatar_url ? <img src={member.avatar_url} alt={member.full_name || 'Member'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={20} style={{ margin: '10px' }} />}
                     </div>
                     <div>
                       <div style={{ fontWeight: 700 }}>{member.full_name || 'Anonymous'}</div>
@@ -1075,9 +1066,10 @@ export default function SettingsPage() {
 
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {(() => {
-                const groupData = Array.isArray((profile as any)?.groups) 
-                  ? (profile as any).groups[0] 
-                  : (profile as any)?.groups;
+                const profileGroups = profile?.groups;
+                const groupData = Array.isArray(profileGroups) 
+                  ? profileGroups[0] 
+                  : profileGroups;
                 
                 return (
                   <div>
@@ -1130,8 +1122,8 @@ export default function SettingsPage() {
                     const { sendJoinRequest } = await import('../join/actions')
                     await sendJoinRequest(group.id, fullName || 'A student')
                     setSentRequests(prev => [...new Set([...prev, group.id])])
-                  } catch (err: any) {
-                    setError('Request failed: ' + err.message)
+                  } catch (err: unknown) {
+                    setError('Request failed: ' + (err instanceof Error ? err.message : String(err)))
                   } finally {
                     setPendingRequests(prev => prev.filter(id => id !== group.id))
                   }
@@ -1247,12 +1239,13 @@ export default function SettingsPage() {
                             try {
                               await setPalette(p.name)
                               addToast('Appearance Synced', `The ${p.name} palette has been successfully applied to your terminal.`, 'success')
-                            } catch (err: any) {
-                              if (err.message === 'PREMIUM_LOCKED' || err.message === 'PRO_LOCKED') {
+                            } catch (err: unknown) {
+                              const message = err instanceof Error ? err.message : String(err)
+                              if (message === 'PREMIUM_LOCKED' || message === 'PRO_LOCKED') {
                                 addToast('Access Unauthorized', 'This visual protocol requires higher institutional clearance.', 'error')
                                 setActiveTab('billing')
                               } else {
-                                addToast('Sync Error', err.message || 'Failed to apply theme.', 'error')
+                                addToast('Sync Error', message || 'Failed to apply theme.', 'error')
                               }
                             }
                           }}
@@ -1304,7 +1297,7 @@ export default function SettingsPage() {
               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '32px', padding: '3rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
                 {customBg ? (
                   <div style={{ position: 'relative', width: '240px', height: '120px', borderRadius: '24px', overflow: 'hidden', margin: '0 auto 1.5rem', border: '3px solid var(--brand)', boxShadow: 'var(--shadow-lg)' }}>
-                    <img src={customBg} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={customBg} alt="Custom background" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <button
                       onClick={() => setCustomBg(null)}
                       style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)' }}
@@ -1449,7 +1442,7 @@ export default function SettingsPage() {
                           const achievements = [...currentAchievements]
                           let next
                           if (isConnected) {
-                            next = achievements.filter((a: any) => a.name !== tool)
+                            next = achievements.filter((a: Achievement) => a.name !== tool)
                           } else {
                             next = [...achievements, { name: tool, date: new Date().toISOString() }]
                           }
