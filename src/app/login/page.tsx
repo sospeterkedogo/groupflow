@@ -1,14 +1,12 @@
 "use client"
 
 import { useMemo, useState, useEffect } from 'react'
-import Image from 'next/image'
 import { signup, login } from './actions'
 import TransientError from '@/components/TransientError'
 import { PrivacyPolicy, TermsOfService, CookiePolicy } from '@/components/Legal/Policies'
 import { BookOpen, User, Lock, ExternalLink } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { detectCountry } from '@/utils/geo'
 import { Phone, Hash as HashIcon } from 'lucide-react'
 
 function SubmitButton({ isSignUp, legalAccepted }: { isSignUp: boolean, legalAccepted: boolean }) {
@@ -51,7 +49,6 @@ function LoginContent() {
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
-  const [country, setCountry] = useState<string | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [isResetting, setIsResetting] = useState(false)
 
@@ -145,8 +142,6 @@ function LoginContent() {
 
   const handlePhoneChange = (val: string) => {
     setPhone(val)
-    const detected = detectCountry(val)
-    if (detected) setCountry(detected)
   }
 
   const handleRequestOtp = async (e: React.MouseEvent) => {
@@ -436,7 +431,12 @@ function LoginContent() {
                   color: '#1a1a1b'
                 }}
               >
-                <Image src="https://www.google.com/favicon.ico" alt="Google" width={18} height={18} />
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.56 2.68-3.86 2.68-6.62z" fill="#4285F4"/>
+                  <path d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.92-2.26c-.8.54-1.84.86-3.03.86-2.33 0-4.3-1.57-5-3.68H.98V13.1A8.99 8.99 0 0 0 9 18z" fill="#34A853"/>
+                  <path d="M4 10.74A5.4 5.4 0 0 1 3.72 9c0-.6.1-1.18.28-1.74V5H.98A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.98 4.1L4 10.74z" fill="#FBBC05"/>
+                  <path d="M9 3.58c1.32 0 2.5.46 3.43 1.36l2.57-2.58C13.45.9 11.43 0 9 0A8.99 8.99 0 0 0 .98 5L4 7.26C4.7 5.15 6.67 3.58 9 3.58z" fill="#EA4335"/>
+                </svg>
                 Continue with Google
               </button>
 
