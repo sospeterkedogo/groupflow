@@ -1,5 +1,11 @@
-import { FatalError } from 'workflow'
 import { createAdminClient } from '../../src/utils/supabase/server'
+
+class FatalError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'FatalError'
+  }
+}
 
 export type PaymentWorkflowPayload = {
   eventType: 'checkout.session.completed' | 'invoice.payment_succeeded' | 'invoice.payment_failed'

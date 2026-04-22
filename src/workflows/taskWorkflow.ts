@@ -1,7 +1,13 @@
-import { FatalError } from 'workflow'
 import { createAdminClient } from '../utils/supabase/server'
 import type { TaskCategory, TaskStatus } from '../types/database'
 import { taskSchema } from '../utils/validation'
+
+class FatalError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'FatalError'
+  }
+}
 
 export type TaskPayload = {
   id?: string
