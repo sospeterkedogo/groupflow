@@ -11,8 +11,8 @@ function getStripeClient(): Stripe {
   })
 }
 
-const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || 'http://localhost:3000/dashboard/payment-success'
-const CANCEL_URL = process.env.STRIPE_CANCEL_URL || 'http://localhost:3000/dashboard/marketplace'
+const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || 'http://espeezy.com/dashboard/payment-success'
+const CANCEL_URL = process.env.STRIPE_CANCEL_URL || 'http://espeezy.com/dashboard/marketplace'
 
 /**
  * Retrieve an existing Stripe Customer for the user or create one.

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
@@ -22,7 +22,6 @@ import {
   Music,
   ShieldCheck,
   Lock,
-  Wifi,
   WifiOff,
   Rss,
   DollarSign,
@@ -30,7 +29,6 @@ import {
 } from 'lucide-react'
 import { useConnectivity } from '@/context/ConnectivityContext'
 import { useTheme } from '@/context/ThemeContext'
-import { Profile } from '@/types/auth'
 import { SidebarProps } from '@/types/ui'
 import NotificationBell from './NotificationBell'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
@@ -61,9 +59,19 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const isDark = currentPalette.name !== 'Google Light'
 
+  // 0. Hydration fix: set mounted after first render
+  useEffect(() => {
+  const effectCallback = () => {
+    setMounted(true);
+  };
+
+  effectCallback();
+
+  return effectCallback;
+}, []);
+
   // 1. Manage mobile state with robust resize listener & hydration fix
   useEffect(() => {
-    setMounted(true)
     const handleResize = () => {
       const mobile = typeof window !== 'undefined' && window.innerWidth <= 768
       setIsMobile(mobile)
@@ -434,7 +442,7 @@ export default function Sidebar({ user }: SidebarProps) {
            >
               <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--brand)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 950, flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 8px rgba(var(--brand-rgb), 0.15)' }}>
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="User avatar" />
+                  <Image src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="User avatar" />
                 ) : (
                   profile?.full_name?.charAt(0) || 'U'
                 )}
