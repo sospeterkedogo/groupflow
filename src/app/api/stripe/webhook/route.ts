@@ -4,30 +4,35 @@ import { start } from 'workflow/api'
 import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
 import { createAdminClient } from '@/utils/supabase/server'
 import { sendP2PTransactionEmail } from '@/services/email'
+import { getStripeClient, getStripeWebhookSecret } from '@/utils/stripe'
 
+export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   const signature = req.headers.get('stripe-signature')
   if (!signature) {
-    return new NextResponse('Missing Stripe signature', { status: 400 })
+    return NextResponse.json({ error: 'Missing Stripe signature' }, { status: 400 })
   }
 
-  const stripeKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeKey) {
-    return new NextResponse('Stripe not configured', { status: 400 })
+  let stripe: Stripe
+  let webhookSecret: string
+  try {
+    stripe = getStripeClient()
+    webhookSecret = getStripeWebhookSecret()
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Stripe not configured'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  // Lazy init: avoid module-level throw when STRIPE_SECRET_KEY is unset
-  const stripe = new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as any })
 
   const rawBody = Buffer.from(await req.arrayBuffer())
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET!)
-  } catch (error: any) {
-    return new NextResponse(`Stripe webhook verification failed: ${error.message}`, { status: 400 })
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Webhook verification failed'
+    return NextResponse.json({ error: `Stripe webhook verification failed: ${message}` }, { status: 400 })
   }
 
   // Handle donation separately — does not go through payment workflow
@@ -35,24 +40,25 @@ export async function POST(req: Request) {
     const session = event.data.object as Stripe.Checkout.Session
     if (session.metadata?.type === 'donation') {
       await handleDonationWebhook(session)
-      return new NextResponse('Donation recorded', { status: 200 })
+      return NextResponse.json({ ok: true, handled: 'donation' }, { status: 200 })
     }
     if (session.metadata?.type === 'p2p_transfer') {
       await handleP2PTransferWebhook(session)
-      return new NextResponse('P2P transfer recorded', { status: 200 })
+      return NextResponse.json({ ok: true, handled: 'p2p_transfer' }, { status: 200 })
     }
   }
 
   const payload = buildWebhookPayload(event)
   if (!payload) {
-    return new NextResponse('Event ignored', { status: 200 })
+    return NextResponse.json({ ok: true, handled: 'ignored' }, { status: 200 })
   }
 
   try {
     await start(paymentWorkflow, [payload as any])
-    return new NextResponse('Webhook received', { status: 200 })
-  } catch (error: any) {
-    return new NextResponse(`Workflow startup failed: ${error.message}`, { status: 500 })
+    return NextResponse.json({ ok: true, handled: payload.eventType }, { status: 200 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Workflow startup failed'
+    return NextResponse.json({ error: `Workflow startup failed: ${message}` }, { status: 500 })
   }
 }
 

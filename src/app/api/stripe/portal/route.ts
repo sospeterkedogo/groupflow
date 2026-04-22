@@ -1,24 +1,17 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { getAppUrl, getStripeClient, getStripePortalConfigurationId } from '@/utils/stripe'
 
-function getStripeClient(): Stripe {
-  const stripeKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeKey) {
-    throw new Error('STRIPE_SECRET_KEY is not configured')
-  }
-  return new Stripe(stripeKey, {
-    apiVersion: '2026-03-25.dahlia' as any,
-  })
-}
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-export async function POST(req: Request) {
-  let stripe: Stripe
+export async function POST() {
+  let stripe
   try {
     stripe = getStripeClient()
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Stripe is not configured'
-    return new NextResponse(JSON.stringify({ error: msg }), { status: 500 })
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 
   const supabase = await createServerSupabaseClient()
@@ -26,7 +19,7 @@ export async function POST(req: Request) {
     .catch(() => ({ data: { user: null } }))
 
   if (!user) {
-    return new NextResponse(JSON.stringify({ error: 'Authentication required.' }), { status: 401 })
+    return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
   }
 
   // Get the stripe customer id from the profile
@@ -37,19 +30,21 @@ export async function POST(req: Request) {
     .single()
 
   if (!profile?.stripe_customer_id) {
-    return new NextResponse(JSON.stringify({ error: 'No active subscription found. Please upgrade first.' }), { status: 400 })
+    return NextResponse.json({ error: 'No active subscription found. Please upgrade first.' }, { status: 404 })
   }
 
   try {
+    const configuration = getStripePortalConfigurationId()
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
-      configuration: 'bpc_1TNgcLGi695k7CdbElmCbEc2',
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/dashboard/settings`,
+      ...(configuration ? { configuration } : {}),
+      return_url: `${getAppUrl()}/dashboard/settings`,
     })
 
     return NextResponse.json({ url: session.url })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Stripe Portal Error:', error)
-    return new NextResponse(JSON.stringify({ error: error.message || 'Stripe portal creation failed.' }), { status: 500 })
+    const message = error instanceof Error ? error.message : 'Stripe portal creation failed.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

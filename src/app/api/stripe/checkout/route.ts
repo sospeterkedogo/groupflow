@@ -1,41 +1,37 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { z } from 'zod'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { checkBotId } from 'botid/server'
+import { getStripeClient } from '@/utils/stripe'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-function getStripeClient(): Stripe {
-  const stripeKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeKey) {
-    throw new Error('STRIPE_SECRET_KEY is not configured')
-  }
-  return new Stripe(stripeKey, {
-    apiVersion: '2026-03-25.dahlia' as any,
-  })
-}
+const checkoutSchema = z.object({
+  plan: z.enum(['pro', 'premium', 'lifetime']).default('pro'),
+})
 
-const PLAN_CONFIG: Record<string, { priceEnvKey: string; mode: 'subscription' | 'payment'; label: string }> = {
+const PLAN_CONFIG: Record<z.infer<typeof checkoutSchema>['plan'], { priceEnvKey: string; mode: 'subscription' | 'payment'; label: string }> = {
   pro:      { priceEnvKey: 'STRIPE_PRICE_PRO_ID',      mode: 'subscription', label: 'Pro Scholar — $9/month' },
   premium:  { priceEnvKey: 'STRIPE_PRICE_PREMIUM_ID',  mode: 'subscription', label: 'Premium Scholar — $19/month' },
   lifetime: { priceEnvKey: 'STRIPE_PRICE_LIFETIME_ID', mode: 'payment',      label: 'Lifetime Founding Scholar — $149' },
 }
 
 export async function POST(req: Request) {
-  let stripe: Stripe
+  let stripe
   try {
     stripe = getStripeClient()
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Stripe is not configured'
-    return new NextResponse(JSON.stringify({ error: msg }), { status: 500 })
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 
   // BotID Verification
   const verification = await checkBotId()
   if (verification.isBot) {
-    return new NextResponse(JSON.stringify({ 
+    return NextResponse.json({ 
       error: 'Automated request detected. Please return to the dashboard and try again.' 
-    }), { status: 403 })
+    }, { status: 403 })
   }
 
   const supabase = await createServerSupabaseClient()
@@ -43,16 +39,17 @@ export async function POST(req: Request) {
     .catch(() => ({ data: { user: null } }))
 
   if (!user) {
-    return new NextResponse(JSON.stringify({ error: 'Authentication required.' }), { status: 401 })
+    return NextResponse.json({ error: 'Authentication required.' }, { status: 401 })
   }
 
-  const body = await req.json().catch(() => ({}))
-  const planKey = String(body?.plan ?? 'pro').toLowerCase()
+  const body = await req.json().catch(() => null)
+  const parsedBody = checkoutSchema.safeParse(body)
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: 'Invalid plan selected.' }, { status: 422 })
+  }
+
+  const planKey = parsedBody.data.plan
   const config = PLAN_CONFIG[planKey]
-
-  if (!config) {
-    return new NextResponse(JSON.stringify({ error: 'Invalid plan selected.' }), { status: 422 })
-  }
 
   const priceId = process.env[config.priceEnvKey]
   // Fallback: legacy env keys for backwards compatibility
@@ -67,7 +64,7 @@ export async function POST(req: Request) {
   const cancelUrl = process.env.STRIPE_CANCEL_URL
 
   if (!resolvedPriceId || !successUrl || !cancelUrl) {
-    return new NextResponse(JSON.stringify({ error: 'Stripe is not configured correctly.' }), { status: 500 })
+    return NextResponse.json({ error: 'Stripe is not configured correctly.' }, { status: 500 })
   }
 
   try {
@@ -92,7 +89,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ url: session.url })
-  } catch (error: any) {
-    return new NextResponse(JSON.stringify({ error: error.message || 'Stripe session creation failed.' }), { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Stripe session creation failed.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

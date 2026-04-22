@@ -1,18 +1,10 @@
 import Stripe from 'stripe'
 import { createAdminClient } from '@/utils/supabase/server'
+import { getAppUrl, getStripeClient } from '@/utils/stripe'
 
-function getStripeClient(): Stripe {
-  const stripeKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeKey) {
-    throw new Error('STRIPE_SECRET_KEY is not configured')
-  }
-  return new Stripe(stripeKey, {
-    apiVersion: '2025-08-27.basil',
-  })
-}
-
-const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || 'http://espeezy.com/dashboard/payment-success'
-const CANCEL_URL = process.env.STRIPE_CANCEL_URL || 'http://espeezy.com/dashboard/marketplace'
+const APP_URL = getAppUrl()
+const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || `${APP_URL}/dashboard/payment-success`
+const CANCEL_URL = process.env.STRIPE_CANCEL_URL || `${APP_URL}/dashboard/marketplace`
 
 /**
  * Retrieve an existing Stripe Customer for the user or create one.

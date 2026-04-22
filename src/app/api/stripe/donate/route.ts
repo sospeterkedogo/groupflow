@@ -1,34 +1,38 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { z } from 'zod'
+import { getAppUrl, getStripeClient } from '@/utils/stripe'
 
-function getStripeClient(): Stripe {
-  const stripeKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeKey) {
-    throw new Error('STRIPE_SECRET_KEY is not configured')
-  }
-  return new Stripe(stripeKey, {
-    apiVersion: '2026-03-25.dahlia' as any,
-  })
-}
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 // Allowed donation amounts in cents (min $1, max $10,000)
 const MIN_CENTS = 100
 const MAX_CENTS = 1_000_000
 
+const donationSchema = z.object({
+  amountCents: z.coerce.number().int().min(MIN_CENTS).max(MAX_CENTS),
+  donorEmail: z.email().optional().or(z.literal('')),
+  donorName: z.string().trim().max(120).optional().or(z.literal('')),
+  message: z.string().trim().max(500).optional().or(z.literal('')),
+  featureTag: z.string().trim().max(80).optional().or(z.literal('')),
+  isAnonymous: z.boolean().optional(),
+})
+
 export async function POST(req: Request) {
   try {
     const stripe = getStripeClient()
-    const { amountCents, donorEmail, donorName, message, featureTag, isAnonymous } = await req.json()
-
-    const amount = parseInt(amountCents, 10)
-    if (isNaN(amount) || amount < MIN_CENTS || amount > MAX_CENTS) {
+    const body = await req.json().catch(() => null)
+    const parsedBody = donationSchema.safeParse(body)
+    if (!parsedBody.success) {
       return NextResponse.json(
-        { error: `Donation amount must be between $1.00 and $10,000.` },
-        { status: 400 }
+        { error: 'Donation amount must be between $1.00 and $10,000.' },
+        { status: 422 }
       )
     }
 
-    const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
+    const { amountCents, donorEmail, donorName, message, featureTag, isAnonymous = false } = parsedBody.data
+
+    const origin = req.headers.get('origin') ?? getAppUrl()
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -37,7 +41,7 @@ export async function POST(req: Request) {
         {
           price_data: {
             currency: 'usd',
-            unit_amount: amount,
+            unit_amount: amountCents,
             product_data: {
               name: featureTag
                 ? `Espeezy — ${featureTag}`
@@ -50,18 +54,18 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      customer_email: isAnonymous ? undefined : (donorEmail ?? undefined),
+      customer_email: isAnonymous ? undefined : (donorEmail || undefined),
       success_url: `${origin}/fund/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/fund`,
       billing_address_collection: 'auto',
       submit_type: 'donate',
       metadata: {
         type: 'donation',
-        donor_name: isAnonymous ? 'Anonymous' : (donorName ?? ''),
-        donor_email: isAnonymous ? '' : (donorEmail ?? ''),
-        message: message ?? '',
-        feature_tag: featureTag ?? 'general',
-        is_anonymous: String(isAnonymous ?? false),
+        donor_name: isAnonymous ? 'Anonymous' : (donorName || ''),
+        donor_email: isAnonymous ? '' : (donorEmail || ''),
+        message: message || '',
+        feature_tag: featureTag || 'general',
+        is_anonymous: String(isAnonymous),
       },
     })
 
@@ -70,8 +74,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ url: session.url })
-  } catch (err: any) {
-    console.error('[donate] Stripe error:', err?.message)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown Stripe error'
+    console.error('[donate] Stripe error:', message)
     return NextResponse.json(
       { error: 'Could not initialize donation. Please try again.' },
       { status: 500 }
