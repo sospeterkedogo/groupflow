@@ -1,6 +1,6 @@
 import Stripe from 'stripe'
 
-export const STRIPE_API_VERSION: Stripe.LatestApiVersion = '2026-03-25.dahlia'
+export const STRIPE_API_VERSION: Stripe.LatestApiVersion = '2025-08-27.basil'
 
 export function getStripeClient(): Stripe {
   const stripeKey = process.env.STRIPE_SECRET_KEY

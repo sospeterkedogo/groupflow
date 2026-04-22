@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { start } from 'workflow/api'
 import { taskWorkflow } from '@/workflows/taskWorkflow'
 import { createServerSupabaseClient } from '@/utils/supabase/server'
+import { start } from '@/utils/workflow'
 
 export async function POST(req: Request) {
   const supabase = await createServerSupabaseClient()

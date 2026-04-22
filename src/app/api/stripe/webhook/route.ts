@@ -1,10 +1,10 @@
 import Stripe from 'stripe'
 import { NextResponse } from 'next/server'
-import { start } from 'workflow/api'
 import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
 import { createAdminClient } from '@/utils/supabase/server'
 import { sendP2PTransactionEmail } from '@/services/email'
 import { getStripeClient, getStripeWebhookSecret } from '@/utils/stripe'
+import { start } from '@/utils/workflow'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    await start(paymentWorkflow, [payload as any])
+    await start(paymentWorkflow, [payload])
     return NextResponse.json({ ok: true, handled: payload.eventType }, { status: 200 })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Workflow startup failed'

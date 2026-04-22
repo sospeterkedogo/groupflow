@@ -1,6 +1,5 @@
-import Stripe from 'stripe'
 import { createAdminClient } from '@/utils/supabase/server'
-import { getAppUrl, getStripeClient } from '@/utils/stripe'
+import { getAppUrl, getStripeClient } from '../utils/stripe'
 
 const APP_URL = getAppUrl()
 const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || `${APP_URL}/dashboard/payment-success`
