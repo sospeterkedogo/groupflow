@@ -5,18 +5,27 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, X, Shield, Activity, Globe } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
+interface AnnouncementConfig {
+  key: string
+  is_active: boolean
+  value: {
+    title: string
+    message: string
+    style: 'elite' | 'alert'
+  }
+}
+
 export default function GlobalAnnouncement() {
-  const [isClient, setIsClient] = useState(false)
-  const [config, setConfig] = useState<any>(null)
+  const [config, setConfig] = useState<AnnouncementConfig | null>(null)
   const [isVisible, setIsVisible] = useState(true)
   // Use a ref to prevent React StrictMode double-subscription errors:
   // StrictMode mounts→unmounts→mounts in dev; the cleanup removes the channel
   // before the second mount, so using a unique channel name per effect avoids
   // "cannot add postgres_changes callbacks after subscribe()" errors.
   const mountIdRef = useRef(0)
+  const isClientRef = useRef(true)
 
   useEffect(() => {
-    setIsClient(true)
     mountIdRef.current += 1
     const mountId = mountIdRef.current
 

@@ -132,6 +132,13 @@ docker logs -f espeezy_app
 Use this script for updates:
 - `scripts/agent-pull.sh`
 
+# Production build
+docker build --target production -t espeezy:prod .
+
+# Development ON Docker (with hot reload)
+docker build --target dev -t espeezy:dev .
+docker run -it -p 3000:3000 -v $(pwd):/app espeezy:dev
+
 Remote pull from your machine:
 
 ```bash

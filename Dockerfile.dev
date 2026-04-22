@@ -1,23 +1,83 @@
 ﻿# ──────────────────────────────────────────────────────────────────────────────
-# espeezy.com — Cloud Dev Container
-# Next.js 14 · Node 20 Alpine · Hot Reload via volume mount
+# espeezy.com — Multi-stage Build (Development & Production)
+# Next.js 14 · Node 20 Alpine · Optimized for production
 # ──────────────────────────────────────────────────────────────────────────────
-FROM node:20-alpine AS dev
 
-# Required for some native deps (canvas, sharp, etc.)
+# ── DEPENDENCIES STAGE ──────────────────────────────────────────────────────────
+# Separate stage to cache npm install and avoid rebuilds on code changes
+FROM node:22.0.0 AS dependencies
+
 RUN apk add --no-cache libc6-compat python3 make g++
 
 WORKDIR /app
 
-# ── Install deps as a separate layer so code changes don't bust cache ──────────
 COPY package.json package-lock.json* ./
 RUN npm ci --prefer-offline
 
-# ── Source files are volume-mounted at runtime; nothing else to copy ──────────
+
+# ── BUILDER STAGE ──────────────────────────────────────────────────────────────
+# Build Next.js app in isolation with all deps
+FROM node:22.0.0 AS builder
+
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+# Copy dependencies from previous stage
+COPY --from=dependencies /app/node_modules ./node_modules
+
+# Copy source code
+COPY . .
+
+# Build Next.js app
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+RUN npm run build
+
+
+# ── RUNTIME STAGE ──────────────────────────────────────────────────────────────
+# Minimal production image with only runtime dependencies
+FROM node:22.0.0 AS production
+
+# Install only libc6-compat (required by Next.js runtime, not build tools)
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+# Copy built app and production node_modules from builder
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/public ./public
+
+# Non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+USER nextjs
 
 EXPOSE 3000
 
-# Disable telemetry in container
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+
+CMD ["npm", "start"]
+
+
+# ── DEVELOPMENT STAGE ──────────────────────────────────────────────────────────
+# Development image with volume-mounted source for hot reload
+FROM node:22.0.0 AS dev
+
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci --prefer-offline
+
+EXPOSE 3000
+
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=development
 # Required for hot-module reload across Docker bind mounts

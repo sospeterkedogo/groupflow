@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
 # espeezy.com — Agent Sync Script
 #
@@ -13,7 +13,14 @@
 #   cs-pull  (alias set up by vps-bootstrap.sh)
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
-APP_DIR="/opt/espeezy"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [ -d "/opt/espeezy/.git" ]; then
+  APP_DIR="/opt/espeezy"
+else
+  APP_DIR="$REPO_ROOT"
+fi
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 info() { echo -e "${GREEN}[agent-sync]${NC} $*"; }
@@ -21,6 +28,7 @@ warn() { echo -e "${YELLOW}[agent-sync]${NC} $*"; }
 err()  { echo -e "${RED}[agent-sync]${NC} $*"; exit 1; }
 
 info "Syncing code from GitHub..."
+info "Using app directory: $APP_DIR"
 cd "$APP_DIR"
 
 # Stash any accidental local changes (agents shouldn't leave uncommitted changes)
@@ -48,7 +56,7 @@ if $STASHED; then
 fi
 
 # Check if node_modules is stale (package.json changed)
-if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.*json"; then
+if git rev-parse --verify HEAD@{1} >/dev/null 2>&1 && git diff HEAD@{1} HEAD --name-only | grep -q "package.*json"; then
   warn "package.json changed — reinstalling deps inside container..."
   docker exec espeezy_app npm ci --prefer-offline
   info "Dependencies updated."

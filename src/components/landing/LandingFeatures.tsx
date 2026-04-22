@@ -34,3 +34,4 @@ export default function LandingFeatures({ features }: LandingFeaturesProps) {
     </section>
   )
 }
+
