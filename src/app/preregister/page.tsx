@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Sparkles, ArrowRight, CheckCircle, Clock, Users, Globe, ShieldCheck,
-  BookOpen, Cpu, Zap, BarChart2, Star, ChevronDown, Mail, Building,
-  GraduationCap, TrendingUp, Heart, Award, Lock, Play, ChevronRight
+  Sparkles, ArrowRight, CheckCircle, Users, Globe, ShieldCheck,
+  BookOpen, Cpu, Zap, BarChart2, Mail,
+  GraduationCap, TrendingUp, Heart, Award
 } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -69,18 +69,7 @@ const COMING_FEATURES = [
   { icon: <Heart size={20} />, title: 'Wellbeing & Balance Insights', desc: 'Burnout detection, workload fairness alerts, and peer support channels baked directly into the workflow.', tag: 'Wellbeing' },
 ]
 
-// ─── Stat Pill ────────────────────────────────────────────────────────────────
-function StatPill({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem 1.25rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', flex: '1 1 160px' }}>
-      <div style={{ color: 'var(--brand)', opacity: 0.8 }}>{icon}</div>
-      <div>
-        <div style={{ fontSize: '1.25rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em', lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2px' }}>{label}</div>
-      </div>
-    </div>
-  )
-}
+
 
 // ─── Countdown Block ─────────────────────────────────────────────────────────
 function CountBlock({ value, label }: { value: number; label: string }) {

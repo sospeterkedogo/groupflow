@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
     .eq('user_id', user.id)
     .gt('cash_value_cents', 0)
 
-  const totalCashCents = (cashTotal ?? []).reduce((acc, r) => acc + (r.cash_value_cents ?? 0), 0)
+  const cashRows = (cashTotal ?? []) as Array<{ cash_value_cents: number | null }>
+  const totalCashCents = cashRows.reduce((acc: number, r) => acc + (r.cash_value_cents ?? 0), 0)
 
   return NextResponse.json({
     points_balance: balanceRow ?? 0,

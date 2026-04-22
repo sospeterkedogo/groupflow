@@ -5,9 +5,15 @@ import { checkBotId } from 'botid/server'
 
 export const dynamic = 'force-dynamic'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia' as any,
-})
+function getStripeClient(): Stripe {
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured')
+  }
+  return new Stripe(stripeKey, {
+    apiVersion: '2026-03-25.dahlia' as any,
+  })
+}
 
 const PLAN_CONFIG: Record<string, { priceEnvKey: string; mode: 'subscription' | 'payment'; label: string }> = {
   pro:      { priceEnvKey: 'STRIPE_PRICE_PRO_ID',      mode: 'subscription', label: 'Pro Scholar — $9/month' },
@@ -16,6 +22,14 @@ const PLAN_CONFIG: Record<string, { priceEnvKey: string; mode: 'subscription' | 
 }
 
 export async function POST(req: Request) {
+  let stripe: Stripe
+  try {
+    stripe = getStripeClient()
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Stripe is not configured'
+    return new NextResponse(JSON.stringify({ error: msg }), { status: 500 })
+  }
+
   // BotID Verification
   const verification = await checkBotId()
   if (verification.isBot) {

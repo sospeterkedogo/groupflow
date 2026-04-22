@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { start } from 'workflow/api'
 import { paymentWorkflow, type PaymentWorkflowPayload } from '@/workflows/paymentWorkflow'
 import { createAdminClient } from '@/utils/supabase/server'
+import { sendP2PTransactionEmail } from '@/services/email'
 
 export const runtime = 'nodejs'
 
@@ -35,6 +36,10 @@ export async function POST(req: Request) {
     if (session.metadata?.type === 'donation') {
       await handleDonationWebhook(session)
       return new NextResponse('Donation recorded', { status: 200 })
+    }
+    if (session.metadata?.type === 'p2p_transfer') {
+      await handleP2PTransferWebhook(session)
+      return new NextResponse('P2P transfer recorded', { status: 200 })
     }
   }
 
@@ -71,15 +76,20 @@ function buildWebhookPayload(event: Stripe.Event) {
   }
 
   if (event.type === 'invoice.payment_succeeded' || event.type === 'invoice.payment_failed') {
-    const invoice = event.data.object as Stripe.Invoice
+    const invoice = event.data.object as Stripe.Invoice & {
+      payment_intent?: string | Stripe.PaymentIntent | null
+      subscription?: string | Stripe.Subscription | null
+    }
+    const firstLine = invoice.lines?.data?.[0]
+    const linePlanLabel = firstLine?.description ?? 'Subscription billing'
     return {
       eventType: event.type,
       sessionId: invoice.payment_intent?.toString() ?? invoice.id,
       stripeCustomerId: invoice.customer?.toString() ?? null,
       stripeSubscriptionId: invoice.subscription?.toString() ?? null,
       userId: null,
-      plan: invoice.lines?.data?.[0]?.price?.nickname ?? 'subscription',
-      productLabel: invoice.lines?.data?.[0]?.description ?? 'Subscription billing',
+      plan: 'subscription',
+      productLabel: linePlanLabel,
       amountTotal: invoice.amount_paid ?? invoice.amount_due ?? null,
       currency: invoice.currency ?? null,
       mode: invoice.billing_reason === 'subscription_cycle' ? 'subscription' : 'payment',
@@ -111,5 +121,135 @@ async function handleDonationWebhook(session: Stripe.Checkout.Session) {
     }, { onConflict: 'stripe_session_id' })
   } catch (err) {
     console.error('[webhook] donation upsert error:', err)
+  }
+}
+
+async function handleP2PTransferWebhook(session: Stripe.Checkout.Session) {
+  const transferId = session.metadata?.transfer_id
+  if (!transferId) return
+
+  const paid = session.payment_status === 'paid'
+  const admin = await createAdminClient()
+
+  const { data: transfer } = await admin
+    .from('p2p_transfers')
+    .select('id, sender_id, recipient_id, amount_cents, fee_cents, net_cents, note, status')
+    .eq('id', transferId)
+    .single()
+
+  if (!transfer) return
+
+  if (paid) {
+    await admin
+      .from('p2p_transfers')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        stripe_payment_intent_id: session.payment_intent?.toString() ?? null,
+      })
+      .eq('id', transfer.id)
+
+    const { data: sender } = await admin
+      .from('profiles')
+      .select('id, full_name, username, email, espeezy_email')
+      .eq('id', transfer.sender_id)
+      .single()
+
+    const { data: recipient } = await admin
+      .from('profiles')
+      .select('id, full_name, username, email, espeezy_email')
+      .eq('id', transfer.recipient_id)
+      .single()
+
+    if (sender && recipient) {
+      const { data: sendRule } = await admin
+        .from('reward_rules')
+        .select('points_awarded')
+        .eq('action', 'earned_payment_sent')
+        .eq('is_active', true)
+        .single()
+
+      const { data: receiveRule } = await admin
+        .from('reward_rules')
+        .select('points_awarded')
+        .eq('action', 'earned_payment_received')
+        .eq('is_active', true)
+        .single()
+
+      if (sendRule?.points_awarded) {
+        await admin.from('reward_ledger').insert({
+          user_id: sender.id,
+          type: 'earned_payment_sent',
+          points: sendRule.points_awarded,
+          description: `Sent $${(transfer.amount_cents / 100).toFixed(2)} to @${recipient.username}`,
+          reference_id: transfer.id,
+          reference_type: 'p2p_transfer',
+        })
+      }
+
+      if (receiveRule?.points_awarded) {
+        await admin.from('reward_ledger').insert({
+          user_id: recipient.id,
+          type: 'earned_payment_received',
+          points: receiveRule.points_awarded,
+          description: `Received $${(transfer.net_cents / 100).toFixed(2)} from @${sender.username}`,
+          reference_id: transfer.id,
+          reference_type: 'p2p_transfer',
+        })
+      }
+
+      await admin.from('notifications').insert([
+        {
+          user_id: sender.id,
+          type: 'payment_sent',
+          title: `Payment sent to @${recipient.username}`,
+          message: `You sent $${(transfer.amount_cents / 100).toFixed(2)} to ${recipient.full_name ?? recipient.username}.`,
+          link: '/dashboard/wallet',
+        },
+        {
+          user_id: recipient.id,
+          type: 'payment_received',
+          title: `Payment received from @${sender.username}`,
+          message: `You received $${(transfer.net_cents / 100).toFixed(2)} from ${sender.full_name ?? sender.username}.`,
+          link: '/dashboard/wallet',
+        },
+      ])
+
+      const senderTargets = [sender.email, sender.espeezy_email].filter((v): v is string => Boolean(v))
+      const recipientTargets = [recipient.email, recipient.espeezy_email].filter((v): v is string => Boolean(v))
+
+      if (senderTargets.length > 0) {
+        await sendP2PTransactionEmail({
+          to: senderTargets,
+          role: 'sender',
+          transferId: transfer.id,
+          counterpartyName: recipient.full_name ?? recipient.username ?? 'Recipient',
+          counterpartyUsername: recipient.username ?? 'member',
+          amountCents: transfer.amount_cents,
+          feeCents: transfer.fee_cents,
+          netCents: transfer.net_cents,
+          note: transfer.note,
+        })
+      }
+
+      if (recipientTargets.length > 0) {
+        await sendP2PTransactionEmail({
+          to: recipientTargets,
+          role: 'recipient',
+          transferId: transfer.id,
+          counterpartyName: sender.full_name ?? sender.username ?? 'Sender',
+          counterpartyUsername: sender.username ?? 'member',
+          amountCents: transfer.amount_cents,
+          feeCents: transfer.fee_cents,
+          netCents: transfer.net_cents,
+          note: transfer.note,
+        })
+      }
+    }
+  } else {
+    await admin
+      .from('p2p_transfers')
+      .update({ status: 'failed', failed_at: new Date().toISOString() })
+      .eq('id', transfer.id)
   }
 }

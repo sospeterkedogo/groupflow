@@ -21,6 +21,7 @@ import LandingHero from '@/components/landing/LandingHero'
 // Below-the-fold / interaction-only: deferred until needed
 const LandingMission  = dynamic(() => import('@/components/landing/LandingMission'))
 const LandingFeatures = dynamic(() => import('@/components/landing/LandingFeatures'))
+const LandingDevelopers = dynamic(() => import('@/components/landing/LandingDevelopers'))
 const LandingFAQ      = dynamic(() => import('@/components/landing/LandingFAQ'))
 const PricingSection  = dynamic(() => import('@/components/PricingSection'))
 const LandingDonate   = dynamic(() => import('@/components/landing/LandingDonate'))
@@ -143,6 +144,7 @@ export default function Home() {
         <LandingHero />
         <LandingMission />
         <LandingFeatures features={features} />
+        <LandingDevelopers />
         <LandingFAQ faqs={faqs} />
 
         {/* PRICING SECTION */}

@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "nodejs": "22.x",
+  "nodejs": "24.x",
   "regions": [
     "iad1",
     "lhr1",

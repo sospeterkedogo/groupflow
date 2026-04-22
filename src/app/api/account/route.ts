@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { checkBotId } from 'botid/server'
 
-export async function GET(_req: Request) {
+export async function GET() {
   // BotID Verification (only available in Vercel cloud — skip locally)
   try {
     const verification = await checkBotId()
@@ -53,7 +53,7 @@ export async function GET(_req: Request) {
   }
 }
 
-export async function DELETE(_req: Request) {
+export async function DELETE() {
   // BotID Verification
   const verification = await checkBotId()
   if (verification.isBot) {

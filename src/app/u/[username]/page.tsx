@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/utils/supabase/server'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -13,6 +14,16 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
     .single()
 
   if (!profile || profile.account_status === 'deactivated') notFound()
+
+  const { data: gameSessions } = await svc
+    .from('quiz_sessions')
+    .select('id, score, prize_cents_won, status')
+    .eq('user_id', profile.id)
+    .eq('status', 'completed')
+
+  const gamesPlayed = gameSessions?.length ?? 0
+  const totalScore = (gameSessions ?? []).reduce((acc: number, s: typeof gameSessions[0]) => acc + (s.score ?? 0), 0)
+  const totalPrizeCents = (gameSessions ?? []).reduce((acc: number, s: typeof gameSessions[0]) => acc + (s.prize_cents_won ?? 0), 0)
 
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', padding: '3rem 1rem' }}>
@@ -32,6 +43,17 @@ export default async function UserProfilePage({ params }: { params: Promise<{ us
         {profile.bio && (
           <p style={{ margin: '1rem 0 0', fontSize: '0.88rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: 440, marginLeft: 'auto', marginRight: 'auto' }}>{profile.bio}</p>
         )}
+
+        <div style={{ marginTop: '1rem', border: '1px solid rgba(16,185,129,0.18)', background: 'rgba(16,185,129,0.06)', borderRadius: '12px', padding: '0.8rem 1rem', textAlign: 'left' }}>
+          <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800 }}>Games Profile</p>
+          <p style={{ margin: '0.45rem 0 0', fontSize: '0.84rem', color: '#E5E7EB' }}>
+            Sessions completed: <strong>{gamesPlayed}</strong> | Total score: <strong>{totalScore}</strong> | Cash prizes: <strong>${(totalPrizeCents / 100).toFixed(2)}</strong>
+          </p>
+          <Link href={`/u/${profile.username}/games`} style={{ display: 'inline-block', marginTop: '0.55rem', color: '#10B981', fontSize: '0.8rem', fontWeight: 800, textDecoration: 'none' }}>
+            View Full Games Stats -&gt;
+          </Link>
+        </div>
+
         <p style={{ margin: '1.5rem 0 0', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>
           Member since {new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
         </p>

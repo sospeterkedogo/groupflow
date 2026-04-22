@@ -1,11 +1,57 @@
 import Stripe from 'stripe'
+import { createAdminClient } from '@/utils/supabase/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia' as any,
-})
+function getStripeClient(): Stripe {
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured')
+  }
+  return new Stripe(stripeKey, {
+    apiVersion: '2025-08-27.basil',
+  })
+}
 
 const SUCCESS_URL = process.env.STRIPE_SUCCESS_URL || 'http://localhost:3000/dashboard/payment-success'
 const CANCEL_URL = process.env.STRIPE_CANCEL_URL || 'http://localhost:3000/dashboard/marketplace'
+
+/**
+ * Retrieve an existing Stripe Customer for the user or create one.
+ * Persists stripe_customer_id back to the profiles table.
+ */
+export async function getOrCreateStripeCustomer({
+  userId,
+  email,
+  name,
+}: {
+  userId: string
+  email?: string
+  name?: string
+}): Promise<string> {
+  const stripe = getStripeClient()
+  const svc = await createAdminClient()
+  const { data: profile } = await svc
+    .from('profiles')
+    .select('stripe_customer_id')
+    .eq('id', userId)
+    .single()
+
+  if (profile?.stripe_customer_id) {
+    return profile.stripe_customer_id as string
+  }
+
+  const customer = await stripe.customers.create({
+    email,
+    name: name ?? undefined,
+    metadata: { platform_user_id: userId },
+  })
+
+  await svc
+    .from('profiles')
+    .update({ stripe_customer_id: customer.id })
+    .eq('id', userId)
+
+  return customer.id
+}
 
 /**
  * Portable Financial Service
@@ -16,24 +62,27 @@ export async function createCheckoutSession({
   email,
   price,
   type,
-  metadata = {}
+  metadata = {},
 }: {
-  userId: string,
-  email: string | undefined,
-  price: number,
-  type: 'subscription' | 'purchase',
+  userId: string
+  email: string | undefined
+  price: number
+  type: 'subscription' | 'purchase'
   metadata?: Record<string, string>
 }) {
+  const stripe = getStripeClient()
   const isSubscription = type === 'subscription'
-  
-  // Platform Flux Fee calculation (5%)
   const amountToCharge = Math.round(price * 100) // Stripe uses cents
-  
+
+  const customerId = email
+    ? await getOrCreateStripeCustomer({ userId, email })
+    : undefined
+
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    // PRIORITIZE Apple Pay / Google Pay via automatic detection
+    // Dynamic payment methods — Stripe auto-selects based on customer locale/wallet
     mode: isSubscription ? 'subscription' : 'payment',
-    customer_email: email,
+    customer: customerId,
+    customer_email: customerId ? undefined : email,
     line_items: [
       {
         price_data: {
@@ -43,8 +92,7 @@ export async function createCheckoutSession({
             description: metadata.description || 'Academic Resource Exchange',
           },
           unit_amount: amountToCharge,
-          // If subscription, use recurring logic. For now, we assume marketplace is 'payment'
-          ...(isSubscription && { recurring: { interval: 'month' } })
+          ...(isSubscription && { recurring: { interval: 'month' } }),
         },
         quantity: 1,
       },
@@ -60,5 +108,3 @@ export async function createCheckoutSession({
 
   return session
 }
-
-export { stripe }

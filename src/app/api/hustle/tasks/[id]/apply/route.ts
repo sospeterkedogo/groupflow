@@ -2,10 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' as any })
+function getStripeClient(): Stripe {
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured')
+  }
+  return new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as any })
+}
 
 // POST /api/hustle/connect — create Stripe Connect onboarding link
 export async function POST(_req: NextRequest) {
+  let stripe: Stripe
+  try {
+    stripe = getStripeClient()
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Stripe is not configured'
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
+
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -57,6 +71,14 @@ export async function POST(_req: NextRequest) {
 
 // GET /api/hustle/connect — check Connect account status
 export async function GET(_req: NextRequest) {
+  let stripe: Stripe
+  try {
+    stripe = getStripeClient()
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Stripe is not configured'
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
+
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

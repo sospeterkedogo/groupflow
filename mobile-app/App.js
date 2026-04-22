@@ -17,10 +17,6 @@ export default function App() {
   const [isOffline, setIsOffline] = useState(false);
   const [activeColumn, setActiveColumn] = useState('To Do');
 
-  useEffect(() => {
-    syncTasks();
-  }, []);
-
   const syncTasks = async () => {
     try {
       // Attempt Network Fetch
@@ -36,13 +32,19 @@ export default function App() {
       setIsOffline(false);
       await AsyncStorage.setItem('OFFLINE_TASKS', JSON.stringify(data));
       
-    } catch (e) {
+    } catch {
       // Network Failed -> Boot from Cache
       setIsOffline(true);
       const cached = await AsyncStorage.getItem('OFFLINE_TASKS');
       if (cached) setTasks(JSON.parse(cached));
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      await syncTasks();
+    })();
+  }, []);
 
   const advanceTask = async (task) => {
     const currentIndex = COLUMNS.indexOf(task.status);

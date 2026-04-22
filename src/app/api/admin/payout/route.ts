@@ -3,8 +3,15 @@ import Stripe from 'stripe'
 import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
+const STRIPE_API_VERSION: Stripe.LatestApiVersion = '2025-08-27.basil'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' as any })
+function getStripeClient(): Stripe {
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured')
+  }
+  return new Stripe(stripeKey, { apiVersion: STRIPE_API_VERSION })
+}
 
 // POST /api/admin/payout — admin sends money to a user
 export async function POST(req: NextRequest) {
@@ -51,6 +58,14 @@ export async function POST(req: NextRequest) {
   if (!recipient) return NextResponse.json({ error: 'User not found' }, { status: 404 })
   if (!recipient.stripe_account_id || recipient.stripe_account_status !== 'active') {
     return NextResponse.json({ error: 'Recipient has no active bank account connected.' }, { status: 400 })
+  }
+
+  let stripe: Stripe
+  try {
+    stripe = getStripeClient()
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Stripe is not configured'
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 
   let transfer: Stripe.Transfer

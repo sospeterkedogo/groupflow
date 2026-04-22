@@ -129,6 +129,7 @@ CREATE TABLE IF NOT EXISTS public.quiz_sessions (
   stripe_checkout_session_id text       UNIQUE,                       -- entry fee checkout
   prize_transfer_id         text        UNIQUE,                       -- Stripe transfer for prize
   prize_paid_out            boolean     NOT NULL DEFAULT false,
+  metadata                  jsonb       NOT NULL DEFAULT '{}'::jsonb,
   started_at                timestamptz NOT NULL DEFAULT now(),
   completed_at              timestamptz,
   expires_at                timestamptz NOT NULL DEFAULT now() + interval '1 hour'

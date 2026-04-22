@@ -9,7 +9,11 @@
 # Caddy auto-provisions Let's Encrypt TLS for real domains — nothing else needed.
 # ──────────────────────────────────────────────────────────────────────────────
 
-{$CADDY_DOMAIN} {
+{$CADDY_DOMAIN}, www.{$CADDY_DOMAIN} {
+    # Canonical host: always serve apex domain
+    @www host www.{$CADDY_DOMAIN}
+    redir @www https://{$CADDY_DOMAIN}{uri} 308
+
     # ── Compression ──────────────────────────────────────────────────────────
     encode zstd gzip
 

@@ -2,7 +2,9 @@
   "name": "espeezy",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=22.0.0" },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--max-old-space-size=2048 next dev",
     "build": "next build --webpack",
@@ -15,6 +17,8 @@
     "@liveblocks/client": "^3.18.2",
     "@liveblocks/node": "^3.18.2",
     "@liveblocks/react": "^3.18.2",
+    "@stripe/react-stripe-js": "^6.2.0",
+    "@stripe/stripe-js": "^9.2.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.0",
     "@types/nodemailer": "^8.0.0",
@@ -39,7 +43,7 @@
     "react-is": "^19.2.5",
     "recharts": "^3.8.1",
     "spotify-web-api-js": "^1.5.2",
-    "stripe": "^12.18.0",
+    "stripe": "^18.5.0",
     "workflow": "^4.2.4",
     "zod": "^4.3.6"
   },

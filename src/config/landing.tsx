@@ -1,5 +1,5 @@
 import React from 'react'
-import { Layers, Users, Zap, Shield, Milestone, Award, LayoutGrid, BookOpen, Globe, Fingerprint, HelpCircle } from 'lucide-react'
+import { Layers, Users, Zap, Shield, Milestone, Award, LayoutGrid, BookOpen, Globe, Fingerprint, HelpCircle, Braces } from 'lucide-react'
 
 export const features = [
   { 
@@ -119,6 +119,7 @@ export const navMenus = {
       {
         label: 'Need Help?',
         items: [
+          { id: 'developers', title: 'Developers API', desc: 'Data API endpoints for all core datasets.', icon: <Braces size={18} />, href: '/#developers' },
           { id: 'help', title: 'Help Center', desc: 'Guides and tips to help you get started.', icon: <HelpCircle size={18} />, href: '/docs' }
         ]
       }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { requireAdmin, isAuthError, writeAuditLog } from '@/utils/admin-auth'
+import { requireAdmin, isAuthError } from '@/utils/admin-auth'
 
 export const dynamic = 'force-dynamic'
 

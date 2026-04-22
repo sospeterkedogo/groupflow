@@ -5,14 +5,14 @@
 
 -- ---------------------------------------------------------------------------
 -- 1. Add espeezy_email alias column to profiles
---    Derived from username: e.g. john_doe -> john_doe@espeezy.com
+--    Derived from full_name: e.g. john_doe -> john_doe@espeezy.com
 -- ---------------------------------------------------------------------------
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS espeezy_email text GENERATED ALWAYS AS (
-    CASE WHEN username IS NOT NULL THEN username || '@espeezy.com' ELSE NULL END
+    CASE WHEN full_name IS NOT NULL THEN full_name || '@espeezy.com' ELSE NULL END
   ) STORED;
 
-COMMENT ON COLUMN public.profiles.espeezy_email IS 'Virtual Espeezy platform email: username@espeezy.com. Used for transaction receipts and platform identity.';
+COMMENT ON COLUMN public.profiles.espeezy_email IS 'Virtual Espeezy platform email: full_name@espeezy.com. Used for transaction receipts and platform identity.';
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_espeezy_email
   ON public.profiles(espeezy_email)

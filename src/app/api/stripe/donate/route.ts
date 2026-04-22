@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia' as any,
-})
+function getStripeClient(): Stripe {
+  const stripeKey = process.env.STRIPE_SECRET_KEY
+  if (!stripeKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured')
+  }
+  return new Stripe(stripeKey, {
+    apiVersion: '2026-03-25.dahlia' as any,
+  })
+}
 
 // Allowed donation amounts in cents (min $1, max $10,000)
 const MIN_CENTS = 100
@@ -11,6 +17,7 @@ const MAX_CENTS = 1_000_000
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripeClient()
     const { amountCents, donorEmail, donorName, message, featureTag, isAnonymous } = await req.json()
 
     const amount = parseInt(amountCents, 10)

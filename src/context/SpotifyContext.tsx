@@ -99,12 +99,10 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     })
 
     newPlayer.addListener('ready', ({ device_id }: { device_id: string }) => {
-      console.log('Spotify Player ready with Device ID', device_id)
       setDeviceId(device_id)
     })
 
     newPlayer.addListener('not_ready', ({ device_id }: { device_id: string }) => {
-      console.log('Device ID has gone offline', device_id)
       setDeviceId(null)
     })
 
