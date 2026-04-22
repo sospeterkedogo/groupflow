@@ -17,13 +17,6 @@ import dynamic from 'next/dynamic'
 // Critical path (immediately visible): keep synchronous
 import LandingHeader from '@/components/landing/LandingHeader'
 import LandingHero from '@/components/landing/LandingHero'
-<<<<<<< copilot/vscode-mo8m06y4-hu8u
-import LandingMission from '@/components/landing/LandingMission'
-import LandingFeatures from '@/components/landing/LandingFeatures'
-import LandingFAQ from '@/components/landing/LandingFAQ'
-import LandingDonate from '@/components/landing/LandingDonate'
-import LandingFooter from '@/components/landing/LandingFooter'
-=======
 
 // Below-the-fold / interaction-only: deferred until needed
 const LandingMission  = dynamic(() => import('@/components/landing/LandingMission'))
@@ -32,7 +25,6 @@ const LandingFAQ      = dynamic(() => import('@/components/landing/LandingFAQ'))
 const PricingSection  = dynamic(() => import('@/components/PricingSection'))
 const LandingDonate   = dynamic(() => import('@/components/landing/LandingDonate'))
 const LandingFooter   = dynamic(() => import('@/components/landing/LandingFooter'))
->>>>>>> main
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false)
