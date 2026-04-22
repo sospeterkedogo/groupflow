@@ -1,4 +1,5 @@
-# DEVOPS_BIBLE.md
+# espeezybible.md
+
 
 GroupFlow Tool Factory: practical, copy-paste operations guide for Windows + Linux + Docker + GitHub + VPS + agent workflows.
 
