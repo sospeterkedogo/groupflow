@@ -5,18 +5,31 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle, X, Shield, Activity, Globe } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 
+interface AnnouncementConfig {
+  key: string
+  is_active: boolean
+  value: {
+    title: string
+    message: string
+    style: 'elite' | 'alert'
+  }
+}
+
 export default function GlobalAnnouncement() {
-  const [isClient, setIsClient] = useState(false)
-  const [config, setConfig] = useState<any>(null)
+  const [config, setConfig] = useState<AnnouncementConfig | null>(null)
   const [isVisible, setIsVisible] = useState(true)
   // Use a ref to prevent React StrictMode double-subscription errors:
   // StrictMode mounts→unmounts→mounts in dev; the cleanup removes the channel
   // before the second mount, so using a unique channel name per effect avoids
   // "cannot add postgres_changes callbacks after subscribe()" errors.
   const mountIdRef = useRef(0)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+  }, [])
+
+  useEffect(() => {
     mountIdRef.current += 1
     const mountId = mountIdRef.current
 
@@ -38,7 +51,7 @@ export default function GlobalAnnouncement() {
     const channel = supabase
       .channel(`announcement_sync_${mountId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'platform_config', filter: 'key=eq.global_announcement' }, (payload) => {
-        setConfig(payload.new)
+        setConfig(payload.new as AnnouncementConfig)
         setIsVisible(true) // Re-show on new updates
       })
       .subscribe()
