@@ -1,17 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createServerSupabaseClient, createAdminClient } from '@/utils/supabase/server'
+
+export const dynamic = 'force-dynamic'
 
 function getStripeClient(): Stripe {
   const stripeKey = process.env.STRIPE_SECRET_KEY
   if (!stripeKey) {
     throw new Error('STRIPE_SECRET_KEY is not configured')
   }
-  return new Stripe(stripeKey, { apiVersion: '2025-09-30.clover' as   })
+  return new Stripe(stripeKey, { apiVersion: '2025-08-27.basil' })
 }
 
 // POST /api/hustle/connect — create Stripe Connect onboarding link
-export async function POST(_req: NextRequest) {
+export async function POST() {
   let stripe: Stripe
   try {
     stripe = getStripeClient()
@@ -21,7 +23,9 @@ export async function POST(_req: NextRequest) {
   }
 
   const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const svc = await createAdminClient()
@@ -70,7 +74,7 @@ export async function POST(_req: NextRequest) {
 }
 
 // GET /api/hustle/connect — check Connect account status
-export async function GET(_req: NextRequest) {
+export async function GET() {
   let stripe: Stripe
   try {
     stripe = getStripeClient()
@@ -80,7 +84,9 @@ export async function GET(_req: NextRequest) {
   }
 
   const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }))
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const svc = await createAdminClient()
