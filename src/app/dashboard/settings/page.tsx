@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import {
-  Settings, Save, CheckCircle2, Shield, Download, Trash2,
+  Settings, Save, CheckCircle2, Shield, Trash2,
   Key, AlertTriangle, X, Palette as PaletteIcon,
   Image as ImageIcon, User, Layout, MapPin, ChevronRight, Users,
   UserMinus, Eye, EyeOff, ShieldAlert, Activity as PulseIcon, History, Mail,
@@ -1378,7 +1379,7 @@ export default function SettingsPage() {
               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '20px', height: '20px' }} />
+                    <Image src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} />
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>Google Identity</h3>
