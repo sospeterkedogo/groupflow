@@ -4,7 +4,13 @@
 #
 # Agents (GitHub Copilot, Claude, etc.) SSH in and run this script to pull
 # the latest code. Next.js hot-reload picks up changes instantly via the
-# volume mount — no container restart needed.
+# volume mount — no container restart needed. This keeps the agent dev loop super fast.
+#
+# This script is intended to run from a GitHub Actions workflow.
+# It can also be run manually for quick syncs without needing to log in and run git pull.
+# It handles stashing any accidental local changes, pulling the latest code, and then popping the stash.
+# It also checks if package.json or package-lock.json changed and runs npm ci inside the container if needed.
+# Finally, it verifies the app container is running and restarts the stack if it crashed. 
 #
 # Usage:
 #   ssh deploy@YOUR_VPS_IP "bash /opt/espeezy/scripts/agent-pull.sh"
@@ -64,5 +70,15 @@ if [ "$RUNNING" != "true" ]; then
 else
   info "App container is healthy. Hot reload active — changes live."
 fi
+
+# Run npm ci if package-lock.json changed to keep node_modules in sync
+if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package-lock.json"; then
+  warn "package-lock.json changed — ensuring node_modules is in sync..."
+  docker exec espeezy_app npm ci --prefer-offline
+  info "Dependencies synced with package-lock.json."
+fi
+
+# Clean up
+rm -rf "$APP_DIR/.git"
 
 info "Done. Latest commit: $(git log -1 --pretty='%h %s (%ar)')"

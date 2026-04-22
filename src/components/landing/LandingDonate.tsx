@@ -95,7 +95,7 @@ export default function LandingDonate() {
             </span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '580px', margin: '0 auto', fontSize: 'clamp(0.9rem, 2vw, 1.05rem)', lineHeight: 1.65 }}>
-            Espeezy is free for every student — and keeping it that way demands servers, APIs, and engineers who don't sleep. Even $5 keeps a feature running for a month. <strong style={{ color: 'rgba(255,255,255,0.7)' }}>Your $5 matters more than you think.</strong>
+            Espeezy is free for every student — and keeping it that way demands servers, APIs, and engineers who don&apos;t sleep. Even $5 keeps a feature running for a month. <strong style={{ color: 'rgba(255,255,255,0.7)' }}>Your $5 matters more than you think.</strong>
           </p>
         </motion.div>
 
@@ -138,7 +138,7 @@ export default function LandingDonate() {
                 {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="var(--brand)" color="var(--brand)" />)}
               </div>
               <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, fontStyle: 'italic', margin: '0 0 0.75rem' }}>
-                "Espeezy replaced three separate tools for my team. The transparency alone is worth every penny — finally, group work that's actually fair."
+                &quot;Espeezy replaced three separate tools for my team. The transparency alone is worth every penny — finally, group work that&apos;s actually fair.&quot;
               </p>
               <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>— Kenji T., Computer Science, Tokyo</p>
             </motion.div>

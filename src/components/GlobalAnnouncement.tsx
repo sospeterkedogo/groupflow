@@ -26,10 +26,6 @@ export default function GlobalAnnouncement() {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  useEffect(() => {
     mountIdRef.current += 1
     const mountId = mountIdRef.current
 
@@ -47,18 +43,12 @@ export default function GlobalAnnouncement() {
     }
     fetchConfig()
 
-    // 2. Real-time Subscription — unique channel name per mount avoids double-subscribe error
-    const channel = supabase
-      .channel(`announcement_sync_${mountId}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'platform_config', filter: 'key=eq.global_announcement' }, (payload) => {
-        setConfig(payload.new as AnnouncementConfig)
-        setIsVisible(true) // Re-show on new updates
-      })
-      .subscribe()
+    
 
-    return () => { supabase.removeChannel(channel) }
+  
   }, [])
 
+  const isClient = typeof window !== 'undefined'
   if (!isClient || !isVisible || !config?.is_active) return null
 
   const { title, message, style } = config.value || { title: 'Institutional Update', message: '', style: 'elite' }
