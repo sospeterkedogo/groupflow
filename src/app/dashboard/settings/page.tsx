@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import {
   Settings, Save, CheckCircle2, Shield, Trash2,
@@ -62,6 +63,7 @@ export default function SettingsPage() {
   const [saveConfirmation, setSaveConfirmation] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  // Feedback State
   const [feedbackMessage, setFeedbackMessage] = useState('')
   const [feedbackCategory, setFeedbackCategory] = useState('Suggestion')
   const [submittingFeedback, setSubmittingFeedback] = useState(false)
@@ -117,12 +119,14 @@ export default function SettingsPage() {
   const fetchUserData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
+      // 1. Meta-Information (Linked Identities)
       const identities = user.identities || []
       setIsGithubLinked(identities.some(id => id.provider === 'github'))
       setIsGoogleLinked(identities.some(id => id.provider === 'google'))
 
+      // 2. Profile and Dependent Data
       const { data } = await supabase.from('profiles').select('*, groups(*)').eq('id', user.id).single()
-
+      
       if (data) {
         setFullName(data.full_name || '')
         setCourseName(data.course_name || '')
@@ -138,13 +142,14 @@ export default function SettingsPage() {
         setIsEncrypted(data.groups?.is_encrypted || false)
         setProtectAvatar(data.protect_avatar || false)
         setIsPhoneVerified(data.is_phone_verified || false)
-
+        
+        // Parallelize Secondary Context Fetches
         const contextFetches = []
         if (data.id) contextFetches.push(fetchJoinRequests(data.id))
         if (data.group_id) contextFetches.push(fetchTeam(data.group_id))
-
+        
         await Promise.all(contextFetches)
-
+        
         if (data.groups) {
           setProfile(data)
         }
@@ -245,7 +250,7 @@ export default function SettingsPage() {
       if (error) throw error
       addToast('Code Dispatched', 'Verification shard sent to your communication device.', 'success')
     } catch (err: unknown) {
-      setError(getErrorMessage(err))
+      setError(getErrorMessage(err, 'Failed to send verification code.'))
       setOtpStep('idle')
     }
   }
@@ -266,7 +271,7 @@ export default function SettingsPage() {
       addToast('Identity Verified', 'Phone connection successfully linked to your node.', 'success')
       refreshProfile()
     } catch (err: unknown) {
-      setError(getErrorMessage(err))
+      setError(getErrorMessage(err, 'Failed to verify code.'))
       setOtpStep('sent')
     }
   }
@@ -302,7 +307,6 @@ export default function SettingsPage() {
         // Priority System: If it's a manual upload, also update manual_avatar_url
         updateData.manual_avatar_url = publicUrl
         await supabase.from('profiles').update(updateData).eq('id', profile.id)
-        setAvatarUrl(publicUrl)
         setAvatarUrl(publicUrl)
       } else {
         await setCustomBg(publicUrl)
@@ -404,7 +408,7 @@ export default function SettingsPage() {
       await supabase.auth.signOut()
       window.location.href = '/login'
     } catch (err: unknown) {
-      setError(getErrorMessage(err))
+      setError(getErrorMessage(err, 'Account termination failed'))
       setIsDeleting(false)
       setIsDeleteModalOpen(false)
     }
@@ -419,7 +423,7 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error(result.error || 'Portal creation failed')
       window.location.href = result.url
     } catch (err: unknown) {
-      setError(getErrorMessage(err))
+      setError(getErrorMessage(err, 'Unable to open billing portal'))
       setLoadingPortal(false)
     }
   }
@@ -826,7 +830,7 @@ export default function SettingsPage() {
                   zIndex: 1
                 }}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image src={avatarUrl} alt="Profile avatar" fill sizes="120px" style={{ objectFit: 'cover' }} unoptimized />
                   ) : (
                     <User size={32} color="var(--text-sub)" />
                   )}
@@ -1038,8 +1042,8 @@ export default function SettingsPage() {
               {teamMembers.map(member => (
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', overflow: 'hidden' }}>
-                      {member.avatar_url ? <img src={member.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={20} style={{ margin: '10px' }} />}
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', overflow: 'hidden', position: 'relative' }}>
+                      {member.avatar_url ? <Image src={member.avatar_url} alt={`${member.full_name || 'Team'} avatar`} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized /> : <User size={20} style={{ margin: '10px' }} />}
                     </div>
                     <div>
                       <div style={{ fontWeight: 700 }}>{member.full_name || 'Anonymous'}</div>
@@ -1301,7 +1305,7 @@ export default function SettingsPage() {
               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '32px', padding: '3rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
                 {customBg ? (
                   <div style={{ position: 'relative', width: '240px', height: '120px', borderRadius: '24px', overflow: 'hidden', margin: '0 auto 1.5rem', border: '3px solid var(--brand)', boxShadow: 'var(--shadow-lg)' }}>
-                    <img src={customBg} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image src={customBg} alt="Custom workspace background" fill sizes="240px" style={{ objectFit: 'cover' }} unoptimized />
                     <button
                       onClick={() => setCustomBg(null)}
                       style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)' }}
@@ -1375,7 +1379,7 @@ export default function SettingsPage() {
               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '20px', height: '20px' }} />
+                    <Image src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} />
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>Google Identity</h3>
@@ -1642,10 +1646,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-
-
-
-
-
-
