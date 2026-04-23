@@ -205,7 +205,7 @@ export default function NotificationsPage() {
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-sub)', lineHeight: 1.3 }}>{item.desc}</div>
                  </div>
                 <button 
-                  onClick={() => updateSetting(item.key as any, !settings[item.key as keyof typeof settings])}
+                  onClick={() => updateSetting(item.key as keyof typeof settings, !settings[item.key as keyof typeof settings])}
                   style={{ 
                     width: '50px', height: '26px', borderRadius: '13px', border: 'none', position: 'relative', cursor: 'pointer',
                     background: settings[item.key as keyof typeof settings] ? 'var(--brand)' : 'var(--bg-sub)',

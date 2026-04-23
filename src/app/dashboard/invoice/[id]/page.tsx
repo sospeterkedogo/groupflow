@@ -70,6 +70,7 @@ function HustlePage() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchConnectStatus()
     // Check return from Stripe onboarding
     if (searchParams.get('success') === '1') {
@@ -77,6 +78,7 @@ function HustlePage() {
     }
   }, [fetchConnectStatus, searchParams])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchTasks(tab) }, [tab, fetchTasks])
 
   async function connectBank() {

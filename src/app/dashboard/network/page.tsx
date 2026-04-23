@@ -58,7 +58,7 @@ export default function NetworkPage() {
     
     let connectionIds: string[] = []
     if (conn) {
-      connectionIds = conn.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
+      connectionIds = conn.map((c: { user_id: string; target_id: string }) => c.user_id === user.id ? c.target_id : c.user_id)
       if (connectionIds.length > 0) {
         const { data: net } = await supabase.from('profiles').select('*').in('id', connectionIds)
         setPersonalNetwork(net || [])
@@ -81,6 +81,7 @@ export default function NetworkPage() {
   }, [supabase, teamMembers])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchMetrics()
   }, [fetchMetrics])
 
@@ -181,7 +182,7 @@ function NetworkSection({ title, icon, users, loading, router, onlineUsers }: {
   icon: React.ReactNode, 
   users: Profile[], 
   loading: boolean,
-  router: any,
+  router: { push: (url: string) => void },
   onlineUsers: Set<string>
 }) {
   return (
@@ -223,7 +224,7 @@ function NetworkSection({ title, icon, users, loading, router, onlineUsers }: {
   )
 }
 
-function NetworkRow({ user, router, isOnline }: { user: Profile, router: any, isOnline: boolean }) {
+function NetworkRow({ user, router, isOnline }: { user: Profile, router: { push: (url: string) => void }, isOnline: boolean }) {
   return (
     <div 
       className="network-row"

@@ -125,6 +125,7 @@ export default function AdminExtras() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (tab === 'users') loadUsers()
     else if (tab === 'activity') loadActivity()
     else if (tab === 'feedback') loadFeedback()

@@ -73,10 +73,10 @@ export default function ChillOutHub() {
   const [roundCount, setRoundCount] = useState<number>(5)
   
   const [isGenerating, setIsGenerating] = useState(false)
-  const [questions, setQuestions] = useState<any[]>([])
+  const [questions, setQuestions] = useState<Record<string, unknown>[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
-  const [onlineProfiles, setOnlineProfiles] = useState<any[]>([])
-  const [userStats, setUserStats] = useState<any>(null)
+  const [onlineProfiles, setOnlineProfiles] = useState<Record<string, unknown>[]>([])
+  const [userStats, setUserStats] = useState<Record<string, unknown> | null>(null)
 
   // 1. Fetch Stats & Profiles
   useEffect(() => {
@@ -141,8 +141,8 @@ export default function ChillOutHub() {
       } else {
         throw new Error(data.error || 'Synthesis error')
       }
-    } catch (err: any) {
-      addToast('Sync Failure', err.message, 'error')
+    } catch (err: unknown) {
+      addToast('Sync Failure', (err instanceof Error ? err.message : 'Unknown error'), 'error')
     } finally {
       setIsGenerating(false)
     }
@@ -305,7 +305,7 @@ export default function ChillOutHub() {
                     <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', display: 'block', marginBottom: '1rem' }}>Challenge Level</label>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
                        {['Easy', 'Medium', 'Hard'].map(d => (
-                         <button key={d} onClick={() => setDifficulty(d as any)} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: difficulty === d ? 'var(--brand)' : 'var(--border)', background: difficulty === d ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: difficulty === d ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>{d}</button>
+                         <button key={d} onClick={() => setDifficulty(d as 'Easy' | 'Medium' | 'Hard')} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: difficulty === d ? 'var(--brand)' : 'var(--border)', background: difficulty === d ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: difficulty === d ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>{d}</button>
                        ))}
                     </div>
                   </div>
@@ -315,7 +315,7 @@ export default function ChillOutHub() {
                     <label style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', display: 'block', marginBottom: '1rem' }}>Grading Protocol</label>
                     <div style={{ display: 'flex', gap: '0.75rem' }}>
                        {['Speed Recall', 'AI Evaluated'].map(m => (
-                         <button key={m} onClick={() => setGameMode(m as any)} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: gameMode === m ? 'var(--brand)' : 'var(--border)', background: gameMode === m ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: gameMode === m ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s', textAlign: 'left' }}>
+                         <button key={m} onClick={() => setGameMode(m as 'Speed Recall' | 'AI Evaluated')} style={{ flex: 1, padding: '1rem', borderRadius: '14px', border: '2px solid', borderColor: gameMode === m ? 'var(--brand)' : 'var(--border)', background: gameMode === m ? 'rgba(var(--brand-rgb), 0.05)' : 'var(--bg-sub)', color: gameMode === m ? 'var(--text-main)' : 'var(--text-sub)', fontWeight: 900, cursor: 'pointer', transition: '0.2s', textAlign: 'left' }}>
                             <div style={{ fontWeight: 950 }}>{m}</div>
                             <div style={{ fontSize: '0.65rem', opacity: 0.6, marginTop: '2px' }}>{m === 'Speed Recall' ? 'Reveal & choices' : 'Text input + AI Grade'}</div>
                          </button>

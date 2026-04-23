@@ -353,7 +353,7 @@ export default function FundPage() {
                 <div style={{ display: 'flex', gap: '2px', marginBottom: '1rem' }}>
                   {[...Array(5)].map((_, s) => <span key={s} style={{ color: 'var(--brand)', fontSize: '14px' }}>★</span>)}
                 </div>
-                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem', fontStyle: 'italic' }}>"{t.text}"</p>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem', fontStyle: 'italic' }>&quot;{t.text}&quot;</p>
                 <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>{t.name}</p>
               </motion.div>
             ))}

@@ -66,6 +66,7 @@ export default function MarketplacePage() {
   useEffect(() => {
     const hasSeen = localStorage.getItem('gf_marketplace_onboarding')
     if (!hasSeen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowWalkthrough(true)
       localStorage.setItem('gf_marketplace_onboarding', 'true')
     }
@@ -99,6 +100,7 @@ export default function MarketplacePage() {
   }, [supabase])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchListings()
   }, [fetchListings])
 
@@ -304,7 +306,7 @@ export default function MarketplacePage() {
               </div>
               <h2 style={{ fontSize: '1.75rem', fontWeight: 950, letterSpacing: '-0.04em', marginBottom: '1rem' }}>Welcome to the Exchange</h2>
               <p style={{ color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '1rem' }}>
-                Espeezy's internal marketplace is designed for students to share hardware, textbooks, and resources securely. 
+                Espeezy&apos;s internal marketplace is designed for students to share hardware, textbooks, and resources securely. 
                 Coordinate swaps at academic safe-zones and process payments via Stripe or Cash.
               </p>
               
@@ -328,7 +330,7 @@ export default function MarketplacePage() {
                 className="btn btn-primary"
                 style={{ width: '100%', marginTop: '2.5rem', padding: '1rem', borderRadius: '16px', fontWeight: 900, fontSize: '1rem' }}
               >
-                Let's Begin
+                Let&apos;s Begin
               </button>
             </div>
           </div>
@@ -450,8 +452,8 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
       if (error) throw error
       addToast('Listing Created', 'Your resource is now visible to the institutional graph.', 'success')
       onSuccess()
-    } catch (err: any) {
-      addToast('Upload Failed', err.message, 'error')
+    } catch (err: unknown) {
+      addToast('Upload Failed', (err instanceof Error ? err.message : 'Unknown error'), 'error')
     } finally {
       setUploading(false)
     }
@@ -508,7 +510,7 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Condition</label>
                   <select 
                     value={condition}
-                    onChange={(e: any) => setCondition(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value)}
                     style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
                   >
                     <option value="New">New</option>

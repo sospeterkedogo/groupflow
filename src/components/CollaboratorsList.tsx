@@ -66,7 +66,7 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
       .eq('status', 'connected')
 
     if (connData) {
-      const ids = connData.map((c: any) => c.user_id === user.id ? c.target_id : c.user_id)
+      const ids = connData.map((c: { user_id: string; target_id: string }) => c.user_id === user.id ? c.target_id : c.user_id)
       const uniqueIds = Array.from(new Set(ids))
       setConnections(new Set(uniqueIds))
 
@@ -167,7 +167,7 @@ export default function CollaboratorsList({ currentGroupId, onViewProfile }: Col
           <div style={{ fontSize: '0.8rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             {collab.full_name || 'Anonymous'}
             {(() => {
-              const Flag = getFlagComponent((collab as any).country_code)
+              const Flag = getFlagComponent((collab as { country_code?: string }).country_code)
               return Flag ? <div style={{ width: '14px', height: '10px', borderRadius: '2px', overflow: 'hidden' }}><Flag /></div> : null
             })()}
           </div>

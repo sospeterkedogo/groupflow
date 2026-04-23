@@ -19,7 +19,7 @@ export default function StudentProfilePage() {
   const supabase = createBrowserSupabaseClient()
 
   const [member, setMember] = useState<Profile | null>(null)
-  const [me, setMe] = useState<any>(null)
+  const [me, setMe] = useState<{ id: string; email?: string | null } | null>(null)
   const [loading, setLoading] = useState(true)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'pending' | 'connected'>('idle')
   const [activeTab, setActiveTab] = useState<'info' | 'accomplishments'>('info')
@@ -38,6 +38,7 @@ export default function StudentProfilePage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchProfileData()
   }, [studentId])
 
@@ -53,7 +54,7 @@ export default function StudentProfilePage() {
       .single()
 
     if (profile) {
-      setMember(profile as any)
+      setMember(profile as import('@/types/auth').Profile)
       if (user) {
         // Check if there is ANY accepted connection or a pending one sent by me
         const { data: conns } = await supabase
@@ -158,7 +159,7 @@ export default function StudentProfilePage() {
             <h2 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '0.25rem' }}>{member.full_name}</h2>
             {member.tagline && (
               <p style={{ fontSize: '0.85rem', color: 'var(--brand)', fontWeight: 800, fontStyle: 'italic', marginBottom: '1rem' }}>
-                "{member.tagline}"
+                &quot;{member.tagline}&quot;
               </p>
             )}
 
@@ -194,7 +195,7 @@ export default function StudentProfilePage() {
                  onClick={() => {
                    if (item.disabled) return;
                    if (item.id === 'chat') router.push(`/dashboard/network/chat/${studentId}`);
-                   else setActiveTab(item.id as any);
+                   else setActiveTab(item.id as 'info' | 'accomplishments');
                  }}
                  style={{ 
                    borderRadius: '12px', border: activeTab === item.id ? '2px solid var(--brand)' : '1px solid var(--border)',

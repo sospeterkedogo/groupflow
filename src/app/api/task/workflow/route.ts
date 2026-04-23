@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   try {
     const run = await start(taskWorkflow, [workflowPayload])
     return NextResponse.json({ runId: run.runId, status: await run.status }, { status: 202 })
-  } catch (err: any) {
-    return new NextResponse(JSON.stringify({ error: err?.message || 'Workflow startup failed.' }), { status: 500 })
+  } catch (err: unknown) {
+    return new NextResponse(JSON.stringify({ error: (err instanceof Error ? err.message : null) || 'Workflow startup failed.' }), { status: 500 })
   }
 }

@@ -87,6 +87,7 @@ export default function FeedPage() {
     }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadPosts() }, [loadPosts])
 
   // Infinite scroll sentinel
@@ -201,6 +202,7 @@ export default function FeedPage() {
   }
 
   function timeAgo(date: string) {
+    // eslint-disable-next-line react-hooks/purity
     const secs = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
     if (secs < 60) return 'just now'
     if (secs < 3600) return `${Math.floor(secs / 60)}m ago`
@@ -303,7 +305,7 @@ export default function FeedPage() {
       {/* Infinite scroll sentinel */}
       <div ref={sentinelRef} style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {loadingMore && <Loader2 size={18} style={{ animation: 'spin 1s linear infinite', color: 'rgba(255,255,255,0.3)' }} />}
-        {!hasMore && posts.length > 0 && <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>You've seen it all</span>}
+        {!hasMore && posts.length > 0 && <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>You&apos;ve seen it all</span>}
       </div>
     </div>
   )

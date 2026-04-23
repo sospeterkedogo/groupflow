@@ -7,7 +7,7 @@ function getStripeClient(): Stripe {
   if (!stripeKey) {
     throw new Error('STRIPE_SECRET_KEY is not configured')
   }
-  return new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as any })
+  return new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as Stripe.LatestApiVersion })
 }
 
 // POST /api/hustle/connect — create Stripe Connect onboarding link

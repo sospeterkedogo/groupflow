@@ -13,7 +13,7 @@ export default function ProfilePage() {
    const [isEditingBio, setIsEditingBio] = useState(false)
    const [bioText, setBioText] = useState('')
    const [isSaving, setIsSaving] = useState(false)
-   const [achievements, setAchievements] = useState<any[]>([])
+   const [achievements, setAchievements] = useState<Record<string, unknown>[]>([])
 
    useEffect(() => {
      async function fetchAchievements() {
@@ -42,6 +42,7 @@ export default function ProfilePage() {
 
    useEffect(() => {
       if (profile?.biography) {
+         // eslint-disable-next-line react-hooks/set-state-in-effect
          setBioText(profile.biography)
       }
    }, [profile?.biography])
@@ -117,7 +118,8 @@ export default function ProfilePage() {
                         <h1 className="fluid-h1" style={{ fontWeight: 950, margin: 0, fontSize: '2.5rem', letterSpacing: '-0.04em', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           {profile?.full_name}
                           {(() => {
-                            const Flag = getFlagComponent((profile as any)?.country_code)
+                            const Flag = getFlagComponent((profile as { country_code?: string })?.country_code)
+                            // eslint-disable-next-line react-hooks/static-components
                             return Flag ? <div style={{ width: '32px', height: '20px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}><Flag /></div> : null
                           })()}
                         </h1>
@@ -134,12 +136,12 @@ export default function ProfilePage() {
                     </div>
                     {profile?.tagline && (
                        <p style={{ fontSize: '1rem', color: 'var(--brand)', fontStyle: 'italic', margin: '0.4rem 0 0.75rem', fontWeight: 800 }}>
-                          "{profile.tagline}"
+                          &quot;{profile.tagline}&quot;
                        </p>
                     )}
                     <p style={{ color: 'var(--text-sub)', fontSize: '1rem', margin: '0.5rem 0 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap', fontWeight: 700 }}>
                       <ShieldCheck size={18} color="var(--brand)" />
-                      {profile?.course_name || 'Project Analyst'} &bull; {(profile as any)?.role || 'Team Member'}
+                      {profile?.course_name || 'Project Analyst'} &bull; {(profile as { role?: string })?.role || 'Team Member'}
                     </p>
                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-sub)', background: 'var(--bg-sub)', padding: '0.4rem 0.8rem', borderRadius: '50px', border: '1px solid var(--border)', fontWeight: 700 }}>

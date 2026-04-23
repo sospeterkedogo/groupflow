@@ -71,7 +71,7 @@ export default function Home() {
                           <div style={{ display: 'grid', gap: '2rem', fontSize: '1rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.6)' }}>
                 <div>
                    <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal 01: Visibility</strong>
-                   Espeezy makes sure everyone's hard work counts. We keep a clear record of every task so you get the credit you deserve.
+                   Espeezy makes sure everyone&apos;s hard work counts. We keep a clear record of every task so you get the credit you deserve.
                 </div>
                 <div>
                    <strong style={{ color: 'white', display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '1px' }}>Goal 02: Teammates</strong>
@@ -80,7 +80,7 @@ export default function Home() {
              </div>
 
              <button className="btn btn-primary" style={{ marginTop: '2.5rem', width: '100%', padding: '1.25rem', borderRadius: '20px', background: 'var(--brand)', color: '#0a0a0a', fontWeight: 950, fontSize: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(var(--brand-rgb), 0.3)' }} onClick={() => setIsModalOpen(false)}>
-               Got it, let's go!
+               Got it, let&apos;s go!
              </button>
           </div>
         </div>

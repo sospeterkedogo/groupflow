@@ -10,7 +10,7 @@ import {
   Globe, CreditCard, Box, Eye, Flag, BarChart
 } from 'lucide-react'
 
-const docsContent: Record<string, { title: string, icon: any, content: string, eli12: string }> = {
+const docsContent: Record<string, { title: string, icon: React.ReactNode, content: string, eli12: string }> = {
   'getting-started': {
     title: 'Quick Start Guide',
     icon: <Zap size={40} />,

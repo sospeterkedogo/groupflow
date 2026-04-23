@@ -35,7 +35,7 @@ export default function TeamsPage() {
               <div style={{ color: '#10b981', marginBottom: '1.5rem' }}><Users size={40} /></div>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Synchronized Peers</h3>
               <p style={{ color: '#9ca3af', lineHeight: 1.7 }}>
-                See your team's real-time presence and activity dots. Know who is online and what they are working 
+                See your team&apos;s real-time presence and activity dots. Know who is online and what they are working 
                 on without sending a single status update message.
               </p>
            </div>
@@ -51,7 +51,7 @@ export default function TeamsPage() {
               <div style={{ color: '#10b981', marginBottom: '1.5rem' }}><Activity size={40} /></div>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Team Velocity</h3>
               <p style={{ color: '#9ca3af', lineHeight: 1.7 }}>
-                Automated analytics track your group's collective effort, providing insights into team health and 
+                Automated analytics track your group&apos;s collective effort, providing insights into team health and 
                 identifying potential bottlenecks early.
               </p>
            </div>

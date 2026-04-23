@@ -10,7 +10,7 @@ function getStripeClient(): Stripe {
   if (!stripeKey) {
     throw new Error('STRIPE_SECRET_KEY is not configured')
   }
-  return new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as any })
+  return new Stripe(stripeKey, { apiVersion: '2026-03-25.dahlia' as Stripe.LatestApiVersion })
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://espeezy.com'
