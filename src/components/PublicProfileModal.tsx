@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import type { Profile } from '@/types/auth'
 import ChatRoom from './ChatRoom'
-import { getFlagComponent } from '@/utils/geo'
+import { getUnicodeFlag } from '@/utils/geo'
 import { 
   X, 
   UserPlus, 
@@ -33,8 +33,26 @@ interface PublicProfileModalProps {
 type ExtendedProfile = Profile & { country_code?: string }
 
 function FlagDisplay({ countryCode }: { countryCode?: string }) {
-  const Flag = getFlagComponent(countryCode)
-  return Flag ? <div style={{ width: '28px', height: '18px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}><Flag /></div> : null
+  if (!countryCode) return null
+  return (
+    <div
+      style={{
+        width: '28px',
+        height: '18px',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '16px'
+      }}
+      aria-label={`Country flag ${countryCode.toUpperCase()}`}
+      title={countryCode.toUpperCase()}
+    >
+      {getUnicodeFlag(countryCode)}
+    </div>
+  )
 }
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {

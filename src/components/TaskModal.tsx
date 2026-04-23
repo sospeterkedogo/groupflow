@@ -78,8 +78,10 @@ export default function TaskModal({
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
-    void fetchMembers()
-  }, [groupId])
+    queueMicrotask(() => {
+      void fetchMembers()
+    })
+  }, [fetchMembers, groupId, supabase.auth])
 
   async function fetchArtifacts() {
     if (!task) return
@@ -95,8 +97,10 @@ export default function TaskModal({
 
   useEffect(() => {
     if (!isEditMode) return
-    
-    void fetchArtifacts()
+
+    queueMicrotask(() => {
+      void fetchArtifacts()
+    })
     const channelAttr = supabase
       .channel(`task_${task.id}_artifacts`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'artifacts', filter: `task_id=eq.${task.id}` }, () => {

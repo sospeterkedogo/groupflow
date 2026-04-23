@@ -162,7 +162,7 @@ export default function SessionGuard() {
               boxShadow: '0 10px 25px rgba(var(--brand-rgb), 0.3)'
             }}
           >
-            <CheckCircle2 size={18} /> I'm Still Here
+            <CheckCircle2 size={18} /> I&apos;m Still Here
           </button>
           
           <button 
