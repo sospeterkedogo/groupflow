@@ -76,9 +76,7 @@ export default function SettingsPage() {
   const [otp, setOtp] = useState('')
   const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verifying'>('idle')
   const [protectAvatar, setProtectAvatar] = useState(false)
-  const [isToasterMode, setIsToasterMode] = useState(() =>
-    typeof window !== 'undefined' && localStorage.getItem('gf_toaster_mode') === 'true'
-  )
+  const [isToasterMode, setIsToasterMode] = useState(false)
 
   const supabase = createBrowserSupabaseClient()
 
@@ -147,6 +145,11 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
+    // Sync Toaster Mode from local storage (after hydration to avoid mismatch)
+    if (typeof window !== 'undefined') {
+      setIsToasterMode(localStorage.getItem('gf_toaster_mode') === 'true')
+    }
+    
     // Parallelize top-level metadata fetches
     const initializeData = async () => {
       await Promise.all([
