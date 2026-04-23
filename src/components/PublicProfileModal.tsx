@@ -164,6 +164,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em', margin: 0 }}>{member.full_name || 'Anonymous Student'}</h2>
                    {(() => {
                       const Flag = getFlagComponent((member as { country_code?: string }).country_code)
+                      // eslint-disable-next-line react-hooks/static-components
                       return Flag ? <div style={{ width: '28px', height: '18px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}><Flag /></div> : null
                    })()}
                 </div>

@@ -237,6 +237,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId)
     e.dataTransfer.effectAllowed = 'move'
+    // eslint-disable-next-line react-hooks/purity
     dragStartTimeRef.current = Date.now()
     setDraggingCardId(taskId)
     updateMyPresence({ draggingTaskId: taskId });
