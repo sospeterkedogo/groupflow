@@ -6,8 +6,15 @@ import { UserPlus, X, Check, ExternalLink, RefreshCw } from 'lucide-react'
 import { useNotifications } from './NotificationProvider'
 import Link from 'next/link'
 
+interface ConnectionRequest {
+  id: string
+  user_id: string
+  profiles?: { full_name?: string }
+  [key: string]: unknown
+}
+
 export default function ConnectionAlertTray() {
-  const [requests, setRequests] = useState<Array<Record<string, unknown>>>([])
+  const [requests, setRequests] = useState<ConnectionRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const supabase = createBrowserSupabaseClient()

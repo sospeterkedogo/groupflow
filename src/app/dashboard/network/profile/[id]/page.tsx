@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Profile } from '@/types/database'
+import type { User } from '@supabase/supabase-js'
 import { useSmartLoading } from '@/components/GlobalLoadingProvider'
 
 export default function StudentProfilePage() {
@@ -19,7 +20,7 @@ export default function StudentProfilePage() {
   const supabase = createBrowserSupabaseClient()
 
   const [member, setMember] = useState<Profile | null>(null)
-  const [me, setMe] = useState<{ id: string; email?: string | null } | null>(null)
+  const [me, setMe] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'pending' | 'connected'>('idle')
   const [activeTab, setActiveTab] = useState<'info' | 'accomplishments'>('info')

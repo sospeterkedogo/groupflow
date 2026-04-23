@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import KanbanBoard from './KanbanBoard'
@@ -484,10 +484,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', gap: '0.4rem' }}>
-          {[
+          {([
             { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
             { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> }
-          ].map((tab: { id: 'board' | 'calendar'; label: string; icon: JSX.Element }) => (
+          ] as Array<{ id: 'board' | 'calendar'; label: string; icon: React.ReactElement }>).map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}

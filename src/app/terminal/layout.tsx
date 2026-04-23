@@ -39,7 +39,7 @@ export default async function TerminalLayout({
   return (
     <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
       <GlobalLoadingProvider>
-        <ProfileProvider userId={user.id} initialProfile={profile as Parameters<typeof import("@/components/ProfileProvider").ProfileProvider>[0]["initialProfile"]}>
+        <ProfileProvider userId={user.id} initialProfile={profile as unknown as Parameters<typeof ProfileProvider>[0]['initialProfile']}>
            <NotificationProvider>
              {children}
            </NotificationProvider>

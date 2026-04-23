@@ -13,7 +13,16 @@ export default function ProfilePage() {
    const [isEditingBio, setIsEditingBio] = useState(false)
    const [bioText, setBioText] = useState('')
    const [isSaving, setIsSaving] = useState(false)
-   const [achievements, setAchievements] = useState<Record<string, unknown>[]>([])
+
+   interface Achievement {
+     type: string
+     title?: string
+     content?: string
+     created_at: string
+     [key: string]: unknown
+   }
+
+   const [achievements, setAchievements] = useState<Achievement[]>([])
 
    useEffect(() => {
      async function fetchAchievements() {

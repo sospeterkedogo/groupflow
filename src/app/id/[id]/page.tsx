@@ -82,9 +82,9 @@ const PRESETS = [5, 10, 25, 50, 100, 250]
 
 // ─── Donor testimonials (placeholder) ────────────────────────────────────────
 const TESTIMONIALS = [
-  { name: 'Dr. Amara N., University of Lagos', text: 'Espeezy is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade.' },
-  { name: 'Kenji T., Computer Science, Tokyo', text: 'I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting.' },
-  { name: 'Sofia M., Education Technology, Barcelona', text: 'The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS.' },
+  { name: 'Dr. Amara N., University of Lagos', text: '"Espeezy is what I have been waiting for — a tool that actually sees my students as individuals, not just a group grade."' },
+  { name: 'Kenji T., Computer Science, Tokyo', text: '"I was the one always carrying the team. This platform finally makes that visible. 100% worth supporting."' },
+  { name: 'Sofia M., Education Technology, Barcelona', text: '"The integrations roadmap alone is worth backing. Every educator needs this layer between students and the LMS."' },
 ]
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
@@ -353,7 +353,7 @@ export default function FundPage() {
                 <div style={{ display: 'flex', gap: '2px', marginBottom: '1rem' }}>
                   {[...Array(5)].map((_, s) => <span key={s} style={{ color: 'var(--brand)', fontSize: '14px' }}>★</span>)}
                 </div>
-                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem', fontStyle: 'italic' }>&quot;{t.text}&quot;</p>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1rem', fontStyle: 'italic' }}>{t.text}</p>
                 <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>{t.name}</p>
               </motion.div>
             ))}

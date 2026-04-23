@@ -24,7 +24,7 @@ type Presence = {
   lastAction?: string | null;
 };
 
-type QuizQuestion = {
+export type QuizQuestion = {
   id: string;
   question: string;
   type: 'multiple_choice' | 'explanation';
@@ -41,11 +41,13 @@ type UserMeta = {
   }
 };
 
-type QuizScore = {
+export type QuizScore = {
   userId: string;
   userName: string;
   points: number;
 };
+
+export type { ChatMessage };
 
 // Storage is the persistent, conflict-free state of the room
 type Storage = {

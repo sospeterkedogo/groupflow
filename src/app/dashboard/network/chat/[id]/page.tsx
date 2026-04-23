@@ -510,7 +510,7 @@ function PostListingModal({ onClose, onSuccess }: { onClose: () => void, onSucce
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-sub)', marginBottom: '0.6rem' }}>Condition</label>
                   <select 
                     value={condition}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value as "New" | "Like New" | "Used" | "Refurbished")}
                     style={{ width: '100%', padding: '0.9rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-sub)', outline: 'none' }}
                   >
                     <option value="New">New</option>

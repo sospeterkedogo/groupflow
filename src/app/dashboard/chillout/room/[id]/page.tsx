@@ -92,7 +92,8 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
         // Populate Storage
         const qList = storage.get('quizQuestions')
         qList.clear()
-        newQs.forEach((q: unknown) => qList.push(q))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        newQs.forEach((q: unknown) => qList.push(q as any))
         
         storage.set('quizStatus', 'playing')
         storage.set('currentQuestionIndex', 0)

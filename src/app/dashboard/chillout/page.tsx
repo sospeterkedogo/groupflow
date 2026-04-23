@@ -56,6 +56,29 @@ const TOPICS = [
   }
 ]
 
+interface UserGameStats {
+  level: number
+  total_xp: number
+  rank_title: string
+  wins: number
+  games_played: number
+  [key: string]: unknown
+}
+
+interface OnlineProfile {
+  id: string
+  avatar_url: string | null
+  full_name: string
+  [key: string]: unknown
+}
+
+interface QuizQuestion {
+  type: string
+  difficulty_multiplier: number
+  question: string
+  [key: string]: unknown
+}
+
 export default function ChillOutHub() {
   const router = useRouter()
   const { profile } = useProfile()
@@ -73,10 +96,10 @@ export default function ChillOutHub() {
   const [roundCount, setRoundCount] = useState<number>(5)
   
   const [isGenerating, setIsGenerating] = useState(false)
-  const [questions, setQuestions] = useState<Record<string, unknown>[]>([])
+  const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
-  const [onlineProfiles, setOnlineProfiles] = useState<Record<string, unknown>[]>([])
-  const [userStats, setUserStats] = useState<Record<string, unknown> | null>(null)
+  const [onlineProfiles, setOnlineProfiles] = useState<OnlineProfile[]>([])
+  const [userStats, setUserStats] = useState<UserGameStats | null>(null)
 
   // 1. Fetch Stats & Profiles
   useEffect(() => {
@@ -215,7 +238,7 @@ export default function ChillOutHub() {
                    <div style={{ width: '200px', height: '6px', background: 'var(--bg-main)', borderRadius: '10px', overflow: 'hidden' }}>
                       <motion.div 
                         initial={{ width: 0 }} 
-                        animate={{ width: `${(userStats?.total_xp % 100)}%` }}
+                        animate={{ width: `${((userStats?.total_xp ?? 0) % 100)}%` }}
                         style={{ height: '100%', background: 'var(--brand)' }} 
                       />
                    </div>

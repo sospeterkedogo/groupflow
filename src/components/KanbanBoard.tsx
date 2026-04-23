@@ -24,6 +24,7 @@ import {
   useOthers,
   useUpdateMyPresence
 } from "@/liveblocks.config";
+import type { ChatMessage, QuizQuestion, QuizScore } from "@/liveblocks.config";
 import { LiveList, LiveObject } from "@liveblocks/client";
 import { ClientSideSuspense } from "@liveblocks/react";
 
@@ -46,9 +47,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
       initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
       initialStorage={{ 
         tasks: new LiveList<Task>([]), 
-        messages: new LiveList<unknown>([]),
-        quizQuestions: new LiveList<unknown>([]),
-        quizScores: new LiveList<unknown>([]),
+        messages: new LiveList<ChatMessage>([]),
+        quizQuestions: new LiveList<QuizQuestion>([]),
+        quizScores: new LiveList<QuizScore>([]),
         quizStatus: 'setup',
         currentQuestionIndex: 0,
         activeTurnUserId: null,

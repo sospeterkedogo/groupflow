@@ -57,7 +57,7 @@ function FlagDisplay({ countryCode }: { countryCode?: string }) {
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [me, setMe] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null)
-  const [achievements, setAchievements] = useState<unknown[]>([])
+  const [achievements, setAchievements] = useState<Array<{ type: string; title?: string; content?: string; created_at?: string; [key: string]: unknown }>>([])
   const [isConnected, setIsConnected] = useState(initialConnected)
   const [loading, setLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -281,7 +281,7 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ach.title || ach.content || 'Contribution'}</div>
-                               <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>{ach.type === 'artifact' ? 'Verifiable Artifact' : 'Synced Logic Update'} • {new Date(ach.created_at).toLocaleDateString()}</div>
+                               <div style={{ fontSize: '0.7rem', color: 'var(--text-sub)' }}>{ach.type === 'artifact' ? 'Verifiable Artifact' : 'Synced Logic Update'} • {new Date(ach.created_at ?? '').toLocaleDateString()}</div>
                             </div>
                          </div>
                        ))}
