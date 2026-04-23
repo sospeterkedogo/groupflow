@@ -65,6 +65,7 @@ export default function SessionGuard() {
   useEffect(() => {
     if (!isAuthenticated || pathname === '/login' || pathname === '/') {
        if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+       // eslint-disable-next-line react-hooks/set-state-in-effect
        setShowWarning(false)
        return
     }
@@ -97,6 +98,7 @@ export default function SessionGuard() {
         setCountdown(prev => prev - 1)
       }, 1000)
     } else if (countdown === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       handleLogout()
     }
 
@@ -162,7 +164,7 @@ export default function SessionGuard() {
               boxShadow: '0 10px 25px rgba(var(--brand-rgb), 0.3)'
             }}
           >
-            <CheckCircle2 size={18} /> I'm Still Here
+            <CheckCircle2 size={18} /> I&apos;m Still Here
           </button>
           
           <button 

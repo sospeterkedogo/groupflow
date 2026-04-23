@@ -46,9 +46,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
       initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
       initialStorage={{ 
         tasks: new LiveList<Task>([]), 
-        messages: new LiveList<any>([]),
-        quizQuestions: new LiveList<any>([]),
-        quizScores: new LiveList<any>([]),
+        messages: new LiveList<Record<string, unknown>>([]),
+        quizQuestions: new LiveList<Record<string, unknown>>([]),
+        quizScores: new LiveList<Record<string, unknown>>([]),
         quizStatus: 'setup',
         currentQuestionIndex: 0,
         activeTurnUserId: null,
@@ -100,6 +100,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
     if (cached && !storageTasks?.length) {
       try {
         const parsed = JSON.parse(cached);
+        // eslint-disable-next-line react-hooks/immutability
         reconcileTasks(parsed);
       } catch (e) {
         console.error("Cache Hydration Failed", e);
@@ -185,7 +186,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   useEffect(() => {
     let active = true
-    let channel: any = null
+    let channel: ReturnType<typeof import('@supabase/supabase-js').createClient>['channel'] | null = null
 
     const initialize = async () => {
       // Parallelize fetches to eliminate waterfalls

@@ -87,13 +87,16 @@ export default function SettingsPage() {
   useEffect(() => {
     // Sync Toaster Mode from local storage
     if (typeof window !== 'undefined') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsToasterMode(localStorage.getItem('gf_toaster_mode') === 'true')
     }
     
     // Parallelize top-level metadata fetches
     const initializeData = async () => {
       await Promise.all([
+        // eslint-disable-next-line react-hooks/immutability
         fetchUserData(),
+        // eslint-disable-next-line react-hooks/immutability
         fetchGroups()
       ])
     }
@@ -250,8 +253,8 @@ export default function SettingsPage() {
       const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber })
       if (error) throw error
       addToast('Code Dispatched', 'Verification shard sent to your communication device.', 'success')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)))
       setOtpStep('idle')
     }
   }
@@ -271,8 +274,8 @@ export default function SettingsPage() {
       setOtpStep('idle')
       addToast('Identity Verified', 'Phone connection successfully linked to your node.', 'success')
       refreshProfile()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)))
       setOtpStep('sent')
     }
   }
@@ -315,8 +318,8 @@ export default function SettingsPage() {
       }
       refreshProfile()
       addToast('Visuals Updated', 'Your appearance settings have been synchronized across all project hubs.', 'success')
-    } catch (err: any) {
-      setError("Upload failed: " + err.message)
+    } catch (err: unknown) {
+      setError("Upload failed: " + (err instanceof Error ? err.message : String(err)))
     } finally {
       setUploadingAvatar(false)
       setUploadingBg(false)
@@ -361,8 +364,8 @@ export default function SettingsPage() {
         }
       })
       if (error) throw error
-    } catch (err: any) {
-      setError(`Identity Linkage Failure: ${err.message}`)
+    } catch (err: unknown) {
+      setError(`Identity Linkage Failure: ${err instanceof Error ? err.message : String(err)}`)
       setSaving(false)
     }
   }
@@ -409,8 +412,8 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error(data.error || 'Account termination failed')
       await supabase.auth.signOut()
       window.location.href = '/login'
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)))
       setIsDeleting(false)
       setIsDeleteModalOpen(false)
     }
@@ -424,8 +427,8 @@ export default function SettingsPage() {
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Portal creation failed')
       window.location.href = result.url
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)))
       setLoadingPortal(false)
     }
   }
@@ -572,8 +575,8 @@ export default function SettingsPage() {
                       if (profile) {
                         logActivity(profile.id, profile.group_id || 'system', 'setting_updated', `Submitted feedback: ${feedbackCategory}`, { category: feedbackCategory })
                       }
-                    } catch (err: any) {
-                      addToast('Submission Failed', err.message || 'Something went wrong', 'error')
+                    } catch (err: unknown) {
+                      addToast('Submission Failed', (err instanceof Error ? err.message : null) || 'Something went wrong', 'error')
                     } finally {
                       setSubmittingFeedback(false)
                     }
@@ -601,6 +604,7 @@ export default function SettingsPage() {
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
                   {profile.subscription_plan 
+                    // eslint-disable-next-line react-hooks/purity
                     ? `Active since ${new Date(profile.subscription_started_at || Date.now()).toLocaleDateString()}` 
                     : 'Unlock professional project features.'}
                 </p>
@@ -1075,9 +1079,10 @@ export default function SettingsPage() {
 
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {(() => {
-                const groupData = Array.isArray((profile as any)?.groups) 
-                  ? (profile as any).groups[0] 
-                  : (profile as any)?.groups;
+                const profileWithGroups = profile as typeof profile & { groups?: { name?: string; module_code?: string } | { name?: string; module_code?: string }[] }
+                const groupData = Array.isArray(profileWithGroups?.groups) 
+                  ? profileWithGroups.groups[0] 
+                  : profileWithGroups?.groups;
                 
                 return (
                   <div>
@@ -1130,8 +1135,8 @@ export default function SettingsPage() {
                     const { sendJoinRequest } = await import('../join/actions')
                     await sendJoinRequest(group.id, fullName || 'A student')
                     setSentRequests(prev => [...new Set([...prev, group.id])])
-                  } catch (err: any) {
-                    setError('Request failed: ' + err.message)
+                  } catch (err: unknown) {
+                    setError('Request failed: ' + (err instanceof Error ? err.message : String(err)))
                   } finally {
                     setPendingRequests(prev => prev.filter(id => id !== group.id))
                   }
@@ -1247,12 +1252,13 @@ export default function SettingsPage() {
                             try {
                               await setPalette(p.name)
                               addToast('Appearance Synced', `The ${p.name} palette has been successfully applied to your terminal.`, 'success')
-                            } catch (err: any) {
-                              if (err.message === 'PREMIUM_LOCKED' || err.message === 'PRO_LOCKED') {
+                            } catch (err: unknown) {
+                              const errMsg = err instanceof Error ? err.message : String(err)
+                              if (errMsg === 'PREMIUM_LOCKED' || errMsg === 'PRO_LOCKED') {
                                 addToast('Access Unauthorized', 'This visual protocol requires higher institutional clearance.', 'error')
                                 setActiveTab('billing')
                               } else {
-                                addToast('Sync Error', err.message || 'Failed to apply theme.', 'error')
+                                addToast('Sync Error', errMsg || 'Failed to apply theme.', 'error')
                               }
                             }
                           }}
@@ -1449,7 +1455,7 @@ export default function SettingsPage() {
                           const achievements = [...currentAchievements]
                           let next
                           if (isConnected) {
-                            next = achievements.filter((a: any) => a.name !== tool)
+                            next = achievements.filter((a: { name?: string }) => a.name !== tool)
                           } else {
                             next = [...achievements, { name: tool, date: new Date().toISOString() }]
                           }

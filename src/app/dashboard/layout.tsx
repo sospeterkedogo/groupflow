@@ -43,8 +43,8 @@ export default async function DashboardLayout({
   return (
     <ThemeProvider initialTheme={initialTheme} userPlan={profile?.subscription_plan}>
       <GlobalLoadingProvider>
-        <ProfileProvider userId={user.id} initialProfile={profile as any}>
-          <OnboardingWrapper profile={profile as any} user={user}>
+        <ProfileProvider userId={user.id} initialProfile={profile as import('@/types/auth').Profile | null}>
+          <OnboardingWrapper profile={profile as { full_name?: string; avatar_url?: string } | null} user={user}>
             <div className="dashboard-layout">
               <PresenceProvider user={user}>
                 <SpotifyProvider>

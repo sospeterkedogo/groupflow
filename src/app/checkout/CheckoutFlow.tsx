@@ -252,7 +252,7 @@ export default function CheckoutFlow() {
               <Loader2 size={36} color={plan.color} style={{ animation: 'spin 0.8s linear infinite' }} />
             </div>
             <p style={{ margin: 0, color: 'white', fontWeight: 700, fontSize: '1.1rem' }}>Redirecting to secure checkout…</p>
-            <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>You'll be back on Espeezy in moments.</p>
+            <p style={{ margin: 0, color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>You&apos;ll be back on Espeezy in moments.</p>
           </motion.div>
         )}
       </AnimatePresence>

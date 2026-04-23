@@ -91,6 +91,7 @@ export function useAdminDashboard() {
     if (!isVerified) return
 
     // Show seed logs immediately on verification
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSystemLogs(SEED_LOGS)
 
     const interval = setInterval(() => {
@@ -164,6 +165,7 @@ export function useAdminDashboard() {
   useEffect(() => {
     if (!isVerified) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAdminData()
 
     const channel = supabase

@@ -74,7 +74,7 @@ export default function FeaturesDocs() {
           All Espeezy Features
         </h1>
         <p style={{ fontSize: '1.1rem', color: '#9ca3af', lineHeight: 1.6 }}>
-          Explore every capability of the Espeezy ecosystem. We've explained everything in simple terms 
+          Explore every capability of the Espeezy ecosystem. We&apos;ve explained everything in simple terms 
           to make sure your whole team can get started quickly.
         </p>
       </div>

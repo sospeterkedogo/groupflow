@@ -55,6 +55,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
   // Smart Search Logic
   useEffect(() => {
     if (query.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
       setLoading(false)
       return
@@ -80,10 +81,10 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
             ...(profiles.data || []).map(p => ({ 
               id: p.id, 
               type: 'profile' as const, 
-              title: (p as any).full_name, 
-              subtitle: (p as any).course_name, 
-              image_url: (p as any).avatar_url,
-              country_code: (p as any).country_code
+              title: (p as { full_name?: string }).full_name ?? '', 
+              subtitle: (p as { course_name?: string }).course_name, 
+              image_url: (p as { avatar_url?: string }).avatar_url,
+              country_code: (p as { country_code?: string }).country_code
             })),
             ...(tasks.data || []).map(t => ({ id: t.id, type: 'task' as const, title: t.title, subtitle: t.status })),
             ...(groups.data || []).map(g => ({ id: g.id, type: 'group' as const, title: g.name, subtitle: g.module_code }))
@@ -196,7 +197,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
             </div>
           ) : results.length === 0 && !loading ? (
             <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-               <p style={{ color: 'var(--text-sub)' }}>No exact matches for "<span style={{ color: 'var(--text-main)' }}>{query}</span>"</p>
+               <p style={{ color: 'var(--text-sub)' }}>No exact matches for &quot;<span style={{ color: 'var(--text-main)' }}>{query}</span>&quot;</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

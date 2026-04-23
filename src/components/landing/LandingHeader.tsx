@@ -16,7 +16,7 @@ interface LandingHeaderProps {
 export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   useEffect(() => {

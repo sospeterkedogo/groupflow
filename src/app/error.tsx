@@ -19,7 +19,7 @@ export default function GlobalError({
       <AlertCircle size={48} color="var(--danger-color)" style={{ marginBottom: '1rem' }} />
       <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Something went wrong!</h2>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-        A system-level pipeline error occurred. We've logged this internally.
+        A system-level pipeline error occurred. We&apos;ve logged this internally.
       </p>
       <button
         style={{ padding: '0.75rem 1.5rem', cursor: 'pointer' }}

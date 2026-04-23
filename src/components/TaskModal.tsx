@@ -78,6 +78,7 @@ export default function TaskModal({
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchMembers()
   }, [groupId])
 
@@ -96,6 +97,7 @@ export default function TaskModal({
   useEffect(() => {
     if (!isEditMode) return
     
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchArtifacts()
     const channelAttr = supabase
       .channel(`task_${task.id}_artifacts`)

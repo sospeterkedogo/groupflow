@@ -7,13 +7,14 @@ import { useRouter } from 'next/navigation'
 
 export default function PromoBanner() {
   const [isClient, setIsClient] = useState(false)
-  const [config, setConfig] = useState<Record<string, any>>({})
+  const [config, setConfig] = useState<Record<string, unknown>>({})
   const [isVisible, setIsVisible] = useState(true)
   
   const supabase = createBrowserSupabaseClient()
   const router = useRouter()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true)
   }, [])
 
@@ -39,6 +40,7 @@ export default function PromoBanner() {
       .subscribe()
 
     const dismissed = localStorage.getItem('gf_promo_dismissed_v2')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (dismissed) setIsVisible(false)
 
     return () => { supabase.removeChannel(channel) }

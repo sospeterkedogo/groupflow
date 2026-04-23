@@ -27,6 +27,7 @@ export default function LanguageSelector() {
   useEffect(() => {
     const cookieLocale = readCookieLocale()
     if (cookieLocale) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrent(cookieLocale)
     } else {
       const detected = detectBrowserLocale()
@@ -47,6 +48,7 @@ export default function LanguageSelector() {
   }, [open])
 
   const setLocale = (code: LocaleCode) => {
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `NEXT_LOCALE=${encodeURIComponent(code)}; path=/; max-age=31536000; SameSite=Lax`
     setOpen(false)
     window.location.reload()

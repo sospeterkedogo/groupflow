@@ -141,7 +141,7 @@ export default function ActiveUsersList({
                   <span style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {member.full_name} {isMe && '(You)'}
                     {(() => {
-                      const Flag = getFlagComponent((member as any).country_code)
+                      const Flag = getFlagComponent((member as { country_code?: string }).country_code)
                       return Flag ? <div style={{ width: '16px', height: '11px', borderRadius: '2px', overflow: 'hidden' }}><Flag /></div> : null
                     })()}
                   </span>

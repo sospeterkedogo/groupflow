@@ -95,7 +95,7 @@ function SuccessContent() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '5px 14px', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: '100px', marginBottom: '1.25rem' }}>
             <Sparkles size={12} color="#10b981" />
-            <span style={{ fontSize: '0.68rem', fontWeight: 900, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.14em' }}>You're in</span>
+            <span style={{ fontSize: '0.68rem', fontWeight: 900, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.14em' }}>You&apos;re in</span>
           </div>
 
           <h1 style={{ margin: '0 0 0.75rem', fontSize: '2.2rem', fontWeight: 950, color: 'white', letterSpacing: '-0.04em', lineHeight: 1.1 }}>

@@ -26,7 +26,7 @@ export default function SyncPage() {
             <span style={{ color: '#10b981' }}>collaborative state.</span>
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#9ca3af', lineHeight: 1.6, maxWidth: '800px', margin: '0 auto 4rem' }}>
-            Espeezy's sync engine utilizes a peer-to-peer relay protocol to ensure that every team action—from a chat message 
+            Espeezy&apos;s sync engine utilizes a peer-to-peer relay protocol to ensure that every team action—from a chat message 
             to a presence update—is propagated across your whole team in milliseconds.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
@@ -56,7 +56,7 @@ export default function SyncPage() {
               <div style={{ color: '#10b981', marginBottom: '1.5rem' }}><Activity size={40} /></div>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Performance Metrics</h3>
               <p style={{ color: '#9ca3af', lineHeight: 1.7 }}>
-                Monitor your team's real-time velocity through automated analytics that track collaboration frequency and 
+                Monitor your team&apos;s real-time velocity through automated analytics that track collaboration frequency and 
                 update patterns.
               </p>
            </div>

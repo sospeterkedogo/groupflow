@@ -96,7 +96,7 @@ export default function MemberProfileModal({ member, groupMembers, tasks, onClos
                  <div style={{ width: `${contributionPercent}%`, height: '100%', background: 'linear-gradient(90deg, var(--brand), #818cf8)', borderRadius: '10px' }} />
               </div>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-sub)', marginTop: '0.75rem', lineHeight: 1.5 }}>
-                 This verified metric calculates this collaborator's contribution effort relative to the CURRENT project performance, based on completed task nodes.
+                 This verified metric calculates this collaborator&apos;s contribution effort relative to the CURRENT project performance, based on completed task nodes.
               </p>
            </div>
         </div>

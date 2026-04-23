@@ -173,7 +173,7 @@ export default function ActivityLogView({
        </div>
 
        {filteredLogs.length === 0 ? (
-         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-sub)', border: '1px dashed var(--border)', borderRadius: '12px' }}>No logs match "{logSearch}"</div>
+         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-sub)', border: '1px dashed var(--border)', borderRadius: '12px' }}>No logs match &quot;{logSearch}&quot;</div>
        ) : (
          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
            {grouped.map(group => (

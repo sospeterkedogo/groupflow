@@ -29,7 +29,7 @@ export default function DocsHome() {
         <div style={{ background: '#111', padding: '2rem', borderRadius: '16px', border: '1px solid #222' }}>
            <p style={{ margin: 0, color: '#9ca3af', lineHeight: 1.7 }}>
              <strong style={{ color: '#f3f4f6' }}>Auto-Sync Architecture:</strong> This documentation site is powered by a 
-             "Documentation as Code" pipeline. Every page you see here is stored directly in the GitHub repository. 
+             &quot;Documentation as Code&quot; pipeline. Every page you see here is stored directly in the GitHub repository. 
              When a developer pushes an update to GitHub, the documentation site updates automatically. 
              This ensures the manual is always as up-to-date as the code.
            </p>
@@ -43,7 +43,7 @@ export default function DocsHome() {
               <div style={{ color: '#10b981', marginBottom: '1rem' }}><Sparkles size={24} /></div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>What is it?</h3>
               <p style={{ fontSize: '0.9rem', color: '#6b7280', margin: 0, lineHeight: 1.6 }}>
-                Think of Espeezy as a super-powered school project app. It's a place where you and your friends can work together on a technical project without ever losing your work.
+                Think of Espeezy as a super-powered school project app. It&apos;s a place where you and your friends can work together on a technical project without ever losing your work.
               </p>
            </div>
            <div style={{ padding: '1.5rem', background: '#111', borderRadius: '12px', border: '1px solid #222' }}>

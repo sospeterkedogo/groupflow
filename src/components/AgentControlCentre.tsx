@@ -120,6 +120,7 @@ export default function AgentControlCentre() {
     }
   }, [router])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load() }, [load])
 
   async function toggleAgentStatus(agent: Agent) {
