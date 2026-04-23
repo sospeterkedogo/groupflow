@@ -80,8 +80,8 @@ export async function POST(req: Request) {
 
     return new NextResponse('Webhook processed successfully', { status: 200 })
     
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Webhook Error:", err)
-    return new NextResponse(`Server Error: ${err.message}`, { status: 500 })
+    return new NextResponse(`Server Error: ${(err instanceof Error ? err.message : String(err))}`, { status: 500 })
   }
 }

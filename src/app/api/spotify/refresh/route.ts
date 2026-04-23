@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     // New refresh token is optional – Spotify might not return a new one if it hasn't changed.
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       spotify_access_token: data.access_token,
       spotify_token_expires_at: new Date(Date.now() + data.expires_in * 1000).toISOString()
     }
@@ -56,8 +56,8 @@ export async function POST(request: Request) {
     if (updateError) throw updateError
 
     return NextResponse.json({ access_token: data.access_token })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Spotify Refresh Route Error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 })
   }
 }

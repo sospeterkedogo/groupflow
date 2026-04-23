@@ -46,13 +46,15 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const [tasks, setTasks] = useState<Task[]>([])
   const [taskSearch, setTaskSearch] = useState('')
   const [members, setMembers] = useState<ProfileDB[]>([])
-  const [artifacts, setArtifacts] = useState<any[]>([])
+  const [artifacts, setArtifacts] = useState<Record<string, unknown>[]>([])
   const [mounted, setMounted] = useState(false)
   const { onlineUsers } = usePresence()
   const supabase = createBrowserSupabaseClient()
 
   useEffect(() => { 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
+    // eslint-disable-next-line react-hooks/immutability
     fetchData() 
   }, [groupId])
 
@@ -93,7 +95,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
         // Restricted view: still show member count but hide task details
         if (membersData.data) setMembers(membersData.data)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Analytics Fetch Error:', err)
     } finally {
       setLoading(false)
@@ -111,8 +113,8 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
       await sendJoinRequest(groupId, currentUser.full_name || 'A student')
       setHasSentRequest(true)
       addToast('Sync Success', 'Protocol access request has been transmitted to team leader.', 'success')
-    } catch (err: any) {
-      addToast('System Error', 'Failed to transmit access request: ' + err.message, 'error')
+    } catch (err: unknown) {
+      addToast('System Error', 'Failed to transmit access request: ' + (err instanceof Error ? err.message : String(err)), 'error')
     } finally {
       setLoading(false)
     }
@@ -155,7 +157,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     setLoading(true)
     const { data: logs } = await supabase.from('activity_log').select('*, profiles(full_name)').eq('group_id', groupId).order('created_at', { ascending: false })
     const headers = ['Type', 'User', 'Description', 'Timestamp']
-    const rows = (logs || []).map(l => [l.action_type, (l.profiles as any)?.full_name || 'System', l.description, l.created_at])
+    const rows = (logs || []).map(l => [l.action_type, (l.profiles as { full_name?: string } | null)?.full_name || 'System', l.description, l.created_at])
     const csvContent = [headers, ...rows].map(e => e.map(c => `"${c}"`).join(',')).join('\n')
     setLoading(false)
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
