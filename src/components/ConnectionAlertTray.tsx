@@ -7,7 +7,7 @@ import { useNotifications } from './NotificationProvider'
 import Link from 'next/link'
 
 export default function ConnectionAlertTray() {
-  const [requests, setRequests] = useState<Record<string, unknown>[]>([])
+  const [requests, setRequests] = useState<Array<Record<string, unknown>>>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const supabase = createBrowserSupabaseClient()
@@ -32,8 +32,9 @@ export default function ConnectionAlertTray() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchRequests()
+    queueMicrotask(() => {
+      void fetchRequests()
+    })
 
     // Real-time subscription for new requests
     const channel = supabase
@@ -105,7 +106,8 @@ export default function ConnectionAlertTray() {
 
       await fetchRequests()
     } catch (err: unknown) {
-      addToast('Sync Error', (err instanceof Error ? err.message : null) || 'Action failed', 'error')
+      const message = err instanceof Error ? err.message : 'Action failed'
+      addToast('Sync Error', message, 'error')
     } finally {
       setProcessingId(null)
     }

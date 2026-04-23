@@ -1,7 +1,6 @@
 'use client'
 
-import { X, UserCircle, ShieldCheck, Mail, Target } from 'lucide-react'
-import { Task } from '@/types/database'
+import { X, UserCircle, ShieldCheck, Target } from 'lucide-react'
 import { MemberProfileModalProps } from '@/types/ui'
 
 export default function MemberProfileModal({ member, groupMembers, tasks, onClose }: MemberProfileModalProps) {

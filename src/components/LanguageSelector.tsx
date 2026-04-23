@@ -21,19 +21,8 @@ function readCookieLocale(): LocaleCode | null {
 
 export default function LanguageSelector() {
   const [open, setOpen] = useState(false)
-  const [current, setCurrent] = useState<LocaleCode>('en')
+  const [current, setCurrent] = useState<LocaleCode>(() => readCookieLocale() || detectBrowserLocale())
   const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const cookieLocale = readCookieLocale()
-    if (cookieLocale) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCurrent(cookieLocale)
-    } else {
-      const detected = detectBrowserLocale()
-      setCurrent(detected)
-    }
-  }, [])
 
   // Close on outside click
   useEffect(() => {

@@ -16,6 +16,26 @@ interface SearchResult {
   country_code?: string
 }
 
+interface ProfileSearchRow {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  course_name: string | null
+  country_code: string | null
+}
+
+interface TaskSearchRow {
+  id: string
+  title: string
+  status: string
+}
+
+interface GroupSearchRow {
+  id: string
+  name: string
+  module_code: string
+}
+
 interface GlobalSearchProps {
   collapsed?: boolean
 }
@@ -55,9 +75,10 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
   // Smart Search Logic
   useEffect(() => {
     if (query.length < 2) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setResults([])
-      setLoading(false)
+      queueMicrotask(() => {
+        setResults([])
+        setLoading(false)
+      })
       return
     }
 
@@ -77,17 +98,21 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
             supabase.from('groups').select('id, name, module_code').ilike('name', `%${query}%`).limit(3)
           ])
 
+          const profileRows = (profiles.data || []) as ProfileSearchRow[]
+          const taskRows = (tasks.data || []) as TaskSearchRow[]
+          const groupRows = (groups.data || []) as GroupSearchRow[]
+
           const combined: SearchResult[] = [
-            ...(profiles.data || []).map(p => ({ 
-              id: p.id, 
+            ...profileRows.map(p => ({
+              id: p.id,
               type: 'profile' as const, 
-              title: (p as { full_name?: string }).full_name ?? '', 
-              subtitle: (p as { course_name?: string }).course_name, 
-              image_url: (p as { avatar_url?: string }).avatar_url,
-              country_code: (p as { country_code?: string }).country_code
+              title: p.full_name || 'Unknown',
+              subtitle: p.course_name || 'No course',
+              image_url: p.avatar_url || undefined,
+              country_code: p.country_code || undefined
             })),
-            ...(tasks.data || []).map(t => ({ id: t.id, type: 'task' as const, title: t.title, subtitle: t.status })),
-            ...(groups.data || []).map(g => ({ id: g.id, type: 'group' as const, title: g.name, subtitle: g.module_code }))
+            ...taskRows.map(t => ({ id: t.id, type: 'task' as const, title: t.title, subtitle: t.status })),
+            ...groupRows.map(g => ({ id: g.id, type: 'group' as const, title: g.name, subtitle: g.module_code }))
           ]
           setResults(combined)
         }
@@ -197,7 +222,7 @@ export default function GlobalSearch({ collapsed }: GlobalSearchProps) {
             </div>
           ) : results.length === 0 && !loading ? (
             <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-               <p style={{ color: 'var(--text-sub)' }}>No exact matches for &quot;<span style={{ color: 'var(--text-main)' }}>{query}</span>&quot;</p>
+              <p style={{ color: 'var(--text-sub)' }}>No exact matches for &quot;<span style={{ color: 'var(--text-main)' }}>{query}</span>&quot;</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

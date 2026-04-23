@@ -12,11 +12,9 @@ import {
 import { LiveList, LiveObject } from '@liveblocks/client'
 import { 
   Trophy, 
-  Timer, 
   Crown, 
   Zap,
-  Loader2,
-  AlertCircle
+  Loader2
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -59,7 +57,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const router = useRouter()
-  const [me, updateMyPresence] = useMyPresence()
+  useMyPresence()
   const others = useOthers()
   
   const quizStatus = useStorage(s => s.quizStatus)
@@ -78,27 +76,10 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const [isRevealed, setIsRevealed] = useState(false)
   const [isGrading, setIsGrading] = useState(false)
   const [aiCritique, setAiCritique] = useState('')
-
-  // ── LOADING GUARD ──────────────────────────────────────────────
-  if (quizStatus === null) {
-    return (
-      <div style={{ height: 'calc(var(--vh-dynamic) - 6rem)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--text-sub)' }}>
-         <Loader2 className="animate-spin" size={32} />
-         <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>Calibrating Storage...</div>
-      </div>
-    )
-  }
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [hasSetupData, setHasSetupData] = useState(false)
-  
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const setup = sessionStorage.getItem(`skirmish_setup_${roomId}`)
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (setup) setHasSetupData(true)
-    }
-  }, [roomId])
+  const [hasSetupData] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !!sessionStorage.getItem(`skirmish_setup_${roomId}`)
+  })
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const handleStartSkirmish = useMutation(({ storage }) => {
@@ -139,13 +120,22 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   // ── RESET UI ON QUESTION CHANGE ──────────────────────────────────
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSelectedOption(null)
-    setHasAnswered(false)
-    setTextAnswer('')
-    setIsRevealed(false)
-    setAiCritique('')
+    queueMicrotask(() => {
+      setSelectedOption(null)
+      setHasAnswered(false)
+      setTextAnswer('')
+      setIsRevealed(false)
+      setAiCritique('')
+    })
   }, [currentIdx, timerDuration])
+
+  async function handleFinalizeStats() {
+    if (!profile?.id || !scores) return
+    const myScore = scores.find(s => s.userId === profile.id)?.points || 0
+    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
+
+    await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
+  }
 
   // ── MUTATIONS ───────────────────────────────────────────────────
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -198,15 +188,6 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     addToast('Time Out!', 'The round was skipped due to temporal flux.', 'warning')
   }
 
-  const handleFinalizeStats = async () => {
-    if (!profile?.id || !scores) return
-    const myScore = scores.find(s => s.userId === profile.id)?.points || 0
-    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
-
-    await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
-  }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const handleResetSkirmish = useMutation(({ storage }) => {
     storage.set('quizStatus', 'setup')
     storage.set('currentQuestionIndex', 0)
@@ -315,6 +296,15 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     const timer = setTimeout(() => setShowIntro(false), 2500)
     return () => clearTimeout(timer)
   }, [])
+
+  if (quizStatus === null) {
+    return (
+      <div style={{ height: 'calc(var(--vh-dynamic) - 6rem)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--text-sub)' }}>
+         <Loader2 className="animate-spin" size={32} />
+         <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>Calibrating Storage...</div>
+      </div>
+    )
+  }
 
   if (showIntro) {
     return (

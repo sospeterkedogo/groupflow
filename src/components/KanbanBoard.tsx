@@ -46,9 +46,9 @@ export default function KanbanBoard({ groupId, profile, newTaskSignal }: KanbanB
       initialPresence={{ draggingTaskId: null, userName: profile?.full_name || 'Someone' }}
       initialStorage={{ 
         tasks: new LiveList<Task>([]), 
-        messages: new LiveList<Record<string, unknown>>([]),
-        quizQuestions: new LiveList<Record<string, unknown>>([]),
-        quizScores: new LiveList<Record<string, unknown>>([]),
+        messages: new LiveList<unknown>([]),
+        quizQuestions: new LiveList<unknown>([]),
+        quizScores: new LiveList<unknown>([]),
         quizStatus: 'setup',
         currentQuestionIndex: 0,
         activeTurnUserId: null,
@@ -94,33 +94,6 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
   const [activeDragColumn, setActiveDragColumn] = useState<TaskStatus | null>(null)
   const dragStartTimeRef = useRef<number>(0)
 
-  // 0. BLAZING SPEED CACHE: Load from LocalStorage for instant perception
-  useEffect(() => {
-    const cached = localStorage.getItem(`gf_kanban_cache_${groupId}`);
-    if (cached && !storageTasks?.length) {
-      try {
-        const parsed = JSON.parse(cached);
-        // eslint-disable-next-line react-hooks/immutability
-        reconcileTasks(parsed);
-      } catch (e) {
-        console.error("Cache Hydration Failed", e);
-      }
-    }
-  }, [groupId]); // Run once on mount
-
-  // Persistence Sync
-  useEffect(() => {
-    if (storageTasks?.length) {
-      localStorage.setItem(`gf_kanban_cache_${groupId}`, JSON.stringify(Array.from(storageTasks)));
-    }
-  }, [storageTasks, groupId]);
-
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 60000)
-    return () => window.clearInterval(interval)
-  }, [])
-
   // Reconcile Liveblocks Storage with Supabase Data
   const reconcileTasks = useMutation(({ storage }, dbTasks: Task[]) => {
     const liveTasks = storage.get("tasks");
@@ -150,6 +123,32 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
       }
     }
   }, []);
+
+  // 0. BLAZING SPEED CACHE: Load from LocalStorage for instant perception
+  useEffect(() => {
+    const cached = localStorage.getItem(`gf_kanban_cache_${groupId}`);
+    if (cached && !storageTasks?.length) {
+      try {
+        const parsed = JSON.parse(cached);
+        reconcileTasks(parsed);
+      } catch (e) {
+        console.error("Cache Hydration Failed", e);
+      }
+    }
+  }, [groupId]); // Run once on mount
+
+  // Persistence Sync
+  useEffect(() => {
+    if (storageTasks?.length) {
+      localStorage.setItem(`gf_kanban_cache_${groupId}`, JSON.stringify(Array.from(storageTasks)));
+    }
+  }, [storageTasks, groupId]);
+
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 60000)
+    return () => window.clearInterval(interval)
+  }, [])
 
   const fetchTasksFromDB = useCallback(async () => {
     if (storageTasks == null) return;
@@ -186,7 +185,7 @@ function KanbanBoardContent({ groupId, profile, newTaskSignal }: KanbanBoardProp
 
   useEffect(() => {
     let active = true
-    let channel: ReturnType<typeof import('@supabase/supabase-js').createClient>['channel'] | null = null
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
     const initialize = async () => {
       // Parallelize fetches to eliminate waterfalls

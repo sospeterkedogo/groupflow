@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Clock, LogOut, CheckCircle2 } from 'lucide-react'
 import ModalOverlay from './ModalOverlay'
 
@@ -65,8 +65,7 @@ export default function SessionGuard() {
   useEffect(() => {
     if (!isAuthenticated || pathname === '/login' || pathname === '/') {
        if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
-       // eslint-disable-next-line react-hooks/set-state-in-effect
-       setShowWarning(false)
+       queueMicrotask(() => setShowWarning(false))
        return
     }
 
@@ -98,8 +97,7 @@ export default function SessionGuard() {
         setCountdown(prev => prev - 1)
       }, 1000)
     } else if (countdown === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      handleLogout()
+      queueMicrotask(() => void handleLogout())
     }
 
     return () => {
