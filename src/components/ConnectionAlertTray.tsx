@@ -7,7 +7,7 @@ import { useNotifications } from './NotificationProvider'
 import Link from 'next/link'
 
 export default function ConnectionAlertTray() {
-  const [requests, setRequests] = useState<any[]>([])
+  const [requests, setRequests] = useState<Array<Record<string, unknown>>>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const supabase = createBrowserSupabaseClient()
@@ -32,7 +32,9 @@ export default function ConnectionAlertTray() {
   }
 
   useEffect(() => {
-    fetchRequests()
+    queueMicrotask(() => {
+      void fetchRequests()
+    })
 
     // Real-time subscription for new requests
     const channel = supabase
@@ -103,8 +105,9 @@ export default function ConnectionAlertTray() {
       }
 
       await fetchRequests()
-    } catch (err: any) {
-      addToast('Sync Error', err.message || 'Action failed', 'error')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Action failed'
+      addToast('Sync Error', message, 'error')
     } finally {
       setProcessingId(null)
     }

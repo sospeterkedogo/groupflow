@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Search, Play, Plus, Music, Disc } from 'lucide-react'
+import React, { useState } from 'react'
+import { Search, Play, Music, Disc } from 'lucide-react'
 import { useSpotify } from '@/context/SpotifyContext'
 import { useProfile } from '@/context/ProfileContext'
 
@@ -41,7 +41,7 @@ export default function MusicDashboard() {
           <Music size={40} color="#1DB954" />
         </div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 900 }}>Connect to Spotify</h2>
-        <p style={{ color: 'var(--text-sub)', maxWidth: '400px' }}>Join your team's rhythm. Connect your account to listen together and share your favorite study tracks.</p>
+        <p style={{ color: 'var(--text-sub)', maxWidth: '400px' }}>Join your team&apos;s rhythm. Connect your account to listen together and share your favorite study tracks.</p>
         <button className="btn btn-primary" onClick={connectSpotify} style={{ background: '#1DB954', border: 'none', color: 'black', padding: '1rem 2.5rem', borderRadius: '14px', fontWeight: 900 }}>
           Sign in to Spotify
         </button>
@@ -89,7 +89,7 @@ export default function MusicDashboard() {
         }}>
           <Disc size={24} color="#fbbf24" />
           <div style={{ fontSize: '0.85rem', color: '#fbbf24', fontWeight: 700 }}>
-            Since you're on a Spotify Free account, playback will open in your external Spotify app rather than inside Espeezy.
+            Since you&apos;re on a Spotify Free account, playback will open in your external Spotify app rather than inside Espeezy.
           </div>
         </div>
       )}

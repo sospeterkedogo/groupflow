@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { Task, TaskStatus, Artifact, TaskCategory } from '@/types/database'
+import { TaskStatus, Artifact, TaskCategory } from '@/types/database'
 import { X, Trash2, ExternalLink, ThumbsUp, FileUp, Link as LinkIcon, Check } from 'lucide-react'
 import { logActivity } from '@/utils/logging'
 import { taskSchema } from '@/utils/validation'
@@ -78,8 +78,10 @@ export default function TaskModal({
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
-    fetchMembers()
-  }, [groupId])
+    queueMicrotask(() => {
+      void fetchMembers()
+    })
+  }, [fetchMembers, groupId, supabase.auth])
 
   async function fetchArtifacts() {
     if (!task) return
@@ -95,12 +97,14 @@ export default function TaskModal({
 
   useEffect(() => {
     if (!isEditMode) return
-    
-    fetchArtifacts()
+
+    queueMicrotask(() => {
+      void fetchArtifacts()
+    })
     const channelAttr = supabase
       .channel(`task_${task.id}_artifacts`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'artifacts', filter: `task_id=eq.${task.id}` }, () => {
-        fetchArtifacts()
+        void fetchArtifacts()
       })
       .subscribe()
 
@@ -113,7 +117,7 @@ export default function TaskModal({
     const channelMembers = supabase
       .channel(`task_members_${groupId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `group_id=eq.${groupId}` }, () => {
-        fetchMembers()
+        void fetchMembers()
       })
       .subscribe()
 

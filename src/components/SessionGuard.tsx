@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Clock, LogOut, CheckCircle2 } from 'lucide-react'
 import ModalOverlay from './ModalOverlay'
 
@@ -65,7 +65,7 @@ export default function SessionGuard() {
   useEffect(() => {
     if (!isAuthenticated || pathname === '/login' || pathname === '/') {
        if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
-       setShowWarning(false)
+       queueMicrotask(() => setShowWarning(false))
        return
     }
 
@@ -97,7 +97,7 @@ export default function SessionGuard() {
         setCountdown(prev => prev - 1)
       }, 1000)
     } else if (countdown === 0) {
-      handleLogout()
+      queueMicrotask(() => void handleLogout())
     }
 
     return () => {
@@ -162,7 +162,7 @@ export default function SessionGuard() {
               boxShadow: '0 10px 25px rgba(var(--brand-rgb), 0.3)'
             }}
           >
-            <CheckCircle2 size={18} /> I'm Still Here
+            <CheckCircle2 size={18} /> I&apos;m Still Here
           </button>
           
           <button 

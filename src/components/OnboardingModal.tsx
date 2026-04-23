@@ -140,7 +140,13 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
                     transform: selectedAvatar === url ? 'scale(1.1)' : 'scale(1)'
                   }}
                 >
-                  <img src={url} alt="Avatar option" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <Image 
+                    src={url} 
+                    alt="Avatar option" 
+                    width={100}
+                    height={100}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
                 </button>
               ))}
             </div>

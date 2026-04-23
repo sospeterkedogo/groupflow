@@ -12,11 +12,9 @@ import {
 import { LiveList, LiveObject } from '@liveblocks/client'
 import { 
   Trophy, 
-  Timer, 
   Crown, 
   Zap,
-  Loader2,
-  AlertCircle
+  Loader2
 } from 'lucide-react'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -59,7 +57,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const router = useRouter()
-  const [me, updateMyPresence] = useMyPresence()
+  useMyPresence()
   const others = useOthers()
   
   const quizStatus = useStorage(s => s.quizStatus)
@@ -78,24 +76,10 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const [isRevealed, setIsRevealed] = useState(false)
   const [isGrading, setIsGrading] = useState(false)
   const [aiCritique, setAiCritique] = useState('')
-
-  // ── LOADING GUARD ──────────────────────────────────────────────
-  if (quizStatus === null) {
-    return (
-      <div style={{ height: 'calc(var(--vh-dynamic) - 6rem)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--text-sub)' }}>
-         <Loader2 className="animate-spin" size={32} />
-         <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>Calibrating Storage...</div>
-      </div>
-    )
-  }
-  const [hasSetupData, setHasSetupData] = useState(false)
-  
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const setup = sessionStorage.getItem(`skirmish_setup_${roomId}`)
-        if (setup) setHasSetupData(true)
-    }
-  }, [roomId])
+  const [hasSetupData] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !!sessionStorage.getItem(`skirmish_setup_${roomId}`)
+  })
 
   const handleStartSkirmish = useMutation(({ storage }) => {
     const setupRaw = sessionStorage.getItem(`skirmish_setup_${roomId}`)
@@ -107,7 +91,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
         // Populate Storage
         const qList = storage.get('quizQuestions')
         qList.clear()
-        newQs.forEach((q: any) => qList.push(q))
+        newQs.forEach((q: unknown) => qList.push(q))
         
         storage.set('quizStatus', 'playing')
         storage.set('currentQuestionIndex', 0)
@@ -134,12 +118,22 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
 
   // ── RESET UI ON QUESTION CHANGE ──────────────────────────────────
   useEffect(() => {
-    setSelectedOption(null)
-    setHasAnswered(false)
-    setTextAnswer('')
-    setIsRevealed(false)
-    setAiCritique('')
+    queueMicrotask(() => {
+      setSelectedOption(null)
+      setHasAnswered(false)
+      setTextAnswer('')
+      setIsRevealed(false)
+      setAiCritique('')
+    })
   }, [currentIdx, timerDuration])
+
+  async function handleFinalizeStats() {
+    if (!profile?.id || !scores) return
+    const myScore = scores.find(s => s.userId === profile.id)?.points || 0
+    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
+
+    await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
+  }
 
   // ── MUTATIONS ───────────────────────────────────────────────────
   const submitActionResult = useMutation(({ storage }, isCorrect: boolean, bonusXp = 0) => {
@@ -188,14 +182,6 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
   const handleSkipRound = () => {
     submitActionResult(false)
     addToast('Time Out!', 'The round was skipped due to temporal flux.', 'warning')
-  }
-
-  const handleFinalizeStats = async () => {
-    if (!profile?.id || !scores) return
-    const myScore = scores.find(s => s.userId === profile.id)?.points || 0
-    const isWinner = scores.length > 1 && myScore >= Math.max(...scores.map(s => s.points))
-
-    await updateUserGameStats(profile.id, Math.floor(myScore / 4), isWinner)
   }
 
   const handleResetSkirmish = useMutation(({ storage }) => {
@@ -304,6 +290,15 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
     const timer = setTimeout(() => setShowIntro(false), 2500)
     return () => clearTimeout(timer)
   }, [])
+
+  if (quizStatus === null) {
+    return (
+      <div style={{ height: 'calc(var(--vh-dynamic) - 6rem)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--text-sub)' }}>
+         <Loader2 className="animate-spin" size={32} />
+         <div style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>Calibrating Storage...</div>
+      </div>
+    )
+  }
 
   if (showIntro) {
     return (
@@ -473,8 +468,8 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
                         </div>
                         {aiCritique && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ padding: '1rem 1.5rem', background: 'var(--bg-main)', borderLeft: '4px solid var(--brand)', borderRadius: '0 12px 12px 0' }}>
-                               <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase' }}>Judge's Critique:</span>
-                               <p style={{ margin: '4px 0 0', fontWeight: 700, fontStyle: 'italic' }}>"{aiCritique}"</p>
+                               <span style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--brand)', textTransform: 'uppercase' }}>Judge&apos;s Critique:</span>
+                               <p style={{ margin: '4px 0 0', fontWeight: 700, fontStyle: 'italic' }}>&quot;{aiCritique}&quot;</p>
                             </motion.div>
                         )}
                     </div>
