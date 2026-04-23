@@ -23,6 +23,7 @@ export default function GlobalAnnouncement() {
   // before the second mount, so using a unique channel name per effect avoids
   // "cannot add postgres_changes callbacks after subscribe()" errors.
   const mountIdRef = useRef(0)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     mountIdRef.current += 1
