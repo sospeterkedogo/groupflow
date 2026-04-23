@@ -23,7 +23,7 @@ type PresenceProviderProps = {
 export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
   const { addToast } = useNotifications()
@@ -146,7 +146,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
             group_id: groupId,
             online_at: new Date().toISOString(),
             is_typing: false,
-            music: profile?.subscription_plan === 'pro' || profile?.subscription_plan === 'premium' ? (window as any)._spotify_presence : undefined
+            music: profile?.subscription_plan === 'pro' || profile?.subscription_plan === 'premium' ? (window as Record<string, unknown>)._spotify_presence : undefined
           })
 
           await supabase

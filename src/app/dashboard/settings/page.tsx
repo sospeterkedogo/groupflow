@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import {
   Settings, Save, CheckCircle2, Shield, Trash2,
@@ -76,16 +77,29 @@ export default function SettingsPage() {
   const [otp, setOtp] = useState('')
   const [otpStep, setOtpStep] = useState<'idle' | 'sent' | 'verifying'>('idle')
   const [protectAvatar, setProtectAvatar] = useState(false)
-  const [isToasterMode, setIsToasterMode] = useState(false)
+  const [isToasterMode, setIsToasterMode] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('gf_toaster_mode') === 'true'
+  })
 
-  const supabase = createBrowserSupabaseClient()
+  const [supabase] = useState(() => createBrowserSupabaseClient())
 
-  const fetchGroups = async () => {
-    const { data } = await supabase.from('groups').select('*').order('name')
-    if (data) setAvailableGroups(data)
+  const getErrorMessage = (err: unknown, fallback = 'Something went wrong') => {
+    if (err instanceof Error) return err.message
+    return fallback
   }
 
-  const fetchJoinRequests = async (userId: string) => {
+  useEffect(() => {
+    if (isToasterMode) document.body.classList.add('toaster-mode')
+    else document.body.classList.remove('toaster-mode')
+  }, [isToasterMode])
+
+  const fetchGroups = useCallback(async () => {
+    const { data } = await supabase.from('groups').select('*').order('name')
+    if (data) setAvailableGroups(data)
+  }, [supabase])
+
+  const fetchJoinRequests = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('messages')
       .select('group_id')
@@ -95,14 +109,14 @@ export default function SettingsPage() {
     if (data) {
       setSentRequests(Array.from(new Set(data.map((row: { group_id: string }) => row.group_id))))
     }
-  }
+  }, [supabase])
 
-  const fetchTeam = async (groupId: string) => {
+  const fetchTeam = useCallback(async (groupId: string) => {
     const { data } = await supabase.from('profiles').select('*').eq('group_id', groupId)
     if (data) setTeamMembers(data)
-  }
+  }, [supabase])
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       // 1. Meta-Information (Linked Identities)
@@ -136,30 +150,20 @@ export default function SettingsPage() {
         
         await Promise.all(contextFetches)
         
-        if (profile && !profile.groups && data.groups) {
+        if (data.groups) {
           setProfile(data)
         }
       }
     }
     setLoading(false)
-  }
+  }, [supabase, fetchJoinRequests, fetchTeam, setProfile])
 
   useEffect(() => {
-    // Sync Toaster Mode from local storage (after hydration to avoid mismatch)
-    if (typeof window !== 'undefined') {
-      setIsToasterMode(localStorage.getItem('gf_toaster_mode') === 'true')
-    }
-    
-    // Parallelize top-level metadata fetches
     const initializeData = async () => {
-      await Promise.all([
-        fetchUserData(),
-        fetchGroups()
-      ])
+      await Promise.all([fetchUserData(), fetchGroups()])
     }
-    initializeData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    void initializeData()
+  }, [fetchUserData, fetchGroups])
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -246,7 +250,7 @@ export default function SettingsPage() {
       if (error) throw error
       addToast('Code Dispatched', 'Verification shard sent to your communication device.', 'success')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err))
+      setError(getErrorMessage(err, 'Failed to send verification code.'))
       setOtpStep('idle')
     }
   }
@@ -267,7 +271,7 @@ export default function SettingsPage() {
       addToast('Identity Verified', 'Phone connection successfully linked to your node.', 'success')
       refreshProfile()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err))
+      setError(getErrorMessage(err, 'Failed to verify code.'))
       setOtpStep('sent')
     }
   }
@@ -310,7 +314,7 @@ export default function SettingsPage() {
       refreshProfile()
       addToast('Visuals Updated', 'Your appearance settings have been synchronized across all project hubs.', 'success')
     } catch (err: unknown) {
-      setError("Upload failed: " + (err instanceof Error ? err.message : String(err)))
+      setError(`Upload failed: ${getErrorMessage(err, 'unknown upload error')}`)
     } finally {
       setUploadingAvatar(false)
       setUploadingBg(false)
@@ -356,7 +360,7 @@ export default function SettingsPage() {
       })
       if (error) throw error
     } catch (err: unknown) {
-      setError(`Identity Linkage Failure: ${err instanceof Error ? err.message : String(err)}`)
+      setError(`Identity Linkage Failure: ${getErrorMessage(err, 'linking failed')}`)
       setSaving(false)
     }
   }
@@ -404,7 +408,7 @@ export default function SettingsPage() {
       await supabase.auth.signOut()
       window.location.href = '/login'
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err))
+      setError(getErrorMessage(err, 'Account termination failed'))
       setIsDeleting(false)
       setIsDeleteModalOpen(false)
     }
@@ -419,7 +423,7 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error(result.error || 'Portal creation failed')
       window.location.href = result.url
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err))
+      setError(getErrorMessage(err, 'Unable to open billing portal'))
       setLoadingPortal(false)
     }
   }
@@ -567,7 +571,7 @@ export default function SettingsPage() {
                         logActivity(profile.id, profile.group_id || 'system', 'setting_updated', `Submitted feedback: ${feedbackCategory}`, { category: feedbackCategory })
                       }
                     } catch (err: unknown) {
-                      addToast('Submission Failed', err instanceof Error ? err.message : 'Something went wrong', 'error')
+                      addToast('Submission Failed', getErrorMessage(err), 'error')
                     } finally {
                       setSubmittingFeedback(false)
                     }
@@ -595,7 +599,7 @@ export default function SettingsPage() {
                 </div>
                 <p style={{ margin: 0, color: 'var(--text-sub)', fontSize: '0.9rem' }}>
                   {profile.subscription_plan 
-                    ? `Active since ${profile.subscription_started_at ? new Date(profile.subscription_started_at).toLocaleDateString() : 'recently'}` 
+                    ? `Active since ${new Date(profile.subscription_started_at || '1970-01-01').toLocaleDateString()}` 
                     : 'Unlock professional project features.'}
                 </p>
               </div>
@@ -826,7 +830,7 @@ export default function SettingsPage() {
                   zIndex: 1
                 }}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt={fullName || 'Profile photo'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image src={avatarUrl} alt="Profile avatar" fill sizes="120px" style={{ objectFit: 'cover' }} unoptimized />
                   ) : (
                     <User size={32} color="var(--text-sub)" />
                   )}
@@ -1038,8 +1042,8 @@ export default function SettingsPage() {
               {teamMembers.map(member => (
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', overflow: 'hidden' }}>
-                      {member.avatar_url ? <img src={member.avatar_url} alt={member.full_name || 'Member'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={20} style={{ margin: '10px' }} />}
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface)', overflow: 'hidden', position: 'relative' }}>
+                      {member.avatar_url ? <Image src={member.avatar_url} alt={`${member.full_name || 'Team'} avatar`} fill sizes="40px" style={{ objectFit: 'cover' }} unoptimized /> : <User size={20} style={{ margin: '10px' }} />}
                     </div>
                     <div>
                       <div style={{ fontWeight: 700 }}>{member.full_name || 'Anonymous'}</div>
@@ -1069,10 +1073,11 @@ export default function SettingsPage() {
 
             <div style={{ background: 'var(--bg-sub)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {(() => {
-                const profileGroups = profile?.groups;
-                const groupData = Array.isArray(profileGroups) 
-                  ? profileGroups[0] 
-                  : profileGroups;
+                type GroupSummary = { name?: string | null; module_code?: string | null }
+                const groupRelation = (profile as Profile & { groups?: GroupSummary | GroupSummary[] }).groups
+                const groupData = Array.isArray(groupRelation)
+                  ? groupRelation[0]
+                  : groupRelation
                 
                 return (
                   <div>
@@ -1126,7 +1131,7 @@ export default function SettingsPage() {
                     await sendJoinRequest(group.id, fullName || 'A student')
                     setSentRequests(prev => [...new Set([...prev, group.id])])
                   } catch (err: unknown) {
-                    setError('Request failed: ' + (err instanceof Error ? err.message : String(err)))
+                    setError(`Request failed: ${getErrorMessage(err, 'unknown request error')}`)
                   } finally {
                     setPendingRequests(prev => prev.filter(id => id !== group.id))
                   }
@@ -1243,12 +1248,12 @@ export default function SettingsPage() {
                               await setPalette(p.name)
                               addToast('Appearance Synced', `The ${p.name} palette has been successfully applied to your terminal.`, 'success')
                             } catch (err: unknown) {
-                              const message = err instanceof Error ? err.message : String(err)
-                              if (message === 'PREMIUM_LOCKED' || message === 'PRO_LOCKED') {
+                              const errorMessage = getErrorMessage(err)
+                              if (errorMessage === 'PREMIUM_LOCKED' || errorMessage === 'PRO_LOCKED') {
                                 addToast('Access Unauthorized', 'This visual protocol requires higher institutional clearance.', 'error')
                                 setActiveTab('billing')
                               } else {
-                                addToast('Sync Error', message || 'Failed to apply theme.', 'error')
+                                addToast('Sync Error', errorMessage || 'Failed to apply theme.', 'error')
                               }
                             }
                           }}
@@ -1300,7 +1305,7 @@ export default function SettingsPage() {
               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: '32px', padding: '3rem', textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
                 {customBg ? (
                   <div style={{ position: 'relative', width: '240px', height: '120px', borderRadius: '24px', overflow: 'hidden', margin: '0 auto 1.5rem', border: '3px solid var(--brand)', boxShadow: 'var(--shadow-lg)' }}>
-                    <img src={customBg} alt="Custom background" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image src={customBg} alt="Custom workspace background" fill sizes="240px" style={{ objectFit: 'cover' }} unoptimized />
                     <button
                       onClick={() => setCustomBg(null)}
                       style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--error)', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-md)' }}
@@ -1374,7 +1379,7 @@ export default function SettingsPage() {
               <div style={{ background: 'var(--bg-sub)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'white', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '20px', height: '20px' }} />
+                    <Image src="https://www.google.com/favicon.ico" alt="Google" width={20} height={20} />
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>Google Identity</h3>

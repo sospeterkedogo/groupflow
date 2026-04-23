@@ -50,6 +50,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
   const [members, setMembers] = useState<Profile[]>([])
   const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([])
   const [showMembers, setShowMembers] = useState(false)
+  const [projectProgress, setProjectProgress] = useState(0)
+  const [progressLabel, setProgressLabel] = useState('Starting up')
+  const [totalBacklog, setTotalBacklog] = useState(0)
 
   // 0. BLAZING SPEED CACHE: Perceptive hydration
   useEffect(() => {
@@ -57,14 +60,19 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     try {
       const cachedGroup = localStorage.getItem(`gf_cache_group_${groupId}`)
       const cachedStats = localStorage.getItem(`gf_cache_stats_${groupId}`)
-      
-      if (cachedGroup) setGroup(JSON.parse(cachedGroup))
+
+      if (cachedGroup) {
+        const parsedGroup = JSON.parse(cachedGroup) as Group
+        queueMicrotask(() => setGroup(parsedGroup))
+      }
       if (cachedStats) {
         const stats = JSON.parse(cachedStats)
-        setPersonalTaskCount(stats.personal || 0)
-        setTotalBacklog(stats.backlog || 0)
-        setProjectProgress(stats.progress || 0)
-        setProgressLabel(stats.label || 'Just a moment...')
+        queueMicrotask(() => {
+          setPersonalTaskCount(stats.personal || 0)
+          setTotalBacklog(stats.backlog || 0)
+          setProjectProgress(stats.progress || 0)
+          setProgressLabel(stats.label || 'Just a moment...')
+        })
       }
     } catch (e) {
       console.warn('Cache hydration failed defensively:', e)
@@ -151,10 +159,6 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
     if (count !== null) setPersonalTaskCount(count)
   }, [profile, groupId, supabase])
 
-  const [projectProgress, setProjectProgress] = useState(0)
-  const [progressLabel, setProgressLabel] = useState('Starting up')
-  const [totalBacklog, setTotalBacklog] = useState(0)
-
   const fetchProjectProgress = useCallback(async () => {
     if (!groupId) return
     const { data: tasks, error } = await supabase
@@ -191,7 +195,7 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
       progress: progress,
       label: label
     }))
-  }, [groupId, supabase, personalTaskCount])
+  }, [groupId, supabase])
 
   useEffect(() => {
     if (!groupId) return
@@ -483,10 +487,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
           {[
             { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
             { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> }
-          ].map(tab => (
+          ].map((tab: { id: 'board' | 'calendar'; label: string; icon: JSX.Element }) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`control-tab ${activeTab === tab.id ? 'active' : ''}`}
             >
               {tab.icon} {tab.label}
