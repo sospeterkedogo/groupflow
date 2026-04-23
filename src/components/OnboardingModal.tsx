@@ -99,7 +99,7 @@ export default function OnboardingModal({ user, onComplete }: OnboardingModalPro
               <ShieldCheck size={32} />
             </div>
             <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '1rem' }}>Welcome to Espeezy</h1>
-            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Let&apos;s set up your profile. What name should we show in the dashboard?</p>
+            <p style={{ color: 'var(--text-sub)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>Lets set up your profile. What name should we show in the dashboard?</p>
             
             <div className="form-group">
                <label className="form-label" style={{ fontSize: '0.8rem', opacity: 0.7 }}>YOUR FULL NAME</label>
