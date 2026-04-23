@@ -58,6 +58,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ access_token: data.access_token })
   } catch (err: unknown) {
     console.error('Spotify Refresh Route Error:', err)
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 })
+    return NextResponse.json({ error: (err instanceof Error ? err.message : String(err)) }, { status: 500 })
   }
 }
