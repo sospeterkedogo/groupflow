@@ -5,6 +5,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
+import type { User } from '@supabase/supabase-js'
 import { ChevronDown, Search, Code, Menu, X, MessageSquarePlus } from 'lucide-react'
 import { NavMenus, NavCategory, NavItem } from '@/types/landing'
 import LanguageSelector from '@/components/LanguageSelector'
@@ -16,7 +17,7 @@ interface LandingHeaderProps {
 export default function LandingHeader({ navMenus }: LandingHeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const supabase = useMemo(() => createBrowserSupabaseClient(), [])
 
   useEffect(() => {

@@ -21,18 +21,8 @@ function readCookieLocale(): LocaleCode | null {
 
 export default function LanguageSelector() {
   const [open, setOpen] = useState(false)
-  const [current, setCurrent] = useState<LocaleCode>('en')
+  const [current, setCurrent] = useState<LocaleCode>(() => readCookieLocale() || detectBrowserLocale())
   const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const cookieLocale = readCookieLocale()
-    if (cookieLocale) {
-      setCurrent(cookieLocale)
-    } else {
-      const detected = detectBrowserLocale()
-      setCurrent(detected)
-    }
-  }, [])
 
   // Close on outside click
   useEffect(() => {
@@ -47,6 +37,7 @@ export default function LanguageSelector() {
   }, [open])
 
   const setLocale = (code: LocaleCode) => {
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `NEXT_LOCALE=${encodeURIComponent(code)}; path=/; max-age=31536000; SameSite=Lax`
     setOpen(false)
     window.location.reload()

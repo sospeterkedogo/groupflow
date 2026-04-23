@@ -30,9 +30,16 @@ interface PublicProfileModalProps {
   onConnect?: () => void;
 }
 
+type ExtendedProfile = Profile & { country_code?: string }
+
+function FlagDisplay({ countryCode }: { countryCode?: string }) {
+  const Flag = getFlagComponent(countryCode)
+  return Flag ? <div style={{ width: '28px', height: '18px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}><Flag /></div> : null
+}
+
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [me, setMe] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null)
-  const [achievements, setAchievements] = useState<any[]>([])
+  const [achievements, setAchievements] = useState<unknown[]>([])
   const [isConnected, setIsConnected] = useState(initialConnected)
   const [loading, setLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -163,8 +170,8 @@ export default function PublicProfileModal({ member, onClose, isConnected: initi
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
                    <h2 style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.03em', margin: 0 }}>{member.full_name || 'Anonymous Student'}</h2>
                    {(() => {
-                      const Flag = getFlagComponent((member as any).country_code)
-                      return Flag ? <div style={{ width: '28px', height: '18px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}><Flag /></div> : null
+                      const extMember = member as ExtendedProfile
+                      return <FlagDisplay countryCode={extMember.country_code} />
                    })()}
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', color: 'var(--text-sub)', fontSize: '0.85rem' }}>

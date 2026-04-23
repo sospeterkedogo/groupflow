@@ -91,7 +91,7 @@ export function useAdminDashboard() {
     if (!isVerified) return
 
     // Show seed logs immediately on verification
-    setSystemLogs(SEED_LOGS)
+    queueMicrotask(() => setSystemLogs(SEED_LOGS))
 
     const interval = setInterval(() => {
       const time = new Date().toLocaleTimeString('en-GB', { hour12: false })
@@ -164,7 +164,7 @@ export function useAdminDashboard() {
   useEffect(() => {
     if (!isVerified) return
 
-    fetchAdminData()
+    queueMicrotask(() => void fetchAdminData())
 
     const channel = supabase
       .channel('admin_sync')

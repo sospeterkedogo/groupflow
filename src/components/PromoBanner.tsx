@@ -3,19 +3,16 @@
 import { useState, useEffect } from 'react'
 import { X, Zap } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { useRouter } from 'next/navigation'
 
 export default function PromoBanner() {
-  const [isClient, setIsClient] = useState(false)
-  const [config, setConfig] = useState<Record<string, any>>({})
-  const [isVisible, setIsVisible] = useState(true)
+  const [isClient] = useState(() => typeof window !== 'undefined')
+  const [config, setConfig] = useState<Record<string, unknown>>({})
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof localStorage === 'undefined') return true
+    return !localStorage.getItem('gf_promo_dismissed_v2')
+  })
   
   const supabase = createBrowserSupabaseClient()
-  const router = useRouter()
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
 
   useEffect(() => {
     if (!isClient) return;
@@ -38,21 +35,19 @@ export default function PromoBanner() {
       })
       .subscribe()
 
-    const dismissed = localStorage.getItem('gf_promo_dismissed_v2')
-    if (dismissed) setIsVisible(false)
-
     return () => { supabase.removeChannel(channel) }
-  }, [supabase])
+  }, [isClient, supabase])
 
   const handleDismiss = () => {
     setIsVisible(false)
     localStorage.setItem('gf_promo_dismissed_v2', 'true')
   }
 
+  const configValue = typeof config?.value === 'object' && config.value !== null ? config.value as Record<string, string> : {}
   if (!isClient || !isVisible || !config?.is_active) return null
 
-  const bannerText = config.value?.text || '30% OFF ALL CLEARANCE TIERS'
-  const promoCode = config.value?.code || 'ELITE30'
+  const bannerText = configValue.text || '30% OFF ALL CLEARANCE TIERS'
+  const promoCode = configValue.code || 'ELITE30'
 
   return (
     <div className="promo-banner-container" style={{
