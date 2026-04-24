@@ -1,4 +1,4 @@
-# GitHub Copilot — GroupFlow Project Instructions
+# GitHub Copilot — Espeezy Project Instructions
 
 > These instructions apply to every prompt submitted in this workspace.
 > Copilot must read and apply all sections before generating any response.

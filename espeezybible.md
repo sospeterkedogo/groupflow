@@ -1,11 +1,11 @@
-# espeezybible.md
+# EspeezyBible.md
 
 
-GroupFlow Tool Factory: practical, copy-paste operations guide for Windows + Linux + Docker + GitHub + VPS + agent workflows.
+Espeezy Tool Factory: Practical, copy-paste operations guide for Windows + Linux + Docker + GitHub + VPS + agent workflows.
 
-Audience: builders, validators, and non-technical operators.
+Audience: Non-technical operators, Builders and Validators.
 
-Goal: make setup, deploy, rollback, and verification repeatable with minimal mistakes.
+Goal: Make setup, deploy, rollback, and verification repeatable with minimal mistakes.
 
 ---
 
@@ -14,7 +14,7 @@ Goal: make setup, deploy, rollback, and verification repeatable with minimal mis
 1. Work from WSL Ubuntu for speed and fewer path issues.
 2. Never commit secrets (`.env.local`, `.env`, private keys).
 3. Run type check + build before push.
-4. Deploy by pulling from GitHub on VPS using `scripts/agent-pull.sh`.0
+4. Deploy by pulling from GitHub on VPS using `scripts/ess.sh`.0
 5. If something breaks, use the rollback steps exactly.
 
 ---
@@ -53,8 +53,8 @@ Target stack:
 
 ```bash
 cd ~
-git clone https://github.com/sospeterkedogo/groupflow.git
-cd groupflow
+git clone https://github.com/sospeterkedogo/espeezy.git
+cd espeezy
 cp .env.example .env.local
 ```
 

@@ -1,22 +1,30 @@
-﻿#!/usr/bin/env bash
+﻿#!c/Users/kedog/env/espeezy
 # ──────────────────────────────────────────────────────────────────────────────
 # espeezy.com — Agent Sync Script
 #
-# Agents (GitHub Copilot, Claude, etc.) SSH in and run this script to pull
-# the latest code. Next.js hot-reload picks up changes instantly via the
-# volume mount — no container restart needed. This keeps the agent dev loop super fast.
+# Agents (GitHub Copilot, ChatGPT, etc.) SSH in and run this script to pull the latest code: 
+#   ssh deploy@YOUR_VPS_IP "bash /espeezy/scripts/ess.sh" 
+
+# Next.js hot-reload picks up changes instantly via the
+# volume mount so no container restart needed. This keeps the agent dev loop super fast.
 #
 # This script is intended to run from a GitHub Actions workflow.
+#
+# It can be triggered on a schedule (e.g. every hour) to keep the VPS code in sync with GitHub, ensuring agents always have the latest code and dependencies.
+#
 # It can also be run manually for quick syncs without needing to log in and run git pull.
+#
 # It handles stashing any accidental local changes, pulling the latest code, and then popping the stash.
+#
 # It also checks if package.json or package-lock.json changed and runs npm ci inside the container if needed.
+# 
 # Finally, it verifies the app container is running and restarts the stack if it crashed. 
 #
 # Usage:
-#   ssh deploy@YOUR_VPS_IP "bash /opt/espeezy/scripts/agent-pull.sh"
+#   ssh deploy@YOUR_VPS_IP "bash /espeezy/scripts/ess.sh"
 #
 #   Or from inside the VPS:
-#   cs-pull  (alias set up by vps-bootstrap.sh)
+#   scripts/ess.sh  (alias set up by user [pete])
 # ──────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 APP_DIR="/opt/espeezy"
