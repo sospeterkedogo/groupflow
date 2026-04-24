@@ -11,7 +11,6 @@ WORKDIR /app
 
 # ── Install deps as a separate layer so code changes don't bust cache ──────────
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline
 
 # ── Source files are volume-mounted at runtime; nothing else to copy ──────────
 

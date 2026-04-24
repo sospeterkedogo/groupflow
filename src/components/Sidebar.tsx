@@ -36,6 +36,7 @@ import { SidebarProps } from '@/types/ui'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
+import { hasFeature } from '@/utils/feature-gate'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
 const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
@@ -190,8 +191,8 @@ export default function Sidebar({ user }: SidebarProps) {
   const isProfileLoaded = Boolean(profile)
   const onlineCount = onlineUsers?.size ?? 0
   const isDark = currentPalette.name !== 'Google Light'
-  const isPremiumMember = profile?.subscription_plan === 'premium' || profile?.subscription_plan === 'pro'
-  const showUpgradeCard = !profile?.subscription_plan || profile.subscription_plan === 'free'
+  const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
+  const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
   const projectStatsPath = profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics'
 
   const navLinks = useMemo(
