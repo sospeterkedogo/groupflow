@@ -92,7 +92,7 @@ function QuizGameContainer({ roomId }: { roomId: string }) {
         // Populate Storage
         const qList = storage.get('quizQuestions')
         qList.clear()
-        newQs.forEach((q: unknown) => qList.push(q))
+        newQs.forEach((q: any) => qList.push(q))
         
         storage.set('quizStatus', 'playing')
         storage.set('currentQuestionIndex', 0)

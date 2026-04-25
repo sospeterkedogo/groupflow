@@ -331,7 +331,13 @@ export default function SettingsPage() {
       .update({ is_encrypted: nextValue })
       .eq('id', profile.group_id)
 
-    if (updateError) setError(`Failed to update visibility: ${updateError.message}`)
+    if (updateError) {
+      let msg = `Failed to update visibility: ${updateError.message}`
+      if (updateError.message.includes('column') && updateError.message.includes('not found')) {
+        msg += ' — Please run the SQL fix script in the Supabase Editor.'
+      }
+      setError(msg)
+    }
     else {
       // Verifiable Logging
       if (profile.id && profile.group_id) {
@@ -439,7 +445,7 @@ export default function SettingsPage() {
     )
   }
 
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = profile?.role?.toLowerCase() === 'admin'
 
   return (
     <div className="page-fade" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 var(--p-safe)' }}>

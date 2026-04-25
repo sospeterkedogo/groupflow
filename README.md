@@ -1,6 +1,6 @@
-# GroupFlow
+# Espeezy
 
-GroupFlow is the collaborative platform behind Espeezy: a student-focused workspace that combines task coordination, social presence, creator tools, marketplace flows, payments, and agent-assisted operations in a single Next.js application.
+Espeezy is a student-focused workspace that combines task coordination, social presence, creator tools, marketplace flows, payments, and agent-assisted operations in a single Next.js application.
 
 ## What It Does
 

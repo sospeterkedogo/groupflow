@@ -7,7 +7,7 @@ const client = createClient({
 });
 
 // Presence is used to track ephemeral state like cursors or dragging
-type ChatMessage = {
+export type ChatMessage = {
   id: string;
   senderId: string;
   senderName: string;
@@ -16,7 +16,7 @@ type ChatMessage = {
 };
 
 // Presence is used to track ephemeral state like cursors or dragging
-type Presence = {
+export type Presence = {
   draggingTaskId: string | null;
   userName?: string;
   isTyping?: boolean;
@@ -24,7 +24,7 @@ type Presence = {
   lastAction?: string | null;
 };
 
-type QuizQuestion = {
+export type QuizQuestion = {
   id: string;
   question: string;
   type: 'multiple_choice' | 'explanation';
@@ -41,7 +41,7 @@ type UserMeta = {
   }
 };
 
-type QuizScore = {
+export type QuizScore = {
   userId: string;
   userName: string;
   points: number;
