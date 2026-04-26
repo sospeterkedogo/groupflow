@@ -27,8 +27,8 @@ export default function LandingMission() {
           </div>
           <div style={{ background: 'linear-gradient(135deg, #111111 0%, #0a0a0a 100%)', padding: '3rem', borderRadius: '16px', border: '1px solid #222222', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '2.5rem' }}>
-                <div style={{ width: '42px', height: '42px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                   <img src="/logo.png" style={{ width: '24px', height: '24px' }} alt="Espeezy" />
+                <div style={{ width: '42px', height: '42px', background: 'linear-gradient(145deg, #070707 0%, #131313 100%)', border: '1px solid rgba(212, 160, 23, 0.35)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px rgba(212, 160, 23, 0.12)' }}>
+                   <img src="/brand-logo-black-gold.svg" style={{ width: '24px', height: '24px', objectFit: 'contain' }} alt="Espeezy" />
                 </div>
                 <div>
                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981' }}>EVERYTHING ONLINE</div>

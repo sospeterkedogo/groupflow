@@ -332,14 +332,15 @@ export default function Sidebar({ user }: SidebarProps) {
                 height: '38px',
                 borderRadius: '12px',
                 overflow: 'hidden',
-                background: 'var(--brand)',
+                background: 'linear-gradient(145deg, #070707 0%, #141414 100%)',
+                border: '1px solid rgba(212, 160, 23, 0.35)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(var(--brand-rgb), 0.3)',
+                boxShadow: '0 8px 20px rgba(212, 160, 23, 0.22)',
               }}
             >
-              <Image src="/logo.png" width={38} height={38} alt="Logo" priority style={{ objectFit: 'cover' }} />
+              <Image src="/brand-logo-black-gold.svg" width={28} height={28} alt="Espeezy brand logo" priority style={{ objectFit: 'contain' }} />
             </div>
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>

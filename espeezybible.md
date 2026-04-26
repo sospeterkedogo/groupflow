@@ -5,7 +5,34 @@ Espeezy Tool Factory: Practical, copy-paste operations guide for Windows + Linux
 
 Audience: Non-technical operators, Builders and Validators.
 
-Goal: Make setup, deploy, rollback, and verification repeatable with minimal mistakes.
+Goal: Make setup, deploy, rollback, and verification repeatable with minimal mistakes. up
+
+Onboarding: For a member to be FULLY qualified as a TEAM member, they are REQUIRED to complete all Onboarding steps  assigned on their portal.
+
+
+
+# Quick Links
+
+# MAIN DESIGN TOOL FOR espeezy.com: https://canva.link/d5jqlw3gq4ia1b3
+
+# BRAND TEMPLATE LINK: https://www.canva.com/brand/brand-templates/EAHHxaMEWGY
+
+# PUBLIC LOGO URL: https://canva.link/l7lyz827phaf6ec
+
+# Tasks Remaining:
+# Set up OATH cofiguration BUILD on server IP to establish  FULLY OFFLINE capabilities. DEAL SEALER !!!!
+# Establish core TEAM members ... current # 13
+
+# PRO & Premium Plans Only available in certain regions
+# Run manual E2E on Dev Server Before Full Deployment
+
+#GOOGLE_CONSOLE_ADMIN_PASSWORDS
+#NAME USERNAME EMAIL_ADDRESS PASSWORD
+#	Lynn lynn lynn@espeezy.com >Y6X5yE>
+
+# VNC viewER PASS NMG"fy">j6cNLx?
+# 
+
 
 ---
 
