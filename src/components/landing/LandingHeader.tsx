@@ -70,8 +70,13 @@ export default function LandingHeader({ navMenus }: LandingHeaderProps) {
           style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', transition: 'opacity 0.2s ease' }} 
           onClick={() => typeof window !== 'undefined' && window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
+<<<<<<< HEAD
            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(145deg, #0b0b0b 0%, #131313 100%)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(212, 160, 23, 0.3)', boxShadow: '0 0 24px rgba(212, 160, 23, 0.18)' }}>
               <Image src="/brand-logo-black-gold.svg" width={24} height={24} alt="Espeezy brand logo" priority style={{ objectFit: 'contain' }} />
+=======
+           <div style={{ width: '28px', height: '28px', background: '#10b981', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)' }}>
+              <Image src="/brand-logo-black-gold.png" width={20} height={20} alt="Logo" priority style={{ objectFit: 'contain' }} />
+>>>>>>> b7c25bf03018b1f17814f973aa372a6b87a1eb82
            </div>
            <span style={{ fontSize: '1rem', fontWeight: 650, letterSpacing: '-0.02em', color: '#f3f4f6' }}>Espeezy</span>
         </div>

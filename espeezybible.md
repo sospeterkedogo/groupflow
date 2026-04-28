@@ -13,14 +13,14 @@ Onboarding: For a member to be FULLY qualified as a TEAM member, they are REQUIR
 
 # Quick Links
 
-# MAIN DESIGN TOOL FOR espeezy.com: https://canva.link/d5jqlw3gq4ia1b3
+# MAIN DESIGN LINK FOR espeezy.com: https://canva.link/d5jqlw3gq4ia1b3
 
 # BRAND TEMPLATE LINK: https://www.canva.com/brand/brand-templates/EAHHxaMEWGY
 
 # PUBLIC LOGO URL: https://canva.link/l7lyz827phaf6ec
 
 # Tasks Remaining:
-# Set up OATH cofiguration BUILD on server IP to establish  FULLY OFFLINE capabilities. DEAL SEALER !!!!
+# Set up OATH cofiguration BUILD on server IP to establish  FULLY OFFLINE capabilities.
 # Establish core TEAM members ... current # 13
 
 # PRO & Premium Plans Only available in certain regions

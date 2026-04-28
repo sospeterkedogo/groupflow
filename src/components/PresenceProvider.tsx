@@ -6,6 +6,7 @@ import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import { PresenceContextType, PresenceState } from '@/types/ui'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useProfile } from '@/context/ProfileContext'
+import { hasFeature } from '@/utils/feature-gate'
 
 const PresenceContext = createContext<PresenceContextType>({
   onlineUsers: new Set(),
@@ -146,7 +147,7 @@ export const PresenceProvider = ({ user, children }: PresenceProviderProps) => {
             group_id: groupId,
             online_at: new Date().toISOString(),
             is_typing: false,
-            music: profile?.subscription_plan === 'pro' || profile?.subscription_plan === 'premium' ? (window as Record<string, unknown>)._spotify_presence : undefined
+            music: hasFeature(profile, 'JUKEBOX') ? (window as any)._spotify_presence : undefined
           })
 
           await supabase

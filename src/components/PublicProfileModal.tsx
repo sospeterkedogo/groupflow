@@ -57,7 +57,7 @@ function FlagDisplay({ countryCode }: { countryCode?: string }) {
 
 export default function PublicProfileModal({ member, onClose, isConnected: initialConnected = false, onConnect }: PublicProfileModalProps) {
   const [me, setMe] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null)
-  const [achievements, setAchievements] = useState<unknown[]>([])
+  const [achievements, setAchievements] = useState<any[]>([])
   const [isConnected, setIsConnected] = useState(initialConnected)
   const [loading, setLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)

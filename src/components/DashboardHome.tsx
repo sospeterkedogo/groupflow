@@ -9,6 +9,7 @@ import { LayoutDashboard, Calendar, Activity, Zap, TrendingUp, Users, UserCircle
 import { Group, Profile } from '@/types/database'
 import { useProfile } from '@/context/ProfileContext'
 import { useNotifications } from './NotificationProvider'
+import { getPlanName, hasFeature } from '@/utils/feature-gate'
 
 interface JoinRequest {
   id: string
@@ -23,22 +24,30 @@ interface JoinRequest {
   }
 }
 
+const DASHBOARD_TABS = [
+  { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
+  { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> },
+] as const
+
 export default function DashboardHome({ groupId }: { groupId: string }) {
   const router = useRouter()
   const { profile } = useProfile()
   const { addToast } = useNotifications()
   const [activeTab, setActiveTab] = useState<'board' | 'calendar'>('board')
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [mounted, setMounted] = useState(false)
 
-  const [greeting] = useState(() => {
+  const greeting = useMemo(() => {
+    if (!mounted) return 'Welcome'
     const hour = new Date().getHours()
     if (hour < 12) return 'Good Morning'
     if (hour < 18) return 'Good Afternoon'
     return 'Good Evening'
-  })
+  }, [mounted])
 
-  // 1. Sync local time display
+  // 1. Sync local time display and set mounted
   useEffect(() => {
+    setMounted(true)
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
@@ -276,8 +285,9 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
 
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.25rem)', fontWeight: 950, letterSpacing: '-0.04em', color: 'var(--text-main)', margin: 0, lineHeight: 1.1, display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {greeting}, {profile?.full_name?.split(' ')[0] || 'User'}
-            {profile?.subscription_plan === 'premium' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>PREMIUM TEAM</span>}
-            {profile?.subscription_plan === 'pro' && <span className="locked-badge locked-badge-pro glow-pro" style={{ margin: 0, fontSize: '0.7rem' }}>PRO MEMBER</span>}
+            {profile?.subscription_plan === 'premium' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>{getPlanName('premium').toUpperCase()}</span>}
+            {profile?.subscription_plan === 'pro' && <span className="locked-badge locked-badge-pro glow-pro" style={{ margin: 0, fontSize: '0.7rem' }}>{getPlanName('pro').toUpperCase()}</span>}
+            {profile?.subscription_plan === 'lifetime' && <span className="locked-badge locked-badge-premium glow-premium" style={{ margin: 0, fontSize: '0.7rem' }}>{getPlanName('lifetime').toUpperCase()}</span>}
           </h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.25rem' }}>
@@ -484,13 +494,10 @@ export default function DashboardHome({ groupId }: { groupId: string }) {
         boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', gap: '0.4rem' }}>
-          {[
-            { id: 'board', label: 'Task Board', icon: <LayoutDashboard size={18} /> },
-            { id: 'calendar', label: 'Team Calendar', icon: <Calendar size={18} /> }
-          ].map((tab: { id: 'board' | 'calendar'; label: string; icon: JSX.Element }) => (
+          {DASHBOARD_TABS.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(tab.id as 'board' | 'calendar')}
               className={`control-tab ${activeTab === tab.id ? 'active' : ''}`}
             >
               {tab.icon} {tab.label}

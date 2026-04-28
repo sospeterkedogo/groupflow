@@ -96,7 +96,7 @@ export default function StudentProfilePage() {
         user_id: member.id,
         type: 'connection_request',
         title: 'New Connection Request',
-        message: `${me.user_metadata?.full_name || me.email} wants to connect with you.`,
+        message: `${(me as any).user_metadata?.full_name || me.email} wants to connect with you.`,
         metadata: { sender_id: me.id }
       })
 

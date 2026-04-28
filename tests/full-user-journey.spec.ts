@@ -44,10 +44,7 @@ const SUPABASE_URL  = ENV['NEXT_PUBLIC_SUPABASE_URL'] || process.env.NEXT_PUBLIC
 const ANON_KEY = ENV['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 const SERVICE_ROLE_KEY = ENV['SUPABASE_SERVICE_ROLE_KEY'] || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-// ── Cookie key used by @supabase/ssr + supabase-js (confirmed from source) ────
-// supabase-js SupabaseClient.js: `sb-${baseUrl.hostname.split(".")[0]}-auth-token`
-// Value encoding: @supabase/ssr cookieEncoding="base64url" → "base64-" + base64url(json)
-const PROJECT_REF = new URL(SUPABASE_URL).hostname.split('.')[0]
+const PROJECT_REF = SUPABASE_URL ? new URL(SUPABASE_URL).hostname.split('.')[0] : 'placeholder'
 const COOKIE_KEY = `sb-${PROJECT_REF}-auth-token`
 const MAX_CHUNK_SIZE = 3180 // from @supabase/ssr chunker.js (URL-encoded length)
 
@@ -247,6 +244,8 @@ test.describe('Espeezy — Full User Journey', () => {
   })
 
   test('sign up → team → tasks → analytics → export → delete account', async ({ page, context }) => {
+    test.skip(!SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL is not defined. Please ensure .env.local exists.')
+
 
     // ── 1. CREATE USER (Admin API) + SIGN IN ───────────────────────
     console.log(`[1/10] Creating confirmed user via Supabase admin API: ${EMAIL}`)

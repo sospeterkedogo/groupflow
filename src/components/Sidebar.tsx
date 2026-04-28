@@ -36,11 +36,12 @@ import { SidebarProps } from '@/types/ui'
 import { createBrowserSupabaseClient } from '@/utils/supabase/client'
 import GlobalSearch from './GlobalSearch'
 import NotificationBell from './NotificationBell'
+import { hasFeature } from '@/utils/feature-gate'
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)'
 const THEME_SEQUENCE = ['Google Light', 'Deep Oceanic', 'Cyberpunk'] as const
 const PREMIUM_LINKS = new Set(['Break Room', 'Project Stats', 'Jukebox'])
-const subscribeToClient = () => () => {}
+const subscribeToClient = () => () => { }
 
 type SidebarNavItem = {
   name: string
@@ -190,8 +191,8 @@ export default function Sidebar({ user }: SidebarProps) {
   const isProfileLoaded = Boolean(profile)
   const onlineCount = onlineUsers?.size ?? 0
   const isDark = currentPalette.name !== 'Google Light'
-  const isPremiumMember = profile?.subscription_plan === 'premium' || profile?.subscription_plan === 'pro'
-  const showUpgradeCard = !profile?.subscription_plan || profile.subscription_plan === 'free'
+  const isPremiumMember = hasFeature(profile, 'PROJECT_STATS')
+  const showUpgradeCard = profile?.subscription_plan === 'free' || !profile?.subscription_plan
   const projectStatsPath = profile?.group_id ? `/dashboard/analytics/${profile.group_id}` : '/dashboard/analytics'
 
   const navLinks = useMemo(
@@ -278,7 +279,7 @@ export default function Sidebar({ user }: SidebarProps) {
           window.location.href = '/login'
         }, 'Signing you out...')
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   }
 
@@ -340,7 +341,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 boxShadow: '0 8px 20px rgba(212, 160, 23, 0.22)',
               }}
             >
-              <Image src="/brand-logo-black-gold.svg" width={28} height={28} alt="Espeezy brand logo" priority style={{ objectFit: 'contain' }} />
+              <Image src="/brand-logo-black-gold.png" width={38} height={38} alt="Logo" priority style={{ objectFit: 'cover' }} />
             </div>
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -483,7 +484,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
         </div>
 
-        {isOpen ? (
+        {isOpen && (
           <div style={{ padding: '0 1rem 0.5rem' }}>
             <Link href="/fund" className="support-link" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.625rem 1rem', borderRadius: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', textDecoration: 'none', transition: 'all 0.2s' }}>
               <Heart size={14} color="var(--brand)" />
@@ -493,13 +494,13 @@ export default function Sidebar({ user }: SidebarProps) {
               </div>
             </Link>
           </div>
-        ) : (
-          <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', justifyContent: 'center' }}>
-            <Link href="/fund" title="Support the Devs" style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'var(--brand)' }}>
-              <Heart size={16} />
-            </Link>
-          </div>
-        )}
+        ) || (
+            <div style={{ padding: '0 0.75rem 0.5rem', display: 'flex', justifyContent: 'center' }}>
+              <Link href="/fund" title="Support the Devs" style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'var(--brand)' }}>
+                <Heart size={16} />
+              </Link>
+            </div>
+          )}
 
         <div style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: isOpen ? '0.5rem' : '0', backgroundColor: isOpen ? 'var(--bg-main)' : 'transparent', borderRadius: '12px', border: isOpen ? '1px solid var(--border)' : 'none', justifyContent: isOpen ? 'flex-start' : 'center', cursor: 'pointer', transition: 'all 0.2s ease', minHeight: '40px' }} className="identity-pill" onClick={() => pushRoute('/dashboard/profile')}>

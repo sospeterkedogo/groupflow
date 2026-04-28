@@ -8,8 +8,8 @@ import {
   MessageCircle, Send, Image as ImageIcon, X, ChevronDown, Loader2,
   Globe, Users, Lock, MoreHorizontal, Trash2, Pencil
 } from 'lucide-react'
-import { createBrowserSupabaseClient } from '@/utils/supabase/client'
-import { useProfile } from '@/context/ProfileContext'
+import { createBrowserSupabaseClient } from '../../utils/supabase/client'
+import { useProfile } from '../../context/ProfileContext'
 
 type Reaction = 'like' | 'love' | 'fire' | 'clap' | 'insightful' | 'celebrate'
 

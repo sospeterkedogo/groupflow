@@ -7,7 +7,7 @@
 # Test info
 
 - Name: full-user-journey.spec.ts >> Espeezy — Full User Journey >> sign up → team → tasks → analytics → export → delete account
-- Location: tests\full-user-journey.spec.ts:249:7
+- Location: tests\full-user-journey.spec.ts:246:7
 
 # Error details
 

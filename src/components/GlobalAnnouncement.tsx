@@ -43,12 +43,9 @@ export default function GlobalAnnouncement() {
     }
     fetchConfig()
 
-    
-
-  
+    setIsClient(true)
   }, [])
 
-  const isClient = typeof window !== 'undefined'
   if (!isClient || !isVisible || !config?.is_active) return null
 
   const { title, message, style } = config.value || { title: 'Institutional Update', message: '', style: 'elite' }

@@ -7,7 +7,7 @@ import { useNotifications } from './NotificationProvider'
 import Link from 'next/link'
 
 export default function ConnectionAlertTray() {
-  const [requests, setRequests] = useState<Array<Record<string, unknown>>>([])
+  const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const supabase = createBrowserSupabaseClient()
